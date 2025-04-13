@@ -7,9 +7,9 @@ interface TradingViewChartProps {
 
 const TradingViewChart: React.FC<TradingViewChartProps> = ({ symbol = "BINANCE:BTCUSDT" }) => {
   return (
-    <div className="h-[500px] w-full">
+    <div className="h-[500px] w-full relative z-10">
       <div id="tradingview_chart" className="h-full w-full" />
-      <div className="w-full h-full">
+      <div className="w-full h-full absolute top-0 left-0">
         {/* We're using the TradingView widget directly here */}
         <iframe
           title="Trading Chart"
