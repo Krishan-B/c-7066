@@ -25,7 +25,7 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
   };
 
   const navItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+    { name: "Dashboard", icon: LayoutDashboard, path: "/" },
     { name: "Markets", icon: LineChart, path: "/markets" },
     { name: "Portfolio", icon: Wallet, path: "/portfolio" },
     { name: "Orders", icon: CircleDollarSign, path: "/orders" },

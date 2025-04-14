@@ -22,7 +22,7 @@ const Auth = () => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
-        navigate("/dashboard");
+        navigate("/");
       }
     };
     
@@ -32,7 +32,7 @@ const Auth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session) {
-          navigate("/dashboard");
+          navigate("/");
         }
       }
     );
@@ -84,7 +84,7 @@ const Auth = () => {
         description: "Logged in successfully",
       });
       
-      navigate("/dashboard");
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "Error",

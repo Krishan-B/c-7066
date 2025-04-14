@@ -42,7 +42,7 @@ const Navigation = () => {
       toast({
         title: "Signed out successfully",
       });
-      navigate("/");
+      navigate("/auth");
     } catch (error) {
       toast({
         title: "Error signing out",
@@ -76,13 +76,6 @@ const Navigation = () => {
               <NavigationMenuItem>
                 <Link to="/">
                   <NavigationMenuLink className={navigationMenuTriggerStyle({ className: isActive("/") ? "bg-accent" : "" })}>
-                    Home
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link to="/dashboard">
-                  <NavigationMenuLink className={navigationMenuTriggerStyle({ className: isActive("/dashboard") ? "bg-accent" : "" })}>
                     Dashboard
                   </NavigationMenuLink>
                 </Link>
@@ -117,9 +110,6 @@ const Navigation = () => {
           <div className="absolute top-16 left-0 w-full bg-background border-b border-secondary shadow-lg z-50 md:hidden">
             <nav className="flex flex-col p-4">
               <Link to="/" className="py-2 px-4 hover:bg-accent rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
-                Home
-              </Link>
-              <Link to="/dashboard" className="py-2 px-4 hover:bg-accent rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
                 Dashboard
               </Link>
               <Link to="/markets" className="py-2 px-4 hover:bg-accent rounded-md" onClick={() => setIsMobileMenuOpen(false)}>
