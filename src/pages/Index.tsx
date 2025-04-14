@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ import NewsWidget from "@/components/NewsWidget";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
-import Navigation from "@/components/Navigation";
 
 const Index = () => {
   const [selectedAsset, setSelectedAsset] = useState({
@@ -47,8 +45,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation />
-      
       {/* Main Content */}
       <div className="p-4 md:p-6">
         <div className="flex flex-col lg:flex-row justify-between mb-6">
