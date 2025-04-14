@@ -171,7 +171,7 @@ const Orders = () => {
                         <TableCell className="text-right">${order.total.toLocaleString()}</TableCell>
                         <TableCell>
                           <Badge variant={
-                            order.status === 'completed' ? 'success' :
+                            order.status === 'completed' ? 'default' :
                             order.status === 'pending' ? 'outline' : 'secondary'
                           }>
                             {order.status}
