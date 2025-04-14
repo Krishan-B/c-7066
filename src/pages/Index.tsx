@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Search, Bell, UserCircle, Menu, LineChart, BarChart2, RefreshCw, TrendingUp, Star, Plus, DollarSign, ChevronDown } from "lucide-react";
+import { Search, Bell, UserCircle, Menu, LineChart, BarChart2, RefreshCw, TrendingUp, Star, Plus, DollarSign, ChevronDown, LogOut } from "lucide-react";
 import MarketStats from "@/components/MarketStats";
 import WatchlistTable from "@/components/WatchlistTable";
 import CryptoList from "@/components/CryptoList";
@@ -10,6 +10,8 @@ import TradingViewChart from "@/components/TradingViewChart";
 import QuickTradePanel from "@/components/QuickTradePanel";
 import NewsWidget from "@/components/NewsWidget";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/components/AuthProvider";
 
 const Index = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -20,6 +22,8 @@ const Index = () => {
     change: 2.4
   });
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     // Show welcome toast when dashboard loads
@@ -37,6 +41,20 @@ const Index = () => {
       description: "Chart and trade panel updated",
       duration: 2000,
     });
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error signing out",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -74,9 +92,24 @@ const Index = () => {
             <Button variant="ghost" size="icon" className="text-muted-foreground">
               <Bell className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-muted-foreground">
-              <UserCircle className="h-5 w-5" />
-            </Button>
+            {user ? (
+              <>
+                <span className="text-sm hidden md:block">{user.email}</span>
+                <Button variant="ghost" size="icon" className="text-muted-foreground">
+                  <UserCircle className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleSignOut} className="text-muted-foreground">
+                  <LogOut className="h-5 w-5" />
+                </Button>
+                <Button onClick={() => navigate('/dashboard')} size="sm">
+                  Dashboard
+                </Button>
+              </>
+            ) : (
+              <Button onClick={() => navigate('/auth')} size="sm">
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </header>

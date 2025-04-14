@@ -1,10 +1,13 @@
 
 import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, User, Menu, ChevronUp, ChevronDown } from "lucide-react";
+import { Search, User, Menu, ChevronUp, ChevronDown, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/components/AuthProvider";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface PortfolioAsset {
   symbol: string;
@@ -22,6 +25,10 @@ interface WatchlistAsset {
 }
 
 const Dashboard = () => {
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
   // Dummy data for portfolio summary
   const portfolioAssets: PortfolioAsset[] = [
     { symbol: "NVDA", divident: "0.49", chgPercentage: "Chg %", pepRatio: "P/EP" },
@@ -34,6 +41,21 @@ const Dashboard = () => {
     { asset: "CMS", price: "124.54", chgPercentage: "-0.8%", chgAmount: "-0.67", volume: "873K" },
     { asset: "CNVX", price: "45.12", chgPercentage: "2.1%", chgAmount: "+0.92", volume: "2.5M" }
   ];
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out successfully",
+      });
+      navigate("/");
+    } catch (error) {
+      toast({
+        title: "Error signing out",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,9 +78,17 @@ const Dashboard = () => {
                 className="pl-8 w-[180px] md:w-[220px]"
               />
             </div>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-sm hidden md:block">
+                {user?.email}
+              </span>
+              <Button variant="ghost" size="icon">
+                <User className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign Out">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="h-5 w-5" />
             </Button>
