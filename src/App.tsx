@@ -12,6 +12,8 @@ import { AuthProvider } from "./components/AuthProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Index";
+import Wallet from "./pages/Wallet";
+import Account from "./pages/Account";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +37,8 @@ const App = () => (
               <Route path="markets" element={<Markets />} />
               <Route path="portfolio" element={<Portfolio />} />
               <Route path="orders" element={<Orders />} />
+              <Route path="wallet" element={<Wallet />} />
+              <Route path="account" element={<Account />} />
             </Route>
             
             <Route path="*" element={<Navigate to="/auth" replace />} />

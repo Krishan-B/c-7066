@@ -6,11 +6,9 @@ import {
   LineChart,
   Wallet,
   CircleDollarSign,
-  BarChart2,
-  Star,
-  RefreshCw,
   Settings,
-  Plus
+  Plus,
+  User
 } from "lucide-react";
 
 interface SidebarProps {
@@ -29,7 +27,8 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
     { name: "Markets", icon: LineChart, path: "/markets" },
     { name: "Portfolio", icon: Wallet, path: "/portfolio" },
     { name: "Orders", icon: CircleDollarSign, path: "/orders" },
-    { name: "Transactions", icon: RefreshCw, path: "/transactions" },
+    { name: "Wallet", icon: Wallet, path: "/wallet" },
+    { name: "My Account", icon: User, path: "/account" },
   ];
 
   if (!isOpen) {
