@@ -7,7 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
-import { Wallet, ArrowDownToLine, ArrowUpFromLine, CreditCard, Bank } from "lucide-react";
+import { Wallet, ArrowDownToLine, ArrowUpFromLine, CreditCard, Building, PlusCircle } from "lucide-react";
 
 const WalletPage = () => {
   const [activeTab, setActiveTab] = useState("deposit");
@@ -228,7 +228,7 @@ const WalletPage = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <Bank className="h-4 w-4 mr-2 text-primary" />
+                    <Building className="h-4 w-4 mr-2 text-primary" />
                     <span>Bank Account (ACH)</span>
                   </div>
                   <Button variant="ghost" size="sm">Edit</Button>
@@ -236,7 +236,7 @@ const WalletPage = () => {
               </CardContent>
               <CardFooter>
                 <Button variant="outline" size="sm" className="w-full">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <PlusCircle className="h-4 w-4 mr-2" />
                   Add Payment Method
                 </Button>
               </CardFooter>

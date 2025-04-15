@@ -7,7 +7,7 @@ import {
   Wallet,
   CircleDollarSign,
   Settings,
-  Plus,
+  PlusCircle,
   User
 } from "lucide-react";
 
@@ -67,7 +67,7 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
         
         <div className="mt-auto px-4 pb-4">
           <Button variant="outline" className="w-full">
-            <Plus className="h-4 w-4 mr-2" /> 
+            <PlusCircle className="h-4 w-4 mr-2" /> 
             Deposit Funds
           </Button>
         </div>
