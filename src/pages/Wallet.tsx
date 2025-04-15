@@ -29,18 +29,16 @@ const WalletPage = () => {
                   <TabsTrigger value="deposit">Deposit</TabsTrigger>
                   <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
                 </TabsList>
+              
+                <TabsContent value="deposit" className="mt-4 space-y-4">
+                  <DepositForm />
+                </TabsContent>
+                
+                <TabsContent value="withdraw" className="mt-4 space-y-4">
+                  <WithdrawForm />
+                </TabsContent>
               </Tabs>
             </CardHeader>
-            
-            <CardContent>
-              <TabsContent value="deposit" className="space-y-4">
-                <DepositForm />
-              </TabsContent>
-              
-              <TabsContent value="withdraw" className="space-y-4">
-                <WithdrawForm />
-              </TabsContent>
-            </CardContent>
           </Card>
           
           <BalanceInfo />
