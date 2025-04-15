@@ -50,6 +50,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
           <TabsTrigger value="buy" className="flex-1">Buy</TabsTrigger>
           <TabsTrigger value="sell" className="flex-1">Sell</TabsTrigger>
         </TabsList>
+        
         <div className="mt-4">
           <div className="mb-4">
             <label className="text-sm text-muted-foreground mb-1 block">Order Type</label>
@@ -139,13 +140,13 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
               <span className="text-xs font-medium">${(parseFloat(amount) * 1.001).toFixed(2)}</span>
             </div>
           </div>
-          
-          <TabsContent value="buy" className="mt-0">
+        
+          <TabsContent value="buy" className="mt-0 p-0">
             <Button type="button" className="w-full bg-success hover:bg-success/80" onClick={() => handleSubmit("buy")}>
               Buy {asset.symbol}
             </Button>
           </TabsContent>
-          <TabsContent value="sell" className="mt-0">
+          <TabsContent value="sell" className="mt-0 p-0">
             <Button type="button" className="w-full bg-warning hover:bg-warning/80" onClick={() => handleSubmit("sell")}>
               Sell {asset.symbol}
             </Button>
