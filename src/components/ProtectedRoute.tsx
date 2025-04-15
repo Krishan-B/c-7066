@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/components/AuthProvider';
 import { Loader2 } from "lucide-react";
 
@@ -9,18 +9,31 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { session, loading } = useAuth();
+  const { session, loading, refreshSession } = useAuth();
+  const location = useLocation();
+
+  // Attempt to refresh the session if it's not present and we're loading
+  useEffect(() => {
+    if (!session && !loading) {
+      const attemptRefresh = async () => {
+        await refreshSession();
+      };
+      attemptRefresh();
+    }
+  }, [session, loading, refreshSession]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Verifying your session...</p>
       </div>
     );
   }
 
   if (!session) {
-    return <Navigate to="/auth" replace />;
+    // Redirect to login but remember where the user was trying to go
+    return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
   }
 
   return <>{children}</>;
