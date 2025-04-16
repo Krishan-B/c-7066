@@ -6,6 +6,7 @@ import { Wallet } from "lucide-react";
 import DepositForm from "@/components/wallet/DepositForm";
 import WithdrawForm from "@/components/wallet/WithdrawForm";
 import BalanceInfo from "@/components/wallet/BalanceInfo";
+import TransactionHistory from "@/components/wallet/TransactionHistory";
 
 const WalletPage = () => {
   const [activeTab, setActiveTab] = useState("deposit");
@@ -42,6 +43,10 @@ const WalletPage = () => {
           </Card>
           
           <BalanceInfo />
+        </div>
+        
+        <div className="mt-2">
+          <TransactionHistory />
         </div>
       </div>
     </div>
