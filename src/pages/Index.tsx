@@ -1,8 +1,9 @@
+
 import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { 
-  BarChart2, RefreshCw, TrendingUp, Star, Plus, DollarSign, ChevronDown 
+  BarChart2, RefreshCw, TrendingUp, Star, Plus, DollarSign, ChevronDown, LineChart, Clock
 } from "lucide-react";
 import MarketStats from "@/components/MarketStats";
 import WatchlistTable from "@/components/WatchlistTable";
@@ -10,6 +11,8 @@ import CryptoList from "@/components/CryptoList";
 import TradingViewChart from "@/components/TradingViewChart";
 import QuickTradePanel from "@/components/QuickTradePanel";
 import NewsWidget from "@/components/NewsWidget";
+import PortfolioCard from "@/components/PortfolioCard";
+import MarketOverview from "@/components/MarketOverview";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
@@ -21,6 +24,7 @@ const Index = () => {
     price: 67543.21,
     change: 2.4
   });
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -43,6 +47,20 @@ const Index = () => {
     });
   };
 
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    
+    // Simulate refresh delay
+    setTimeout(() => {
+      toast({
+        title: "Data refreshed",
+        description: "Latest market data has been loaded",
+        duration: 2000,
+      });
+      setIsRefreshing(false);
+    }, 1000);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Main Content */}
@@ -53,11 +71,22 @@ const Index = () => {
             <p className="text-muted-foreground">Track, analyze and trade global markets</p>
           </div>
           <div className="flex items-center space-x-2 mt-4 lg:mt-0">
-            <Button variant="outline" size="sm" className="gap-2">
-              <RefreshCw className="h-4 w-4" />
-              <span>Refresh</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
             </Button>
-            <Button variant="default" size="sm" className="gap-2">
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => navigate('/markets')}
+            >
               <Plus className="h-4 w-4" />
               <span>New Trade</span>
             </Button>
@@ -65,6 +94,15 @@ const Index = () => {
         </div>
         
         <MarketStats />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="lg:col-span-2">
+            <PortfolioCard />
+          </div>
+          <div>
+            <MarketOverview />
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
@@ -78,22 +116,12 @@ const Index = () => {
                     </span>
                   </div>
                 </div>
-                <div>
-                  <Button variant="ghost" size="sm">
-                    1D
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    1W
-                  </Button>
-                  <Button variant="ghost" size="sm" className="bg-secondary text-foreground">
-                    1M
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    1Y
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    ALL
-                  </Button>
+                <div className="flex flex-wrap gap-1">
+                  <Button variant="ghost" size="sm">1D</Button>
+                  <Button variant="ghost" size="sm">1W</Button>
+                  <Button variant="ghost" size="sm" className="bg-secondary text-foreground">1M</Button>
+                  <Button variant="ghost" size="sm">1Y</Button>
+                  <Button variant="ghost" size="sm">ALL</Button>
                 </div>
               </div>
               <TradingViewChart symbol={selectedAsset.symbol} />
@@ -114,7 +142,14 @@ const Index = () => {
             <QuickTradePanel asset={selectedAsset} />
             
             <div className="glass-card rounded-lg p-4 mt-6">
-              <h2 className="text-xl font-semibold mb-4">Market News</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Market News</h2>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Clock className="h-3 w-3" />
+                  <span className="text-xs">Latest</span>
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </div>
               <NewsWidget />
             </div>
           </div>
@@ -132,20 +167,20 @@ const Index = () => {
               </TabsList>
             </div>
             
-            <TabsContent value="crypto">
+            <TabsContent value="crypto" className="animate-fade-in">
               <CryptoList />
             </TabsContent>
-            <TabsContent value="stocks">
+            <TabsContent value="stocks" className="animate-fade-in">
               <div className="glass-card p-6 rounded-lg">
                 <p className="text-muted-foreground text-center">Connect your API key to access stocks data</p>
               </div>
             </TabsContent>
-            <TabsContent value="forex">
+            <TabsContent value="forex" className="animate-fade-in">
               <div className="glass-card p-6 rounded-lg">
                 <p className="text-muted-foreground text-center">Connect your API key to access forex data</p>
               </div>
             </TabsContent>
-            <TabsContent value="commodities">
+            <TabsContent value="commodities" className="animate-fade-in">
               <div className="glass-card p-6 rounded-lg">
                 <p className="text-muted-foreground text-center">Connect your API key to access commodities data</p>
               </div>

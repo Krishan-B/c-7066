@@ -25,7 +25,11 @@ import {
 import { useAuth } from "@/components/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 
-const Navigation = () => {
+interface NavigationProps {
+  onMenuToggle?: () => void;
+}
+
+const Navigation = ({ onMenuToggle }: NavigationProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -51,6 +55,10 @@ const Navigation = () => {
     }
   };
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <header className="border-b border-secondary sticky top-0 z-50 bg-background/95 backdrop-blur">
       <div className="flex items-center justify-between p-4">
@@ -58,7 +66,10 @@ const Navigation = () => {
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onClick={() => {
+              toggleMobileMenu();
+              onMenuToggle?.();
+            }}
             className="lg:hidden"
           >
             <Menu className="h-5 w-5" />
