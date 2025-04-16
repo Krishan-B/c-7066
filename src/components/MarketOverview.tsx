@@ -3,10 +3,9 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   ChartContainer,
-  ChartTooltip,
   ChartTooltipContent
 } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 const MarketOverview = () => {
@@ -23,6 +22,25 @@ const MarketOverview = () => {
   const dayChange = 1243.87;
   const dayChangePercentage = 2.6;
   const isPositive = dayChange > 0;
+
+  const renderTooltipContent = (props: any) => {
+    if (!props.active || !props.payload || !props.payload.length) {
+      return null;
+    }
+    
+    return (
+      <ChartTooltipContent
+        {...props}
+        indicator="dot"
+        formatter={(value, name) => (
+          <div className="flex items-center justify-between gap-2">
+            <span>{name}</span>
+            <span className="font-medium">{value}%</span>
+          </div>
+        )}
+      />
+    );
+  };
 
   return (
     <Card className="animate-fade-in">
@@ -47,20 +65,7 @@ const MarketOverview = () => {
           <ChartContainer config={{ series: {} }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <ChartTooltip
-                  content={(props) => (
-                    <ChartTooltipContent
-                      {...props}
-                      indicator="dot"
-                      formatter={(value, name) => (
-                        <div className="flex items-center justify-between gap-2">
-                          <span>{name}</span>
-                          <span className="font-medium">{value}%</span>
-                        </div>
-                      )}
-                    />
-                  )}
-                />
+                <Tooltip content={renderTooltipContent} />
                 <Pie
                   data={data}
                   cx="50%"
