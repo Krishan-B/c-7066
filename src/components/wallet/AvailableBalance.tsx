@@ -2,6 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Coins, ArrowUpFromLine, ArrowDownToLine } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const AvailableBalance = () => {
   // In a real app, these would come from your state management
@@ -36,11 +37,12 @@ const AvailableBalance = () => {
           </div>
           
           {pendingDeposits > 0 && (
-            <Progress 
-              value={70} 
-              className="h-1.5 bg-green-100" 
-              indicatorClassName="bg-green-500" 
-            />
+            <div className="bg-green-100 rounded-full overflow-hidden">
+              <Progress 
+                value={70} 
+                className={cn("h-1.5", "bg-green-100 [&>div]:bg-green-500")}
+              />
+            </div>
           )}
           
           <div className="flex items-center justify-between text-sm">
@@ -54,11 +56,12 @@ const AvailableBalance = () => {
           </div>
           
           {pendingWithdrawals > 0 && (
-            <Progress 
-              value={30} 
-              className="h-1.5 bg-blue-100" 
-              indicatorClassName="bg-blue-500" 
-            />
+            <div className="bg-blue-100 rounded-full overflow-hidden">
+              <Progress 
+                value={30} 
+                className={cn("h-1.5", "bg-blue-100 [&>div]:bg-blue-500")} 
+              />
+            </div>
           )}
         </div>
       </CardContent>
