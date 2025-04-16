@@ -14,6 +14,7 @@ import Layout from "./components/Layout";
 import Dashboard from "./pages/Index";
 import Wallet from "./pages/Wallet";
 import Account from "./pages/Account";
+import Landing from "./pages/Landing";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/landing" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
             
             {/* Protected Routes */}
@@ -41,7 +43,8 @@ const App = () => (
               <Route path="account" element={<Account />} />
             </Route>
             
-            <Route path="*" element={<Navigate to="/auth" replace />} />
+            {/* Default redirect */}
+            <Route path="*" element={<Navigate to="/landing" replace />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
