@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Shield, 
@@ -14,6 +13,8 @@ import {
 } from "lucide-react";
 
 const Landing = () => {
+  const navigate = useNavigate();
+  
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* Header */}
@@ -32,42 +33,53 @@ const Landing = () => {
           </nav>
           
           <div className="flex items-center gap-2">
-            <Link to="/auth">
-              <Button variant="outline" size="sm">Sign In</Button>
-            </Link>
-            <Link to="/auth?tab=signup">
-              <Button size="sm">Sign Up</Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate("/auth")}
+              className="whitespace-nowrap"
+            >
+              Login
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={() => navigate("/auth?tab=signup")}
+              className="whitespace-nowrap"
+            >
+              Sign Up
+            </Button>
           </div>
         </div>
       </header>
       
       {/* Hero Section */}
-      <section className="py-20 container">
-        <div className="flex flex-col md:flex-row items-center gap-8">
-          <div className="flex-1 space-y-6">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+      <section className="py-16 md:py-20 container">
+        <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
+          <div className="flex-1 space-y-5 md:space-y-6">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold leading-tight">
               Trade Smarter<br />
               <span className="text-primary">Invest Wiser</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-md">
+            <p className="text-base md:text-lg text-muted-foreground max-w-md">
               Access global markets with our advanced multi-asset trading platform. 
               Trade stocks, crypto, forex, and more with institutional-grade tools.
             </p>
-            <div className="flex gap-4 pt-4">
-              <Link to="/auth?tab=signup">
-                <Button size="lg">
-                  Get Started
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+            <div className="flex flex-wrap gap-3 md:gap-4 pt-2 md:pt-4">
+              <Button 
+                size="lg" 
+                onClick={() => navigate("/auth?tab=signup")}
+                className="whitespace-nowrap"
+              >
+                Get Started
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
               <Link to="#features">
                 <Button variant="outline" size="lg">Explore Features</Button>
               </Link>
             </div>
           </div>
-          <div className="flex-1 flex justify-center">
-            <div className="relative w-full max-w-lg h-[400px] bg-secondary/20 rounded-lg overflow-hidden">
+          <div className="flex-1 flex justify-center w-full mt-8 md:mt-0">
+            <div className="relative w-full max-w-lg h-[240px] md:h-[400px] bg-secondary/20 rounded-lg overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(137,137,222,0.15),rgba(26,31,44,0))]"></div>
               <img 
                 src="/trading-dashboard.svg" 
@@ -83,7 +95,7 @@ const Landing = () => {
       </section>
       
       {/* Features Section */}
-      <section id="features" className="py-20 bg-secondary/5">
+      <section id="features" className="py-16 md:py-20 bg-secondary/5">
         <div className="container">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Platform Features</h2>
@@ -128,7 +140,7 @@ const Landing = () => {
       </section>
       
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 container">
+      <section id="pricing" className="py-16 md:py-20 container">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold mb-4">Simple, Transparent Pricing</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
@@ -180,7 +192,7 @@ const Landing = () => {
       </section>
       
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-20 bg-secondary/5">
+      <section id="testimonials" className="py-16 md:py-20 bg-secondary/5">
         <div className="container">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Trusted by Traders Worldwide</h2>
@@ -219,18 +231,20 @@ const Landing = () => {
       </section>
       
       {/* CTA Section */}
-      <section className="py-20 container">
-        <div className="bg-primary/10 rounded-lg p-12 text-center max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-6">Ready to Start Trading?</h2>
-          <p className="text-lg mb-8 max-w-lg mx-auto">
+      <section className="py-16 md:py-20 container">
+        <div className="bg-primary/10 rounded-lg p-8 md:p-12 text-center max-w-4xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Ready to Start Trading?</h2>
+          <p className="text-base md:text-lg mb-6 md:mb-8 max-w-lg mx-auto">
             Join thousands of traders using TradePro to access global markets and reach their financial goals.
           </p>
-          <Link to="/auth?tab=signup">
-            <Button size="lg" className="px-8">
-              Create Your Free Account
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+          <Button 
+            size="lg" 
+            className="px-8"
+            onClick={() => navigate("/auth?tab=signup")}
+          >
+            Create Your Free Account
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
         </div>
       </section>
       
