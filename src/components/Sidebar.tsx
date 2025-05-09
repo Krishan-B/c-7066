@@ -1,75 +1,89 @@
 
-import { Link, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import {
-  LayoutDashboard,
-  LineChart,
-  Wallet,
-  CircleDollarSign,
-  Settings,
-  PlusCircle,
-  User
-} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { NavLink } from "react-router-dom";
+import { LayoutDashboard, LineChart, BarChart3, ShoppingCart, Wallet, Settings, UserCircle, LogOut } from "lucide-react";
+import { useAuth } from "./AuthProvider";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface SidebarProps {
   isOpen: boolean;
 }
 
+interface SidebarItemProps {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+}
+
+const SidebarItem = ({ to, icon, label }: SidebarItemProps) => (
+  <NavLink
+    to={to}
+    className={({ isActive }) => cn(
+      "flex items-center py-2 px-4 rounded-md text-sm transition-colors",
+      isActive 
+        ? "bg-accent text-accent-foreground font-medium" 
+        : "hover:bg-accent/50 text-muted-foreground"
+    )}
+  >
+    <span className="mr-3">{icon}</span>
+    {label}
+  </NavLink>
+);
+
 const Sidebar = ({ isOpen }: SidebarProps) => {
-  const location = useLocation();
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
-  const isActive = (path: string) => {
-    return location.pathname === path;
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out successfully",
+      });
+      navigate("/auth");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast({
+        title: "Error signing out",
+        description: "There was a problem signing out",
+        variant: "destructive",
+      });
+    }
   };
-
-  const navItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/" },
-    { name: "Markets", icon: LineChart, path: "/markets" },
-    { name: "Portfolio", icon: Wallet, path: "/portfolio" },
-    { name: "Orders", icon: CircleDollarSign, path: "/orders" },
-    { name: "Wallet", icon: Wallet, path: "/wallet" },
-    { name: "My Account", icon: User, path: "/account" },
-  ];
-
-  if (!isOpen) {
-    return null;
-  }
-
+  
   return (
-    <aside className="w-64 border-r border-secondary bg-background fixed inset-y-0 top-[65px] z-40 hidden md:block">
-      <div className="py-4 h-full flex flex-col">
-        <div className="px-4 py-3">
-          <div className="glass-card rounded-lg p-4 mb-4">
-            <div className="text-xs text-muted-foreground mb-1">Total Balance</div>
-            <div className="text-xl font-bold">$24,692.57</div>
-            <div className="text-success text-xs flex items-center mt-1">
-              <LineChart className="w-3 h-3 mr-1" />
-              +5.23% today
-            </div>
+    <aside 
+      className={cn(
+        "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background z-10 w-64 border-r border-secondary transition-all duration-300 ease-in-out",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}
+    >
+      <div className="flex flex-col h-full p-4">
+        <div className="flex-grow">
+          <nav className="space-y-1">
+            <SidebarItem to="/" icon={<LayoutDashboard className="h-5 w-5" />} label="Dashboard" />
+            <SidebarItem to="/markets" icon={<LineChart className="h-5 w-5" />} label="Markets" />
+            <SidebarItem to="/portfolio" icon={<BarChart3 className="h-5 w-5" />} label="Portfolio" />
+            <SidebarItem to="/orders" icon={<ShoppingCart className="h-5 w-5" />} label="Orders" />
+            <SidebarItem to="/wallet" icon={<Wallet className="h-5 w-5" />} label="Wallet" />
+          </nav>
+          
+          <div className="mt-8">
+            <p className="px-4 text-xs font-medium text-muted-foreground mb-2">ACCOUNT</p>
+            <nav className="space-y-1">
+              <SidebarItem to="/profile" icon={<UserCircle className="h-5 w-5" />} label="My Profile" />
+              <SidebarItem to="/account" icon={<Settings className="h-5 w-5" />} label="Settings" />
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center py-2 px-4 rounded-md text-sm text-muted-foreground hover:bg-accent/50 transition-colors text-left"
+              >
+                <LogOut className="h-5 w-5 mr-3" />
+                Sign Out
+              </button>
+            </nav>
           </div>
-        </div>
-        
-        <nav className="space-y-1 px-2">
-          {navItems.map((item) => (
-            <Button
-              key={item.name}
-              variant={isActive(item.path) ? "default" : "ghost"}
-              className="w-full justify-start"
-              asChild
-            >
-              <Link to={item.path}>
-                <item.icon className="h-4 w-4 mr-3" />
-                {item.name}
-              </Link>
-            </Button>
-          ))}
-        </nav>
-        
-        <div className="mt-auto px-4 pb-4">
-          <Button variant="outline" className="w-full">
-            <PlusCircle className="h-4 w-4 mr-2" /> 
-            Deposit Funds
-          </Button>
         </div>
       </div>
     </aside>

@@ -15,6 +15,7 @@ import Dashboard from "./pages/Index";
 import Wallet from "./pages/Wallet";
 import Account from "./pages/Account";
 import Landing from "./pages/Landing";
+import ProfilePage from "./pages/ProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="orders" element={<Orders />} />
               <Route path="wallet" element={<Wallet />} />
               <Route path="account" element={<Account />} />
+              <Route path="profile" element={<ProfilePage />} />
             </Route>
             
             {/* Default redirect */}
