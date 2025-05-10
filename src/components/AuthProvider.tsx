@@ -72,6 +72,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Clean up auth state - essential for consistent auth behavior
+  const cleanupAuthState = () => {
+    // Remove standard auth tokens
+    localStorage.removeItem('supabase.auth.token');
+    
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Remove from sessionStorage if in use
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  };
+
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -137,8 +157,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Then attempt a global sign out
+      await supabase.auth.signOut({ scope: 'global' });
       setProfile(null);
+      
+      // Force page reload for clean state
+      window.location.href = '/auth';
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
@@ -170,6 +197,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         description: error.message || "Unable to refresh your session",
         variant: "destructive",
       });
+      
+      // If refreshing fails, try to clean up and force re-login
+      cleanupAuthState();
+      window.location.href = '/auth';
     } finally {
       setLoading(false);
     }
