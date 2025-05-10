@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,17 +82,17 @@ const RegisterForm = () => {
         // Ignore errors during cleanup
       }
       
-      const { data, error } = await supabase.auth.signUp({
+      const formattedPhoneNumber = phoneNumber ? `${countryCode}${phoneNumber}` : '';
+      
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: window.location.origin,
           data: {
             first_name: firstName,
             last_name: lastName,
-            country_code: countryCode,
-            phone_number: phoneNumber,
-            country: country
+            country: country,
+            phone_number: formattedPhoneNumber
           }
         }
       });
@@ -102,17 +101,27 @@ const RegisterForm = () => {
       
       toast({
         title: "Account created successfully",
-        description: "Redirecting to dashboard..."
+        description: "You can now log in with your new account"
       });
       
-      // Force page reload to ensure clean state
-      window.location.href = "/";
+      // Switch to login tab after successful signup
+      // Instead of reloading, just redirect to login view
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
       
     } catch (error: any) {
+      console.error("Signup error:", error);
       let errorMessage = "An error occurred during sign up";
-      if (error.message.includes("email")) {
-        errorMessage = "This email is already in use";
+      
+      if (error.message) {
+        if (error.message.includes("email")) {
+          errorMessage = "This email is already in use";
+        } else {
+          errorMessage = error.message;
+        }
       }
+      
       setFormError(errorMessage);
       toast({
         title: "Error",

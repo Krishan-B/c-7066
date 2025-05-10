@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -69,13 +68,15 @@ const LoginForm = () => {
         // Ignore errors during cleanup
       }
       
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("Attempting to sign in with:", { email });
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) throw error;
       
+      console.log("Login successful:", data);
       toast({
         title: "Success",
         description: "Logged in successfully"
@@ -85,9 +86,14 @@ const LoginForm = () => {
       window.location.href = "/";
       
     } catch (error: any) {
+      console.error("Login error:", error);
       let errorMessage = "Invalid email or password";
-      if (error.message.includes("rate")) {
-        errorMessage = "Too many login attempts. Please try again later";
+      if (error.message) {
+        if (error.message.includes("rate")) {
+          errorMessage = "Too many login attempts. Please try again later";
+        } else {
+          errorMessage = error.message;
+        }
       }
       setFormError(errorMessage);
       toast({
