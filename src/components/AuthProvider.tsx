@@ -12,7 +12,7 @@ type AuthContextType = {
   loading: boolean;
   profileLoading: boolean;
   signOut: () => Promise<void>;
-  refreshSession: () => Promise<void>;
+  refreshSession: () => Promise<Session | null>; // Updated return type to match implementation
   updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
@@ -24,7 +24,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   profileLoading: false,
   signOut: async () => {},
-  refreshSession: async () => {},
+  refreshSession: async () => null, // Updated default implementation to match return type
   updateProfile: async () => {},
   refreshProfile: async () => {},
 });
@@ -207,7 +207,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await fetchProfile(data.session.user);
       }
       
-      return data.session;
+      return data.session; // Return session data
     } catch (error: any) {
       console.error("Error refreshing session:", error);
       toast({
@@ -219,7 +219,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // If refreshing fails, clean up and force re-login
       cleanupAuthState();
       window.location.href = '/auth';
-      return null;
+      return null; // Return null on error
     } finally {
       setLoading(false);
     }
