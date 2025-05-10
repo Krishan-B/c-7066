@@ -93,66 +93,77 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Set up auth state listener FIRST - do this before anything else
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, newSession) => {
         console.log("Auth state change event:", event);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
         
-        // Fetch profile when auth state changes to signed in
-        if (session?.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
-          // Use setTimeout to prevent potential auth deadlocks
+        // Update state synchronously
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        
+        // Handle specific auth events
+        if (event === 'SIGNED_IN' && newSession?.user) {
+          // Defer profile fetching to prevent auth deadlocks
           setTimeout(() => {
-            fetchProfile(session.user);
+            fetchProfile(newSession.user);
           }, 0);
-        }
-        
-        // Show toast message based on auth events
-        if (event === 'SIGNED_OUT') {
-          setProfile(null); // Clear profile on sign out
+        } else if (event === 'SIGNED_OUT') {
+          setProfile(null);
           toast({
             title: "Signed out",
             description: "You have been signed out successfully",
           });
-        } else if (event === 'USER_UPDATED') {
+        } else if (event === 'USER_UPDATED' && newSession?.user) {
+          // Defer profile updating
+          setTimeout(() => {
+            fetchProfile(newSession.user);
+          }, 0);
           toast({
             title: "Profile updated",
             description: "Your profile has been updated successfully",
           });
-        } else if (event === 'PASSWORD_RECOVERY') {
-          toast({
-            title: "Password reset",
-            description: "Please enter your new password",
-          });
+        }
+        
+        // Set loading to false once we've processed this event
+        if (event !== 'INITIAL_SESSION') {
+          setLoading(false);
         }
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
+    const initializeSession = async () => {
+      try {
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          throw error;
+        }
+        
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        
+        if (initialSession?.user) {
+          await fetchProfile(initialSession.user);
+        }
+      } catch (error) {
         console.error("Error getting session:", error);
         toast({
           title: "Session error",
           description: "There was a problem retrieving your session",
           variant: "destructive",
         });
+      } finally {
+        setLoading(false);
       }
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        // Fetch profile for existing session
-        fetchProfile(session.user);
-      }
-      
-      setLoading(false);
-    });
+    };
+    
+    initializeSession();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [toast]);
 
   const signOut = async () => {
@@ -180,6 +191,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const refreshSession = async () => {
     try {
       setLoading(true);
+      
+      // Clean up first to avoid conflicts
+      cleanupAuthState();
+      
+      // Then get a fresh session
       const { data, error } = await supabase.auth.refreshSession();
       
       if (error) throw error;
@@ -190,6 +206,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (data.session?.user) {
         await fetchProfile(data.session.user);
       }
+      
+      return data.session;
     } catch (error: any) {
       console.error("Error refreshing session:", error);
       toast({
@@ -198,9 +216,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         variant: "destructive",
       });
       
-      // If refreshing fails, try to clean up and force re-login
+      // If refreshing fails, clean up and force re-login
       cleanupAuthState();
       window.location.href = '/auth';
+      return null;
     } finally {
       setLoading(false);
     }

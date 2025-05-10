@@ -12,12 +12,15 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { session, loading, refreshSession } = useAuth();
   const location = useLocation();
 
-  // Attempt to refresh the session if it's not present and we're loading
+  // Attempt to refresh the session if it's not present
   useEffect(() => {
     if (!session && !loading) {
+      console.log("No session detected, attempting to refresh");
       const attemptRefresh = async () => {
-        await refreshSession();
+        const refreshedSession = await refreshSession();
+        console.log("Session refresh attempt completed:", refreshedSession ? "Success" : "Failed");
       };
+      
       attemptRefresh();
     }
   }, [session, loading, refreshSession]);
@@ -33,6 +36,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   if (!session) {
     // Redirect to login but remember where the user was trying to go
+    console.log("No authenticated session found, redirecting to auth page");
     return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
   }
 

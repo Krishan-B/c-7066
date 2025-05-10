@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -69,6 +70,7 @@ const LoginForm = () => {
       }
       
       console.log("Attempting to sign in with:", { email });
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,

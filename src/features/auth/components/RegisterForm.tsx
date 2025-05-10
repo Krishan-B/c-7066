@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,7 +85,9 @@ const RegisterForm = () => {
       
       const formattedPhoneNumber = phoneNumber ? `${countryCode}${phoneNumber}` : '';
       
-      const { error } = await supabase.auth.signUp({
+      console.log("Attempting to sign up with:", { email });
+      
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -99,16 +102,17 @@ const RegisterForm = () => {
       
       if (error) throw error;
       
+      console.log("Signup successful:", data);
+      
       toast({
         title: "Account created successfully",
-        description: "You can now log in with your new account"
+        description: "Please check your email for verification and then log in"
       });
       
-      // Switch to login tab after successful signup
-      // Instead of reloading, just redirect to login view
+      // Reset form and redirect to login after a short delay
       setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+        window.location.href = "/auth";
+      }, 2000);
       
     } catch (error: any) {
       console.error("Signup error:", error);
