@@ -1,14 +1,16 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, ArrowUp, ArrowDown, RefreshCcw } from "lucide-react";
+import { Search, ArrowUp, ArrowDown, RefreshCcw, Globe, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import TradingViewChart from "@/components/TradingViewChart";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 
 interface Asset {
   id?: string;
@@ -223,11 +225,57 @@ const Markets = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-[500px]">
+                <div className="h-[400px]">
                   <TradingViewChart symbol={selectedMarket.symbol} />
                 </div>
               </CardContent>
             </Card>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              <EnhancedNewsWidget marketType={selectedMarket.market_type} />
+              
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Globe className="h-5 w-5" />
+                    Market Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <div className="text-xs text-muted-foreground mb-1">Current Price</div>
+                        <div className="font-semibold">${typeof selectedMarket.price === 'number' ? selectedMarket.price.toLocaleString() : selectedMarket.price}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground mb-1">24h Change</div>
+                        <div className={`font-semibold ${selectedMarket.change_percentage >= 0 ? 'text-success' : 'text-warning'}`}>
+                          {selectedMarket.change_percentage >= 0 ? "+" : ""}{selectedMarket.change_percentage.toFixed(2)}%
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground mb-1">24h Volume</div>
+                        <div className="font-semibold">{selectedMarket.volume}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground mb-1">Market Type</div>
+                        <div className="font-semibold">{selectedMarket.market_type}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4">
+                      <div className="flex justify-center space-x-2">
+                        <Button className="flex-1">Trade</Button>
+                        <Button variant="outline" className="gap-1">
+                          <AlertTriangle className="h-4 w-4" /> Set Alert
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>

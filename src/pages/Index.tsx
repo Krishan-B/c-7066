@@ -10,12 +10,13 @@ import WatchlistTable from "@/components/WatchlistTable";
 import CryptoList from "@/components/CryptoList";
 import TradingViewChart from "@/components/TradingViewChart";
 import QuickTradePanel from "@/components/QuickTradePanel";
-import NewsWidget from "@/components/NewsWidget";
 import PortfolioCard from "@/components/PortfolioCard";
 import MarketOverview from "@/components/MarketOverview";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
+import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
+import AlertsWidget from "@/components/AlertsWidget";
 
 const Index = () => {
   const [selectedAsset, setSelectedAsset] = useState({
@@ -100,7 +101,7 @@ const Index = () => {
             <PortfolioCard />
           </div>
           <div>
-            <MarketOverview />
+            <AlertsWidget />
           </div>
         </div>
 
@@ -141,16 +142,8 @@ const Index = () => {
           <div>
             <QuickTradePanel asset={selectedAsset} />
             
-            <div className="glass-card rounded-lg p-4 mt-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Market News</h2>
-                <Button variant="outline" size="sm" className="gap-1">
-                  <Clock className="h-3 w-3" />
-                  <span className="text-xs">Latest</span>
-                  <ChevronDown className="h-3 w-3" />
-                </Button>
-              </div>
-              <NewsWidget />
+            <div className="mt-6">
+              <EnhancedNewsWidget />
             </div>
           </div>
         </div>
