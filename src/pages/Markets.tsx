@@ -1,16 +1,15 @@
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, ArrowUp, ArrowDown, RefreshCcw, Globe, AlertTriangle } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import TradingViewChart from "@/components/TradingViewChart";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { RefreshCcw } from "lucide-react";
+import MarketSearch from "@/components/markets/MarketSearch";
+import MarketTabs from "@/components/markets/MarketTabs";
+import AssetDetails from "@/components/markets/AssetDetails";
+import MarketDetailsCard from "@/components/markets/MarketDetailsCard";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
+import { useMarketData } from "@/hooks/useMarketData";
 
 interface Asset {
   id?: string;
@@ -25,7 +24,8 @@ interface Asset {
 
 const Markets = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedMarket, setSelectedMarket] = useState<Asset>({
+  const [activeTab, setActiveTab] = useState("Crypto");
+  const [selectedAsset, setSelectedAsset] = useState<Asset>({
     name: "Bitcoin",
     symbol: "BTCUSD",
     price: 67432.21,
@@ -33,58 +33,15 @@ const Markets = () => {
     market_type: "Crypto",
     volume: "14.2B"
   });
-  const [activeTab, setActiveTab] = useState("Crypto");
+  
   const { toast } = useToast();
-
-  // Function to fetch market data from Supabase
-  const fetchMarketData = async (marketType: string): Promise<Asset[]> => {
-    try {
-      // First check if we already have recent data in our database
-      const { data: existingData, error: fetchError } = await supabase
-        .from('market_data')
-        .select('*')
-        .eq('market_type', marketType)
-        .gt('last_updated', new Date(Date.now() - 60000 * 15).toISOString()); // Data not older than 15 minutes
-      
-      // If we have enough recent data, use it
-      if (!fetchError && existingData && existingData.length > 5) {
-        return existingData as Asset[];
-      }
-
-      // Otherwise, call our edge function to get fresh data
-      const { data, error } = await supabase.functions.invoke('fetch-market-data', {
-        body: { market: marketType },
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      return data?.data || [];
-    } catch (error) {
-      console.error(`Error fetching ${marketType} data:`, error);
-      throw error;
-    }
-  };
-
-  // Use ReactQuery to manage data fetching
-  const {
-    data: marketData = [],
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ["market-data", activeTab],
-    queryFn: () => fetchMarketData(activeTab),
-    refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 15, // 15 minutes
-  });
+  const { marketData, isLoading, error, refetch } = useMarketData(activeTab);
 
   useEffect(() => {
-    if (marketData.length > 0 && !selectedMarket.id) {
-      setSelectedMarket(marketData[0]);
+    if (marketData.length > 0 && !selectedAsset.id) {
+      setSelectedAsset(marketData[0]);
     }
-  }, [marketData, selectedMarket.id]);
+  }, [marketData, selectedAsset.id]);
 
   const handleRefreshData = () => {
     refetch();
@@ -93,12 +50,6 @@ const Markets = () => {
       description: `Fetching the latest ${activeTab} market data...`,
     });
   };
-
-  // Filter market data based on search term
-  const filteredMarketData = marketData.filter(asset => 
-    asset.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    asset.symbol.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -123,158 +74,24 @@ const Markets = () => {
         
         <div className="flex flex-col md:flex-row gap-6">
           <div className="md:w-1/3 space-y-4">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search markets..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            
-            <Tabs 
-              defaultValue="Crypto"
-              value={activeTab}
-              onValueChange={(value) => setActiveTab(value)}
-            >
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="Crypto">Crypto</TabsTrigger>
-                <TabsTrigger value="Stock">Stocks</TabsTrigger>
-                <TabsTrigger value="Forex">Forex</TabsTrigger>
-                <TabsTrigger value="Index">Indices</TabsTrigger>
-                <TabsTrigger value="Commodity">Commodities</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value={activeTab} className="border rounded-md">
-                {isLoading ? (
-                  <div className="p-8 flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : error ? (
-                  <div className="p-8 text-center text-red-500">
-                    Error loading market data. Please try again.
-                  </div>
-                ) : filteredMarketData.length === 0 ? (
-                  <div className="p-8 text-center text-muted-foreground">
-                    No markets found matching your search.
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Asset</TableHead>
-                        <TableHead className="text-right">Price</TableHead>
-                        <TableHead className="text-right">24h Change</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredMarketData.map((asset) => (
-                        <TableRow 
-                          key={asset.symbol} 
-                          className="cursor-pointer hover:bg-muted"
-                          onClick={() => setSelectedMarket(asset)}
-                        >
-                          <TableCell className="font-medium">
-                            {asset.name}
-                            <div className="text-xs text-muted-foreground">{asset.symbol}</div>
-                          </TableCell>
-                          <TableCell className="text-right">${typeof asset.price === 'number' ? asset.price.toLocaleString() : asset.price}</TableCell>
-                          <TableCell className={`text-right ${asset.change_percentage >= 0 ? 'text-success' : 'text-warning'}`}>
-                            <span className="flex items-center justify-end">
-                              {asset.change_percentage >= 0 
-                                ? <ArrowUp className="mr-1 h-4 w-4" />
-                                : <ArrowDown className="mr-1 h-4 w-4" />
-                              }
-                              {Math.abs(asset.change_percentage).toFixed(2)}%
-                            </span>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </TabsContent>
-            </Tabs>
+            <MarketSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+            <MarketTabs 
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              marketData={marketData}
+              isLoading={isLoading}
+              error={error}
+              searchTerm={searchTerm}
+              onSelectAsset={setSelectedAsset}
+            />
           </div>
           
           <div className="md:w-2/3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                  <div>
-                    {selectedMarket.name} ({selectedMarket.symbol})
-                    <div className="text-sm text-muted-foreground font-normal mt-1">
-                      Price: ${typeof selectedMarket.price === 'number' ? selectedMarket.price.toLocaleString() : selectedMarket.price} | 
-                      <span className={selectedMarket.change_percentage >= 0 ? 'text-success' : 'text-warning'}>
-                        {" "}{selectedMarket.change_percentage >= 0 ? "+" : ""}{selectedMarket.change_percentage.toFixed(2)}%
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm text-muted-foreground">
-                      Volume: {selectedMarket.volume}
-                    </div>
-                    {selectedMarket.market_cap && (
-                      <div className="text-sm text-muted-foreground">
-                        Market Cap: {selectedMarket.market_cap}
-                      </div>
-                    )}
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[400px]">
-                  <TradingViewChart symbol={selectedMarket.symbol} />
-                </div>
-              </CardContent>
-            </Card>
+            <AssetDetails selectedAsset={selectedAsset} />
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-              <EnhancedNewsWidget marketType={selectedMarket.market_type} />
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Globe className="h-5 w-5" />
-                    Market Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-xs text-muted-foreground mb-1">Current Price</div>
-                        <div className="font-semibold">${typeof selectedMarket.price === 'number' ? selectedMarket.price.toLocaleString() : selectedMarket.price}</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-muted-foreground mb-1">24h Change</div>
-                        <div className={`font-semibold ${selectedMarket.change_percentage >= 0 ? 'text-success' : 'text-warning'}`}>
-                          {selectedMarket.change_percentage >= 0 ? "+" : ""}{selectedMarket.change_percentage.toFixed(2)}%
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-muted-foreground mb-1">24h Volume</div>
-                        <div className="font-semibold">{selectedMarket.volume}</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-muted-foreground mb-1">Market Type</div>
-                        <div className="font-semibold">{selectedMarket.market_type}</div>
-                      </div>
-                    </div>
-                    
-                    <div className="pt-4">
-                      <div className="flex justify-center space-x-2">
-                        <Button className="flex-1">Trade</Button>
-                        <Button variant="outline" className="gap-1">
-                          <AlertTriangle className="h-4 w-4" /> Set Alert
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <EnhancedNewsWidget marketType={selectedAsset.market_type} />
+              <MarketDetailsCard selectedAsset={selectedAsset} />
             </div>
           </div>
         </div>
