@@ -7,49 +7,17 @@ import ProfileEditForm from "@/features/profile/components/ProfileEditForm";
 import { Button } from "@/components/ui/button";
 import { Pencil, User } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+  const { profile, profileLoading, updateProfile, refreshProfile } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!user) return;
-      
-      setIsLoading(true);
-      try {
-        // Retrieve profile data from auth metadata
-        const { data: userData } = await supabase.auth.getUser();
-        if (userData?.user) {
-          const metadata = userData.user.user_metadata || {};
-          
-          setProfile({
-            firstName: metadata.first_name || "",
-            lastName: metadata.last_name || "",
-            email: userData.user.email || "",
-            country: metadata.country || "",
-            phoneNumber: metadata.phone_number || ""
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load profile information",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserProfile();
-  }, [user, toast]);
+    // Refresh profile when component mounts
+    refreshProfile();
+  }, [refreshProfile]);
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
@@ -57,26 +25,10 @@ const ProfilePage = () => {
 
   const handleUpdateProfile = async (updatedProfile: UserProfile) => {
     try {
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          first_name: updatedProfile.firstName,
-          last_name: updatedProfile.lastName,
-          country: updatedProfile.country,
-          phone_number: updatedProfile.phoneNumber
-        }
-      });
-
-      if (error) throw error;
-
-      setProfile(updatedProfile);
+      await updateProfile(updatedProfile);
       setIsEditing(false);
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated successfully",
-      });
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("Error in profile update handler:", error);
       toast({
         title: "Update failed",
         description: "There was an error updating your profile",
@@ -100,7 +52,7 @@ const ProfilePage = () => {
               variant="outline" 
               size="sm" 
               onClick={handleEditToggle}
-              disabled={isLoading}
+              disabled={profileLoading}
             >
               {isEditing ? "Cancel" : (
                 <>
@@ -117,7 +69,7 @@ const ProfilePage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {profileLoading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>

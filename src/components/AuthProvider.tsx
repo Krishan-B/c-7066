@@ -3,21 +3,30 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
+import { UserProfile } from "@/features/profile/types";
 
 type AuthContextType = {
   session: Session | null;
   user: User | null;
+  profile: UserProfile | null;
   loading: boolean;
+  profileLoading: boolean;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<void>;
+  updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
+  refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
+  profile: null,
   loading: true,
+  profileLoading: false,
   signOut: async () => {},
   refreshSession: async () => {},
+  updateProfile: async () => {},
+  refreshProfile: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -25,8 +34,42 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
   const { toast } = useToast();
+
+  // Fetch profile data from user metadata
+  const fetchProfile = async (currentUser: User) => {
+    if (!currentUser) return null;
+    
+    try {
+      setProfileLoading(true);
+      // Get profile data from user metadata
+      const metadata = currentUser.user_metadata || {};
+      
+      const userProfile: UserProfile = {
+        firstName: metadata.first_name || "",
+        lastName: metadata.last_name || "",
+        email: currentUser.email || "",
+        country: metadata.country || "",
+        phoneNumber: metadata.phone_number || ""
+      };
+      
+      setProfile(userProfile);
+      return userProfile;
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      toast({
+        title: "Error fetching profile",
+        description: "Unable to load your profile information",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -37,8 +80,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
         
+        // Fetch profile when auth state changes to signed in
+        if (session?.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
+          // Use setTimeout to prevent potential auth deadlocks
+          setTimeout(() => {
+            fetchProfile(session.user);
+          }, 0);
+        }
+        
         // Show toast message based on auth events
         if (event === 'SIGNED_OUT') {
+          setProfile(null); // Clear profile on sign out
           toast({
             title: "Signed out",
             description: "You have been signed out successfully",
@@ -70,6 +122,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Fetch profile for existing session
+        fetchProfile(session.user);
+      }
+      
       setLoading(false);
     });
 
@@ -79,6 +137,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      setProfile(null);
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
@@ -99,6 +158,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       setSession(data.session);
       setUser(data.session?.user ?? null);
+      
+      if (data.session?.user) {
+        await fetchProfile(data.session.user);
+      }
     } catch (error: any) {
       console.error("Error refreshing session:", error);
       toast({
@@ -111,8 +174,86 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Function to update user profile
+  const updateProfile = async (profileData: Partial<UserProfile>) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to update your profile",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setProfileLoading(true);
+      
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          first_name: profileData.firstName,
+          last_name: profileData.lastName,
+          country: profileData.country,
+          phone_number: profileData.phoneNumber
+        }
+      });
+      
+      if (error) throw error;
+      
+      // Update local profile state
+      setProfile(prev => prev ? { ...prev, ...profileData } : null);
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
+      });
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Update failed",
+        description: error.message || "There was a problem updating your profile",
+        variant: "destructive",
+      });
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  // Function to manually refresh the profile
+  const refreshProfile = async () => {
+    if (!user) return;
+    
+    try {
+      setProfileLoading(true);
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        await fetchProfile(data.user);
+      }
+    } catch (error) {
+      console.error("Error refreshing profile:", error);
+      toast({
+        title: "Profile refresh failed",
+        description: "Unable to refresh your profile information",
+        variant: "destructive",
+      });
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ session, user, loading, signOut, refreshSession }}>
+    <AuthContext.Provider 
+      value={{ 
+        session, 
+        user, 
+        profile,
+        loading, 
+        profileLoading,
+        signOut, 
+        refreshSession,
+        updateProfile,
+        refreshProfile 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
