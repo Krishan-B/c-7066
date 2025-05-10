@@ -7,11 +7,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LineChart } from "lucide-react";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
+import { useToast } from "@/hooks/use-toast";
 
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState("signin");
+  const [checkingSession, setCheckingSession] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
+  
+  const from = location.state?.from || "/";
 
   // Set default tab based on URL params
   useEffect(() => {
@@ -25,21 +30,53 @@ const AuthPage = () => {
   // Check if user is already logged in
   useEffect(() => {
     const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        navigate("/");
+      try {
+        setCheckingSession(true);
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error checking session:", error);
+          toast({
+            title: "Session Error",
+            description: "There was a problem checking your session",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (data.session) {
+          console.log("Active session found, redirecting to:", from);
+          navigate(from, { replace: true });
+        }
+      } catch (err) {
+        console.error("Unexpected error during session check:", err);
+      } finally {
+        setCheckingSession(false);
       }
     };
+    
     checkSession();
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate("/");
+      console.log("Auth state changed:", event);
+      if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        console.log("User signed in, redirecting to:", from);
+        navigate(from, { replace: true });
       }
     });
+    
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, from, toast]);
+
+  if (checkingSession) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <LineChart className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Checking authentication status...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
