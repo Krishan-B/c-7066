@@ -23,7 +23,7 @@ interface UseMarketDataOptions {
 export const useMarketData = (marketType: string | string[], options: UseMarketDataOptions = {}) => {
   const { toast } = useToast();
   const { 
-    refetchInterval = 1000 * 60 * 15, // 15 minutes default
+    refetchInterval = 1000 * 60 * 5, // 5 minutes default
     initialData = [],
     enableRefresh = true 
   } = options;
@@ -41,12 +41,15 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
         .in('market_type', marketTypeArray)
         .gt('last_updated', new Date(Date.now() - 60000 * 15).toISOString()); // Data not older than 15 minutes
       
-      // If we have enough recent data (at least 5 items per market type), use it
-      const minExpectedItems = marketTypeArray.length * 5;
+      // If we have enough recent data (at least 3 items per market type), use it
+      const minExpectedItems = marketTypeArray.length * 3;
       if (!fetchError && existingData && existingData.length >= minExpectedItems) {
+        console.log(`Using cached data for ${marketTypeArray.join(', ')}`, existingData);
         return existingData as Asset[];
       }
 
+      console.log(`Fetching fresh data for ${marketTypeArray.join(', ')}`);
+      
       // Otherwise, call our edge functions to get fresh data for each market type
       const dataPromises = marketTypeArray.map(async (type) => {
         const { data, error } = await supabase.functions.invoke('fetch-market-data', {
@@ -65,7 +68,10 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
       const results = await Promise.all(dataPromises);
       
       // Flatten the array of arrays into a single array
-      return results.flat();
+      const combinedData = results.flat();
+      console.log(`Fetched ${combinedData.length} total assets for ${marketTypeArray.join(', ')}`);
+      
+      return combinedData;
     } catch (error) {
       console.error(`Error fetching market data:`, error);
       toast({

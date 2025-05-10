@@ -7,6 +7,7 @@ interface UseCombinedMarketDataOptions {
   sortBy?: keyof Asset;
   order?: 'asc' | 'desc';
   filter?: (asset: Asset) => boolean;
+  refetchInterval?: number;
 }
 
 export const useCombinedMarketData = (marketTypes: string[], options: UseCombinedMarketDataOptions = {}) => {
@@ -14,11 +15,14 @@ export const useCombinedMarketData = (marketTypes: string[], options: UseCombine
     limit,
     sortBy = 'market_cap',
     order = 'desc',
-    filter
+    filter,
+    refetchInterval
   } = options;
 
   // Fetch all market types in a single query
-  const { marketData, isLoading, error, refetch, isFetching } = useMarketData(marketTypes);
+  const { marketData, isLoading, error, refetch, isFetching } = useMarketData(marketTypes, {
+    refetchInterval: refetchInterval
+  });
 
   // Process the market data with sorting, filtering, and limiting
   const processedData = useMemo(() => {

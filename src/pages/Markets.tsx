@@ -9,7 +9,7 @@ import MarketTabs from "@/components/markets/MarketTabs";
 import AssetDetails from "@/components/markets/AssetDetails";
 import MarketDetailsCard from "@/components/markets/MarketDetailsCard";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
-import { useMarketData } from "@/hooks/useMarketData";
+import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 
 interface Asset {
   id?: string;
@@ -35,7 +35,12 @@ const Markets = () => {
   });
   
   const { toast } = useToast();
-  const { marketData, isLoading, error, refetch } = useMarketData(activeTab);
+  
+  // Use the combined market data hook with a 2-minute refetch interval
+  const { marketData, isLoading, error, refetch, isFetching } = useCombinedMarketData(
+    [activeTab],
+    { refetchInterval: 1000 * 60 * 2 } // Refresh every 2 minutes
+  );
 
   useEffect(() => {
     if (marketData.length > 0 && !selectedAsset.id) {
@@ -66,9 +71,10 @@ const Markets = () => {
             size="sm" 
             onClick={handleRefreshData}
             className="flex items-center gap-1"
+            disabled={isFetching}
           >
-            <RefreshCcw className="h-4 w-4 mr-1" />
-            Refresh Data
+            <RefreshCcw className={`h-4 w-4 mr-1 ${isFetching ? 'animate-spin' : ''}`} />
+            {isFetching ? 'Refreshing...' : 'Refresh Data'}
           </Button>
         </div>
         

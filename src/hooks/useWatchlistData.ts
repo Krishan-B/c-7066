@@ -18,22 +18,30 @@ export const useWatchlistData = () => {
   // Fetch market data from Supabase
   async function fetchWatchlistData(): Promise<Asset[]> {
     try {
+      console.log("Fetching watchlist data");
+      
       // Get featured assets from each market type
       const { data, error } = await supabase
         .from('market_data')
         .select('*')
         .in('market_type', ['Stock', 'Index', 'Commodity', 'Forex', 'Crypto'])
+        .order('market_type', { ascending: true })
+        .order('last_updated', { ascending: false })
         .limit(50); // Limit to 50 assets total
       
       if (error) {
+        console.error("Error fetching watchlist data:", error);
         throw error;
       }
 
       if (data && data.length > 0) {
+        console.log(`Found ${data.length} watchlist assets`);
         return data as Asset[];
       }
 
-      // If no data in Supabase yet, call the function to populate it
+      // If no data in Supabase yet, call the functions to populate it
+      console.log("No watchlist data found, fetching fresh data");
+      
       await Promise.all([
         supabase.functions.invoke('fetch-market-data', { body: { market: 'Stock' } }),
         supabase.functions.invoke('fetch-market-data', { body: { market: 'Crypto' } }),
@@ -47,9 +55,11 @@ export const useWatchlistData = () => {
         .from('market_data')
         .select('*')
         .in('market_type', ['Stock', 'Index', 'Commodity', 'Forex', 'Crypto'])
+        .order('market_type', { ascending: true })
         .limit(50);
 
       if (!refreshError && refreshedData && refreshedData.length > 0) {
+        console.log(`Fetched ${refreshedData.length} refreshed watchlist assets`);
         return refreshedData as Asset[];
       }
 
