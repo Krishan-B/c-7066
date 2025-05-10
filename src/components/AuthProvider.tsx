@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const metadata = currentUser.user_metadata || {};
       
       const userProfile: UserProfile = {
+        id: currentUser.id, // Add the user ID from the currentUser object
         firstName: metadata.first_name || "",
         lastName: metadata.last_name || "",
         email: currentUser.email || "",
