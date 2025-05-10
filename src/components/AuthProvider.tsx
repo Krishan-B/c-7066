@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
@@ -12,7 +11,7 @@ type AuthContextType = {
   loading: boolean;
   profileLoading: boolean;
   signOut: () => Promise<void>;
-  refreshSession: () => Promise<Session | null>; // Updated return type to match implementation
+  refreshSession: () => Promise<Session | null>; // Update return type to match implementation
   updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
@@ -24,7 +23,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   profileLoading: false,
   signOut: async () => {},
-  refreshSession: async () => null, // Updated default implementation to match return type
+  refreshSession: async () => null, // Update default implementation to match return type
   updateProfile: async () => {},
   refreshProfile: async () => {},
 });
@@ -106,7 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (event === 'SIGNED_IN' && newSession?.user) {
           // Defer profile fetching to prevent auth deadlocks
           setTimeout(() => {
-            fetchProfile(newSession.user);
+            fetchProfile(newSession.user!);
           }, 0);
         } else if (event === 'SIGNED_OUT') {
           setProfile(null);
@@ -117,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else if (event === 'USER_UPDATED' && newSession?.user) {
           // Defer profile updating
           setTimeout(() => {
-            fetchProfile(newSession.user);
+            fetchProfile(newSession.user!);
           }, 0);
           toast({
             title: "Profile updated",
@@ -187,8 +186,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
   
-  // Function to manually refresh the session
-  const refreshSession = async () => {
+  // Function to manually refresh the session - fixed return type
+  const refreshSession = async (): Promise<Session | null> => {
     try {
       setLoading(true);
       
