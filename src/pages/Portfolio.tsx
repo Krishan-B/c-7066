@@ -1,72 +1,25 @@
-import React, { useState } from "react";
+
+import React, { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  ChartContainer, 
-  ChartTooltipContent
-} from "@/components/ui/chart";
-import { 
-  LineChart, 
-  Line, 
-  ResponsiveContainer, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  BarChart,
-  Bar, 
-  CartesianGrid 
-} from "recharts";
-import { 
-  ArrowUp, 
-  ArrowDown, 
-  Plus, 
-  Eye, 
-  Filter, 
-  Calendar, 
-  Download,
-  Search
-} from "lucide-react";
+import { Plus } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import MarketOverview from "@/components/MarketOverview";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { TradeButton } from "@/components/trade";
+import { toast } from "sonner";
 
-interface Asset {
-  name: string;
-  symbol: string;
-  amount: number;
-  price: number;
-  entryPrice: number;
-  value: number;
-  change: number;
-  pnl: number;
-  pnlPercentage: number;
-}
+// Import the refactored components
+import PortfolioSummary from "@/components/portfolio/PortfolioSummary";
+import PortfolioAllocation from "@/components/portfolio/PortfolioAllocation";
+import PositionsTable from "@/components/portfolio/PositionsTable";
+import ClosedPositionsTable from "@/components/portfolio/ClosedPositionsTable";
+import PerformanceChart from "@/components/portfolio/PerformanceChart";
+import MonthlyReturns from "@/components/portfolio/MonthlyReturns";
+import PositionFilter from "@/components/portfolio/PositionFilter";
+import BalanceBreakdown from "@/components/portfolio/BalanceBreakdown";
+import QuickActions from "@/components/portfolio/QuickActions";
 
-interface ClosedPosition {
-  id: string;
-  name: string;
-  symbol: string;
-  openDate: string;
-  closeDate: string;
-  entryPrice: number;
-  exitPrice: number;
-  amount: number;
-  pnl: number;
-  pnlPercentage: number;
-}
-
+// Sample portfolio performance data
 const performanceData = [
   { date: 'Jan', value: 42000 },
   { date: 'Feb', value: 43200 },
@@ -90,7 +43,7 @@ const Portfolio = () => {
   const [filterPnl, setFilterPnl] = useState("all");
 
   // Sample portfolio data
-  const assets: Asset[] = [
+  const assets = [
     { 
       name: "Bitcoin", 
       symbol: "BTC", 
@@ -137,7 +90,7 @@ const Portfolio = () => {
     },
   ];
 
-  const closedPositions: ClosedPosition[] = [
+  const closedPositions = [
     {
       id: "POS-001",
       name: "Bitcoin",
@@ -176,6 +129,14 @@ const Portfolio = () => {
     },
   ];
 
+  // Portfolio allocation data
+  const allocationData = [
+    { name: 'Bitcoin', value: 45, color: '#8989DE' },
+    { name: 'Ethereum', value: 25, color: '#75C6C3' },
+    { name: 'Stocks', value: 20, color: '#F29559' },
+    { name: 'Cash', value: 10, color: '#E5C5C0' },
+  ];
+
   // Filter closed positions
   const filteredClosedPositions = closedPositions.filter(position => {
     const symbolMatch = position.symbol.toLowerCase().includes(filterSymbol.toLowerCase());
@@ -196,25 +157,22 @@ const Portfolio = () => {
   const totalPnL = assets.reduce((sum, asset) => sum + asset.pnl, 0);
   const totalPnLPercentage = (totalPnL / (totalValue - totalPnL)) * 100;
   const isPositive = totalPnLPercentage >= 0;
+  const activeTrades = assets.length;
 
-  const renderTooltipContent = (props: any) => {
-    if (!props.active || !props.payload || !props.payload.length) {
-      return null;
-    }
-    
-    return (
-      <ChartTooltipContent
-        {...props}
-        indicator="dot"
-        formatter={(value, name) => (
-          <div className="flex items-center justify-between gap-2">
-            <span>{name}</span>
-            <span className="font-medium">${value.toLocaleString()}</span>
-          </div>
-        )}
-      />
-    );
-  };
+  const handleExportReport = useCallback(() => {
+    toast.success("Report export started");
+    // Implementation would go here
+  }, []);
+
+  const handleTaxEvents = useCallback(() => {
+    toast.success("Tax events settings opened");
+    // Implementation would go here
+  }, []);
+
+  const handleViewDetails = useCallback((symbol: string) => {
+    toast.success(`Viewing details for ${symbol}`);
+    // Implementation would go here
+  }, []);
 
   if (!user) {
     return (
@@ -244,6 +202,15 @@ const Portfolio = () => {
           </p>
         </div>
 
+        {/* Portfolio Summary */}
+        <PortfolioSummary 
+          balance={cashBalance + lockedFunds}
+          equity={cashBalance + lockedFunds + totalValue}
+          activeTrades={activeTrades}
+          pnl={totalPnL}
+          pnlPercentage={totalPnLPercentage}
+        />
+
         {/* Portfolio Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <Card>
@@ -253,100 +220,29 @@ const Portfolio = () => {
             <CardContent>
               <div className="text-2xl font-bold">${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               <div className={`flex items-center text-xs ${isPositive ? 'text-success' : 'text-destructive'}`}>
-                {isPositive 
-                  ? <ArrowUp className="h-3 w-3 mr-1" /> 
-                  : <ArrowDown className="h-3 w-3 mr-1" />
-                }
                 <span>${Math.abs(totalPnL).toLocaleString()} ({totalPnLPercentage.toFixed(2)}%)</span>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Balance Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Cash:</span>
-                  <span className="font-medium">${cashBalance.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Locked Funds:</span>
-                  <span className="font-medium">${lockedFunds.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Investments:</span>
-                  <span className="font-medium">${totalValue.toLocaleString()}</span>
-                </div>
-                <div className="pt-2 border-t flex justify-between">
-                  <span className="font-medium">Total:</span>
-                  <span className="font-bold">${(cashBalance + lockedFunds + totalValue).toLocaleString()}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <BalanceBreakdown 
+            cashBalance={cashBalance}
+            lockedFunds={lockedFunds}
+            totalValue={totalValue}
+          />
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <TradeButton variant="outline" className="w-full justify-start" label="Add New Position" />
-              <Button size="sm" variant="outline" className="w-full justify-start">
-                <Download className="h-4 w-4 mr-2" /> Export Report
-              </Button>
-              <Button size="sm" variant="outline" className="w-full justify-start">
-                <Calendar className="h-4 w-4 mr-2" /> Set Tax Events
-              </Button>
-            </CardContent>
-          </Card>
+          <QuickActions 
+            onExport={handleExportReport}
+            onTaxEvents={handleTaxEvents}
+          />
         </div>
 
         {/* Performance Chart */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex justify-between items-center">
-              <span>Portfolio Performance</span>
-              <Select value={timeframe} onValueChange={setTimeframe}>
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="Timeframe" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1m">1M</SelectItem>
-                  <SelectItem value="3m">3M</SelectItem>
-                  <SelectItem value="6m">6M</SelectItem>
-                  <SelectItem value="1y">1Y</SelectItem>
-                  <SelectItem value="all">All</SelectItem>
-                </SelectContent>
-              </Select>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ChartContainer config={{ series: {} }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={performanceData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
-                  <XAxis dataKey="date" stroke="#666" />
-                  <YAxis 
-                    stroke="#666" 
-                    tickFormatter={(value) => `$${(value/1000).toFixed(0)}K`}
-                  />
-                  <Tooltip content={renderTooltipContent} />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    name="Portfolio Value"
-                    stroke="#8989DE"
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
+        <PerformanceChart 
+          data={performanceData}
+          timeframe={timeframe}
+          onTimeframeChange={setTimeframe}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3">
@@ -367,48 +263,10 @@ const Portfolio = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="rounded-md border">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Asset</TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
-                            <TableHead className="text-right">Entry Price</TableHead>
-                            <TableHead className="text-right">Current Price</TableHead>
-                            <TableHead className="text-right">Value</TableHead>
-                            <TableHead className="text-right">P&L</TableHead>
-                            <TableHead></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {assets.map((asset) => (
-                            <TableRow key={asset.symbol}>
-                              <TableCell className="font-medium">
-                                {asset.name} ({asset.symbol})
-                              </TableCell>
-                              <TableCell className="text-right">{asset.amount}</TableCell>
-                              <TableCell className="text-right">${asset.entryPrice.toLocaleString()}</TableCell>
-                              <TableCell className="text-right">${asset.price.toLocaleString()}</TableCell>
-                              <TableCell className="text-right">${asset.value.toLocaleString()}</TableCell>
-                              <TableCell className={`text-right ${asset.pnl >= 0 ? 'text-success' : 'text-destructive'}`}>
-                                <div className="flex items-center justify-end">
-                                  {asset.pnl >= 0 
-                                    ? <ArrowUp className="mr-1 h-4 w-4" />
-                                    : <ArrowDown className="mr-1 h-4 w-4" />
-                                  }
-                                  ${Math.abs(asset.pnl).toLocaleString()} ({Math.abs(asset.pnlPercentage).toFixed(2)}%)
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
+                    <PositionsTable 
+                      assets={assets}
+                      onViewDetails={handleViewDetails}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -419,76 +277,14 @@ const Portfolio = () => {
                     <CardTitle>Closed Positions</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-col md:flex-row gap-4 mb-4">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Filter by symbol..."
-                          className="pl-8"
-                          value={filterSymbol}
-                          onChange={(e) => setFilterSymbol(e.target.value)}
-                        />
-                      </div>
-                      <Select value={filterPnl} onValueChange={setFilterPnl}>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Filter by P&L" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All P&L</SelectItem>
-                          <SelectItem value="profit">Profitable</SelectItem>
-                          <SelectItem value="loss">Loss</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <PositionFilter 
+                      filterSymbol={filterSymbol}
+                      filterPnl={filterPnl}
+                      onSymbolChange={setFilterSymbol}
+                      onPnlChange={setFilterPnl}
+                    />
                     
-                    <div className="rounded-md border">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Asset</TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
-                            <TableHead className="text-right">Entry Price</TableHead>
-                            <TableHead className="text-right">Exit Price</TableHead>
-                            <TableHead>Open / Close Date</TableHead>
-                            <TableHead className="text-right">P&L</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredClosedPositions.map((position) => (
-                            <TableRow key={position.id}>
-                              <TableCell className="font-medium">
-                                {position.name} ({position.symbol})
-                              </TableCell>
-                              <TableCell className="text-right">{position.amount}</TableCell>
-                              <TableCell className="text-right">${position.entryPrice.toLocaleString()}</TableCell>
-                              <TableCell className="text-right">${position.exitPrice.toLocaleString()}</TableCell>
-                              <TableCell>
-                                <div className="text-xs">
-                                  <div>{position.openDate}</div>
-                                  <div>{position.closeDate}</div>
-                                </div>
-                              </TableCell>
-                              <TableCell className={`text-right ${position.pnl >= 0 ? 'text-success' : 'text-destructive'}`}>
-                                <div className="flex items-center justify-end">
-                                  {position.pnl >= 0 
-                                    ? <ArrowUp className="mr-1 h-4 w-4" />
-                                    : <ArrowDown className="mr-1 h-4 w-4" />
-                                  }
-                                  ${Math.abs(position.pnl).toLocaleString()} ({Math.abs(position.pnlPercentage).toFixed(2)}%)
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                          {filteredClosedPositions.length === 0 && (
-                            <TableRow>
-                              <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
-                                No positions match your filter criteria
-                              </TableCell>
-                            </TableRow>
-                          )}
-                        </TableBody>
-                      </Table>
-                    </div>
+                    <ClosedPositionsTable positions={filteredClosedPositions} />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -496,33 +292,14 @@ const Portfolio = () => {
           </div>
           
           <div className="space-y-6">
-            <MarketOverview />
+            <PortfolioAllocation 
+              totalValue={totalValue}
+              dayChange={1243.87}
+              dayChangePercentage={2.6}
+              allocationData={allocationData}
+            />
             
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Monthly Returns</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[220px]">
-                <ChartContainer config={{ series: {} }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={performanceData.slice(-6)}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
-                      <XAxis dataKey="date" />
-                      <YAxis 
-                        tickFormatter={(value) => `${(value/1000).toFixed(0)}K`}
-                      />
-                      <Tooltip content={renderTooltipContent} />
-                      <Bar 
-                        dataKey="value" 
-                        name="Monthly Value" 
-                        fill="#75C6C3" 
-                        radius={[4, 4, 0, 0]} 
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card>
+            <MonthlyReturns data={performanceData} />
           </div>
         </div>
       </div>

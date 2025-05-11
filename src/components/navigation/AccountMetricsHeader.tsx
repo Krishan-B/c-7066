@@ -3,13 +3,16 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AccountMetrics } from "@/types/account";
-import { mockAccountMetrics, getDisplayedMetrics, getAllMetrics } from "@/utils/metricUtils";
+import { mockAccountMetrics, getDisplayedMetrics, getAllMetrics, calculateAvailableFunds } from "@/utils/metricUtils";
 import MetricItem from "./MetricItem";
 import MetricsDropdown from "./MetricsDropdown";
 
 const AccountMetricsHeader = () => {
   const navigate = useNavigate();
-  const [metrics, setMetrics] = useState<AccountMetrics>(mockAccountMetrics);
+  const [metrics, setMetrics] = useState<AccountMetrics>({
+    ...mockAccountMetrics,
+    availableFunds: calculateAvailableFunds(mockAccountMetrics.balance, mockAccountMetrics.bonus)
+  });
 
   // This would be replaced with a real API call or websocket connection
   useEffect(() => {
@@ -18,12 +21,19 @@ const AccountMetricsHeader = () => {
       // Small random fluctuations to simulate real-time changes
       const randomChange = () => (Math.random() - 0.5) * 20;
       
-      setMetrics(prev => ({
-        ...prev,
-        unrealizedPL: Math.round((prev.unrealizedPL + randomChange()) * 100) / 100,
-        equity: Math.round((prev.balance + prev.unrealizedPL + randomChange()) * 100) / 100,
-        marginLevel: Math.round(Math.max(0, (prev.marginLevel + (Math.random() - 0.5) * 2)) * 10) / 10,
-      }));
+      setMetrics(prev => {
+        const newUnrealizedPL = Math.round((prev.unrealizedPL + randomChange()) * 100) / 100;
+        const newEquity = Math.round((prev.balance + newUnrealizedPL + randomChange()) * 100) / 100;
+        const newMarginLevel = Math.round(Math.max(0, (prev.marginLevel + (Math.random() - 0.5) * 2)) * 10) / 10;
+        
+        return {
+          ...prev,
+          unrealizedPL: newUnrealizedPL,
+          equity: newEquity,
+          marginLevel: newMarginLevel,
+          availableFunds: calculateAvailableFunds(prev.balance, prev.bonus)
+        };
+      });
     }, 5000);
 
     return () => clearInterval(interval);

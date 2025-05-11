@@ -9,7 +9,7 @@ export const mockAccountMetrics: AccountMetrics = {
   marginLevel: 85,
   usedMargin: 1200,
   realizedPL: 750,
-  availableFunds: 8800,
+  availableFunds: 10500, // Updated to be balance + bonus
   exposure: 12000,
   bonus: 500,
   buyingPower: 20000
@@ -18,6 +18,11 @@ export const mockAccountMetrics: AccountMetrics = {
 // Format currency with $ and 2 decimal places
 export const formatCurrency = (value: number) => {
   return `$${value.toFixed(2)}`;
+};
+
+// Calculate available funds as balance + bonus
+export const calculateAvailableFunds = (balance: number, bonus: number) => {
+  return balance + bonus;
 };
 
 // Get displayed metrics for the header
@@ -46,7 +51,7 @@ export const getDisplayedMetrics = (metrics: AccountMetrics): MetricItem[] => {
     { 
       label: "Available", 
       value: formatCurrency(metrics.availableFunds),
-      tooltip: "The amount of funds that can be used to open new trades"
+      tooltip: "Balance plus bonus funds available for trading"
     }
   ];
 };
@@ -77,7 +82,7 @@ export const getAllMetrics = (metrics: AccountMetrics): MetricItem[] => {
     { 
       label: "Available", 
       value: formatCurrency(metrics.availableFunds),
-      tooltip: "The amount of funds in your trading account that you can use to open new or additional trades"
+      tooltip: "Balance plus bonus funds available for trading"
     },
     { 
       label: "Used", 
@@ -98,6 +103,11 @@ export const getAllMetrics = (metrics: AccountMetrics): MetricItem[] => {
       label: "Account Equity", 
       value: formatCurrency(metrics.equity),
       tooltip: "The sum of your balance and unrealized P&L"
+    },
+    {
+      label: "Bonus",
+      value: formatCurrency(metrics.bonus),
+      tooltip: "Additional funds provided by the broker that can be used for trading"
     }
   ];
 };

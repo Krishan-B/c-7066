@@ -18,3 +18,40 @@ export interface MetricItem {
   value: string;
   tooltip: string;
 }
+
+// Portfolio types
+export interface Asset {
+  name: string;
+  symbol: string;
+  amount: number;
+  price: number;
+  entryPrice: number;
+  value: number;
+  change: number;
+  pnl: number;
+  pnlPercentage: number;
+}
+
+export interface ClosedPosition {
+  id: string;
+  name: string;
+  symbol: string;
+  openDate: string;
+  closeDate: string;
+  entryPrice: number;
+  exitPrice: number;
+  amount: number;
+  pnl: number;
+  pnlPercentage: number;
+}
+
+export interface AllocationData {
+  name: string;
+  value: number;
+  color: string;
+}
+
+export interface PerformanceData {
+  date: string;
+  value: number;
+}
