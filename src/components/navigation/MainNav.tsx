@@ -160,7 +160,7 @@ const MainNav = ({
   ];
 
   return (
-    <div className="hidden md:flex flex-1 items-center overflow-x-auto">
+    <div className="hidden md:flex flex-1 items-center justify-center overflow-x-auto">
       <TooltipProvider>
         <div className="flex items-center gap-6">
           {displayedMetrics.map((item, index) => (
