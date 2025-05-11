@@ -76,7 +76,7 @@ export const getMarketHoursMessage = (marketType: string): string => {
   const config = marketConfig[marketType];
   
   if (config.isOpen24Hours) {
-    return "Market is open 24/7";
+    return "This market trades 24/7, every day of the week.";
   }
   
   const days = config.openDays.map(day => {
@@ -84,5 +84,5 @@ export const getMarketHoursMessage = (marketType: string): string => {
     return dayNames[day];
   }).join(", ");
   
-  return `Trading hours: ${days} ${config.openTime}:00-${config.closeTime}:00 UTC`;
+  return `${marketType} markets trade from ${config.openTime}:00 to ${config.closeTime}:00 UTC on ${days}.`;
 };

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarketList from "./MarketList";
 
@@ -22,6 +22,7 @@ interface MarketTabsProps {
   error: Error | null;
   searchTerm: string;
   onSelectAsset: (asset: Asset) => void;
+  containerRef: React.RefObject<HTMLDivElement>;
 }
 
 const MarketTabs = ({ 
@@ -31,21 +32,32 @@ const MarketTabs = ({
   isLoading, 
   error, 
   searchTerm, 
-  onSelectAsset 
+  onSelectAsset,
+  containerRef
 }: MarketTabsProps) => {
   // Filter market data based on search term
   const filteredMarketData = marketData.filter(asset => 
     asset.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     asset.symbol.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  // Handle asset selection with auto-scroll
+  const handleAssetSelect = (asset: Asset) => {
+    onSelectAsset(asset);
+    // Scroll to the chart section smoothly
+    if (containerRef?.current) {
+      containerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
     <Tabs 
       defaultValue="Crypto"
       value={activeTab}
       onValueChange={(value) => setActiveTab(value)}
+      className="w-full"
     >
-      <TabsList className="grid w-full grid-cols-5">
+      <TabsList className="grid w-full grid-cols-5 mb-2">
         <TabsTrigger value="Crypto">Crypto</TabsTrigger>
         <TabsTrigger value="Stock">Stocks</TabsTrigger>
         <TabsTrigger value="Forex">Forex</TabsTrigger>
@@ -58,7 +70,7 @@ const MarketTabs = ({
           isLoading={isLoading}
           error={error}
           filteredMarketData={filteredMarketData}
-          onSelectAsset={onSelectAsset}
+          onSelectAsset={handleAssetSelect}
         />
       </TabsContent>
     </Tabs>
