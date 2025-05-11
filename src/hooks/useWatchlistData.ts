@@ -52,8 +52,9 @@ export const useWatchlistData = () => {
       // Fetch user's session before making the request
       const { data } = await supabase.auth.getSession();
       const session = data.session;
-      // Ensure access token is a string with fallback to empty string
-      const accessToken = session?.access_token ?? '';
+      
+      // Explicitly cast access_token to string with a fallback to empty string
+      const accessToken: string = session?.access_token ?? '';
       
       // Fetch the user's watchlist through the edge function
       const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
@@ -156,8 +157,9 @@ export const useWatchlistData = () => {
         // For authenticated users, use the edge function
         const { data } = await supabase.auth.getSession();
         const session = data.session;
-        // Ensure access token is a string with fallback to empty string
-        const accessToken = session?.access_token ?? '';
+        
+        // Explicitly cast access_token to string with fallback to empty string
+        const accessToken: string = session?.access_token ?? '';
         
         const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
           body: { 
@@ -215,8 +217,9 @@ export const useWatchlistData = () => {
         // For authenticated users, use the edge function
         const { data } = await supabase.auth.getSession();
         const session = data.session;
-        // Ensure access token is a string with fallback to empty string
-        const accessToken = session?.access_token ?? '';
+        
+        // Explicitly cast access_token to string with fallback to empty string
+        const accessToken: string = session?.access_token ?? '';
         
         const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
           body: { 
