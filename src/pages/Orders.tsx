@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,17 +12,15 @@ import {
   AlertCircle, 
   Clock, 
   ShieldCheck, 
-  Percent
+  Percent,
+  Info
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { TradeButton } from "@/components/trade";
 import { toast } from "sonner";
-import { useForm } from "react-hook-form";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
-import OrderTypeSelector from "@/components/trade/OrderTypeSelector";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { AdvancedOrderForm, AdvancedOrderFormValues } from "@/components/trade/AdvancedOrderForm";
 
 interface BaseOrder {
   id: string;
@@ -79,32 +78,12 @@ interface OrderHistory extends BaseOrder {
 
 type Order = OpenTrade | PendingOrder | ClosedTrade | OrderHistory;
 
-// Form interface for the order creation form
-interface OrderFormValues {
-  stopLoss: boolean;
-  takeProfit: boolean;
-  expirationDate: boolean;
-}
-
 const Orders = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("open");
-  const [selectedOrderType, setSelectedOrderType] = useState("market");
-  
-  // Initialize the form with react-hook-form
-  const form = useForm<OrderFormValues>({
-    defaultValues: {
-      stopLoss: false,
-      takeProfit: false,
-      expirationDate: false
-    },
-  });
-
-  // Extract the values from the form to use for UI state
-  const hasStopLoss = form.watch("stopLoss");
-  const hasTakeProfit = form.watch("takeProfit");
-  const hasExpirationDate = form.watch("expirationDate");
+  const [selectedSymbol, setSelectedSymbol] = useState("BTCUSD");
+  const [currentPrice, setCurrentPrice] = useState(67432.21);
   
   // Sample orders data
   const openTrades: OpenTrade[] = [
@@ -298,6 +277,21 @@ const Orders = () => {
     };
   };
 
+  // Handle order submission
+  const handleOrderSubmit = (values: AdvancedOrderFormValues, action: "buy" | "sell") => {
+    console.log('Order values:', values, 'Action:', action);
+    
+    // In a real app, this would submit the order to an API
+    const orderTypeDisplay = values.orderType === "market" ? "Market" : "Entry";
+    
+    toast.success(
+      `${orderTypeDisplay} ${action.toUpperCase()} order for ${selectedSymbol} created successfully`, 
+      { 
+        description: `Order type: ${orderTypeDisplay}, Stop Loss: ${values.stopLoss ? 'Yes' : 'No'}, Take Profit: ${values.takeProfit ? 'Yes' : 'No'}` 
+      }
+    );
+  };
+
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh]">
@@ -412,7 +406,9 @@ const Orders = () => {
                                         <TooltipTrigger>
                                           <AlertCircle className="h-4 w-4 text-amber-500" />
                                         </TooltipTrigger>
-                                        <TooltipContent>Stop Loss: ${trade.stopLoss}</TooltipContent>
+                                        <TooltipContent>
+                                          <p>Stop Loss: ${trade.stopLoss}</p>
+                                        </TooltipContent>
                                       </Tooltip>
                                     )}
                                     {trade.takeProfit && (
@@ -420,7 +416,9 @@ const Orders = () => {
                                         <TooltipTrigger>
                                           <ShieldCheck className="h-4 w-4 text-green-500" />
                                         </TooltipTrigger>
-                                        <TooltipContent>Take Profit: ${trade.takeProfit}</TooltipContent>
+                                        <TooltipContent>
+                                          <p>Take Profit: ${trade.takeProfit}</p>
+                                        </TooltipContent>
                                       </Tooltip>
                                     )}
                                   </TooltipProvider>
@@ -504,7 +502,9 @@ const Orders = () => {
                                         <TooltipTrigger>
                                           <AlertCircle className="h-4 w-4 text-amber-500" />
                                         </TooltipTrigger>
-                                        <TooltipContent>Stop Loss: ${order.stopLoss}</TooltipContent>
+                                        <TooltipContent>
+                                          <p>Stop Loss: ${order.stopLoss}</p>
+                                        </TooltipContent>
                                       </Tooltip>
                                     )}
                                     {order.takeProfit && (
@@ -512,7 +512,9 @@ const Orders = () => {
                                         <TooltipTrigger>
                                           <ShieldCheck className="h-4 w-4 text-green-500" />
                                         </TooltipTrigger>
-                                        <TooltipContent>Take Profit: ${order.takeProfit}</TooltipContent>
+                                        <TooltipContent>
+                                          <p>Take Profit: ${order.takeProfit}</p>
+                                        </TooltipContent>
                                       </Tooltip>
                                     )}
                                   </TooltipProvider>
@@ -551,108 +553,12 @@ const Orders = () => {
                   </Table>
                 </div>
                 
-                <div className="mt-6 p-4 border rounded-md">
-                  <h3 className="text-lg font-medium mb-4">Create New Order</h3>
-                  
-                  <OrderTypeSelector 
-                    orderType={selectedOrderType}
-                    onOrderTypeChange={setSelectedOrderType}
-                  />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div className="space-y-4">
-                      <div>
-                        {selectedOrderType === "market" ? (
-                          <p className="text-sm text-muted-foreground mb-2">
-                            A market order will be executed immediately at the next market price.
-                          </p>
-                        ) : (
-                          <p className="text-sm text-muted-foreground mb-2">
-                            An entry order will be executed when the market reaches the requested price.
-                          </p>
-                        )}
-                      </div>
-                      
-                      {/* Fix: Use form as a context provider rather than a component */}
-                      <Form {...form}>
-                        <form className="space-y-4">
-                          <FormField
-                            control={form.control}
-                            name="stopLoss"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel>
-                                    Stop Loss
-                                  </FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name="takeProfit"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel>
-                                    Take Profit
-                                  </FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          {selectedOrderType !== "market" && (
-                            <FormField
-                              control={form.control}
-                              name="expirationDate"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value}
-                                      onCheckedChange={field.onChange}
-                                    />
-                                  </FormControl>
-                                  <div className="space-y-1 leading-none">
-                                    <FormLabel>
-                                      Expiration Date
-                                    </FormLabel>
-                                  </div>
-                                </FormItem>
-                              )}
-                            />
-                          )}
-                        </form>
-                      </Form>
-                    </div>
-                    
-                    <div className="flex flex-col justify-end">
-                      <div className="grid grid-cols-2 gap-4">
-                        <Button variant="outline" className="bg-red-500 hover:bg-red-600 text-white">
-                          Sell
-                        </Button>
-                        <Button className="bg-green-600 hover:bg-green-700 text-white">
-                          Buy
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {/* Replace the old form with our new AdvancedOrderForm component */}
+                <AdvancedOrderForm 
+                  currentPrice={currentPrice}
+                  symbol={selectedSymbol}
+                  onOrderSubmit={handleOrderSubmit}
+                />
               </TabsContent>
               
               <TabsContent value="closed">
@@ -721,7 +627,9 @@ const Orders = () => {
                                         <TooltipTrigger>
                                           <AlertCircle className="h-4 w-4 text-amber-500" />
                                         </TooltipTrigger>
-                                        <TooltipContent>Stop Loss: ${trade.stopLoss}</TooltipContent>
+                                        <TooltipContent>
+                                          <p>Stop Loss: ${trade.stopLoss}</p>
+                                        </TooltipContent>
                                       </Tooltip>
                                     )}
                                     {trade.takeProfit && (
@@ -729,7 +637,9 @@ const Orders = () => {
                                         <TooltipTrigger>
                                           <ShieldCheck className="h-4 w-4 text-green-500" />
                                         </TooltipTrigger>
-                                        <TooltipContent>Take Profit: ${trade.takeProfit}</TooltipContent>
+                                        <TooltipContent>
+                                          <p>Take Profit: ${trade.takeProfit}</p>
+                                        </TooltipContent>
                                       </Tooltip>
                                     )}
                                   </TooltipProvider>
@@ -815,7 +725,9 @@ const Orders = () => {
                                         <TooltipTrigger>
                                           <AlertCircle className="h-4 w-4 text-amber-500" />
                                         </TooltipTrigger>
-                                        <TooltipContent>Stop Loss: ${order.stopLoss}</TooltipContent>
+                                        <TooltipContent>
+                                          <p>Stop Loss: ${order.stopLoss}</p>
+                                        </TooltipContent>
                                       </Tooltip>
                                     )}
                                     {order.takeProfit && (
@@ -823,7 +735,9 @@ const Orders = () => {
                                         <TooltipTrigger>
                                           <ShieldCheck className="h-4 w-4 text-green-500" />
                                         </TooltipTrigger>
-                                        <TooltipContent>Take Profit: ${order.takeProfit}</TooltipContent>
+                                        <TooltipContent>
+                                          <p>Take Profit: ${order.takeProfit}</p>
+                                        </TooltipContent>
                                       </Tooltip>
                                     )}
                                   </TooltipProvider>

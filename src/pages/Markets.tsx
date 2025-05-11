@@ -11,6 +11,9 @@ import { isMarketOpen } from "@/utils/marketHours";
 import { TradeButton } from "@/components/trade";
 import MarketHeader from "@/components/markets/MarketHeader";
 import MarketChartSection from "@/components/markets/MarketChartSection";
+import { AdvancedOrderForm, AdvancedOrderFormValues } from "@/components/trade/AdvancedOrderForm";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 
 const Markets = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,6 +44,21 @@ const Markets = () => {
   
   // Check if the selected market is open
   const marketIsOpen = selectedAsset ? isMarketOpen(selectedAsset.market_type) : false;
+
+  // Handle order submission
+  const handleOrderSubmit = (values: AdvancedOrderFormValues, action: "buy" | "sell") => {
+    console.log('Order values:', values, 'Action:', action);
+    
+    // In a real app, this would submit the order to an API
+    const orderTypeDisplay = values.orderType === "market" ? "Market" : "Entry";
+    
+    toast.success(
+      `${orderTypeDisplay} ${action.toUpperCase()} order for ${selectedAsset.symbol} created successfully`, 
+      { 
+        description: `Order type: ${orderTypeDisplay}, Stop Loss: ${values.stopLoss ? 'Yes' : 'No'}, Take Profit: ${values.takeProfit ? 'Yes' : 'No'}` 
+      }
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -76,6 +94,22 @@ const Markets = () => {
           selectedAsset={selectedAsset}
           marketIsOpen={marketIsOpen}
         />
+
+        {/* Advanced Order Form Card for trading */}
+        <div className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Trade {selectedAsset.name}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AdvancedOrderForm
+                currentPrice={selectedAsset.price}
+                symbol={selectedAsset.symbol}
+                onOrderSubmit={handleOrderSubmit}
+              />
+            </CardContent>
+          </Card>
+        </div>
         
         {/* News section - Full width below */}
         <div className="mt-6">

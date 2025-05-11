@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { X, ChevronDown, Clock, AlertTriangle } from "lucide-react";
+import { X, ChevronDown, Clock, AlertTriangle, Info } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,8 @@ import { useMarketData } from "@/hooks/useMarketData";
 import { isMarketOpen } from "@/utils/marketHours";
 import { useAuth } from "@/hooks/useAuth";
 import { getLeverageForAssetType, calculateRequiredMargin, formatLeverageRatio } from "@/utils/leverageUtils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const SUPPORTED_ASSETS = [
   { name: "Bitcoin", symbol: "BTCUSD", market_type: "Crypto" },
@@ -37,10 +39,14 @@ interface TradeSlidePanelProps {
 export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   const { user } = useAuth();
   const [selectedAsset, setSelectedAsset] = useState(SUPPORTED_ASSETS[0]);
-  const [orderType, setOrderType] = useState("market");
+  const [orderType, setOrderType] = useState<"market" | "entry">("market");
   const [quantity, setQuantity] = useState("0.01");
   const [tradeAction, setTradeAction] = useState<"buy" | "sell">("buy");
   const [isExecuting, setIsExecuting] = useState(false);
+  const [hasStopLoss, setHasStopLoss] = useState(false);
+  const [hasTakeProfit, setHasTakeProfit] = useState(false);
+  const [hasExpirationDate, setHasExpirationDate] = useState(false);
+  const [orderRate, setOrderRate] = useState("");
   const { toast } = useToast();
   
   // Use market data hook to get real-time price
@@ -52,6 +58,13 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   // Find current price in market data
   const currentAssetData = marketData.find(item => item.symbol === selectedAsset.symbol);
   const currentPrice = currentAssetData?.price || 0;
+  
+  // Update order rate when current price changes
+  useEffect(() => {
+    if (currentPrice > 0) {
+      setOrderRate(currentPrice.toFixed(4));
+    }
+  }, [currentPrice]);
   
   // Check if market is open for the selected asset
   const marketIsOpen = isMarketOpen(selectedAsset.market_type);
@@ -85,10 +98,10 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   
   // Handle order execution
   const handleExecuteTrade = async (action: "buy" | "sell") => {
-    if (!marketIsOpen) {
+    if (!marketIsOpen && orderType === "market") {
       toast({
         title: "Market Closed",
-        description: "The market is currently closed. Please try again during market hours.",
+        description: "The market is currently closed. Please try again during market hours or use an entry order.",
         variant: "destructive",
       });
       return;
@@ -113,31 +126,32 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
       // Get latest price
       await refetch();
       
-      // Create trade object (would be saved to database in a real implementation)
-      const trade = {
-        id: `ORD-${Math.floor(Math.random() * 100000)}`,
-        user_id: user.id,
-        type: action,
+      // Create order object based on order type
+      const orderDetails = {
         asset: selectedAsset.symbol,
-        amount: parsedQuantity,
-        price: currentPrice,
-        total: totalCost,
+        quantity: parsedQuantity,
         leverage: fixedLeverage,
-        order_type: orderType,
-        status: 'completed',
-        date: new Date().toISOString(),
+        orderType: orderType,
+        action: action,
+        stopLoss: hasStopLoss ? true : false,
+        takeProfit: hasTakeProfit ? true : false,
+        expiration: hasExpirationDate && orderType === "entry" ? true : false,
       };
       
-      // Save trade to session storage for demo purposes
-      const existingTrades = JSON.parse(sessionStorage.getItem('trades') || '[]');
-      sessionStorage.setItem('trades', JSON.stringify([trade, ...existingTrades]));
-      
-      // Success notification
-      toast({
-        title: `Order Executed: ${action.toUpperCase()} ${selectedAsset.symbol}`,
-        description: `${action.toUpperCase()} order for ${parsedQuantity} ${selectedAsset.symbol} at $${currentPrice.toLocaleString()} with ${formatLeverageRatio(fixedLeverage)} leverage executed successfully.`,
-        variant: action === "buy" ? "default" : "destructive",
-      });
+      // Display different success message based on order type
+      if (orderType === "market") {
+        toast({
+          title: `Position Opened: ${action.toUpperCase()} ${selectedAsset.symbol}`,
+          description: `${action.toUpperCase()} order for ${parsedQuantity} ${selectedAsset.symbol} at $${currentPrice.toLocaleString()} with ${formatLeverageRatio(fixedLeverage)} leverage executed successfully.`,
+          variant: action === "buy" ? "default" : "destructive",
+        });
+      } else {
+        toast({
+          title: `Entry Order Placed: ${action.toUpperCase()} ${selectedAsset.symbol}`,
+          description: `${action.toUpperCase()} entry order for ${parsedQuantity} ${selectedAsset.symbol} at $${orderRate} with ${formatLeverageRatio(fixedLeverage)} leverage has been placed.`,
+          variant: "default",
+        });
+      }
       
       // Close the panel after successful execution
       setTimeout(() => onOpenChange(false), 1500);
@@ -209,34 +223,63 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
               <div>
                 <p className="text-sm font-medium">Market Closed</p>
                 <p className="text-xs text-muted-foreground">
-                  {selectedAsset.market_type} market is currently closed. Orders will be queued for execution when the market opens.
+                  {selectedAsset.market_type} market is currently closed. You can place entry orders now or market orders when the market opens.
                 </p>
               </div>
             </div>
           )}
           
+          {/* Order Type Selection */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium">Order Type</label>
+            <div className="flex gap-2">
+              <Button 
+                variant={orderType === "market" ? "default" : "outline"} 
+                className={`flex-1 ${orderType === "market" ? "bg-primary text-primary-foreground" : ""}`}
+                onClick={() => setOrderType("market")}
+              >
+                Market order
+              </Button>
+              <Button 
+                variant={orderType === "entry" ? "default" : "outline"} 
+                className={`flex-1 ${orderType === "entry" ? "bg-yellow-500 text-white hover:bg-yellow-600" : ""}`}
+                onClick={() => setOrderType("entry")}
+              >
+                Entry order
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {orderType === "market" 
+                ? "A market order will be executed immediately at the next market price."
+                : "An entry order will be executed when the market reaches the requested price."}
+            </p>
+          </div>
+
           {/* Leverage Info */}
           <div className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-md">
             <span className="text-sm">Fixed Leverage</span>
             <span className="font-medium">{formatLeverageRatio(fixedLeverage)}</span>
           </div>
-          
-          {/* Order Type Selection */}
-          <div className="space-y-1.5">
-            <label htmlFor="order-type" className="text-sm font-medium">
-              Order Type
-            </label>
-            <Select value={orderType} onValueChange={setOrderType}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select order type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="market">Market Order</SelectItem>
-                <SelectItem value="limit">Limit Order</SelectItem>
-                <SelectItem value="stop">Stop Order</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+
+          {/* Entry Order Rate (only for entry orders) */}
+          {orderType === "entry" && (
+            <div className="space-y-1.5">
+              <label htmlFor="orderRate" className="text-sm font-medium">
+                Order Rate
+              </label>
+              <Input
+                id="orderRate"
+                type="number"
+                step="0.0001"
+                value={orderRate}
+                onChange={(e) => setOrderRate(e.target.value)}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                Rate should be above {(currentPrice * 0.98).toFixed(4)} or below {(currentPrice * 1.02).toFixed(4)}
+              </p>
+            </div>
+          )}
           
           {/* Quantity Input */}
           <div className="space-y-1.5">
@@ -253,6 +296,74 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
               className="w-full"
             />
           </div>
+          
+          {/* Stop Loss Checkbox */}
+          <div className="flex items-center space-x-2">
+            <Checkbox id="stopLoss" checked={hasStopLoss} onCheckedChange={() => setHasStopLoss(!hasStopLoss)} />
+            <div className="flex items-center">
+              <label htmlFor="stopLoss" className="text-sm font-medium cursor-pointer">
+                Stop Loss
+              </label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 ml-1 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="w-[200px] text-xs">
+                      A stop loss order will automatically close your position when the market reaches the specified price, helping to limit potential losses.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+
+          {/* Take Profit Checkbox */}
+          <div className="flex items-center space-x-2">
+            <Checkbox id="takeProfit" checked={hasTakeProfit} onCheckedChange={() => setHasTakeProfit(!hasTakeProfit)} />
+            <div className="flex items-center">
+              <label htmlFor="takeProfit" className="text-sm font-medium cursor-pointer">
+                Take Profit
+              </label>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 ml-1 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="w-[200px] text-xs">
+                      A take profit order will automatically close your position when the market reaches a specified price, allowing you to secure profits.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+
+          {/* Expiration Date Checkbox (only for entry orders) */}
+          {orderType === "entry" && (
+            <div className="flex items-center space-x-2">
+              <Checkbox id="expirationDate" checked={hasExpirationDate} onCheckedChange={() => setHasExpirationDate(!hasExpirationDate)} />
+              <div className="flex items-center">
+                <label htmlFor="expirationDate" className="text-sm font-medium cursor-pointer">
+                  Expiration Date
+                </label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 ml-1 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="w-[200px] text-xs">
+                        Set a date when your entry order should expire if not executed.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
+          )}
           
           {/* Trade Summary */}
           <div className="space-y-3 p-3 bg-secondary/30 rounded-md">
