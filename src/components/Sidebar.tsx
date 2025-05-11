@@ -1,6 +1,7 @@
+
 import { cn } from "@/lib/utils";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, LineChart, BarChart3, ShoppingCart, Wallet, Settings, UserCircle, LogOut } from "lucide-react";
+import { LayoutDashboard, LineChart, BarChart3, Newspaper, ShoppingCart, Wallet, Settings, UserCircle, LogOut, ListCheck } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -65,7 +66,8 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
             <SidebarItem to="/" icon={<LayoutDashboard className="h-5 w-5" />} label="Dashboard" />
             <SidebarItem to="/markets" icon={<LineChart className="h-5 w-5" />} label="Markets" />
             <SidebarItem to="/portfolio" icon={<BarChart3 className="h-5 w-5" />} label="Portfolio" />
-            <SidebarItem to="/orders" icon={<ShoppingCart className="h-5 w-5" />} label="Orders" />
+            <SidebarItem to="/orders" icon={<ListCheck className="h-5 w-5" />} label="Orders" />
+            <SidebarItem to="/news" icon={<Newspaper className="h-5 w-5" />} label="News" />
             <SidebarItem to="/wallet" icon={<Wallet className="h-5 w-5" />} label="Wallet" />
           </nav>
           

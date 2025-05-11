@@ -5,7 +5,7 @@ import { LineChart } from "lucide-react"
 
 const ApplicationLogo = () => {
   return (
-    <Link to="/" className="mr-4 flex items-center space-x-2">
+    <Link to="/" className="mr-4 flex items-center space-x-2 fixed">
       <LineChart className="h-6 w-6 text-primary" />
       <span className="font-bold sm:inline-block">
         TradePro

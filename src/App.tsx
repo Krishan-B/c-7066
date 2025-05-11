@@ -12,6 +12,7 @@ import Auth from "@/pages/Auth";
 import Markets from "@/pages/Markets";
 import Portfolio from "@/pages/Portfolio";
 import Orders from "@/pages/Orders";
+import News from "@/pages/News";
 import Wallet from "@/pages/Wallet";
 import Account from "@/pages/Account";
 import ProfilePage from "@/pages/ProfilePage";
@@ -28,6 +29,7 @@ export default function App() {
               <Route path="markets" element={<Markets />} />
               <Route path="portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
               <Route path="orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+              <Route path="news" element={<News />} />
               <Route path="wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
               <Route path="account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
               <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
