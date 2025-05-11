@@ -7,7 +7,7 @@ interface MarketStatusAlertProps {
   marketType: string;
 }
 
-const MarketStatusAlert = ({ marketType }: MarketStatusAlertProps) => {
+export const MarketStatusAlert = ({ marketType }: MarketStatusAlertProps) => {
   return (
     <Alert className="mb-4 bg-destructive/10 border-destructive">
       <Clock className="h-4 w-4" />
@@ -19,5 +19,3 @@ const MarketStatusAlert = ({ marketType }: MarketStatusAlertProps) => {
     </Alert>
   );
 };
-
-export default MarketStatusAlert;

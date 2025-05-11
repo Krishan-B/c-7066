@@ -2,7 +2,7 @@
 // Re-export all trade-related components for easier imports
 import TradeForm from "./TradeForm";
 import OrderTypeSelector from "./OrderTypeSelector";
-import { QuickTradePanel } from "./QuickTradePanel";
+import QuickTradePanel from "./QuickTradePanel";
 import { TradeSlidePanel } from "./TradeSlidePanel";
 import { TradePanelProvider } from "./TradePanelProvider";
 import { TradeButton } from "./TradeButton";
@@ -21,8 +21,8 @@ import { TradeSlidePanelAssetSelection } from "./TradeSlidePanelAssetSelection";
 import { TradeSlidePanelUnitsInput } from "./TradeSlidePanelUnitsInput";
 import { TradeSlidePanelOptionCheckbox } from "./TradeSlidePanelOptionCheckbox";
 import { TradeSlidePanelSummary } from "./TradeSlidePanelSummary";
-import { MarketHoursDisplay } from "./MarketHoursDisplay";
-import { LeverageSlider } from "./LeverageSlider";
+import MarketHoursDisplay from "./MarketHoursDisplay";
+import LeverageSlider from "./LeverageSlider";
 
 export {
   TradeForm,

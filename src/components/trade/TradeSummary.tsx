@@ -7,7 +7,7 @@ interface TradeSummaryProps {
   isLoading: boolean;
 }
 
-const TradeSummary = ({ 
+export const TradeSummary = ({ 
   currentPrice, 
   parsedAmount, 
   fee, 
@@ -36,5 +36,3 @@ const TradeSummary = ({
     </div>
   );
 };
-
-export default TradeSummary;
