@@ -70,9 +70,6 @@ import {
 import {
   HoverCard,
   HoverCardContent,
-  HoverCardDescription,
-  HoverCardHeader,
-  HoverCardTitle,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
 import {
@@ -297,7 +294,11 @@ function MobileNavItem({ children, title, href, ...props }: MobileNavItemProps) 
   )
 }
 
-export function Navigation() {
+interface NavigationProps {
+  onMenuToggle?: () => void;
+}
+
+export function Navigation({ onMenuToggle }: NavigationProps) {
   const { user, signOut } = useAuth()
   const { toast } = useToast()
   const location = useLocation()
@@ -388,6 +389,7 @@ export function Navigation() {
                 variant="ghost"
                 size="sm"
                 className="pl-0 ml-2 md:hidden"
+                onClick={onMenuToggle}
               >
                 <Menu className="h-4 w-4" />
               </Button>
@@ -419,5 +421,5 @@ export function Navigation() {
         </nav>
       </div>
     </div>
-  )
+  );
 }
