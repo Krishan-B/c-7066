@@ -1,131 +1,28 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { Asset } from './useMarketData';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from "@/hooks/useAuth";
+import { useLocalWatchlist } from './useLocalWatchlist';
+import { 
+  fetchWatchlistData, 
+  addToWatchlist as addToWatchlistService, 
+  removeFromWatchlist as removeFromWatchlistService
+} from '@/services/watchlistService';
 
 export const useWatchlistData = () => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [localWatchlist, setLocalWatchlist] = useState<Asset[]>([]);
+  const { localWatchlist, setLocalWatchlist } = useLocalWatchlist();
 
   // Use React Query for data fetching and caching
   const { data: watchlistData = [], isLoading, error, refetch } = useQuery({
     queryKey: ["watchlist-data", user?.id],
-    queryFn: fetchWatchlistData,
+    queryFn: () => fetchWatchlistData(user?.id),
     staleTime: 1000 * 60 * 5, // 5 minutes
     enabled: !!user
   });
-
-  // Initialize local watchlist from localStorage for non-authenticated users
-  useEffect(() => {
-    if (!user) {
-      try {
-        const savedWatchlist = localStorage.getItem('watchlist');
-        if (savedWatchlist) {
-          setLocalWatchlist(JSON.parse(savedWatchlist));
-        }
-      } catch (error) {
-        console.error("Error loading local watchlist:", error);
-      }
-    }
-  }, [user]);
-
-  // Fetch watchlist data from Supabase
-  async function fetchWatchlistData(): Promise<Asset[]> {
-    try {
-      console.log("Fetching watchlist data");
-      
-      if (!user) {
-        // Use local storage for non-authenticated users
-        const savedWatchlist = localStorage.getItem('watchlist');
-        if (savedWatchlist) {
-          return JSON.parse(savedWatchlist) as Asset[];
-        }
-        
-        // Return empty array if no local watchlist
-        return [];
-      }
-      
-      // Fetch user's session before making the request
-      const { data } = await supabase.auth.getSession();
-      const session = data.session;
-      
-      // Explicitly cast access_token to string with a fallback to empty string
-      const accessToken: string = session?.access_token ?? '';
-      
-      // Fetch the user's watchlist through the edge function
-      const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
-        body: { operation: "get" },
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      });
-      
-      if (error || responseData?.error) {
-        throw error || responseData?.error;
-      }
-
-      if (responseData?.data && Array.isArray(responseData.data)) {
-        console.log(`Found ${responseData.data.length} watchlist items`);
-        
-        // Get current market data for the watchlist items
-        const watchlistItems = responseData.data;
-        const marketTypes = [...new Set(watchlistItems.map(item => item.market_type))];
-        const symbols = watchlistItems.map(item => item.asset_symbol);
-        
-        let marketData: Asset[] = [];
-        
-        // Fetch market data for each market type
-        for (const marketType of marketTypes) {
-          const { data: marketResult, error: marketError } = await supabase
-            .from('market_data')
-            .select('*')
-            .eq('market_type', marketType)
-            .in('symbol', symbols);
-            
-          if (!marketError && marketResult) {
-            marketData = [...marketData, ...marketResult];
-          }
-        }
-        
-        // Map watchlist items to their current market data
-        return watchlistItems.map(item => {
-          const marketItem = marketData.find(m => 
-            m.symbol === item.asset_symbol && 
-            m.market_type === item.market_type
-          );
-          
-          if (marketItem) {
-            return marketItem;
-          }
-          
-          // Fallback if market data is not available
-          return {
-            name: item.asset_name,
-            symbol: item.asset_symbol,
-            price: 0,
-            change_percentage: 0,
-            volume: "N/A",
-            market_type: item.market_type
-          };
-        });
-      }
-
-      // Fallback to default data if no watchlist items found
-      return [];
-    } catch (error) {
-      console.error("Error fetching watchlist data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load watchlist data. Please try again later.",
-        variant: "destructive"
-      });
-      return [];
-    }
-  };
 
   // Add asset to watchlist
   const addToWatchlist = async (asset: Asset) => {
@@ -154,30 +51,7 @@ export const useWatchlistData = () => {
           description: `${asset.name} has been added to your watchlist.`,
         });
       } else {
-        // For authenticated users, use the edge function
-        const { data } = await supabase.auth.getSession();
-        const session = data.session;
-        
-        // Explicitly cast access_token to string with fallback to empty string
-        const accessToken: string = session?.access_token ?? '';
-        
-        const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
-          body: { 
-            operation: "add",
-            asset: {
-              symbol: asset.symbol,
-              name: asset.name,
-              market_type: asset.market_type
-            }
-          },
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        });
-        
-        if (error || responseData?.error) {
-          throw error || responseData?.error;
-        }
+        await addToWatchlistService(user.id, asset);
         
         toast({
           title: "Added to watchlist",
@@ -214,29 +88,7 @@ export const useWatchlistData = () => {
           description: `${asset.name} has been removed from your watchlist.`,
         });
       } else {
-        // For authenticated users, use the edge function
-        const { data } = await supabase.auth.getSession();
-        const session = data.session;
-        
-        // Explicitly cast access_token to string with fallback to empty string
-        const accessToken: string = session?.access_token ?? '';
-        
-        const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
-          body: { 
-            operation: "remove",
-            asset: {
-              symbol: asset.symbol,
-              market_type: asset.market_type
-            }
-          },
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        });
-        
-        if (error || responseData?.error) {
-          throw error || responseData?.error;
-        }
+        await removeFromWatchlistService(user.id, asset);
         
         toast({
           title: "Removed from watchlist",
