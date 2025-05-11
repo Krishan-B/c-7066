@@ -1,18 +1,22 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, Info, AlertCircle } from "lucide-react";
+import { CreditCard, Info, AlertCircle, Clock } from "lucide-react";
+import { isMarketOpen, getMarketHoursMessage } from "@/utils/marketHours";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useMarketData, Asset } from "@/hooks/useMarketData";
 
 interface QuickTradePanelProps {
   asset: {
     name: string;
     symbol: string;
     price: number;
-    change: number;
+    change_percentage?: number;
+    market_type: string;
   };
 }
 
@@ -20,14 +24,72 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   const [amount, setAmount] = useState("100");
   const [orderType, setOrderType] = useState("market");
   const [leverage, setLeverage] = useState([1]);
+  const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
+  const [isExecuting, setIsExecuting] = useState(false);
   const { toast } = useToast();
+  
+  // Use our useMarketData hook to get real-time price data
+  const { marketData, isLoading, refetch } = useMarketData([asset.market_type], {
+    refetchInterval: 10000, // Refresh every 10 seconds for trade panel
+    enableRefresh: true,
+  });
+  
+  // Find the current asset in our market data
+  const currentAssetData = marketData.find((item: Asset) => 
+    item.symbol === asset.symbol
+  );
+  
+  // Get the current price, defaulting to the passed asset price if not found
+  const currentPrice = currentAssetData?.price || asset.price;
+  
+  // Check if market is open
+  const marketIsOpen = isMarketOpen(asset.market_type);
+  
+  // Calculate estimated values
+  const parsedAmount = parseFloat(amount) || 0;
+  const fee = parsedAmount * 0.001;
+  const total = parsedAmount + fee;
+  
+  const handleTabChange = (value: string) => {
+    if (value === "buy" || value === "sell") {
+      setActiveTab(value);
+    }
+  };
 
-  const handleSubmit = (action: "buy" | "sell") => {
-    toast({
-      title: `Order Placed: ${action.toUpperCase()} ${asset.name}`,
-      description: `${action.toUpperCase()} order for $${amount} of ${asset.symbol} at ${leverage[0]}x leverage`,
-      variant: action === "buy" ? "default" : "destructive",
-    });
+  const handleSubmit = async (action: "buy" | "sell") => {
+    if (!marketIsOpen) {
+      toast({
+        title: "Market Closed",
+        description: "The market is currently closed. Please try again during market hours.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsExecuting(true);
+    
+    try {
+      // Simulate network delay for trade execution
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Refresh market data to get latest price
+      await refetch();
+      
+      toast({
+        title: `Order Executed: ${action.toUpperCase()} ${asset.name}`,
+        description: `${action.toUpperCase()} order for $${amount} of ${asset.symbol} at $${currentPrice.toLocaleString()} with ${leverage[0]}x leverage`,
+        variant: action === "buy" ? "default" : "destructive",
+      });
+    } catch (error) {
+      toast({
+        title: "Execution Failed",
+        description: "There was an error executing your trade. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Trade execution error:", error);
+    } finally {
+      setIsExecuting(false);
+    }
   };
 
   return (
@@ -41,11 +103,24 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
         </div>
         <div className="flex justify-between">
           <span className="text-sm text-muted-foreground">Current Price</span>
-          <span className="text-sm font-medium">${asset.price.toLocaleString()}</span>
+          <span className="text-sm font-medium">
+            ${isLoading ? "Loading..." : currentPrice.toLocaleString()}
+          </span>
         </div>
       </div>
       
-      <Tabs defaultValue="buy" className="mb-4">
+      {!marketIsOpen && (
+        <Alert className="mb-4 bg-destructive/10 border-destructive">
+          <Clock className="h-4 w-4" />
+          <AlertTitle>Market Closed</AlertTitle>
+          <AlertDescription>
+            The market for {asset.market_type} is currently closed.
+            <div className="text-xs mt-1">{getMarketHoursMessage(asset.market_type)}</div>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      <Tabs defaultValue="buy" onValueChange={handleTabChange}>
         <TabsList className="w-full">
           <TabsTrigger value="buy" className="flex-1">Buy</TabsTrigger>
           <TabsTrigger value="sell" className="flex-1">Sell</TabsTrigger>
@@ -125,25 +200,30 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
             <div className="mb-4 space-y-1">
               <div className="flex justify-between">
                 <span className="text-xs text-muted-foreground">Est. Price</span>
-                <span className="text-xs">${asset.price.toLocaleString()}</span>
+                <span className="text-xs">${isLoading ? "Loading..." : currentPrice.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-xs text-muted-foreground">Amount</span>
-                <span className="text-xs">${amount}</span>
+                <span className="text-xs">${parsedAmount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-xs text-muted-foreground">Fee (0.1%)</span>
-                <span className="text-xs">${(parseFloat(amount) * 0.001).toFixed(2)}</span>
+                <span className="text-xs">${fee.toFixed(2)}</span>
               </div>
               <div className="border-t border-secondary/40 my-1 pt-1"></div>
               <div className="flex justify-between">
                 <span className="text-xs text-muted-foreground">Total</span>
-                <span className="text-xs font-medium">${(parseFloat(amount) * 1.001).toFixed(2)}</span>
+                <span className="text-xs font-medium">${total.toFixed(2)}</span>
               </div>
             </div>
           
-            <Button type="button" className="w-full bg-success hover:bg-success/80" onClick={() => handleSubmit("buy")}>
-              Buy {asset.symbol}
+            <Button 
+              type="button" 
+              className="w-full bg-success hover:bg-success/80" 
+              onClick={() => handleSubmit("buy")}
+              disabled={!marketIsOpen || isExecuting || isLoading}
+            >
+              {isExecuting ? "Processing..." : `Buy ${asset.symbol}`}
             </Button>
           </div>
         </TabsContent>
@@ -222,25 +302,30 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
             <div className="mb-4 space-y-1">
               <div className="flex justify-between">
                 <span className="text-xs text-muted-foreground">Est. Price</span>
-                <span className="text-xs">${asset.price.toLocaleString()}</span>
+                <span className="text-xs">${isLoading ? "Loading..." : currentPrice.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-xs text-muted-foreground">Amount</span>
-                <span className="text-xs">${amount}</span>
+                <span className="text-xs">${parsedAmount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-xs text-muted-foreground">Fee (0.1%)</span>
-                <span className="text-xs">${(parseFloat(amount) * 0.001).toFixed(2)}</span>
+                <span className="text-xs">${fee.toFixed(2)}</span>
               </div>
               <div className="border-t border-secondary/40 my-1 pt-1"></div>
               <div className="flex justify-between">
                 <span className="text-xs text-muted-foreground">Total</span>
-                <span className="text-xs font-medium">${(parseFloat(amount) * 1.001).toFixed(2)}</span>
+                <span className="text-xs font-medium">${total.toFixed(2)}</span>
               </div>
             </div>
           
-            <Button type="button" className="w-full bg-warning hover:bg-warning/80" onClick={() => handleSubmit("sell")}>
-              Sell {asset.symbol}
+            <Button 
+              type="button" 
+              className="w-full bg-warning hover:bg-warning/80" 
+              onClick={() => handleSubmit("sell")}
+              disabled={!marketIsOpen || isExecuting || isLoading}
+            >
+              {isExecuting ? "Processing..." : `Sell ${asset.symbol}`}
             </Button>
           </div>
         </TabsContent>

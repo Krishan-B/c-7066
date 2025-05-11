@@ -10,17 +10,8 @@ import AssetDetails from "@/components/markets/AssetDetails";
 import MarketDetailsCard from "@/components/markets/MarketDetailsCard";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
-
-interface Asset {
-  id?: string;
-  name: string;
-  symbol: string;
-  price: number;
-  change_percentage: number;
-  volume: string;
-  market_cap?: string;
-  market_type: string;
-}
+import { Asset } from "@/hooks/useMarketData";
+import { isMarketOpen } from "@/utils/marketHours";
 
 const Markets = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,10 +27,10 @@ const Markets = () => {
   
   const { toast } = useToast();
   
-  // Use the combined market data hook with a 2-minute refetch interval
+  // Use the combined market data hook with a 1-minute refetch interval for more real-time market data
   const { marketData, isLoading, error, refetch, isFetching } = useCombinedMarketData(
     [activeTab],
-    { refetchInterval: 1000 * 60 * 2 } // Refresh every 2 minutes
+    { refetchInterval: 1000 * 60 } // Refresh every minute
   );
 
   useEffect(() => {
@@ -55,6 +46,9 @@ const Markets = () => {
       description: `Fetching the latest ${activeTab} market data...`,
     });
   };
+  
+  // Check if the selected market is open
+  const marketIsOpen = selectedAsset ? isMarketOpen(selectedAsset.market_type) : false;
 
   return (
     <div className="min-h-screen bg-background">
@@ -97,7 +91,10 @@ const Markets = () => {
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
               <EnhancedNewsWidget marketType={selectedAsset.market_type} />
-              <MarketDetailsCard selectedAsset={selectedAsset} />
+              <MarketDetailsCard 
+                selectedAsset={selectedAsset} 
+                marketIsOpen={marketIsOpen}
+              />
             </div>
           </div>
         </div>

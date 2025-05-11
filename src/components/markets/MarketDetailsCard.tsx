@@ -2,7 +2,8 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Globe } from "lucide-react";
+import { AlertTriangle, Globe, Clock } from "lucide-react";
+import { getMarketHoursMessage } from "@/utils/marketHours";
 
 interface Asset {
   id?: string;
@@ -17,9 +18,10 @@ interface Asset {
 
 interface MarketDetailsCardProps {
   selectedAsset: Asset;
+  marketIsOpen?: boolean;
 }
 
-const MarketDetailsCard = ({ selectedAsset }: MarketDetailsCardProps) => {
+const MarketDetailsCard = ({ selectedAsset, marketIsOpen = true }: MarketDetailsCardProps) => {
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -51,13 +53,36 @@ const MarketDetailsCard = ({ selectedAsset }: MarketDetailsCardProps) => {
             </div>
           </div>
           
-          <div className="pt-4">
+          <div className="flex items-center gap-2 py-2 px-3 rounded-md bg-secondary/20">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <div className="text-xs">
+              <div className={marketIsOpen ? "text-success" : "text-warning"}>
+                Market {marketIsOpen ? "Open" : "Closed"}
+              </div>
+              <div className="text-muted-foreground text-xs mt-0.5">
+                {getMarketHoursMessage(selectedAsset.market_type)}
+              </div>
+            </div>
+          </div>
+          
+          <div className="pt-2">
             <div className="flex justify-center space-x-2">
-              <Button className="flex-1">Trade</Button>
+              <Button 
+                className="flex-1" 
+                disabled={!marketIsOpen}
+              >
+                Trade
+              </Button>
               <Button variant="outline" className="gap-1">
                 <AlertTriangle className="h-4 w-4" /> Set Alert
               </Button>
             </div>
+            
+            {!marketIsOpen && (
+              <div className="mt-2 text-xs text-warning text-center">
+                The market is currently closed. Please try again during market hours.
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
