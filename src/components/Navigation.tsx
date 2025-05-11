@@ -22,7 +22,7 @@ import {
   CircleDollarSign, 
   Wallet
 } from "lucide-react";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 interface NavigationProps {

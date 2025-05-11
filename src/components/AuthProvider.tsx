@@ -1,34 +1,10 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
+
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { UserProfile } from "@/features/profile/types";
-
-type AuthContextType = {
-  session: Session | null;
-  user: User | null;
-  profile: UserProfile | null;
-  loading: boolean;
-  profileLoading: boolean;
-  signOut: () => Promise<void>;
-  refreshSession: () => Promise<Session | null>; // Update return type to match implementation
-  updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
-  refreshProfile: () => Promise<void>;
-};
-
-const AuthContext = createContext<AuthContextType>({
-  session: null,
-  user: null,
-  profile: null,
-  loading: true,
-  profileLoading: false,
-  signOut: async () => {},
-  refreshSession: async () => null, // Update default implementation to match return type
-  updateProfile: async () => {},
-  refreshProfile: async () => {},
-});
-
-export const useAuth = () => useContext(AuthContext);
+import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
@@ -48,7 +24,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const metadata = currentUser.user_metadata || {};
       
       const userProfile: UserProfile = {
-        id: currentUser.id, // Add the user ID from the currentUser object
+        id: currentUser.id,
         firstName: metadata.first_name || "",
         lastName: metadata.last_name || "",
         email: currentUser.email || "",
