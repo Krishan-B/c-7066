@@ -22,9 +22,10 @@ export async function fetchWatchlistData(userId: string | undefined): Promise<As
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Explicitly cast access_token to string with a fallback to empty string
-    // Using optional chaining and conditional to ensure it's a string
-    const accessToken = session?.access_token ? String(session.access_token) : "";
+    // Ensure access_token is treated as a string with a proper fallback
+    const accessToken = typeof session?.access_token === 'string' 
+      ? session.access_token 
+      : session?.access_token?.toString() || "";
     
     // Fetch the user's watchlist through the edge function
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
@@ -117,8 +118,10 @@ export async function addToWatchlist(userId: string | undefined, asset: Asset): 
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Explicitly cast access_token to string with fallback to empty string
-    const accessToken = session?.access_token ? String(session.access_token) : "";
+    // Ensure access_token is treated as a string with a proper fallback
+    const accessToken = typeof session?.access_token === 'string' 
+      ? session.access_token 
+      : session?.access_token?.toString() || "";
     
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
       body: { 
@@ -161,8 +164,10 @@ export async function removeFromWatchlist(userId: string | undefined, asset: Ass
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Explicitly cast access_token to string with fallback to empty string
-    const accessToken = session?.access_token ? String(session.access_token) : "";
+    // Ensure access_token is treated as a string with a proper fallback
+    const accessToken = typeof session?.access_token === 'string' 
+      ? session.access_token 
+      : session?.access_token?.toString() || "";
     
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
       body: { 
