@@ -23,6 +23,7 @@ interface AccountMetrics {
   availableFunds: number;
   exposure: number;
   bonus: number;
+  buyingPower: number;
 }
 
 // Mock data - This would normally come from an API
@@ -36,6 +37,7 @@ const mockAccountMetrics: AccountMetrics = {
   availableFunds: 8800,
   exposure: 12000,
   bonus: 500,
+  buyingPower: 20000
 }
 
 const MainNav = ({
@@ -79,7 +81,7 @@ const MainNav = ({
     return <div className="hidden md:flex flex-1"></div>;
   }
 
-  // Selected metrics to display in the header
+  // Selected metrics to display in the header (based on the reference image)
   const displayedMetrics = [
     { 
       label: "Unrealized P&L", 
@@ -108,13 +110,17 @@ const MainNav = ({
     }
   ];
 
-  // All metrics for the dropdown
+  // All metrics for the dropdown (based on the reference images)
   const allMetrics = [
-    ...displayedMetrics,
+    {
+      label: "Buying Power",
+      value: formatCurrency(metrics.buyingPower),
+      tooltip: "Your available margin multiplied by the maximum leverage rate of your trading account"
+    },
     { 
-      label: "Used Margin", 
-      value: formatCurrency(metrics.usedMargin),
-      tooltip: "The amount of funds that is held to keep the existing positions open"
+      label: "Unrealized P&L", 
+      value: formatCurrency(metrics.unrealizedPL),
+      tooltip: "Total profit and loss from the open positions in the trading account"
     },
     { 
       label: "Realized P&L", 
@@ -122,36 +128,56 @@ const MainNav = ({
       tooltip: "Total profit and loss from the closed positions in the trading account"
     },
     { 
-      label: "Exposure", 
-      value: formatCurrency(metrics.exposure),
-      tooltip: "The current market value of the open position multiplied by the position size"
+      label: "Balance", 
+      value: formatCurrency(metrics.balance),
+      tooltip: "Your deposits and the realized P&L in your trading account"
     },
     { 
-      label: "Bonus", 
-      value: formatCurrency(metrics.bonus),
-      tooltip: "Funds introduced by the broker that can be used to trade but are non-withdrawable"
+      label: "Available", 
+      value: formatCurrency(metrics.availableFunds),
+      tooltip: "The amount of funds in your trading account that you can use to open new or additional trades"
+    },
+    { 
+      label: "Used", 
+      value: formatCurrency(metrics.usedMargin),
+      tooltip: "The amount of funds in your trading account that is held to keep your existing positions open"
+    },
+    { 
+      label: "Exposure", 
+      value: formatCurrency(metrics.exposure),
+      tooltip: "The current market value of your open position multiplied by the position size converted to your trading account currency"
+    },
+    { 
+      label: "Margin Level", 
+      value: `${metrics.marginLevel}%`,
+      tooltip: "Indicates whether there are sufficient funds to keep your positions open in your trading account. When your margin level drops below 1%, you will be notified"
+    },
+    { 
+      label: "Account Equity", 
+      value: formatCurrency(metrics.equity),
+      tooltip: "The sum of your balance and unrealized P&L"
     }
   ];
 
   return (
     <div className="hidden md:flex flex-1 items-center overflow-x-auto">
       <TooltipProvider>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           {displayedMetrics.map((item, index) => (
             <Tooltip key={index}>
               <TooltipTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  className="p-1 h-auto flex items-center gap-1 text-xs hover:bg-accent" 
+                  className="p-0 h-auto flex flex-col items-center hover:bg-transparent" 
                   onClick={handleMetricClick}
                 >
-                  <span className="font-medium">{item.label}:</span>
-                  <span className={`
+                  <span className={`text-base font-semibold
                     ${item.label.includes('P&L') && parseFloat(item.value.replace('$', '')) > 0 ? 'text-success' : ''}
                     ${item.label.includes('P&L') && parseFloat(item.value.replace('$', '')) < 0 ? 'text-destructive' : ''}
                     ${item.label === 'Margin Level' && parseFloat(item.value.replace('%', '')) < 20 ? 'text-warning' : ''}
                     ${item.label === 'Margin Level' && parseFloat(item.value.replace('%', '')) < 5 ? 'text-destructive' : ''}
                   `}>{item.value}</span>
+                  <span className="text-xs text-muted-foreground">{item.label}</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -165,26 +191,28 @@ const MainNav = ({
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="p-1 h-auto flex items-center gap-1 text-xs hover:bg-accent"
+                className="h-auto flex items-center hover:bg-transparent"
               >
-                <span>More</span>
-                <ChevronDown className="h-3 w-3" />
+                <ChevronDown className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-background">
-              {allMetrics.map((item, index) => (
-                <DropdownMenuItem key={index} onClick={handleMetricClick}>
-                  <div className="flex justify-between w-full">
-                    <span className="font-medium mr-4">{item.label}:</span>
-                    <span className={`
-                      ${item.label.includes('P&L') && parseFloat(item.value.replace('$', '')) > 0 ? 'text-success' : ''}
-                      ${item.label.includes('P&L') && parseFloat(item.value.replace('$', '')) < 0 ? 'text-destructive' : ''}
-                      ${item.label === 'Margin Level' && parseFloat(item.value.replace('%', '')) < 20 ? 'text-warning' : ''}
-                      ${item.label === 'Margin Level' && parseFloat(item.value.replace('%', '')) < 5 ? 'text-destructive' : ''}
-                    `}>{item.value}</span>
-                  </div>
-                </DropdownMenuItem>
-              ))}
+            <DropdownMenuContent align="end" className="bg-background w-[400px] p-4">
+              <div className="font-semibold text-lg mb-2 border-b pb-2">Account Details</div>
+              <div className="space-y-4">
+                {allMetrics.map((item, index) => (
+                  <DropdownMenuItem 
+                    key={index} 
+                    onClick={handleMetricClick}
+                    className="flex flex-col items-start cursor-pointer p-0 focus:bg-transparent hover:bg-transparent"
+                  >
+                    <div className="flex w-full">
+                      <span className="font-semibold text-base mr-3">{item.value}</span>
+                      <span className="font-semibold text-base">{item.label}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{item.tooltip}</p>
+                  </DropdownMenuItem>
+                ))}
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
