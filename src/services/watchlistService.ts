@@ -23,7 +23,7 @@ export async function fetchWatchlistData(userId: string | undefined): Promise<As
     const session = data.session;
     
     // Explicitly cast access_token to string with a fallback to empty string
-    const accessToken: string = session?.access_token?.toString() ?? '';
+    const accessToken = session?.access_token?.toString() || "";
     
     // Fetch the user's watchlist through the edge function
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
@@ -117,7 +117,7 @@ export async function addToWatchlist(userId: string | undefined, asset: Asset): 
     const session = data.session;
     
     // Explicitly cast access_token to string with fallback to empty string
-    const accessToken: string = session?.access_token?.toString() ?? '';
+    const accessToken = session?.access_token?.toString() || "";
     
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
       body: { 
@@ -161,7 +161,7 @@ export async function removeFromWatchlist(userId: string | undefined, asset: Ass
     const session = data.session;
     
     // Explicitly cast access_token to string with fallback to empty string
-    const accessToken: string = session?.access_token?.toString() ?? '';
+    const accessToken = session?.access_token?.toString() || "";
     
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
       body: { 
