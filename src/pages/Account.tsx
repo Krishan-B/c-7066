@@ -1,4 +1,3 @@
-
 import { User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +7,7 @@ import { SecuritySettings } from "@/components/account/SecuritySettings";
 import { NotificationPreferences } from "@/components/account/NotificationPreferences";
 import { AccountStatus } from "@/components/account/AccountStatus";
 import { AccountSecurity } from "@/components/account/AccountSecurity";
+import { useAuth } from '@/hooks/useAuth'; // Add this if it's needed but missing
 
 const Account = () => {
   return (

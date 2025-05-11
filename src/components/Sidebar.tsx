@@ -1,8 +1,7 @@
-
 import { cn } from "@/lib/utils";
 import { NavLink } from "react-router-dom";
 import { LayoutDashboard, LineChart, BarChart3, ShoppingCart, Wallet, Settings, UserCircle, LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
