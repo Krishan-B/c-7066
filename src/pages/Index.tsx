@@ -14,7 +14,7 @@ import PortfolioCard from "@/components/PortfolioCard";
 import MarketOverview from "@/components/MarketOverview";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import AlertsWidget from "@/components/AlertsWidget";
 

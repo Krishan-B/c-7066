@@ -6,7 +6,7 @@ import ProfileDisplay from "@/features/profile/components/ProfileDisplay";
 import ProfileEditForm from "@/features/profile/components/ProfileEditForm";
 import { Button } from "@/components/ui/button";
 import { Pencil, User } from "lucide-react";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 const ProfilePage = () => {

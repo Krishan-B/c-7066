@@ -29,7 +29,7 @@ import {
   Download,
   Search
 } from "lucide-react";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import MarketOverview from "@/components/MarketOverview";
 import { Badge } from "@/components/ui/badge";
