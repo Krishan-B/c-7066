@@ -1,15 +1,28 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RefreshCw, ArrowUpDown, Settings, X } from "lucide-react";
+import { 
+  RefreshCw, 
+  ArrowUpDown, 
+  Settings, 
+  X, 
+  AlertCircle, 
+  Clock, 
+  CheckCircle2, 
+  ShieldCheck, 
+  Percent
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { TradeButton } from "@/components/trade";
 import { toast } from "sonner";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+import OrderTypeSelector from "@/components/trade/OrderTypeSelector";
 
 interface BaseOrder {
   id: string;
@@ -71,6 +84,10 @@ const Orders = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("open");
+  const [selectedOrderType, setSelectedOrderType] = useState("market");
+  const [hasStopLoss, setHasStopLoss] = useState(false);
+  const [hasTakeProfit, setHasTakeProfit] = useState(false);
+  const [hasExpirationDate, setHasExpirationDate] = useState(false);
   
   // Sample orders data
   const openTrades: OpenTrade[] = [
@@ -242,6 +259,28 @@ const Orders = () => {
     toast.success(`Order ${orderId} cancelled successfully`);
   };
 
+  // Calculate profit/loss percentage for each open trade
+  const calculatePnlPercentage = (trade: OpenTrade) => {
+    if (trade.direction === 'Buy') {
+      return ((trade.marketRate - trade.openRate) / trade.openRate) * 100;
+    } else {
+      return ((trade.openRate - trade.marketRate) / trade.openRate) * 100;
+    }
+  };
+
+  // Calculate bid/ask spread for display
+  const calculateSpread = (currentRate: number) => {
+    // Simulate a bid-ask spread (0.1% for this example)
+    const spreadPercentage = 0.001;
+    const spread = currentRate * spreadPercentage;
+    
+    return {
+      bid: currentRate - spread/2,
+      ask: currentRate + spread/2,
+      spreadValue: spread
+    };
+  };
+
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh]">
@@ -265,9 +304,9 @@ const Orders = () => {
       <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Orders</h1>
+            <h1 className="text-2xl font-bold mb-2">Orders & Positions</h1>
             <p className="text-muted-foreground">
-              View and manage your trading activities
+              Manage your CFD trading positions and pending orders
             </p>
           </div>
           
@@ -282,69 +321,98 @@ const Orders = () => {
 
         <Card>
           <CardHeader className="pb-0">
-            <CardTitle>Order Management</CardTitle>
+            <CardTitle>Position & Order Management</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="open" value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="mb-4 grid grid-cols-4 w-full md:w-auto">
-                <TabsTrigger value="open">Open trades</TabsTrigger>
-                <TabsTrigger value="pending">Pending orders</TabsTrigger>
-                <TabsTrigger value="closed">Closed trades</TabsTrigger>
-                <TabsTrigger value="history">Orders history</TabsTrigger>
+                <TabsTrigger value="open">Open Positions</TabsTrigger>
+                <TabsTrigger value="pending">Pending Orders</TabsTrigger>
+                <TabsTrigger value="closed">Closed Positions</TabsTrigger>
+                <TabsTrigger value="history">Orders History</TabsTrigger>
               </TabsList>
               
               <TabsContent value="open">
-                <div className="rounded-md border">
+                <div className="rounded-md border overflow-hidden">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-muted/60">
                       <TableRow>
-                        <TableHead>Symbol</TableHead>
-                        <TableHead>Open Rate</TableHead>
+                        <TableHead className="whitespace-nowrap">Symbol</TableHead>
                         <TableHead>Direction</TableHead>
+                        <TableHead>Open Rate</TableHead>
                         <TableHead>Units</TableHead>
-                        <TableHead>Market Rate</TableHead>
-                        <TableHead>Market Value</TableHead>
-                        <TableHead>Total P&L</TableHead>
-                        <TableHead>Stop Loss</TableHead>
-                        <TableHead>Take Profit</TableHead>
-                        <TableHead>Open Date</TableHead>
+                        <TableHead className="whitespace-nowrap">
+                          <div className="flex items-center">
+                            Market Rate <ArrowUpDown className="ml-1 h-4 w-4" />
+                          </div>
+                        </TableHead>
+                        <TableHead>Sell</TableHead>
+                        <TableHead>Buy</TableHead>
+                        <TableHead className="whitespace-nowrap">Market Value</TableHead>
+                        <TableHead>
+                          <div className="flex items-center">
+                            P&L <Percent className="ml-1 h-4 w-4" />
+                          </div>
+                        </TableHead>
+                        <TableHead>Protection</TableHead>
+                        <TableHead className="whitespace-nowrap">Open Date</TableHead>
                         <TableHead>Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {openTrades.map((trade) => (
-                        <TableRow key={trade.id}>
-                          <TableCell className="font-medium">{trade.symbol}</TableCell>
-                          <TableCell>${trade.openRate.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <Badge variant={trade.direction === 'Buy' ? 'default' : 'destructive'}>
-                              {trade.direction}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{trade.units}</TableCell>
-                          <TableCell>${trade.marketRate.toLocaleString()}</TableCell>
-                          <TableCell>${trade.marketValue.toLocaleString()}</TableCell>
-                          <TableCell className={`${trade.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            ${trade.totalPnl.toLocaleString()}
-                          </TableCell>
-                          <TableCell>${trade.stopLoss?.toLocaleString() || '-'}</TableCell>
-                          <TableCell>${trade.takeProfit?.toLocaleString() || '-'}</TableCell>
-                          <TableCell>{trade.openDate}</TableCell>
-                          <TableCell>
-                            <Button 
-                              variant="destructive" 
-                              size="sm" 
-                              onClick={() => handleCloseTrade(trade.id)}
-                            >
-                              <X className="h-4 w-4 mr-1" /> Close
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {openTrades.map((trade) => {
+                        const pnlPercentage = calculatePnlPercentage(trade);
+                        const { bid, ask } = calculateSpread(trade.marketRate);
+                        return (
+                          <TableRow key={trade.id} className="hover:bg-muted/40">
+                            <TableCell className="font-medium">{trade.symbol}</TableCell>
+                            <TableCell>
+                              <Badge variant={trade.direction === 'Buy' ? 'default' : 'destructive'} 
+                                className={`${trade.direction === 'Buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}>
+                                {trade.direction}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>${trade.openRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                            <TableCell>{trade.units}</TableCell>
+                            <TableCell>${trade.marketRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                            <TableCell className="text-red-500">${bid.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                            <TableCell className="text-green-500">${ask.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                            <TableCell>${trade.marketValue.toLocaleString()}</TableCell>
+                            <TableCell>
+                              <div className={`flex items-center ${trade.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                ${trade.totalPnl.toLocaleString()}
+                                <span className="ml-1 text-xs">
+                                  ({pnlPercentage >= 0 ? '+' : ''}{pnlPercentage.toFixed(2)}%)
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {(trade.stopLoss || trade.takeProfit) ? (
+                                <div className="flex gap-1">
+                                  {trade.stopLoss && <AlertCircle className="h-4 w-4 text-amber-500" title="Stop Loss" />}
+                                  {trade.takeProfit && <ShieldCheck className="h-4 w-4 text-green-500" title="Take Profit" />}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">{trade.openDate}</TableCell>
+                            <TableCell>
+                              <Button 
+                                variant="destructive" 
+                                size="sm" 
+                                onClick={() => handleCloseTrade(trade.id)}
+                              >
+                                <X className="h-4 w-4 mr-1" /> Close
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                       {openTrades.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={11} className="text-center py-6">
-                            No open trades found
+                          <TableCell colSpan={12} className="text-center py-6">
+                            No open positions found
                           </TableCell>
                         </TableRow>
                       )}
@@ -354,50 +422,78 @@ const Orders = () => {
               </TabsContent>
               
               <TabsContent value="pending">
-                <div className="rounded-md border">
+                <div className="rounded-md border overflow-hidden">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-muted/60">
                       <TableRow>
                         <TableHead>Symbol</TableHead>
-                        <TableHead>Order Rate</TableHead>
                         <TableHead>Direction</TableHead>
+                        <TableHead>Order Type</TableHead>
+                        <TableHead>Order Rate</TableHead>
                         <TableHead>Units</TableHead>
-                        <TableHead>Market Rate</TableHead>
-                        <TableHead>Stop Loss</TableHead>
-                        <TableHead>Take Profit</TableHead>
+                        <TableHead>Current Market</TableHead>
+                        <TableHead>Protection</TableHead>
+                        <TableHead>Expires</TableHead>
                         <TableHead>Order Date</TableHead>
                         <TableHead>Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {pendingOrders.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-medium">{order.symbol}</TableCell>
-                          <TableCell>${order.orderRate.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <Badge variant={order.direction === 'Buy' ? 'default' : 'destructive'}>
-                              {order.direction}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{order.units}</TableCell>
-                          <TableCell>${order.marketRate.toLocaleString()}</TableCell>
-                          <TableCell>${order.stopLoss?.toLocaleString() || '-'}</TableCell>
-                          <TableCell>${order.takeProfit?.toLocaleString() || '-'}</TableCell>
-                          <TableCell>{order.orderDate}</TableCell>
-                          <TableCell>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => handleCancelOrder(order.id)}
-                            >
-                              <X className="h-4 w-4 mr-1" /> Cancel
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {pendingOrders.map((order) => {
+                        // For demo purposes, let's assume all orders here are limit orders
+                        // In a real app, this would come from the database
+                        const orderType = "limit";
+                        const expires = "GTC"; // Good Till Canceled
+                        
+                        return (
+                          <TableRow key={order.id} className="hover:bg-muted/40">
+                            <TableCell className="font-medium">{order.symbol}</TableCell>
+                            <TableCell>
+                              <Badge variant={order.direction === 'Buy' ? 'default' : 'destructive'}
+                                className={`${order.direction === 'Buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}>
+                                {order.direction}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
+                                {orderType === "market" ? "Market" : "Limit"}
+                              </span>
+                            </TableCell>
+                            <TableCell>${order.orderRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                            <TableCell>{order.units}</TableCell>
+                            <TableCell>${order.marketRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                            <TableCell>
+                              {(order.stopLoss || order.takeProfit) ? (
+                                <div className="flex gap-1">
+                                  {order.stopLoss && <AlertCircle className="h-4 w-4 text-amber-500" title="Stop Loss" />}
+                                  {order.takeProfit && <ShieldCheck className="h-4 w-4 text-green-500" title="Take Profit" />}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
+                                {expires}
+                              </div>
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">{order.orderDate}</TableCell>
+                            <TableCell>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleCancelOrder(order.id)}
+                              >
+                                <X className="h-4 w-4 mr-1" /> Cancel
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                       {pendingOrders.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={9} className="text-center py-6">
+                          <TableCell colSpan={10} className="text-center py-6">
                             No pending orders found
                           </TableCell>
                         </TableRow>
@@ -405,52 +501,193 @@ const Orders = () => {
                     </TableBody>
                   </Table>
                 </div>
+                
+                <div className="mt-6 p-4 border rounded-md">
+                  <h3 className="text-lg font-medium mb-4">Create New Order</h3>
+                  
+                  <OrderTypeSelector 
+                    orderType={selectedOrderType}
+                    onOrderTypeChange={setSelectedOrderType}
+                  />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div className="space-y-4">
+                      <div>
+                        {selectedOrderType === "market" ? (
+                          <p className="text-sm text-muted-foreground mb-2">
+                            A market order will be executed immediately at the next market price.
+                          </p>
+                        ) : (
+                          <p className="text-sm text-muted-foreground mb-2">
+                            An entry order will be executed when the market reaches the requested price.
+                          </p>
+                        )}
+                      </div>
+                      
+                      <Form>
+                        <div className="space-y-4">
+                          <FormField
+                            name="stopLoss"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={hasStopLoss}
+                                    onCheckedChange={(checked) => {
+                                      setHasStopLoss(!!checked);
+                                    }}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                  <FormLabel>
+                                    Stop Loss
+                                  </FormLabel>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            name="takeProfit"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={hasTakeProfit}
+                                    onCheckedChange={(checked) => {
+                                      setHasTakeProfit(!!checked);
+                                    }}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                  <FormLabel>
+                                    Take Profit
+                                  </FormLabel>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          {selectedOrderType === "limit" && (
+                            <FormField
+                              name="expirationDate"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={hasExpirationDate}
+                                      onCheckedChange={(checked) => {
+                                        setHasExpirationDate(!!checked);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <div className="space-y-1 leading-none">
+                                    <FormLabel>
+                                      Expiration Date
+                                    </FormLabel>
+                                  </div>
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                        </div>
+                      </Form>
+                    </div>
+                    
+                    <div className="flex flex-col justify-end">
+                      <div className="grid grid-cols-2 gap-4">
+                        <Button variant="outline" className="bg-red-500 hover:bg-red-600 text-white">
+                          Sell
+                        </Button>
+                        <Button className="bg-green-600 hover:bg-green-700 text-white">
+                          Buy
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
               
               <TabsContent value="closed">
-                <div className="rounded-md border">
+                <div className="rounded-md border overflow-hidden">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-muted/60">
                       <TableRow>
                         <TableHead>Symbol</TableHead>
+                        <TableHead>Direction</TableHead>
                         <TableHead>Open Rate</TableHead>
                         <TableHead>Close Rate</TableHead>
-                        <TableHead>Direction</TableHead>
                         <TableHead>Units</TableHead>
                         <TableHead>Market Value</TableHead>
-                        <TableHead>Total P&L</TableHead>
-                        <TableHead>Stop Loss</TableHead>
-                        <TableHead>Take Profit</TableHead>
+                        <TableHead>
+                          <div className="flex items-center">
+                            P&L <Percent className="ml-1 h-4 w-4" />
+                          </div>
+                        </TableHead>
+                        <TableHead>Protection</TableHead>
                         <TableHead>Open Date</TableHead>
                         <TableHead>Close Date</TableHead>
+                        <TableHead>Duration</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {closedTrades.map((trade) => (
-                        <TableRow key={trade.id}>
-                          <TableCell className="font-medium">{trade.symbol}</TableCell>
-                          <TableCell>${trade.openRate.toLocaleString()}</TableCell>
-                          <TableCell>${trade.closeRate.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <Badge variant={trade.direction === 'Buy' ? 'default' : 'destructive'}>
-                              {trade.direction}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{trade.units}</TableCell>
-                          <TableCell>${trade.marketValue.toLocaleString()}</TableCell>
-                          <TableCell className={`${trade.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                            ${trade.totalPnl.toLocaleString()}
-                          </TableCell>
-                          <TableCell>${trade.stopLoss?.toLocaleString() || '-'}</TableCell>
-                          <TableCell>${trade.takeProfit?.toLocaleString() || '-'}</TableCell>
-                          <TableCell>{trade.openDate}</TableCell>
-                          <TableCell>{trade.closeDate}</TableCell>
-                        </TableRow>
-                      ))}
+                      {closedTrades.map((trade) => {
+                        // Calculate how long the position was open
+                        const openDate = new Date(trade.openDate);
+                        const closeDate = new Date(trade.closeDate);
+                        const durationMs = closeDate.getTime() - openDate.getTime();
+                        const durationDays = Math.floor(durationMs / (1000 * 60 * 60 * 24));
+                        const durationHours = Math.floor((durationMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        
+                        // Calculate P&L percentage
+                        const pnlPercentage = trade.direction === 'Buy'
+                          ? ((trade.closeRate - trade.openRate) / trade.openRate) * 100
+                          : ((trade.openRate - trade.closeRate) / trade.openRate) * 100;
+                        
+                        return (
+                          <TableRow key={trade.id} className="hover:bg-muted/40">
+                            <TableCell className="font-medium">{trade.symbol}</TableCell>
+                            <TableCell>
+                              <Badge variant={trade.direction === 'Buy' ? 'default' : 'destructive'}
+                                className={`${trade.direction === 'Buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}>
+                                {trade.direction}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>${trade.openRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                            <TableCell>${trade.closeRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                            <TableCell>{trade.units}</TableCell>
+                            <TableCell>${trade.marketValue.toLocaleString()}</TableCell>
+                            <TableCell>
+                              <div className={`flex items-center ${trade.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                ${trade.totalPnl.toLocaleString()}
+                                <span className="ml-1 text-xs">
+                                  ({pnlPercentage >= 0 ? '+' : ''}{pnlPercentage.toFixed(2)}%)
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {(trade.stopLoss || trade.takeProfit) ? (
+                                <div className="flex gap-1">
+                                  {trade.stopLoss && <AlertCircle className="h-4 w-4 text-amber-500" title="Stop Loss" />}
+                                  {trade.takeProfit && <ShieldCheck className="h-4 w-4 text-green-500" title="Take Profit" />}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">{trade.openDate}</TableCell>
+                            <TableCell className="whitespace-nowrap">{trade.closeDate}</TableCell>
+                            <TableCell>
+                              {durationDays > 0 ? `${durationDays}d ` : ''}
+                              {durationHours}h
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                       {closedTrades.length === 0 && (
                         <TableRow>
                           <TableCell colSpan={11} className="text-center py-6">
-                            No closed trades found
+                            No closed positions found
                           </TableCell>
                         </TableRow>
                       )}
@@ -460,40 +697,75 @@ const Orders = () => {
               </TabsContent>
               
               <TabsContent value="history">
-                <div className="rounded-md border">
+                <div className="rounded-md border overflow-hidden">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-muted/60">
                       <TableRow>
                         <TableHead>Symbol</TableHead>
-                        <TableHead>Order Rate</TableHead>
                         <TableHead>Direction</TableHead>
+                        <TableHead>Order Type</TableHead>
+                        <TableHead>Order Rate</TableHead>
                         <TableHead>Units</TableHead>
-                        <TableHead>Stop Loss</TableHead>
-                        <TableHead>Take Profit</TableHead>
-                        <TableHead>Order Date</TableHead>
-                        <TableHead>Close Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Protection</TableHead>
+                        <TableHead>Created Date</TableHead>
+                        <TableHead>Closed Date</TableHead>
+                        <TableHead>Reason</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {ordersHistory.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-medium">{order.symbol}</TableCell>
-                          <TableCell>${order.orderRate.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <Badge variant={order.direction === 'Buy' ? 'default' : 'destructive'}>
-                              {order.direction}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{order.units}</TableCell>
-                          <TableCell>${order.stopLoss?.toLocaleString() || '-'}</TableCell>
-                          <TableCell>${order.takeProfit?.toLocaleString() || '-'}</TableCell>
-                          <TableCell>{order.orderDate}</TableCell>
-                          <TableCell>{order.closeDate}</TableCell>
-                        </TableRow>
-                      ))}
+                      {ordersHistory.map((order) => {
+                        // For demo purposes, let's determine some status display values
+                        const statusDisplay = order.status === 'canceled' ? 'Cancelled' : 'Expired';
+                        const reason = order.status === 'canceled' ? 'User Cancelled' : 'Auto Expired';
+                        
+                        // For demo purposes, assume some are limit and some are stop orders
+                        const orderType = order.id.endsWith('8') ? 'limit' : 'stop';
+                        
+                        return (
+                          <TableRow key={order.id} className="hover:bg-muted/40">
+                            <TableCell className="font-medium">{order.symbol}</TableCell>
+                            <TableCell>
+                              <Badge variant={order.direction === 'Buy' ? 'default' : 'destructive'}
+                                className={`${order.direction === 'Buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}>
+                                {order.direction}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <span className="text-xs px-2 py-1 bg-muted rounded-full">
+                                {orderType === "limit" ? "Limit" : "Stop"}
+                              </span>
+                            </TableCell>
+                            <TableCell>${order.orderRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                            <TableCell>{order.units}</TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="bg-muted text-muted-foreground">
+                                {statusDisplay}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {(order.stopLoss || order.takeProfit) ? (
+                                <div className="flex gap-1">
+                                  {order.stopLoss && <AlertCircle className="h-4 w-4 text-amber-500" title="Stop Loss" />}
+                                  {order.takeProfit && <ShieldCheck className="h-4 w-4 text-green-500" title="Take Profit" />}
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="whitespace-nowrap">{order.orderDate}</TableCell>
+                            <TableCell className="whitespace-nowrap">{order.closeDate}</TableCell>
+                            <TableCell>
+                              <span className="text-xs text-muted-foreground">
+                                {reason}
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                       {ordersHistory.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={8} className="text-center py-6">
+                          <TableCell colSpan={10} className="text-center py-6">
                             No order history found
                           </TableCell>
                         </TableRow>
