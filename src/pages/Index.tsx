@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import MarketStats from "@/components/MarketStats";
 import WatchlistTable from "@/components/watchlist/WatchlistTable";
 import CryptoList from "@/components/CryptoList";
 import TradingViewChart from "@/components/TradingViewChart";
-import { QuickTradePanel } from "@/components/trade";
+import { QuickTradePanel, TradeButton } from "@/components/trade";
 import PortfolioCard from "@/components/PortfolioCard";
 import MarketOverview from "@/components/MarketOverview";
 import { useToast } from "@/hooks/use-toast";
@@ -83,15 +82,7 @@ const Index = () => {
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
             </Button>
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="gap-2"
-              onClick={() => navigate('/markets')}
-            >
-              <Plus className="h-4 w-4" />
-              <span>New Trade</span>
-            </Button>
+            <TradeButton size="sm" />
           </div>
         </div>
         

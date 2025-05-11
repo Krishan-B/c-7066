@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import { Asset } from "@/hooks/useMarketData";
 import { isMarketOpen } from "@/utils/marketHours";
-import { MarketHoursDisplay } from "@/components/trade";
+import { MarketHoursDisplay, TradeButton } from "@/components/trade";
 
 const Markets = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -79,6 +80,7 @@ const Markets = () => {
               <RefreshCcw className={`h-4 w-4 mr-1 ${isFetching ? 'animate-spin' : ''}`} />
               {isFetching ? 'Refreshing...' : 'Refresh Data'}
             </Button>
+            <TradeButton size="sm" />
           </div>
         </div>
         

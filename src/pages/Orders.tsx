@@ -1,13 +1,13 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, RefreshCw, ArrowUpDown } from "lucide-react";
+import { RefreshCw, ArrowUpDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { TradeButton } from "@/components/trade";
 
 interface Order {
   id: string;
@@ -122,10 +122,7 @@ const Orders = () => {
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              New Order
-            </Button>
+            <TradeButton size="sm" label="New Order" />
           </div>
         </div>
 

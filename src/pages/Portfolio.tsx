@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -41,6 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TradeButton } from "@/components/trade";
 
 interface Asset {
   name: string;
@@ -293,9 +293,7 @@ const Portfolio = () => {
               <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button size="sm" variant="outline" className="w-full justify-start">
-                <Plus className="h-4 w-4 mr-2" /> Add New Position
-              </Button>
+              <TradeButton variant="outline" className="w-full justify-start" label="Add New Position" />
               <Button size="sm" variant="outline" className="w-full justify-start">
                 <Download className="h-4 w-4 mr-2" /> Export Report
               </Button>
