@@ -1,27 +1,22 @@
+
 import { useState, useEffect } from "react";
-import { X, Info } from "lucide-react";
+import { X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectGroup,
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useMarketData } from "@/hooks/useMarketData";
 import { isMarketOpen } from "@/utils/marketHours";
 import { useAuth } from "@/hooks/useAuth";
-import { getLeverageForAssetType, formatLeverageRatio } from "@/utils/leverageUtils";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getLeverageForAssetType } from "@/utils/leverageUtils";
 import { mockAccountMetrics } from "@/utils/metricUtils";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 
-const ASSET_CATEGORIES = ["Crypto", "Stocks", "Forex", "Indices", "Commodities"];
+// Import the new component files
+import { TradeSlidePanelAssetSelection } from "./TradeSlidePanelAssetSelection";
+import { TradeSlidePanelPriceActions } from "./TradeSlidePanelPriceActions";
+import { TradeSlidePanelUnitsInput } from "./TradeSlidePanelUnitsInput";
+import { TradeSlidePanelOrderTypeSelector } from "./TradeSlidePanelOrderTypeSelector";
+import { TradeSlidePanelEntryRate } from "./TradeSlidePanelEntryRate";
+import { TradeSlidePanelOptionCheckbox } from "./TradeSlidePanelOptionCheckbox";
+import { TradeSlidePanelSummary } from "./TradeSlidePanelSummary";
 
 interface TradeSlidePanelProps {
   open: boolean;
@@ -213,241 +208,96 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
         </SheetHeader>
         
         <div className="space-y-4">
-          {/* Asset Category Selection */}
-          <div className="space-y-1.5">
-            <label htmlFor="asset-category" className="text-sm font-medium">
-              Asset Category
-            </label>
-            <Select value={assetCategory} onValueChange={handleAssetCategoryChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {ASSET_CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          
           {/* Asset Selection */}
-          <div className="space-y-1.5">
-            <label htmlFor="asset-select" className="text-sm font-medium">
-              Select Asset
-            </label>
-            <Select value={selectedAsset.symbol} onValueChange={handleAssetSelect}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select an asset" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {isLoading ? (
-                    <SelectItem value="loading">Loading...</SelectItem>
-                  ) : marketData.filter(asset => asset.market_type === assetCategory).length > 0 ? (
-                    marketData
-                      .filter(asset => asset.market_type === assetCategory)
-                      .map((asset) => (
-                        <SelectItem key={asset.symbol} value={asset.symbol}>
-                          {asset.name} ({asset.symbol})
-                        </SelectItem>
-                      ))
-                  ) : (
-                    <SelectItem value="none">No assets available</SelectItem>
-                  )}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+          <TradeSlidePanelAssetSelection 
+            assetCategory={assetCategory}
+            onAssetCategoryChange={handleAssetCategoryChange}
+            selectedAsset={selectedAsset.symbol}
+            onAssetSelect={handleAssetSelect}
+            isLoading={isLoading}
+            isExecuting={isExecuting}
+            marketData={marketData}
+          />
           
           {/* Real-time prices with Buy/Sell buttons */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">Buy Price</div>
-              <div className="text-lg font-medium">${buyPrice.toFixed(4)}</div>
-              <Button 
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-                onClick={() => handleExecuteTrade("buy")}
-                disabled={isExecuting || (orderType === "market" && !marketIsOpen) || !canAfford}
-              >
-                {isExecuting && tradeAction === "buy" ? "Processing..." : "Buy"}
-              </Button>
-            </div>
-            <div className="space-y-2">
-              <div className="text-sm text-muted-foreground">Sell Price</div>
-              <div className="text-lg font-medium">${sellPrice.toFixed(4)}</div>
-              <Button 
-                className="w-full bg-red-500 hover:bg-red-600 text-white"
-                onClick={() => handleExecuteTrade("sell")}
-                disabled={isExecuting || (orderType === "market" && !marketIsOpen) || parsedUnits <= 0}
-              >
-                {isExecuting && tradeAction === "sell" ? "Processing..." : "Sell"}
-              </Button>
-            </div>
-          </div>
+          <TradeSlidePanelPriceActions
+            buyPrice={buyPrice}
+            sellPrice={sellPrice}
+            onExecuteTrade={handleExecuteTrade}
+            isExecuting={isExecuting}
+            tradeAction={tradeAction}
+            marketIsOpen={marketIsOpen}
+            orderType={orderType}
+            canAfford={canAfford}
+            parsedUnits={parsedUnits}
+          />
           
           {/* Units Input */}
-          <div className="space-y-1.5">
-            <label htmlFor="units" className="text-sm font-medium">
-              Units
-            </label>
-            <Input
-              id="units"
-              type="number"
-              step="0.01"
-              value={units}
-              onChange={(e) => setUnits(e.target.value)}
-              placeholder="Enter units"
-              className="w-full"
-            />
-            <div className="text-xs text-muted-foreground">
-              Funds required to open the position: <span className={`font-medium ${!canAfford ? 'text-red-500' : ''}`}>${marginRequirement.toFixed(2)}</span>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Available: <span className="font-medium">${availableFunds.toFixed(2)}</span>
-            </div>
-          </div>
+          <TradeSlidePanelUnitsInput
+            units={units}
+            setUnits={setUnits}
+            isExecuting={isExecuting}
+            marginRequirement={marginRequirement}
+            canAfford={canAfford}
+            availableFunds={availableFunds}
+          />
           
           {/* Order Type Selection */}
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">Order Type</label>
-            <div className="flex gap-2">
-              <Button 
-                variant={orderType === "market" ? "default" : "outline"} 
-                className={`flex-1 ${orderType === "market" ? "bg-primary text-primary-foreground" : ""}`}
-                onClick={() => setOrderType("market")}
-              >
-                Market order
-              </Button>
-              <Button 
-                variant={orderType === "entry" ? "default" : "outline"} 
-                className={`flex-1 ${orderType === "entry" ? "bg-yellow-500 text-white hover:bg-yellow-600" : ""}`}
-                onClick={() => setOrderType("entry")}
-              >
-                Entry order
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {orderType === "market" 
-                ? "A market order will be executed immediately at the next market price."
-                : "An entry order will be executed when the market reaches the requested price."}
-            </p>
-          </div>
+          <TradeSlidePanelOrderTypeSelector
+            orderType={orderType}
+            setOrderType={setOrderType}
+            isExecuting={isExecuting}
+          />
 
           {/* Entry Order Rate (only for entry orders) */}
           {orderType === "entry" && (
-            <div className="space-y-1.5">
-              <label htmlFor="orderRate" className="text-sm font-medium">
-                Order Rate
-              </label>
-              <Input
-                id="orderRate"
-                type="number"
-                step="0.0001"
-                value={orderRate}
-                onChange={(e) => setOrderRate(e.target.value)}
-                className="w-full"
-              />
-              <p className="text-xs text-muted-foreground">
-                Rate should be above {(currentPrice * 0.98).toFixed(4)} or below {(currentPrice * 1.02).toFixed(4)}
-              </p>
-            </div>
+            <TradeSlidePanelEntryRate
+              orderRate={orderRate}
+              setOrderRate={setOrderRate}
+              currentPrice={currentPrice}
+              isExecuting={isExecuting}
+            />
           )}
           
           {/* Stop Loss Checkbox */}
-          <div className="flex items-center space-x-2">
-            <Checkbox id="stopLoss" checked={hasStopLoss} onCheckedChange={() => setHasStopLoss(!hasStopLoss)} />
-            <div className="flex items-center">
-              <label htmlFor="stopLoss" className="text-sm font-medium cursor-pointer">
-                Stop Loss
-              </label>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="w-[200px] text-xs">
-                      A stop loss order will automatically close your position when the market reaches the specified price, helping to limit potential losses.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </div>
+          <TradeSlidePanelOptionCheckbox
+            id="stopLoss"
+            label="Stop Loss"
+            checked={hasStopLoss}
+            onCheckedChange={() => setHasStopLoss(!hasStopLoss)}
+            tooltip="A stop loss order will automatically close your position when the market reaches the specified price, helping to limit potential losses."
+            disabled={isExecuting}
+          />
 
           {/* Take Profit Checkbox */}
-          <div className="flex items-center space-x-2">
-            <Checkbox id="takeProfit" checked={hasTakeProfit} onCheckedChange={() => setHasTakeProfit(!hasTakeProfit)} />
-            <div className="flex items-center">
-              <label htmlFor="takeProfit" className="text-sm font-medium cursor-pointer">
-                Take Profit
-              </label>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="w-[200px] text-xs">
-                      A take profit order will automatically close your position when the market reaches a specified price, allowing you to secure profits.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </div>
+          <TradeSlidePanelOptionCheckbox
+            id="takeProfit"
+            label="Take Profit"
+            checked={hasTakeProfit}
+            onCheckedChange={() => setHasTakeProfit(!hasTakeProfit)}
+            tooltip="A take profit order will automatically close your position when the market reaches a specified price, allowing you to secure profits."
+            disabled={isExecuting}
+          />
 
           {/* Expiration Date Checkbox (only for entry orders) */}
           {orderType === "entry" && (
-            <div className="flex items-center space-x-2">
-              <Checkbox id="expirationDate" checked={hasExpirationDate} onCheckedChange={() => setHasExpirationDate(!hasExpirationDate)} />
-              <div className="flex items-center">
-                <label htmlFor="expirationDate" className="text-sm font-medium cursor-pointer">
-                  Expiration Date
-                </label>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="w-[200px] text-xs">
-                        Set a date when your entry order should expire if not executed.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
+            <TradeSlidePanelOptionCheckbox
+              id="expirationDate"
+              label="Expiration Date"
+              checked={hasExpirationDate}
+              onCheckedChange={() => setHasExpirationDate(!hasExpirationDate)}
+              tooltip="Set a date when your entry order should expire if not executed."
+              disabled={isExecuting}
+            />
           )}
           
           {/* Trade Summary */}
-          <div className="space-y-3 p-3 bg-secondary/30 rounded-md">
-            <h3 className="text-sm font-medium">Trade Summary</h3>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Position Value</span>
-                <span>${positionValue.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Required Margin</span>
-                <span>${marginRequirement.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Fee (0.1%)</span>
-                <span>${fee.toFixed(2)}</span>
-              </div>
-              <div className="border-t border-border my-1 pt-1"></div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total</span>
-                <span className="font-medium">${totalCost.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
+          <TradeSlidePanelSummary
+            positionValue={positionValue}
+            marginRequirement={marginRequirement}
+            fee={fee}
+            totalCost={totalCost}
+          />
         </div>
       </SheetContent>
     </Sheet>
