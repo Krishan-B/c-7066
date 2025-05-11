@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { X, Info } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
@@ -50,7 +49,7 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   // Use the combined market data hook for the selected category
   const { marketData, isLoading, refetch } = useCombinedMarketData(
     [assetCategory], 
-    { refetchInterval: 1000 * 10, enableRefresh: true }
+    { refetchInterval: 1000 * 10 }
   );
   
   // Find current price in market data

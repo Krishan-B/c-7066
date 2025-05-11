@@ -34,7 +34,6 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   // Use our combined market data hook to get data for all market types
   const { marketData, isLoading, refetch } = useCombinedMarketData([assetCategory], {
     refetchInterval: 10000, // Refresh every 10 seconds for trade panel
-    enableRefresh: true,
   });
   
   // Find the current asset in our market data
