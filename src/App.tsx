@@ -26,11 +26,11 @@ export default function App() {
             <Route path="/" element={<Layout />}>
               <Route index element={<Index />} />
               <Route path="markets" element={<Markets />} />
-              <Route path="portfolio" element={<ProtectedRoute element={<Portfolio />} />} />
-              <Route path="orders" element={<ProtectedRoute element={<Orders />} />} />
-              <Route path="wallet" element={<ProtectedRoute element={<Wallet />} />} />
-              <Route path="account" element={<ProtectedRoute element={<Account />} />} />
-              <Route path="profile" element={<ProtectedRoute element={<ProfilePage />} />} />
+              <Route path="portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
+              <Route path="orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+              <Route path="wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+              <Route path="account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+              <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
             <Route path="/auth" element={<Auth />} />
