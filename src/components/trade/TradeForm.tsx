@@ -1,16 +1,15 @@
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { OrderTypeSelector } from "@/components/trade";
-import { TradeSummary } from "@/components/trade"; 
-import { formatLeverageRatio } from "@/utils/leverageUtils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 import { Asset } from "@/hooks/useMarketData";
+import { OrderTypeSelector } from "@/components/trade";
+import { TradeSummary } from "@/components/trade";
 import { getLeverageForAssetType } from "@/utils/leverageUtils";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
+import { AssetCategorySelector } from "./AssetCategorySelector";
+import { AssetSelector } from "./AssetSelector";
+import { UnitsInput } from "./UnitsInput";
+import { StopLossCheckbox } from "./StopLossCheckbox";
+import { TakeProfitCheckbox } from "./TakeProfitCheckbox";
+import { TradeActionButton } from "./TradeActionButton";
 
 interface TradeFormProps {
   action: "buy" | "sell";
@@ -29,8 +28,6 @@ interface TradeFormProps {
   availableFunds?: number;
   marketData?: Asset[];
 }
-
-const ASSET_CATEGORIES = ["Crypto", "Stocks", "Forex", "Indices", "Commodities"];
 
 const TradeForm = ({
   action,
@@ -83,109 +80,30 @@ const TradeForm = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-2">
       {/* Asset Category Selection */}
-      <div>
-        <label htmlFor="asset-category" className="text-sm font-medium block mb-1">
-          Asset Category
-        </label>
-        <Select
-          value={assetCategory}
-          onValueChange={handleAssetCategoryChange}
-          disabled={isExecuting}
-        >
-          <SelectTrigger id="asset-category" className="w-full">
-            <SelectValue placeholder="Select asset category" />
-          </SelectTrigger>
-          <SelectContent>
-            {ASSET_CATEGORIES.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <AssetCategorySelector
+        assetCategory={assetCategory}
+        setAssetCategory={handleAssetCategoryChange}
+        isExecuting={isExecuting}
+      />
       
       {/* Asset Selection */}
-      <div>
-        <label htmlFor="asset" className="text-sm font-medium block mb-1">
-          Select Asset
-        </label>
-        <Select
-          value={selectedAsset}
-          onValueChange={setSelectedAsset}
-          disabled={isExecuting}
-        >
-          <SelectTrigger id="asset" className="w-full">
-            <SelectValue placeholder="Select asset" />
-          </SelectTrigger>
-          <SelectContent>
-            {isLoading ? (
-              <SelectItem value="loading">Loading...</SelectItem>
-            ) : filteredAssets.length > 0 ? (
-              filteredAssets.map((a) => (
-                <SelectItem key={a.symbol} value={a.symbol}>
-                  {a.name} ({a.symbol})
-                </SelectItem>
-              ))
-            ) : (
-              <SelectItem value="none">No assets available</SelectItem>
-            )}
-          </SelectContent>
-        </Select>
-      </div>
+      <AssetSelector
+        selectedAsset={selectedAsset}
+        setSelectedAsset={setSelectedAsset}
+        isExecuting={isExecuting}
+        isLoading={isLoading}
+        filteredAssets={filteredAssets}
+      />
       
       {/* Units Input */}
-      <div>
-        <label htmlFor="units" className="text-sm font-medium block mb-1">
-          Units
-        </label>
-        <Input
-          id="units"
-          type="number"
-          value={units}
-          onChange={(e) => setUnits(e.target.value)}
-          placeholder="Enter units"
-          className="w-full"
-          disabled={isExecuting}
-          step="0.01"
-        />
-        <div className="flex justify-between mt-1">
-          <button
-            type="button"
-            className="text-xs text-primary"
-            onClick={() => setUnits("0.1")}
-          >
-            0.1
-          </button>
-          <button
-            type="button"
-            className="text-xs text-primary"
-            onClick={() => setUnits("1")}
-          >
-            1
-          </button>
-          <button
-            type="button"
-            className="text-xs text-primary"
-            onClick={() => setUnits("10")}
-          >
-            10
-          </button>
-          <button
-            type="button"
-            className="text-xs text-primary"
-            onClick={() => setUnits("100")}
-          >
-            100
-          </button>
-        </div>
-        <div className="text-xs text-muted-foreground mt-2">
-          Funds required to open the position: <span className={`font-medium ${!canAfford ? 'text-red-500' : ''}`}>${requiredFunds.toFixed(2)}</span>
-        </div>
-        <div className="text-xs text-muted-foreground">
-          Available: <span className="font-medium">${availableFunds.toFixed(2)}</span>
-        </div>
-      </div>
+      <UnitsInput
+        units={units}
+        setUnits={setUnits}
+        isExecuting={isExecuting}
+        requiredFunds={requiredFunds}
+        canAfford={canAfford}
+        availableFunds={availableFunds}
+      />
       
       {/* Order Type Selection */}
       <OrderTypeSelector
@@ -195,58 +113,18 @@ const TradeForm = ({
       />
       
       {/* Stop Loss Checkbox */}
-      <div className="flex items-center space-x-2">
-        <Checkbox 
-          id="stopLoss" 
-          checked={hasStopLoss} 
-          onCheckedChange={() => setHasStopLoss(!hasStopLoss)} 
-          disabled={isExecuting}
-        />
-        <div className="flex items-center">
-          <label htmlFor="stopLoss" className="text-sm font-medium cursor-pointer">
-            Stop Loss
-          </label>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="w-[200px] text-xs">
-                  A stop loss order will automatically close your position when the market reaches the specified price, helping to limit potential losses.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+      <StopLossCheckbox
+        hasStopLoss={hasStopLoss}
+        setHasStopLoss={setHasStopLoss}
+        isExecuting={isExecuting}
+      />
       
       {/* Take Profit Checkbox */}
-      <div className="flex items-center space-x-2">
-        <Checkbox 
-          id="takeProfit" 
-          checked={hasTakeProfit} 
-          onCheckedChange={() => setHasTakeProfit(!hasTakeProfit)} 
-          disabled={isExecuting}
-        />
-        <div className="flex items-center">
-          <label htmlFor="takeProfit" className="text-sm font-medium cursor-pointer">
-            Take Profit
-          </label>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="w-[200px] text-xs">
-                  A take profit order will automatically close your position when the market reaches a specified price, allowing you to secure profits.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
+      <TakeProfitCheckbox
+        hasTakeProfit={hasTakeProfit}
+        setHasTakeProfit={setHasTakeProfit}
+        isExecuting={isExecuting}
+      />
       
       {/* Trade Summary */}
       <TradeSummary
@@ -257,19 +135,15 @@ const TradeForm = ({
         isLoading={isLoading}
       />
       
-      <Button
-        type="submit"
-        className={`w-full ${
-          action === "buy"
-            ? "bg-success hover:bg-success/90"
-            : "bg-warning hover:bg-warning/90"
-        } text-white`}
-        disabled={isExecuting || !marketIsOpen || parsedUnits <= 0 || !canAfford}
-      >
-        {isExecuting
-          ? "Processing..."
-          : `${action === "buy" ? "Buy" : "Sell"} ${selectedAsset}`}
-      </Button>
+      {/* Trade Action Button */}
+      <TradeActionButton
+        action={action}
+        selectedAsset={selectedAsset}
+        isExecuting={isExecuting}
+        marketIsOpen={marketIsOpen}
+        parsedUnits={parsedUnits}
+        canAfford={canAfford}
+      />
     </form>
   );
 };

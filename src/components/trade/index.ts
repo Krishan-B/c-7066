@@ -16,3 +16,11 @@ export { TradeSlidePanelOrderTypeSelector } from './TradeSlidePanelOrderTypeSele
 export { TradeSlidePanelEntryRate } from './TradeSlidePanelEntryRate';
 export { TradeSlidePanelOptionCheckbox } from './TradeSlidePanelOptionCheckbox';
 export { TradeSlidePanelSummary } from './TradeSlidePanelSummary';
+
+// Export new components
+export { AssetCategorySelector } from './AssetCategorySelector';
+export { AssetSelector } from './AssetSelector';
+export { UnitsInput } from './UnitsInput';
+export { StopLossCheckbox } from './StopLossCheckbox';
+export { TakeProfitCheckbox } from './TakeProfitCheckbox';
+export { TradeActionButton } from './TradeActionButton';
