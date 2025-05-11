@@ -6,8 +6,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { RefreshCcw } from "lucide-react";
 import MarketSearch from "@/components/markets/MarketSearch";
 import MarketTabs from "@/components/markets/MarketTabs";
-import AssetDetails from "@/components/markets/AssetDetails";
-import MarketDetailsCard from "@/components/markets/MarketDetailsCard";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import { Asset } from "@/hooks/useMarketData";
@@ -31,9 +29,10 @@ const Markets = () => {
   const chartSectionRef = useRef<HTMLDivElement>(null);
   
   // Use the combined market data hook with a 1-minute refetch interval for more real-time market data
+  // Auto-refresh functionality is kept in the backend but removed from UI
   const { marketData, isLoading, error, refetch, isFetching } = useCombinedMarketData(
     [activeTab],
-    { refetchInterval: 1000 * 60 } // Refresh every minute
+    { refetchInterval: 1000 * 60 } // Refresh every minute (kept in backend)
   );
 
   useEffect(() => {
@@ -41,14 +40,6 @@ const Markets = () => {
       setSelectedAsset(marketData[0]);
     }
   }, [marketData, selectedAsset.id]);
-
-  const handleRefreshData = () => {
-    refetch();
-    toast({
-      title: "Refreshing market data",
-      description: `Fetching the latest ${activeTab} market data...`,
-    });
-  };
   
   // Check if the selected market is open
   const marketIsOpen = selectedAsset ? isMarketOpen(selectedAsset.market_type) : false;
@@ -71,22 +62,12 @@ const Markets = () => {
                 className="hidden md:flex"
               />
             )}
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleRefreshData}
-              className="flex items-center gap-1"
-              disabled={isFetching}
-            >
-              <RefreshCcw className={`h-4 w-4 mr-1 ${isFetching ? 'animate-spin' : ''}`} />
-              {isFetching ? 'Refreshing...' : 'Refresh Data'}
-            </Button>
             <TradeButton size="sm" />
           </div>
         </div>
         
         {/* Market search and table section - now full width */}
-        <div className="mb-6">
+        <div className="mb-8">
           <MarketSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           <div className="mt-4">
             <MarketTabs 
@@ -102,7 +83,7 @@ const Markets = () => {
           </div>
         </div>
         
-        <Separator className="my-6" />
+        <Separator className="my-8" />
         
         {/* Chart and details section */}
         <div ref={chartSectionRef}>
@@ -154,7 +135,7 @@ const Markets = () => {
                   
                   <Separator />
                   
-                  {/* Integrated trading hours info */}
+                  {/* Integrated trading hours info - Now part of the Market Details card */}
                   <div>
                     <h4 className="text-sm font-medium mb-2">Trading Hours</h4>
                     <div className="text-xs text-muted-foreground">

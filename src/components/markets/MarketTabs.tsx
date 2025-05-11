@@ -35,7 +35,7 @@ const MarketTabs = ({
   onSelectAsset,
   containerRef
 }: MarketTabsProps) => {
-  // Filter market data based on search term
+  // Filter market data based on search term - now checking both name and symbol
   const filteredMarketData = marketData.filter(asset => 
     asset.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     asset.symbol.toLowerCase().includes(searchTerm.toLowerCase())
@@ -57,15 +57,15 @@ const MarketTabs = ({
       onValueChange={(value) => setActiveTab(value)}
       className="w-full"
     >
-      <TabsList className="grid w-full grid-cols-5 mb-2">
-        <TabsTrigger value="Crypto">Crypto</TabsTrigger>
-        <TabsTrigger value="Stock">Stocks</TabsTrigger>
-        <TabsTrigger value="Forex">Forex</TabsTrigger>
-        <TabsTrigger value="Index">Indices</TabsTrigger>
-        <TabsTrigger value="Commodity">Commodities</TabsTrigger>
+      <TabsList className="grid w-full grid-cols-5 mb-4">
+        <TabsTrigger value="Crypto" className="font-medium">Crypto</TabsTrigger>
+        <TabsTrigger value="Stock" className="font-medium">Stocks</TabsTrigger>
+        <TabsTrigger value="Forex" className="font-medium">Forex</TabsTrigger>
+        <TabsTrigger value="Index" className="font-medium">Indices</TabsTrigger>
+        <TabsTrigger value="Commodity" className="font-medium">Commodities</TabsTrigger>
       </TabsList>
       
-      <TabsContent value={activeTab} className="border rounded-md">
+      <TabsContent value={activeTab}>
         <MarketList 
           isLoading={isLoading}
           error={error}
