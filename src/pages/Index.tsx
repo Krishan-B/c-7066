@@ -6,7 +6,7 @@ import {
   BarChart2, RefreshCw, TrendingUp, Star, Plus, DollarSign, ChevronDown, LineChart, Clock
 } from "lucide-react";
 import MarketStats from "@/components/MarketStats";
-import WatchlistTable from "@/components/WatchlistTable";
+import WatchlistTable from "@/components/watchlist/WatchlistTable";
 import CryptoList from "@/components/CryptoList";
 import TradingViewChart from "@/components/TradingViewChart";
 import QuickTradePanel from "@/components/QuickTradePanel";
