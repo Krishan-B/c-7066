@@ -62,13 +62,55 @@ const MobileMenu = ({ onMenuToggle }: MobileMenuProps) => {
         <SheetHeader className="text-left">
           <SheetTitle>Tradable</SheetTitle>
           <SheetDescription>
-            Manage your account settings.
+            Account Information
           </SheetDescription>
         </SheetHeader>
+        
+        {user && (
+          <div className="py-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Balance:</span>
+                <span>$10,000.00</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Equity:</span>
+                <span>$10,250.00</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Unrealized P&L:</span>
+                <span className="text-success">$250.00</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Margin Level:</span>
+                <span>85%</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Used Margin:</span>
+                <span>$1,200.00</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Realized P&L:</span>
+                <span className="text-success">$750.00</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Available:</span>
+                <span>$8,800.00</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Exposure:</span>
+                <span>$12,000.00</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Bonus:</span>
+                <span>$500.00</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <Separator />
         <MobileNavItem title="Dashboard" href="/" />
-        <MobileNavItem title="Markets" href="/markets" />
-        <MobileNavItem title="Portfolio" href="/portfolio" />
-        <MobileNavItem title="Orders" href="/orders" />
         <MobileNavItem title="Wallet" href="/wallet" />
         <MobileNavItem title="Account" href="/account" />
         <MobileNavItem title="Profile" href="/profile" />

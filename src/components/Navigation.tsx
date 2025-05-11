@@ -12,9 +12,9 @@ interface NavigationProps {
 export function Navigation({ onMenuToggle }: NavigationProps) {
   return (
     <div className="border-b">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-16 items-center">
         <ApplicationLogo />
-        <MainNav className="mx-6" />
+        <MainNav className="mx-6 flex-1" />
         <nav className="flex items-center space-x-1">
           <UserMenu />
           <MobileMenu onMenuToggle={onMenuToggle} />
