@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,11 @@ export interface Asset {
   volume: string;
   market_cap?: string;
   market_type: string;
+  last_price?: number;
+  high_price?: number;
+  low_price?: number;
+  open_price?: number;
+  previous_close?: number;
 }
 
 interface UseMarketDataOptions {
@@ -28,7 +34,7 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
     enableRefresh = true 
   } = options;
   
-  // Function to fetch market data from Supabase
+  // Function to fetch market data
   const fetchMarketData = async (marketTypes: string | string[]): Promise<Asset[]> => {
     try {
       // Convert single market type to array for consistent handling
@@ -52,7 +58,7 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
       
       // Otherwise, call our edge functions to get fresh data for each market type
       const dataPromises = marketTypeArray.map(async (type) => {
-        const { data, error } = await supabase.functions.invoke('fetch-market-data', {
+        const { data, error } = await supabase.functions.invoke('finnhub-market-data', {
           body: { market: type },
         });
 

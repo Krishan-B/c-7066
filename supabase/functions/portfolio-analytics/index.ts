@@ -1,176 +1,166 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// CORS headers for browser access
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Content-Type": "application/json",
 };
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// Handle OPTIONS preflight requests
+function handleOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders,
+  });
+}
 
-// Generate mock portfolio analytics
-const generatePortfolioAnalytics = (userId: string) => {
-  // In a real implementation, we would query user portfolio data from the database
-  // For now, we'll generate mock data
-  
-  return {
-    portfolio_value: 124567.89,
-    daily_change: 1243.56,
-    daily_change_percent: 1.02,
-    total_gain: 24567.89,
-    total_gain_percent: 24.56,
-    cash_balance: 4215.89,
-    locked_funds: 850.00,
-    allocation: {
-      stocks: 65,
-      crypto: 20,
-      commodities: 10,
-      forex: 5,
-    },
-    performance: {
-      '1D': 1.02,
-      '1W': -0.5,
-      '1M': 3.2,
-      '3M': 8.7,
-      '1Y': 12.4,
-      'YTD': 9.8,
-    },
-    top_holdings: [
-      {
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        value: 18750.25,
-        allocation: 15.05,
-        change_percent: 0.8,
-        quantity: 120,
-        price: 156.25,
-        entry_price: 142.65,
-        pnl: 1632.00,
-      },
-      {
-        symbol: "MSFT",
-        name: "Microsoft Corporation",
-        value: 15230.40,
-        allocation: 12.23,
-        change_percent: 1.2,
-        quantity: 45,
-        price: 338.45,
-        entry_price: 310.20,
-        pnl: 1271.25,
-      },
-      {
-        symbol: "GOOGL",
-        name: "Alphabet Inc.",
-        value: 12450.30,
-        allocation: 9.99,
-        change_percent: -0.5,
-        quantity: 85,
-        price: 146.48,
-        entry_price: 148.65,
-        pnl: -184.45,
-      },
-      {
-        symbol: "BTCUSD",
-        name: "Bitcoin",
-        value: 10500.00,
-        allocation: 8.43,
-        change_percent: 2.3,
-        quantity: 0.25,
-        price: 42000.00,
-        entry_price: 36250.00,
-        pnl: 1437.50,
-      },
-      {
-        symbol: "AMZN",
-        name: "Amazon.com Inc.",
-        value: 9870.15,
-        allocation: 7.92,
-        change_percent: -0.3,
-        quantity: 60,
-        price: 164.50,
-        entry_price: 166.25,
-        pnl: -105.00,
-      },
-    ],
-    recent_trades: [
-      {
-        id: "trade-1",
-        symbol: "NVDA",
-        name: "NVIDIA Corporation",
-        type: "buy",
-        quantity: 10,
-        price: 875.40,
-        total: 8754.00,
-        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        open_date: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
-        entry_price: 875.40,
-        exit_price: 0,
-        pnl: 0,
-        pnl_percentage: 0,
-      },
-      {
-        id: "trade-2",
-        symbol: "TSLA",
-        name: "Tesla Inc.",
-        type: "sell",
-        quantity: 5,
-        price: 235.30,
-        total: 1176.50,
-        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        open_date: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toISOString(),
-        entry_price: 187.45,
-        exit_price: 235.30,
-        pnl: 239.25,
-        pnl_percentage: 25.5,
-      },
-      {
-        id: "trade-3",
-        symbol: "ETHUSD",
-        name: "Ethereum",
-        type: "buy",
-        quantity: 2.5,
-        price: 3255.75,
-        total: 8139.38,
-        date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        open_date: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString(),
-        entry_price: 1890.50,
-        exit_price: 0,
-        pnl: 3413.13,
-        pnl_percentage: 72.3,
-      }
-    ]
-  };
-};
-
-serve(async (req: Request) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+serve(async (req) => {
+  // Handle CORS preflight request
+  if (req.method === "OPTIONS") {
+    return handleOptions();
   }
 
   try {
     const { userId } = await req.json();
-
+    
     if (!userId) {
-      throw new Error("User ID is required");
+      return new Response(
+        JSON.stringify({ error: "User ID is required" }),
+        { headers: corsHeaders, status: 400 }
+      );
     }
-
-    // Generate portfolio analytics
-    const analytics = generatePortfolioAnalytics(userId);
-
-    // Return the analytics data
-    return new Response(JSON.stringify({ success: true, data: analytics }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
+    
+    // Initialize Supabase client
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+    
+    // Get user account info
+    const { data: accountData, error: accountError } = await supabase
+      .from("user_account")
+      .select("*")
+      .eq("id", userId)
+      .single();
+      
+    if (accountError) {
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch user account data" }),
+        { headers: corsHeaders, status: 500 }
+      );
+    }
+    
+    // Get user portfolio
+    const { data: portfolioData, error: portfolioError } = await supabase
+      .from("user_portfolio")
+      .select("*")
+      .eq("user_id", userId);
+      
+    if (portfolioError) {
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch user portfolio data" }),
+        { headers: corsHeaders, status: 500 }
+      );
+    }
+    
+    // Get recent trades
+    const { data: recentTrades, error: tradesError } = await supabase
+      .from("user_trades")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(10);
+      
+    if (tradesError) {
+      return new Response(
+        JSON.stringify({ error: "Failed to fetch user trades data" }),
+        { headers: corsHeaders, status: 500 }
+      );
+    }
+    
+    // Calculate portfolio allocation
+    const allocation: {[key: string]: number} = {};
+    let totalValue = 0;
+    
+    portfolioData.forEach(asset => {
+      totalValue += asset.total_value;
+      
+      if (allocation[asset.market_type]) {
+        allocation[asset.market_type] += asset.total_value;
+      } else {
+        allocation[asset.market_type] = asset.total_value;
+      }
     });
+    
+    // Convert allocation to percentages
+    Object.keys(allocation).forEach(key => {
+      allocation[key] = (allocation[key] / totalValue) * 100;
+    });
+    
+    // Create mock performance data for chart
+    const performanceData: {[key: string]: number} = {};
+    const startDate = new Date();
+    startDate.setFullYear(startDate.getFullYear() - 1);
+    
+    let currentValue = accountData.cash_balance + totalValue;
+    let percentChange = 0;
+    
+    // Generate monthly data points
+    for (let i = 0; i <= 12; i++) {
+      const date = new Date(startDate);
+      date.setMonth(date.getMonth() + i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // Random fluctuation between -3% and +5%
+      const randomChange = ((Math.random() * 8) - 3);
+      percentChange += randomChange;
+      
+      performanceData[dateStr] = percentChange;
+    }
+    
+    // Format top holdings for the UI
+    const topHoldings = portfolioData.map(asset => ({
+      symbol: asset.asset_symbol,
+      name: asset.asset_name,
+      value: asset.total_value,
+      allocation: (asset.total_value / totalValue) * 100,
+      change_percent: asset.pnl_percentage,
+      quantity: asset.units,
+      price: asset.current_price,
+      entry_price: asset.average_price,
+      pnl: asset.pnl
+    }));
+    
+    // Calculate portfolio metrics
+    const dailyChange = Math.random() * 200 - 100; // Random value between -100 and 100
+    const dailyChangePercent = (dailyChange / (accountData.equity - dailyChange)) * 100;
+    
+    const analyticsData = {
+      portfolio_value: totalValue,
+      daily_change: dailyChange,
+      daily_change_percent: dailyChangePercent,
+      total_gain: accountData.realized_pnl + accountData.unrealized_pnl,
+      total_gain_percent: ((accountData.realized_pnl + accountData.unrealized_pnl) / accountData.cash_balance) * 100,
+      cash_balance: accountData.cash_balance,
+      locked_funds: accountData.used_margin,
+      allocation: allocation,
+      performance: performanceData,
+      top_holdings: topHoldings,
+      recent_trades: recentTrades
+    };
+    
+    return new Response(
+      JSON.stringify({ data: analyticsData }),
+      { headers: corsHeaders }
+    );
   } catch (error) {
-    console.error("Error generating portfolio analytics:", error);
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    });
+    console.error("Error processing request:", error);
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      { headers: corsHeaders, status: 500 }
+    );
   }
 });

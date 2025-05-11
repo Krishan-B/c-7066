@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import MarketContainer from "@/components/markets/MarketContainer";
 
@@ -13,16 +13,13 @@ const Markets = () => {
     { refetchInterval: 1000 * 60 } // Refresh every minute
   );
   
-  // Handle tab change
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-  };
-  
   return (
     <MarketContainer 
       marketData={marketData}
       isLoading={isLoading}
       error={error}
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
     />
   );
 };

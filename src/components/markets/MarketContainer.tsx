@@ -8,19 +8,27 @@ import MarketSearch from "@/components/markets/MarketSearch";
 import MarketTabs from "@/components/markets/MarketTabs";
 import MarketChartSection from "@/components/markets/MarketChartSection";
 import { useToast } from "@/components/ui/use-toast";
+import { useTradePanelContext } from "@/components/trade/TradePanelProvider";
 
 interface MarketContainerProps {
   marketData: Asset[];
   isLoading: boolean;
   error: Error | null;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
 }
 
-const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps) => {
+const MarketContainer = ({ 
+  marketData, 
+  isLoading, 
+  error, 
+  activeTab, 
+  setActiveTab 
+}: MarketContainerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("Crypto");
   const [selectedAsset, setSelectedAsset] = useState<Asset>({
     name: "Bitcoin",
-    symbol: "BTCUSD",
+    symbol: "BTCUSDT",
     price: 67432.21,
     change_percentage: 2.4,
     market_type: "Crypto",
@@ -29,6 +37,7 @@ const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps)
 
   const chartSectionRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { openTradePanel } = useTradePanelContext();
   
   // Check if the selected market is open
   const marketIsOpen = selectedAsset ? isMarketOpen(selectedAsset.market_type) : false;
@@ -70,6 +79,12 @@ const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps)
     }
   };
 
+  // Handle trade button click
+  const handleTradeButtonClick = () => {
+    // Open the trade panel
+    openTradePanel();
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
@@ -104,6 +119,7 @@ const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps)
           chartSectionRef={chartSectionRef}
           selectedAsset={selectedAsset}
           marketIsOpen={marketIsOpen}
+          onTradeClick={handleTradeButtonClick}
         />
       </div>
     </div>
