@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useMarketData } from "@/hooks/useMarketData";
-import { LeverageSlider } from "@/components/trade";
 import { isMarketOpen } from "@/utils/marketHours";
 import { useAuth } from "@/hooks/useAuth";
+import { getLeverageForAssetType, calculateRequiredMargin, formatLeverageRatio } from "@/utils/leverageUtils";
 
 const SUPPORTED_ASSETS = [
   { name: "Bitcoin", symbol: "BTCUSD", market_type: "Crypto" },
@@ -39,7 +39,6 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   const [selectedAsset, setSelectedAsset] = useState(SUPPORTED_ASSETS[0]);
   const [orderType, setOrderType] = useState("market");
   const [quantity, setQuantity] = useState("0.01");
-  const [leverage, setLeverage] = useState([1]);
   const [tradeAction, setTradeAction] = useState<"buy" | "sell">("buy");
   const [isExecuting, setIsExecuting] = useState(false);
   const { toast } = useToast();
@@ -66,10 +65,13 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
     return () => clearInterval(intervalId);
   }, [refetch]);
   
+  // Get the fixed leverage for the selected asset type
+  const fixedLeverage = getLeverageForAssetType(selectedAsset.market_type);
+  
   // Calculate required margin and estimated cost
   const parsedQuantity = parseFloat(quantity) || 0;
-  const marginRequirement = (currentPrice * parsedQuantity) / leverage[0];
   const estimatedCost = currentPrice * parsedQuantity;
+  const marginRequirement = calculateRequiredMargin(estimatedCost, selectedAsset.market_type);
   const fee = estimatedCost * 0.001; // 0.1% fee
   const totalCost = estimatedCost + fee;
   
@@ -120,7 +122,7 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
         amount: parsedQuantity,
         price: currentPrice,
         total: totalCost,
-        leverage: leverage[0],
+        leverage: fixedLeverage,
         order_type: orderType,
         status: 'completed',
         date: new Date().toISOString(),
@@ -133,7 +135,7 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
       // Success notification
       toast({
         title: `Order Executed: ${action.toUpperCase()} ${selectedAsset.symbol}`,
-        description: `${action.toUpperCase()} order for ${parsedQuantity} ${selectedAsset.symbol} at $${currentPrice.toLocaleString()} executed successfully.`,
+        description: `${action.toUpperCase()} order for ${parsedQuantity} ${selectedAsset.symbol} at $${currentPrice.toLocaleString()} with ${formatLeverageRatio(fixedLeverage)} leverage executed successfully.`,
         variant: action === "buy" ? "default" : "destructive",
       });
       
@@ -213,6 +215,12 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
             </div>
           )}
           
+          {/* Leverage Info */}
+          <div className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-md">
+            <span className="text-sm">Fixed Leverage</span>
+            <span className="font-medium">{formatLeverageRatio(fixedLeverage)}</span>
+          </div>
+          
           {/* Order Type Selection */}
           <div className="space-y-1.5">
             <label htmlFor="order-type" className="text-sm font-medium">
@@ -246,27 +254,20 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
             />
           </div>
           
-          {/* Leverage Slider */}
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">
-              Leverage <span className="text-muted-foreground">({leverage[0]}x)</span>
-            </label>
-            <LeverageSlider
-              leverage={leverage}
-              onLeverageChange={setLeverage}
-            />
-          </div>
-          
           {/* Trade Summary */}
           <div className="space-y-3 p-3 bg-secondary/30 rounded-md">
             <h3 className="text-sm font-medium">Trade Summary</h3>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
+                <span className="text-muted-foreground">Leverage</span>
+                <span>{formatLeverageRatio(fixedLeverage)}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-muted-foreground">Required Margin</span>
                 <span>${marginRequirement.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Estimated Value</span>
+                <span className="text-muted-foreground">Position Value</span>
                 <span>${estimatedCost.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">

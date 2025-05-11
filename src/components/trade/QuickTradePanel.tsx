@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMarketData, Asset } from "@/hooks/useMarketData";
 import { TradeForm } from "@/components/trade";
 import { MarketStatusAlert } from "@/components/trade";
+import { getLeverageForAssetType, formatLeverageRatio } from "@/utils/leverageUtils";
 
 interface QuickTradePanelProps {
   asset: {
@@ -41,13 +42,16 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   // Check if market is open
   const marketIsOpen = isMarketOpen(asset.market_type);
   
+  // Get fixed leverage for this asset type
+  const fixedLeverage = getLeverageForAssetType(asset.market_type);
+  
   const handleTabChange = (value: string) => {
     if (value === "buy" || value === "sell") {
       setActiveTab(value);
     }
   };
 
-  const handleSubmit = async (action: "buy" | "sell", amount: string, leverage: number[]) => {
+  const handleSubmit = async (action: "buy" | "sell", amount: string) => {
     if (!marketIsOpen) {
       toast({
         title: "Market Closed",
@@ -68,7 +72,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
       
       toast({
         title: `Order Executed: ${action.toUpperCase()} ${asset.name}`,
-        description: `${action.toUpperCase()} order for $${amount} of ${asset.symbol} at $${currentPrice.toLocaleString()} with ${leverage[0]}x leverage`,
+        description: `${action.toUpperCase()} order for $${amount} of ${asset.symbol} at $${currentPrice.toLocaleString()} with ${formatLeverageRatio(fixedLeverage)} leverage`,
         variant: action === "buy" ? "default" : "destructive",
       });
     } catch (error) {
@@ -98,6 +102,10 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
             ${isLoading ? "Loading..." : currentPrice.toLocaleString()}
           </span>
         </div>
+        <div className="flex justify-between mt-1">
+          <span className="text-sm text-muted-foreground">Fixed Leverage</span>
+          <span className="text-sm font-medium">{formatLeverageRatio(fixedLeverage)}</span>
+        </div>
       </div>
       
       {!marketIsOpen && <MarketStatusAlert marketType={asset.market_type} />}
@@ -116,7 +124,8 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
             isLoading={isLoading}
             isExecuting={isExecuting}
             marketIsOpen={marketIsOpen}
-            onSubmit={(amount, orderType, leverage) => handleSubmit("buy", amount, leverage)}
+            fixedLeverage={fixedLeverage}
+            onSubmit={(amount, orderType) => handleSubmit("buy", amount)}
           />
         </TabsContent>
         
@@ -128,7 +137,8 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
             isLoading={isLoading}
             isExecuting={isExecuting}
             marketIsOpen={marketIsOpen}
-            onSubmit={(amount, orderType, leverage) => handleSubmit("sell", amount, leverage)}
+            fixedLeverage={fixedLeverage}
+            onSubmit={(amount, orderType) => handleSubmit("sell", amount)}
           />
         </TabsContent>
       </Tabs>

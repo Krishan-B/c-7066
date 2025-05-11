@@ -1,11 +1,10 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Info } from "lucide-react";
-import { OrderTypeSelector } from '@/components/trade';
-import { LeverageSlider } from '@/components/trade';
-import { TradeSummary } from '@/components/trade';
+import { OrderTypeSelector } from "@/components/trade";
+import { TradeSummary } from "@/components/trade"; 
+import { formatLeverageRatio } from "@/utils/leverageUtils";
 
 interface TradeFormProps {
   action: "buy" | "sell";
@@ -13,14 +12,14 @@ interface TradeFormProps {
     name: string;
     symbol: string;
     price: number;
-    change_percentage?: number;
     market_type: string;
   };
   currentPrice: number;
   isLoading: boolean;
   isExecuting: boolean;
   marketIsOpen: boolean;
-  onSubmit: (amount: string, orderType: string, leverage: number[]) => void;
+  fixedLeverage?: number;
+  onSubmit: (amount: string, orderType: string, leverage?: number[]) => void;
 }
 
 const TradeForm = ({
@@ -30,49 +29,97 @@ const TradeForm = ({
   isLoading,
   isExecuting,
   marketIsOpen,
-  onSubmit
+  fixedLeverage = 1, // Default to 1:1 (no leverage) if not provided
+  onSubmit,
 }: TradeFormProps) => {
   const [amount, setAmount] = useState("100");
   const [orderType, setOrderType] = useState("market");
-  const [leverage, setLeverage] = useState([1]);
   
-  // Calculate estimated values
+  // Calculate total based on amount
   const parsedAmount = parseFloat(amount) || 0;
-  const fee = parsedAmount * 0.001;
+  const fee = parsedAmount * 0.001; // 0.1% fee
   const total = parsedAmount + fee;
+  
+  // Calculate estimated quantity
+  const estimatedQuantity = currentPrice > 0 ? parsedAmount / currentPrice : 0;
+  
+  // Calculate required margin based on fixed leverage
+  const marginRequirement = parsedAmount / fixedLeverage;
 
-  const handleSubmit = () => {
-    onSubmit(amount, orderType, leverage);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(amount, orderType, [fixedLeverage]);
   };
 
   return (
-    <div className="mt-4">
-      <OrderTypeSelector 
-        orderType={orderType} 
-        onOrderTypeChange={setOrderType} 
-      />
-      
-      <div className="mb-4">
-        <label className="text-sm text-muted-foreground mb-1 block">Amount (USD)</label>
+    <form onSubmit={handleSubmit} className="space-y-4 py-2">
+      <div>
+        <label htmlFor="amount" className="text-sm font-medium block mb-1">
+          Amount (USD)
+        </label>
         <Input
-          type="text"
+          id="amount"
+          type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className="bg-secondary/40"
+          placeholder="Enter amount"
+          className="w-full"
+          disabled={isExecuting}
         />
+        <div className="flex justify-between mt-1">
+          <button
+            type="button"
+            className="text-xs text-primary"
+            onClick={() => setAmount("100")}
+          >
+            $100
+          </button>
+          <button
+            type="button"
+            className="text-xs text-primary"
+            onClick={() => setAmount("500")}
+          >
+            $500
+          </button>
+          <button
+            type="button"
+            className="text-xs text-primary"
+            onClick={() => setAmount("1000")}
+          >
+            $1,000
+          </button>
+          <button
+            type="button"
+            className="text-xs text-primary"
+            onClick={() => setAmount("5000")}
+          >
+            $5,000
+          </button>
+        </div>
       </div>
       
-      <LeverageSlider 
-        leverage={leverage} 
-        onLeverageChange={setLeverage} 
+      <OrderTypeSelector
+        value={orderType}
+        onChange={setOrderType}
+        disabled={isExecuting}
       />
       
-      <div className="mb-4 text-xs bg-secondary/40 p-3 rounded-md border border-secondary/60">
-        <div className="flex items-start gap-2">
-          <Info className="min-w-4 w-4 h-4 text-muted-foreground mt-0.5" />
-          <p className="text-muted-foreground">
-            Trading with leverage increases both potential profits and losses. Make sure you understand the risks before placing an order.
-          </p>
+      {/* Display leverage info */}
+      <div className="flex justify-between items-center p-2 bg-primary/10 rounded-md">
+        <span className="text-xs">Fixed Leverage</span>
+        <span className="text-xs font-medium">{formatLeverageRatio(fixedLeverage)}</span>
+      </div>
+      
+      <div className="space-y-1 text-sm">
+        <div className="flex justify-between">
+          <span className="text-xs text-muted-foreground">Est. Quantity</span>
+          <span className="text-xs">
+            {isLoading ? "Loading..." : estimatedQuantity.toFixed(6)} {asset.symbol}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-xs text-muted-foreground">Required Margin</span>
+          <span className="text-xs">${marginRequirement.toFixed(2)}</span>
         </div>
       </div>
       
@@ -83,16 +130,21 @@ const TradeForm = ({
         total={total}
         isLoading={isLoading}
       />
-    
-      <Button 
-        type="button" 
-        className={`w-full ${action === "buy" ? "bg-success hover:bg-success/80" : "bg-warning hover:bg-warning/80"}`}
-        onClick={handleSubmit}
-        disabled={!marketIsOpen || isExecuting || isLoading}
+      
+      <Button
+        type="submit"
+        className={`w-full ${
+          action === "buy"
+            ? "bg-success hover:bg-success/90"
+            : "bg-warning hover:bg-warning/90"
+        } text-white`}
+        disabled={isExecuting || !marketIsOpen || parsedAmount <= 0}
       >
-        {isExecuting ? "Processing..." : `${action === "buy" ? "Buy" : "Sell"} ${asset.symbol}`}
+        {isExecuting
+          ? "Processing..."
+          : `${action === "buy" ? "Buy" : "Sell"} ${asset.symbol}`}
       </Button>
-    </div>
+    </form>
   );
 };
 
