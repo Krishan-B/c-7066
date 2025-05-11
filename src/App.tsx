@@ -1,8 +1,8 @@
 
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/components/AuthProvider";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Layout } from "@/components/Layout";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import Layout from "@/components/Layout";
 import { Toaster } from "@/components/ui/toaster";
 import { TradePanelProvider } from "@/components/trade/TradePanelProvider";
 
