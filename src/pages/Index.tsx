@@ -23,7 +23,8 @@ const Index = () => {
     name: "Bitcoin",
     symbol: "BTCUSD",
     price: 67543.21,
-    change: 2.4
+    change: 2.4,
+    market_type: "Crypto"  // Added the required market_type property
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
