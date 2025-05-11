@@ -25,11 +25,6 @@ export const TradeSlidePanelOrderTypeSelector = ({
         onOrderTypeChange={handleOrderTypeChange}
         disabled={isExecuting}
       />
-      <p className="text-xs text-muted-foreground">
-        {orderType === "market" 
-          ? "A market order will be executed immediately at the next market price."
-          : "An entry order will be executed when the market reaches the requested price."}
-      </p>
     </div>
   );
 };

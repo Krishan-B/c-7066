@@ -4,42 +4,38 @@ import { Button } from "@/components/ui/button";
 interface OrderTypeSelectorProps {
   orderType: string;
   onOrderTypeChange: (type: string) => void;
-  disabled?: boolean; // Added disabled as an optional prop
+  disabled?: boolean;
 }
 
 const OrderTypeSelector = ({ orderType, onOrderTypeChange, disabled = false }: OrderTypeSelectorProps) => {
   return (
     <div className="mb-4">
-      <label className="text-sm text-muted-foreground mb-1 block">Order Type</label>
+      <label className="text-sm text-muted-foreground mb-1 block">Order type</label>
       <div className="flex gap-2">
         <Button 
           type="button" 
           variant={orderType === "market" ? "default" : "outline"} 
-          className="flex-1 text-xs" 
+          className={`flex-1 ${orderType === "market" ? "bg-sky-100 text-sky-900 hover:bg-sky-200 hover:text-sky-900" : ""}`}
           onClick={() => onOrderTypeChange("market")}
           disabled={disabled}
         >
-          Market
+          Market order
         </Button>
         <Button 
           type="button" 
-          variant={orderType === "limit" ? "default" : "outline"} 
-          className="flex-1 text-xs" 
-          onClick={() => onOrderTypeChange("limit")}
+          variant={orderType === "entry" ? "default" : "outline"} 
+          className={`flex-1 ${orderType === "entry" ? "bg-amber-400 text-black hover:bg-amber-500 hover:text-black" : ""}`}
+          onClick={() => onOrderTypeChange("entry")}
           disabled={disabled}
         >
-          Limit
-        </Button>
-        <Button 
-          type="button" 
-          variant={orderType === "stop" ? "default" : "outline"} 
-          className="flex-1 text-xs" 
-          onClick={() => onOrderTypeChange("stop")}
-          disabled={disabled}
-        >
-          Stop
+          Entry order
         </Button>
       </div>
+      <p className="text-xs text-muted-foreground mt-1">
+        {orderType === "market" 
+          ? "A market order will be executed immediately at the next market price." 
+          : "An entry order will be executed when the market reaches the requested price."}
+      </p>
     </div>
   );
 };
