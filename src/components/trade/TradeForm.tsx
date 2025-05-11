@@ -99,8 +99,8 @@ const TradeForm = ({
       </div>
       
       <OrderTypeSelector
-        value={orderType}
-        onChange={setOrderType}
+        orderType={orderType}
+        onOrderTypeChange={setOrderType}
         disabled={isExecuting}
       />
       
