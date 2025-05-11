@@ -12,6 +12,7 @@ import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import { Asset } from "@/hooks/useMarketData";
 import { isMarketOpen } from "@/utils/marketHours";
+import { MarketHoursDisplay } from "@/components/trade";
 
 const Markets = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -53,23 +54,32 @@ const Markets = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="p-6 max-w-7xl mx-auto">
-        <div className="mb-6 flex justify-between items-center">
+        <div className="mb-6 flex flex-col md:flex-row justify-between md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold mb-2">Markets</h1>
             <p className="text-muted-foreground">
               Explore live price data and trends across different markets
             </p>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRefreshData}
-            className="flex items-center gap-1"
-            disabled={isFetching}
-          >
-            <RefreshCcw className={`h-4 w-4 mr-1 ${isFetching ? 'animate-spin' : ''}`} />
-            {isFetching ? 'Refreshing...' : 'Refresh Data'}
-          </Button>
+          <div className="flex items-center gap-3">
+            {selectedAsset && (
+              <MarketHoursDisplay 
+                marketType={selectedAsset.market_type}
+                isOpen={marketIsOpen}
+                className="hidden md:flex"
+              />
+            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRefreshData}
+              className="flex items-center gap-1"
+              disabled={isFetching}
+            >
+              <RefreshCcw className={`h-4 w-4 mr-1 ${isFetching ? 'animate-spin' : ''}`} />
+              {isFetching ? 'Refreshing...' : 'Refresh Data'}
+            </Button>
+          </div>
         </div>
         
         <div className="flex flex-col md:flex-row gap-6">

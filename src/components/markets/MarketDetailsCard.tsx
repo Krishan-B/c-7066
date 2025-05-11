@@ -2,8 +2,8 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Globe, Clock } from "lucide-react";
-import { getMarketHoursMessage } from "@/utils/marketHours";
+import { AlertTriangle, Globe } from "lucide-react";
+import { MarketHoursDisplay } from "@/components/trade";
 
 interface Asset {
   id?: string;
@@ -53,17 +53,11 @@ const MarketDetailsCard = ({ selectedAsset, marketIsOpen = true }: MarketDetails
             </div>
           </div>
           
-          <div className="flex items-center gap-2 py-2 px-3 rounded-md bg-secondary/20">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <div className="text-xs">
-              <div className={marketIsOpen ? "text-success" : "text-warning"}>
-                Market {marketIsOpen ? "Open" : "Closed"}
-              </div>
-              <div className="text-muted-foreground text-xs mt-0.5">
-                {getMarketHoursMessage(selectedAsset.market_type)}
-              </div>
-            </div>
-          </div>
+          <MarketHoursDisplay 
+            marketType={selectedAsset.market_type}
+            isOpen={marketIsOpen}
+            className="py-2 px-3 rounded-md bg-secondary/20"
+          />
           
           <div className="pt-2">
             <div className="flex justify-center space-x-2">
