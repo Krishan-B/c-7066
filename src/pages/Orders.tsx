@@ -7,11 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   RefreshCw, 
   ArrowUpDown, 
-  Settings, 
   X, 
   AlertCircle, 
   Clock, 
-  CheckCircle2, 
   ShieldCheck, 
   Percent
 } from "lucide-react";
@@ -19,7 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { TradeButton } from "@/components/trade";
 import { toast } from "sonner";
-import { FormProvider, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import OrderTypeSelector from "@/components/trade/OrderTypeSelector";
@@ -93,9 +91,6 @@ const Orders = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("open");
   const [selectedOrderType, setSelectedOrderType] = useState("market");
-  const [hasStopLoss, setHasStopLoss] = useState(false);
-  const [hasTakeProfit, setHasTakeProfit] = useState(false);
-  const [hasExpirationDate, setHasExpirationDate] = useState(false);
   
   // Initialize the form with react-hook-form
   const form = useForm<OrderFormValues>({
@@ -105,6 +100,11 @@ const Orders = () => {
       expirationDate: false
     },
   });
+
+  // Extract the values from the form to use for UI state
+  const hasStopLoss = form.watch("stopLoss");
+  const hasTakeProfit = form.watch("takeProfit");
+  const hasExpirationDate = form.watch("expirationDate");
   
   // Sample orders data
   const openTrades: OpenTrade[] = [
@@ -573,82 +573,72 @@ const Orders = () => {
                         )}
                       </div>
                       
-                      <FormProvider {...form}>
-                        <Form>
-                          <div className="space-y-4">
-                            <FormField
-                              control={form.control}
-                              name="stopLoss"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={hasStopLoss}
-                                      onCheckedChange={(checked) => {
-                                        setHasStopLoss(!!checked);
-                                        field.onChange(!!checked);
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <div className="space-y-1 leading-none">
-                                    <FormLabel>
-                                      Stop Loss
-                                    </FormLabel>
-                                  </div>
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={form.control}
-                              name="takeProfit"
-                              render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={hasTakeProfit}
-                                      onCheckedChange={(checked) => {
-                                        setHasTakeProfit(!!checked);
-                                        field.onChange(!!checked);
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <div className="space-y-1 leading-none">
-                                    <FormLabel>
-                                      Take Profit
-                                    </FormLabel>
-                                  </div>
-                                </FormItem>
-                              )}
-                            />
-                            
-                            {selectedOrderType !== "market" && (
-                              <FormField
-                                control={form.control}
-                                name="expirationDate"
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={hasExpirationDate}
-                                        onCheckedChange={(checked) => {
-                                          setHasExpirationDate(!!checked);
-                                          field.onChange(!!checked);
-                                        }}
-                                      />
-                                    </FormControl>
-                                    <div className="space-y-1 leading-none">
-                                      <FormLabel>
-                                        Expiration Date
-                                      </FormLabel>
-                                    </div>
-                                  </FormItem>
-                                )}
-                              />
+                      {/* Fix: Use form as a context provider rather than a component */}
+                      <Form {...form}>
+                        <form className="space-y-4">
+                          <FormField
+                            control={form.control}
+                            name="stopLoss"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                  <FormLabel>
+                                    Stop Loss
+                                  </FormLabel>
+                                </div>
+                              </FormItem>
                             )}
-                          </div>
-                        </Form>
-                      </FormProvider>
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="takeProfit"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                  <FormLabel>
+                                    Take Profit
+                                  </FormLabel>
+                                </div>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          {selectedOrderType !== "market" && (
+                            <FormField
+                              control={form.control}
+                              name="expirationDate"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value}
+                                      onCheckedChange={field.onChange}
+                                    />
+                                  </FormControl>
+                                  <div className="space-y-1 leading-none">
+                                    <FormLabel>
+                                      Expiration Date
+                                    </FormLabel>
+                                  </div>
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                        </form>
+                      </Form>
                     </div>
                     
                     <div className="flex flex-col justify-end">
