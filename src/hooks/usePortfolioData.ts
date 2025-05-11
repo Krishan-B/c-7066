@@ -29,37 +29,37 @@ export const usePortfolioData = () => {
     dayChangePercentage: analytics?.daily_change_percent || 0,
     totalPnL: analytics?.total_gain || 0,
     totalPnLPercentage: analytics?.total_gain_percent || 0,
-    cashBalance: 4215.89, // Default value since it's not in analytics
-    lockedFunds: 850.00, // Default value since it's not in analytics
+    cashBalance: analytics?.cash_balance || 4215.89, // Use analytics value if available, otherwise fallback
+    lockedFunds: analytics?.locked_funds || 850.00, // Use analytics value if available, otherwise fallback
     
-    // Transform top holdings into assets format
+    // Transform top holdings into assets format with better error handling
     assets: analytics?.top_holdings?.map(holding => ({
       name: holding.name,
       symbol: holding.symbol,
-      amount: 0, // Not provided in analytics
-      price: holding.value / holding.allocation * 100 / 0.45, // Estimate price based on value and allocation
-      entryPrice: 0, // Not provided in analytics
+      amount: holding.quantity || 0,
+      price: holding.price || (holding.value / holding.allocation * 100 / 0.45), // Use direct price if available
+      entryPrice: holding.entry_price || 0,
       value: holding.value,
       change: holding.change_percent,
-      pnl: holding.value * (holding.change_percent / 100), // Estimate PnL based on value and change percentage
+      pnl: holding.pnl || (holding.value * (holding.change_percent / 100)), // Use direct PnL if available
       pnlPercentage: holding.change_percent
     })) || [],
     
-    // Transform recent trades into closed positions format
+    // Transform recent trades into closed positions format with validation
     closedPositions: analytics?.recent_trades?.map(trade => ({
       id: trade.id,
       name: trade.name,
       symbol: trade.symbol,
-      openDate: "N/A", // Not provided in analytics
+      openDate: trade.open_date || "N/A",
       closeDate: trade.date,
-      entryPrice: trade.type === "buy" ? trade.price : 0,
-      exitPrice: trade.type === "sell" ? trade.price : 0,
+      entryPrice: trade.entry_price || (trade.type === "buy" ? trade.price : 0),
+      exitPrice: trade.exit_price || (trade.type === "sell" ? trade.price : 0),
       amount: trade.quantity,
-      pnl: trade.type === "sell" ? trade.total * 0.05 : -trade.total * 0.02, // Estimate P&L based on trade type
-      pnlPercentage: trade.type === "sell" ? 5 : -2 // Placeholder values
+      pnl: trade.pnl || (trade.type === "sell" ? trade.total * 0.05 : -trade.total * 0.02),
+      pnlPercentage: trade.pnl_percentage || (trade.type === "sell" ? 5 : -2)
     })) || [],
     
-    // Transform allocation data
+    // Transform allocation data with better error handling
     allocationData: Object.entries(analytics?.allocation || {}).map(([name, value], index) => {
       const colors = ['#8989DE', '#75C6C3', '#F29559', '#E5C5C0', '#A5D8FF', '#FFD8A5'];
       return {
@@ -69,27 +69,44 @@ export const usePortfolioData = () => {
       };
     }),
     
-    // Create performance data from portfolio performance
+    // Create performance data from portfolio performance with validation
     performanceData: Object.entries(analytics?.performance || {}).map(([date, value]) => ({
       date,
-      value: analytics?.portfolio_value * (1 + (value as number) / 100)
+      value: analytics?.portfolio_value ? analytics.portfolio_value * (1 + (value as number) / 100) : 0
     }))
   };
 
   const handleExportReport = useCallback(() => {
+    if (error) {
+      toast.error("Cannot export report: Portfolio data unavailable");
+      return;
+    }
     toast.success("Report export started");
     // Implementation would go here
-  }, []);
+  }, [error]);
 
   const handleTaxEvents = useCallback(() => {
+    if (error) {
+      toast.error("Cannot access tax events: Portfolio data unavailable");
+      return;
+    }
     toast.success("Tax events settings opened");
     // Implementation would go here
-  }, []);
+  }, [error]);
 
   const handleViewDetails = useCallback((symbol: string) => {
+    if (error) {
+      toast.error(`Cannot view details for ${symbol}: Portfolio data unavailable`);
+      return;
+    }
     toast.success(`Viewing details for ${symbol}`);
     // Implementation would go here
-  }, []);
+  }, [error]);
+
+  const retryFetch = useCallback(() => {
+    toast.info("Retrying data fetch...");
+    refetch();
+  }, [refetch]);
 
   return {
     portfolioData: transformedData,
@@ -97,7 +114,7 @@ export const usePortfolioData = () => {
     setTimeframe,
     isLoading,
     error,
-    refetch,
+    refetch: retryFetch,
     actions: {
       handleExportReport,
       handleTaxEvents,

@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 // Import components and hook
 import PortfolioSummary from "@/components/portfolio/PortfolioSummary";
@@ -25,7 +26,8 @@ const PortfolioContainer = () => {
     actions, 
     activeTrades,
     isLoading,
-    error
+    error,
+    refetch
   } = usePortfolioData();
   
   const {
@@ -71,16 +73,33 @@ const PortfolioContainer = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh]">
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-4">
         <Card className="max-w-md w-full">
           <CardHeader>
-            <CardTitle className="text-center text-destructive">Error Loading Portfolio</CardTitle>
+            <CardTitle className="text-center text-destructive flex items-center justify-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              Error Loading Portfolio
+            </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
-            <p className="text-center mb-4">
-              There was a problem loading your portfolio data. Please try again later.
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Data Retrieval Error</AlertTitle>
+              <AlertDescription>
+                {error instanceof Error 
+                  ? error.message 
+                  : "There was a problem loading your portfolio data. Please try again."}
+              </AlertDescription>
+            </Alert>
+            <p className="text-center mb-6 text-muted-foreground">
+              This could be due to network connectivity issues or a temporary server problem.
             </p>
-            <Button onClick={() => window.location.reload()}>Refresh</Button>
+            <div className="flex gap-4">
+              <Button onClick={refetch} className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Retry
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/")}>Go to Dashboard</Button>
+            </div>
           </CardContent>
         </Card>
       </div>
