@@ -9,7 +9,7 @@ import MarketStats from "@/components/MarketStats";
 import WatchlistTable from "@/components/watchlist/WatchlistTable";
 import CryptoList from "@/components/CryptoList";
 import TradingViewChart from "@/components/TradingViewChart";
-import QuickTradePanel from "@/components/QuickTradePanel";
+import { QuickTradePanel } from "@/components/trade";
 import PortfolioCard from "@/components/PortfolioCard";
 import MarketOverview from "@/components/MarketOverview";
 import { useToast } from "@/hooks/use-toast";
