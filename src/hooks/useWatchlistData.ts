@@ -215,7 +215,7 @@ export const useWatchlistData = () => {
         // For authenticated users, use the edge function
         const { data } = await supabase.auth.getSession();
         const session = data.session;
-        // Ensure access token is a string
+        // Ensure access token is a string with fallback to empty string
         const accessToken = session?.access_token ?? '';
         
         const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
