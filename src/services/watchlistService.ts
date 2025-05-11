@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Asset } from '@/hooks/useMarketData';
 
@@ -21,9 +22,10 @@ export async function fetchWatchlistData(userId: string | undefined): Promise<As
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Ensure access_token is treated as a string with a proper fallback
-    // Use type assertion to convert the unknown type to string safely
-    const accessToken = session?.access_token ? String(session.access_token) : "";
+    // Properly convert the access_token to string with TypeScript safety
+    const accessToken = session?.access_token ? 
+      (typeof session.access_token === 'string' ? session.access_token : String(session.access_token)) : 
+      "";
     
     // Fetch the user's watchlist through the edge function
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
@@ -116,9 +118,10 @@ export async function addToWatchlist(userId: string | undefined, asset: Asset): 
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Ensure access_token is treated as a string with a proper fallback
-    // Use type assertion to convert the unknown type to string safely
-    const accessToken = session?.access_token ? String(session.access_token) : "";
+    // Properly convert the access_token to string with TypeScript safety
+    const accessToken = session?.access_token ? 
+      (typeof session.access_token === 'string' ? session.access_token : String(session.access_token)) : 
+      "";
     
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
       body: { 
@@ -161,9 +164,10 @@ export async function removeFromWatchlist(userId: string | undefined, asset: Ass
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Ensure access_token is treated as a string with a proper fallback
-    // Use type assertion to convert the unknown type to string safely
-    const accessToken = session?.access_token ? String(session.access_token) : "";
+    // Properly convert the access_token to string with TypeScript safety
+    const accessToken = session?.access_token ? 
+      (typeof session.access_token === 'string' ? session.access_token : String(session.access_token)) : 
+      "";
     
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
       body: { 
