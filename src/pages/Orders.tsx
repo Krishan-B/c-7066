@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -20,9 +19,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { TradeButton } from "@/components/trade";
 import { toast } from "sonner";
+import { FormProvider, useForm } from "react-hook-form";
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import OrderTypeSelector from "@/components/trade/OrderTypeSelector";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface BaseOrder {
   id: string;
@@ -80,6 +81,13 @@ interface OrderHistory extends BaseOrder {
 
 type Order = OpenTrade | PendingOrder | ClosedTrade | OrderHistory;
 
+// Form interface for the order creation form
+interface OrderFormValues {
+  stopLoss: boolean;
+  takeProfit: boolean;
+  expirationDate: boolean;
+}
+
 const Orders = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -88,6 +96,15 @@ const Orders = () => {
   const [hasStopLoss, setHasStopLoss] = useState(false);
   const [hasTakeProfit, setHasTakeProfit] = useState(false);
   const [hasExpirationDate, setHasExpirationDate] = useState(false);
+  
+  // Initialize the form with react-hook-form
+  const form = useForm<OrderFormValues>({
+    defaultValues: {
+      stopLoss: false,
+      takeProfit: false,
+      expirationDate: false
+    },
+  });
   
   // Sample orders data
   const openTrades: OpenTrade[] = [
@@ -389,8 +406,24 @@ const Orders = () => {
                             <TableCell>
                               {(trade.stopLoss || trade.takeProfit) ? (
                                 <div className="flex gap-1">
-                                  {trade.stopLoss && <AlertCircle className="h-4 w-4 text-amber-500" title="Stop Loss" />}
-                                  {trade.takeProfit && <ShieldCheck className="h-4 w-4 text-green-500" title="Take Profit" />}
+                                  <TooltipProvider>
+                                    {trade.stopLoss && (
+                                      <Tooltip>
+                                        <TooltipTrigger>
+                                          <AlertCircle className="h-4 w-4 text-amber-500" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>Stop Loss: ${trade.stopLoss}</TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                    {trade.takeProfit && (
+                                      <Tooltip>
+                                        <TooltipTrigger>
+                                          <ShieldCheck className="h-4 w-4 text-green-500" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>Take Profit: ${trade.takeProfit}</TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                  </TooltipProvider>
                                 </div>
                               ) : (
                                 <span className="text-muted-foreground">—</span>
@@ -456,7 +489,7 @@ const Orders = () => {
                             </TableCell>
                             <TableCell>
                               <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
-                                {orderType === "market" ? "Market" : "Limit"}
+                                {orderType === "limit" ? "Limit" : "Market"}
                               </span>
                             </TableCell>
                             <TableCell>${order.orderRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
@@ -465,8 +498,24 @@ const Orders = () => {
                             <TableCell>
                               {(order.stopLoss || order.takeProfit) ? (
                                 <div className="flex gap-1">
-                                  {order.stopLoss && <AlertCircle className="h-4 w-4 text-amber-500" title="Stop Loss" />}
-                                  {order.takeProfit && <ShieldCheck className="h-4 w-4 text-green-500" title="Take Profit" />}
+                                  <TooltipProvider>
+                                    {order.stopLoss && (
+                                      <Tooltip>
+                                        <TooltipTrigger>
+                                          <AlertCircle className="h-4 w-4 text-amber-500" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>Stop Loss: ${order.stopLoss}</TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                    {order.takeProfit && (
+                                      <Tooltip>
+                                        <TooltipTrigger>
+                                          <ShieldCheck className="h-4 w-4 text-green-500" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>Take Profit: ${order.takeProfit}</TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                  </TooltipProvider>
                                 </div>
                               ) : (
                                 <span className="text-muted-foreground">—</span>
@@ -524,74 +573,82 @@ const Orders = () => {
                         )}
                       </div>
                       
-                      <Form>
-                        <div className="space-y-4">
-                          <FormField
-                            name="stopLoss"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={hasStopLoss}
-                                    onCheckedChange={(checked) => {
-                                      setHasStopLoss(!!checked);
-                                    }}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel>
-                                    Stop Loss
-                                  </FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            name="takeProfit"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={hasTakeProfit}
-                                    onCheckedChange={(checked) => {
-                                      setHasTakeProfit(!!checked);
-                                    }}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel>
-                                    Take Profit
-                                  </FormLabel>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          {selectedOrderType === "limit" && (
+                      <FormProvider {...form}>
+                        <Form>
+                          <div className="space-y-4">
                             <FormField
-                              name="expirationDate"
+                              control={form.control}
+                              name="stopLoss"
                               render={({ field }) => (
                                 <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                                   <FormControl>
                                     <Checkbox
-                                      checked={hasExpirationDate}
+                                      checked={hasStopLoss}
                                       onCheckedChange={(checked) => {
-                                        setHasExpirationDate(!!checked);
+                                        setHasStopLoss(!!checked);
+                                        field.onChange(!!checked);
                                       }}
                                     />
                                   </FormControl>
                                   <div className="space-y-1 leading-none">
                                     <FormLabel>
-                                      Expiration Date
+                                      Stop Loss
                                     </FormLabel>
                                   </div>
                                 </FormItem>
                               )}
                             />
-                          )}
-                        </div>
-                      </Form>
+                            
+                            <FormField
+                              control={form.control}
+                              name="takeProfit"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={hasTakeProfit}
+                                      onCheckedChange={(checked) => {
+                                        setHasTakeProfit(!!checked);
+                                        field.onChange(!!checked);
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <div className="space-y-1 leading-none">
+                                    <FormLabel>
+                                      Take Profit
+                                    </FormLabel>
+                                  </div>
+                                </FormItem>
+                              )}
+                            />
+                            
+                            {selectedOrderType !== "market" && (
+                              <FormField
+                                control={form.control}
+                                name="expirationDate"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={hasExpirationDate}
+                                        onCheckedChange={(checked) => {
+                                          setHasExpirationDate(!!checked);
+                                          field.onChange(!!checked);
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <div className="space-y-1 leading-none">
+                                      <FormLabel>
+                                        Expiration Date
+                                      </FormLabel>
+                                    </div>
+                                  </FormItem>
+                                )}
+                              />
+                            )}
+                          </div>
+                        </Form>
+                      </FormProvider>
                     </div>
                     
                     <div className="flex flex-col justify-end">
@@ -668,8 +725,24 @@ const Orders = () => {
                             <TableCell>
                               {(trade.stopLoss || trade.takeProfit) ? (
                                 <div className="flex gap-1">
-                                  {trade.stopLoss && <AlertCircle className="h-4 w-4 text-amber-500" title="Stop Loss" />}
-                                  {trade.takeProfit && <ShieldCheck className="h-4 w-4 text-green-500" title="Take Profit" />}
+                                  <TooltipProvider>
+                                    {trade.stopLoss && (
+                                      <Tooltip>
+                                        <TooltipTrigger>
+                                          <AlertCircle className="h-4 w-4 text-amber-500" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>Stop Loss: ${trade.stopLoss}</TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                    {trade.takeProfit && (
+                                      <Tooltip>
+                                        <TooltipTrigger>
+                                          <ShieldCheck className="h-4 w-4 text-green-500" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>Take Profit: ${trade.takeProfit}</TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                  </TooltipProvider>
                                 </div>
                               ) : (
                                 <span className="text-muted-foreground">—</span>
@@ -746,8 +819,24 @@ const Orders = () => {
                             <TableCell>
                               {(order.stopLoss || order.takeProfit) ? (
                                 <div className="flex gap-1">
-                                  {order.stopLoss && <AlertCircle className="h-4 w-4 text-amber-500" title="Stop Loss" />}
-                                  {order.takeProfit && <ShieldCheck className="h-4 w-4 text-green-500" title="Take Profit" />}
+                                  <TooltipProvider>
+                                    {order.stopLoss && (
+                                      <Tooltip>
+                                        <TooltipTrigger>
+                                          <AlertCircle className="h-4 w-4 text-amber-500" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>Stop Loss: ${order.stopLoss}</TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                    {order.takeProfit && (
+                                      <Tooltip>
+                                        <TooltipTrigger>
+                                          <ShieldCheck className="h-4 w-4 text-green-500" />
+                                        </TooltipTrigger>
+                                        <TooltipContent>Take Profit: ${order.takeProfit}</TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                  </TooltipProvider>
                                 </div>
                               ) : (
                                 <span className="text-muted-foreground">—</span>
