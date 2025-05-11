@@ -51,10 +51,7 @@ export const useWatchlistData = () => {
       
       // Fetch the user's watchlist through the edge function
       const { data, error } = await supabase.functions.invoke('watchlist-operations', {
-        body: { operation: "get" },
-        headers: {
-          Authorization: `Bearer ${supabase.auth.getSession().then(res => res.data.session?.access_token)}`
-        }
+        body: { operation: "get" }
       });
       
       if (error || data?.error) {
@@ -148,6 +145,9 @@ export const useWatchlistData = () => {
         });
       } else {
         // For authenticated users, use the edge function
+        const session = await supabase.auth.getSession();
+        const token = session?.data?.session?.access_token || '';
+        
         const { data, error } = await supabase.functions.invoke('watchlist-operations', {
           body: { 
             operation: "add",
@@ -158,7 +158,7 @@ export const useWatchlistData = () => {
             }
           },
           headers: {
-            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+            Authorization: `Bearer ${token}`
           }
         });
         
@@ -202,6 +202,9 @@ export const useWatchlistData = () => {
         });
       } else {
         // For authenticated users, use the edge function
+        const session = await supabase.auth.getSession();
+        const token = session?.data?.session?.access_token || '';
+        
         const { data, error } = await supabase.functions.invoke('watchlist-operations', {
           body: { 
             operation: "remove",
@@ -211,7 +214,7 @@ export const useWatchlistData = () => {
             }
           },
           headers: {
-            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+            Authorization: `Bearer ${token}`
           }
         });
         
