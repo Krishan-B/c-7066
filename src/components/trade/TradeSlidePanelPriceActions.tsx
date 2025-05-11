@@ -30,9 +30,9 @@ export const TradeSlidePanelPriceActions = ({
         <div className="text-sm text-muted-foreground">Buy Price</div>
         <div className="text-lg font-medium">${buyPrice.toFixed(4)}</div>
         <Button 
-          className="w-full bg-green-600 hover:bg-green-700 text-white"
+          className="w-full bg-success hover:bg-success/90 text-white"
           onClick={() => onExecuteTrade("buy")}
-          disabled={isExecuting || (orderType === "market" && !marketIsOpen) || !canAfford}
+          disabled={isExecuting || (orderType === "market" && !marketIsOpen) || !canAfford || parsedUnits <= 0}
         >
           {isExecuting && tradeAction === "buy" ? "Processing..." : "Buy"}
         </Button>
@@ -41,7 +41,7 @@ export const TradeSlidePanelPriceActions = ({
         <div className="text-sm text-muted-foreground">Sell Price</div>
         <div className="text-lg font-medium">${sellPrice.toFixed(4)}</div>
         <Button 
-          className="w-full bg-red-500 hover:bg-red-600 text-white"
+          className="w-full bg-warning hover:bg-warning/90 text-white"
           onClick={() => onExecuteTrade("sell")}
           disabled={isExecuting || (orderType === "market" && !marketIsOpen) || parsedUnits <= 0}
         >

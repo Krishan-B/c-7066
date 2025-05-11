@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
@@ -17,6 +16,8 @@ import { TradeSlidePanelOrderTypeSelector } from "./TradeSlidePanelOrderTypeSele
 import { TradeSlidePanelEntryRate } from "./TradeSlidePanelEntryRate";
 import { TradeSlidePanelOptionCheckbox } from "./TradeSlidePanelOptionCheckbox";
 import { TradeSlidePanelSummary } from "./TradeSlidePanelSummary";
+import { StopLossCheckbox } from "./StopLossCheckbox";
+import { TakeProfitCheckbox } from "./TakeProfitCheckbox";
 
 interface TradeSlidePanelProps {
   open: boolean;
@@ -260,23 +261,17 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
           )}
           
           {/* Stop Loss Checkbox */}
-          <TradeSlidePanelOptionCheckbox
-            id="stopLoss"
-            label="Stop Loss"
-            checked={hasStopLoss}
-            onCheckedChange={() => setHasStopLoss(!hasStopLoss)}
-            tooltip="A stop loss order will automatically close your position when the market reaches the specified price, helping to limit potential losses."
-            disabled={isExecuting}
+          <StopLossCheckbox
+            hasStopLoss={hasStopLoss}
+            setHasStopLoss={setHasStopLoss}
+            isExecuting={isExecuting}
           />
 
           {/* Take Profit Checkbox */}
-          <TradeSlidePanelOptionCheckbox
-            id="takeProfit"
-            label="Take Profit"
-            checked={hasTakeProfit}
-            onCheckedChange={() => setHasTakeProfit(!hasTakeProfit)}
-            tooltip="A take profit order will automatically close your position when the market reaches a specified price, allowing you to secure profits."
-            disabled={isExecuting}
+          <TakeProfitCheckbox
+            hasTakeProfit={hasTakeProfit}
+            setHasTakeProfit={setHasTakeProfit}
+            isExecuting={isExecuting}
           />
 
           {/* Expiration Date Checkbox (only for entry orders) */}
