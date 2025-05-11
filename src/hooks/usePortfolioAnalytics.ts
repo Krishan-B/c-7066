@@ -3,12 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-interface PortfolioAnalytics {
+export interface PortfolioAnalytics {
   portfolio_value: number;
   daily_change: number;
   daily_change_percent: number;
   total_gain: number;
   total_gain_percent: number;
+  cash_balance: number;
+  locked_funds: number;
   allocation: Record<string, number>;
   performance: Record<string, number>;
   top_holdings: Array<{
@@ -17,6 +19,10 @@ interface PortfolioAnalytics {
     value: number;
     allocation: number;
     change_percent: number;
+    quantity?: number;
+    price?: number;
+    entry_price?: number;
+    pnl?: number;
   }>;
   recent_trades: Array<{
     id: string;
@@ -27,6 +33,11 @@ interface PortfolioAnalytics {
     price: number;
     total: number;
     date: string;
+    open_date?: string;
+    entry_price?: number;
+    exit_price?: number;
+    pnl?: number;
+    pnl_percentage?: number;
   }>;
 }
 

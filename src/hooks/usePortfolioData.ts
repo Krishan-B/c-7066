@@ -29,19 +29,19 @@ export const usePortfolioData = () => {
     dayChangePercentage: analytics?.daily_change_percent || 0,
     totalPnL: analytics?.total_gain || 0,
     totalPnLPercentage: analytics?.total_gain_percent || 0,
-    cashBalance: analytics?.cash_balance || 4215.89, // Use analytics value if available, otherwise fallback
-    lockedFunds: analytics?.locked_funds || 850.00, // Use analytics value if available, otherwise fallback
+    cashBalance: analytics?.cash_balance || 0,
+    lockedFunds: analytics?.locked_funds || 0,
     
     // Transform top holdings into assets format with better error handling
     assets: analytics?.top_holdings?.map(holding => ({
       name: holding.name,
       symbol: holding.symbol,
       amount: holding.quantity || 0,
-      price: holding.price || (holding.value / holding.allocation * 100 / 0.45), // Use direct price if available
+      price: holding.price || (holding.value / (holding.quantity || 1)),
       entryPrice: holding.entry_price || 0,
       value: holding.value,
       change: holding.change_percent,
-      pnl: holding.pnl || (holding.value * (holding.change_percent / 100)), // Use direct PnL if available
+      pnl: holding.pnl || (holding.value * (holding.change_percent / 100)),
       pnlPercentage: holding.change_percent
     })) || [],
     
