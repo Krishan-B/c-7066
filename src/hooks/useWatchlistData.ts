@@ -49,9 +49,16 @@ export const useWatchlistData = () => {
         return [];
       }
       
+      // Fetch user's session before making the request
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token || '';
+      
       // Fetch the user's watchlist through the edge function
       const { data, error } = await supabase.functions.invoke('watchlist-operations', {
-        body: { operation: "get" }
+        body: { operation: "get" },
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
       });
       
       if (error || data?.error) {
@@ -145,8 +152,8 @@ export const useWatchlistData = () => {
         });
       } else {
         // For authenticated users, use the edge function
-        const session = await supabase.auth.getSession();
-        const token = session?.data?.session?.access_token || '';
+        const { data: { session } } = await supabase.auth.getSession();
+        const accessToken = session?.access_token || '';
         
         const { data, error } = await supabase.functions.invoke('watchlist-operations', {
           body: { 
@@ -158,7 +165,7 @@ export const useWatchlistData = () => {
             }
           },
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${accessToken}`
           }
         });
         
@@ -202,8 +209,8 @@ export const useWatchlistData = () => {
         });
       } else {
         // For authenticated users, use the edge function
-        const session = await supabase.auth.getSession();
-        const token = session?.data?.session?.access_token || '';
+        const { data: { session } } = await supabase.auth.getSession();
+        const accessToken = session?.access_token || '';
         
         const { data, error } = await supabase.functions.invoke('watchlist-operations', {
           body: { 
@@ -214,7 +221,7 @@ export const useWatchlistData = () => {
             }
           },
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${accessToken}`
           }
         });
         
