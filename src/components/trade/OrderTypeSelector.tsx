@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 interface OrderTypeSelectorProps {
   orderType: string;
   onOrderTypeChange: (type: string) => void;
+  disabled?: boolean; // Added disabled as an optional prop
 }
 
-const OrderTypeSelector = ({ orderType, onOrderTypeChange }: OrderTypeSelectorProps) => {
+const OrderTypeSelector = ({ orderType, onOrderTypeChange, disabled = false }: OrderTypeSelectorProps) => {
   return (
     <div className="mb-4">
       <label className="text-sm text-muted-foreground mb-1 block">Order Type</label>
@@ -16,6 +17,7 @@ const OrderTypeSelector = ({ orderType, onOrderTypeChange }: OrderTypeSelectorPr
           variant={orderType === "market" ? "default" : "outline"} 
           className="flex-1 text-xs" 
           onClick={() => onOrderTypeChange("market")}
+          disabled={disabled}
         >
           Market
         </Button>
@@ -24,6 +26,7 @@ const OrderTypeSelector = ({ orderType, onOrderTypeChange }: OrderTypeSelectorPr
           variant={orderType === "limit" ? "default" : "outline"} 
           className="flex-1 text-xs" 
           onClick={() => onOrderTypeChange("limit")}
+          disabled={disabled}
         >
           Limit
         </Button>
@@ -32,6 +35,7 @@ const OrderTypeSelector = ({ orderType, onOrderTypeChange }: OrderTypeSelectorPr
           variant={orderType === "stop" ? "default" : "outline"} 
           className="flex-1 text-xs" 
           onClick={() => onOrderTypeChange("stop")}
+          disabled={disabled}
         >
           Stop
         </Button>
