@@ -64,7 +64,7 @@ const MobileMenu = ({ onMenuToggle }: MobileMenuProps) => {
           <Menu className="h-4 w-4" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="pr-0">
+      <SheetContent side="left" className="pr-0 bg-background">
         <SheetHeader className="text-left">
           <SheetTitle>Tradable</SheetTitle>
           <SheetDescription>

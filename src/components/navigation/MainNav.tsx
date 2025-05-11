@@ -171,7 +171,7 @@ const MainNav = ({
                 <ChevronDown className="h-3 w-3" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="bg-background">
               {allMetrics.map((item, index) => (
                 <DropdownMenuItem key={index} onClick={handleMetricClick}>
                   <div className="flex justify-between w-full">
