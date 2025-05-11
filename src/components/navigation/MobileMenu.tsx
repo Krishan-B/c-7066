@@ -44,6 +44,12 @@ const MobileMenu = ({ onMenuToggle }: MobileMenuProps) => {
     }
   };
 
+  // Navigate to portfolio when a metric is clicked
+  const handleMetricClick = () => {
+    navigate("/portfolio");
+    setOpen(false);
+  };
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -69,42 +75,78 @@ const MobileMenu = ({ onMenuToggle }: MobileMenuProps) => {
         {user && (
           <div className="py-4">
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Balance:</span>
-                <span>$10,000.00</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Equity:</span>
-                <span>$10,250.00</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Unrealized P&L:</span>
-                <span className="text-success">$250.00</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Margin Level:</span>
-                <span>85%</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Used Margin:</span>
-                <span>$1,200.00</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Realized P&L:</span>
-                <span className="text-success">$750.00</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Available:</span>
-                <span>$8,800.00</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Exposure:</span>
-                <span>$12,000.00</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Bonus:</span>
-                <span>$500.00</span>
-              </div>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between p-2" 
+                onClick={handleMetricClick}
+              >
+                <span className="text-muted-foreground text-sm">Balance:</span>
+                <span className="text-sm">$10,000.00</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between p-2" 
+                onClick={handleMetricClick}
+              >
+                <span className="text-muted-foreground text-sm">Equity:</span>
+                <span className="text-sm">$10,250.00</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between p-2" 
+                onClick={handleMetricClick}
+              >
+                <span className="text-muted-foreground text-sm">Unrealized P&L:</span>
+                <span className="text-success text-sm">$250.00</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between p-2" 
+                onClick={handleMetricClick}
+              >
+                <span className="text-muted-foreground text-sm">Margin Level:</span>
+                <span className="text-sm">85%</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between p-2" 
+                onClick={handleMetricClick}
+              >
+                <span className="text-muted-foreground text-sm">Used Margin:</span>
+                <span className="text-sm">$1,200.00</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between p-2" 
+                onClick={handleMetricClick}
+              >
+                <span className="text-muted-foreground text-sm">Realized P&L:</span>
+                <span className="text-success text-sm">$750.00</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between p-2" 
+                onClick={handleMetricClick}
+              >
+                <span className="text-muted-foreground text-sm">Available:</span>
+                <span className="text-sm">$8,800.00</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between p-2" 
+                onClick={handleMetricClick}
+              >
+                <span className="text-muted-foreground text-sm">Exposure:</span>
+                <span className="text-sm">$12,000.00</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between p-2" 
+                onClick={handleMetricClick}
+              >
+                <span className="text-muted-foreground text-sm">Bonus:</span>
+                <span className="text-sm">$500.00</span>
+              </Button>
             </div>
           </div>
         )}
