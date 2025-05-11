@@ -50,26 +50,27 @@ export const useWatchlistData = () => {
       }
       
       // Fetch user's session before making the request
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
       const accessToken = session?.access_token || '';
       
       // Fetch the user's watchlist through the edge function
-      const { data, error } = await supabase.functions.invoke('watchlist-operations', {
+      const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
         body: { operation: "get" },
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
       });
       
-      if (error || data?.error) {
-        throw error || data?.error;
+      if (error || responseData?.error) {
+        throw error || responseData?.error;
       }
 
-      if (data?.data && Array.isArray(data.data)) {
-        console.log(`Found ${data.data.length} watchlist items`);
+      if (responseData?.data && Array.isArray(responseData.data)) {
+        console.log(`Found ${responseData.data.length} watchlist items`);
         
         // Get current market data for the watchlist items
-        const watchlistItems = data.data;
+        const watchlistItems = responseData.data;
         const marketTypes = [...new Set(watchlistItems.map(item => item.market_type))];
         const symbols = watchlistItems.map(item => item.asset_symbol);
         
@@ -152,10 +153,11 @@ export const useWatchlistData = () => {
         });
       } else {
         // For authenticated users, use the edge function
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data } = await supabase.auth.getSession();
+        const session = data.session;
         const accessToken = session?.access_token || '';
         
-        const { data, error } = await supabase.functions.invoke('watchlist-operations', {
+        const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
           body: { 
             operation: "add",
             asset: {
@@ -169,8 +171,8 @@ export const useWatchlistData = () => {
           }
         });
         
-        if (error || data?.error) {
-          throw error || data?.error;
+        if (error || responseData?.error) {
+          throw error || responseData?.error;
         }
         
         toast({
@@ -209,10 +211,11 @@ export const useWatchlistData = () => {
         });
       } else {
         // For authenticated users, use the edge function
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data } = await supabase.auth.getSession();
+        const session = data.session;
         const accessToken = session?.access_token || '';
         
-        const { data, error } = await supabase.functions.invoke('watchlist-operations', {
+        const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
           body: { 
             operation: "remove",
             asset: {
@@ -225,8 +228,8 @@ export const useWatchlistData = () => {
           }
         });
         
-        if (error || data?.error) {
-          throw error || data?.error;
+        if (error || responseData?.error) {
+          throw error || responseData?.error;
         }
         
         toast({
