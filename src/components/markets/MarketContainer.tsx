@@ -7,8 +7,7 @@ import MarketHeader from "@/components/markets/MarketHeader";
 import MarketSearch from "@/components/markets/MarketSearch";
 import MarketTabs from "@/components/markets/MarketTabs";
 import MarketChartSection from "@/components/markets/MarketChartSection";
-import MarketOrderForm from "@/components/markets/MarketOrderForm";
-import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
+import { useToast } from "@/components/ui/use-toast";
 
 interface MarketContainerProps {
   marketData: Asset[];
@@ -29,9 +28,47 @@ const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps)
   });
 
   const chartSectionRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
   
   // Check if the selected market is open
   const marketIsOpen = selectedAsset ? isMarketOpen(selectedAsset.market_type) : false;
+
+  // Handle adding to watchlist
+  const handleAddToWatchlist = async (asset: Asset) => {
+    try {
+      // Add to watchlist in localStorage for persistence
+      const existingWatchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+      
+      // Check if asset is already in watchlist
+      const isAlreadyInWatchlist = existingWatchlist.some((item: Asset) => 
+        item.symbol === asset.symbol && item.market_type === asset.market_type
+      );
+      
+      if (isAlreadyInWatchlist) {
+        toast({
+          title: "Already in watchlist",
+          description: `${asset.name} is already in your watchlist.`,
+        });
+        return;
+      }
+      
+      // Add to watchlist
+      const updatedWatchlist = [...existingWatchlist, asset];
+      localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
+      
+      toast({
+        title: "Added to watchlist",
+        description: `${asset.name} has been added to your watchlist.`,
+      });
+    } catch (error) {
+      console.error("Error adding to watchlist:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add to watchlist. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,6 +91,7 @@ const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps)
               error={error}
               searchTerm={searchTerm}
               onSelectAsset={setSelectedAsset}
+              onAddToWatchlist={handleAddToWatchlist}
               containerRef={chartSectionRef}
             />
           </div>
@@ -67,14 +105,6 @@ const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps)
           selectedAsset={selectedAsset}
           marketIsOpen={marketIsOpen}
         />
-
-        {/* Advanced Order Form Card for trading */}
-        <MarketOrderForm selectedAsset={selectedAsset} />
-        
-        {/* News section */}
-        <div className="mt-6">
-          <EnhancedNewsWidget marketType={selectedAsset.market_type} />
-        </div>
       </div>
     </div>
   );

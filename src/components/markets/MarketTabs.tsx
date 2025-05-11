@@ -22,6 +22,7 @@ interface MarketTabsProps {
   error: Error | null;
   searchTerm: string;
   onSelectAsset: (asset: Asset) => void;
+  onAddToWatchlist?: (asset: Asset) => void;
   containerRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -33,6 +34,7 @@ const MarketTabs = ({
   error, 
   searchTerm, 
   onSelectAsset,
+  onAddToWatchlist,
   containerRef
 }: MarketTabsProps) => {
   // Filter market data based on search term - now checking both name and symbol
@@ -71,6 +73,7 @@ const MarketTabs = ({
           error={error}
           filteredMarketData={filteredMarketData}
           onSelectAsset={handleAssetSelect}
+          onAddToWatchlist={onAddToWatchlist}
         />
       </TabsContent>
     </Tabs>

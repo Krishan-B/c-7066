@@ -7,18 +7,40 @@ import { useQuery } from '@tanstack/react-query';
 
 export const useWatchlistData = () => {
   const { toast } = useToast();
+  const [localWatchlist, setLocalWatchlist] = useState<Asset[]>([]);
 
   // Use React Query for data fetching and caching
-  const { data: watchlist = [], isLoading, error, refetch } = useQuery({
+  const { data: supabaseWatchlist = [], isLoading, error, refetch } = useQuery({
     queryKey: ["watchlist-data"],
     queryFn: fetchWatchlistData,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  // Initialize local watchlist from localStorage
+  useEffect(() => {
+    try {
+      const savedWatchlist = localStorage.getItem('watchlist');
+      if (savedWatchlist) {
+        setLocalWatchlist(JSON.parse(savedWatchlist));
+      }
+    } catch (error) {
+      console.error("Error loading local watchlist:", error);
+    }
+  }, []);
+
   // Fetch market data from Supabase
   async function fetchWatchlistData(): Promise<Asset[]> {
     try {
       console.log("Fetching watchlist data");
+      
+      // Try to use local watchlist first
+      const savedWatchlist = localStorage.getItem('watchlist');
+      if (savedWatchlist) {
+        const parsedWatchlist = JSON.parse(savedWatchlist);
+        if (parsedWatchlist && parsedWatchlist.length > 0) {
+          return parsedWatchlist as Asset[];
+        }
+      }
       
       // Get featured assets from each market type
       const { data, error } = await supabase
@@ -89,6 +111,65 @@ export const useWatchlistData = () => {
     }
   };
 
+  // Add asset to watchlist
+  const addToWatchlist = (asset: Asset) => {
+    try {
+      // Check if asset is already in watchlist
+      const isAlreadyInWatchlist = localWatchlist.some(item => 
+        item.symbol === asset.symbol && item.market_type === asset.market_type
+      );
+      
+      if (isAlreadyInWatchlist) {
+        toast({
+          title: "Already in watchlist",
+          description: `${asset.name} is already in your watchlist.`,
+        });
+        return;
+      }
+      
+      // Add to watchlist
+      const updatedWatchlist = [...localWatchlist, asset];
+      setLocalWatchlist(updatedWatchlist);
+      localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
+      
+      toast({
+        title: "Added to watchlist",
+        description: `${asset.name} has been added to your watchlist.`,
+      });
+    } catch (error) {
+      console.error("Error adding to watchlist:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add to watchlist. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Remove asset from watchlist
+  const removeFromWatchlist = (asset: Asset) => {
+    try {
+      const updatedWatchlist = localWatchlist.filter(item => 
+        !(item.symbol === asset.symbol && item.market_type === asset.market_type)
+      );
+      
+      setLocalWatchlist(updatedWatchlist);
+      localStorage.setItem('watchlist', JSON.stringify(updatedWatchlist));
+      
+      toast({
+        title: "Removed from watchlist",
+        description: `${asset.name} has been removed from your watchlist.`,
+      });
+    } catch (error) {
+      console.error("Error removing from watchlist:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove from watchlist. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Handle refresh data
   const handleRefreshData = async () => {
     toast({
@@ -113,10 +194,15 @@ export const useWatchlistData = () => {
     }
   };
 
+  // Combine local watchlist with fetched data
+  const combinedWatchlist = localWatchlist.length > 0 ? localWatchlist : supabaseWatchlist;
+
   return {
-    watchlist,
+    watchlist: combinedWatchlist,
     isLoading,
     error,
-    handleRefreshData
+    handleRefreshData,
+    addToWatchlist,
+    removeFromWatchlist
   };
 };

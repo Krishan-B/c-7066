@@ -5,8 +5,10 @@ import { ArrowUp, ArrowDown, Star, Bell, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Asset {
   id?: string;
@@ -17,7 +19,6 @@ interface Asset {
   volume: string;
   market_cap?: string;
   market_type: string;
-  // We'll simulate these values as they're not in the original data
   day_low?: number;
   day_high?: number;
   buy_price?: number;
@@ -29,11 +30,15 @@ interface MarketListProps {
   error: Error | null;
   filteredMarketData: Asset[];
   onSelectAsset: (asset: Asset) => void;
+  onAddToWatchlist?: (asset: Asset) => void;
 }
 
-const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: MarketListProps) => {
+const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset, onAddToWatchlist }: MarketListProps) => {
   const { toast } = useToast();
-
+  const [isPriceAlertOpen, setIsPriceAlertOpen] = React.useState(false);
+  const [selectedAlertAsset, setSelectedAlertAsset] = React.useState<Asset | null>(null);
+  const [alertPrice, setAlertPrice] = React.useState("");
+  
   // Helper to calculate simulated day low/high and buy/sell prices
   const getEnhancedAssetData = (asset: Asset) => {
     // Simulate day low/high as ±2% from current price
@@ -55,18 +60,52 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
 
   const handleAddToWatchlist = (e: React.MouseEvent, asset: Asset) => {
     e.stopPropagation(); // Prevent row click
-    toast({
-      title: "Added to watchlist",
-      description: `${asset.name} (${asset.symbol}) has been added to your watchlist.`,
-    });
+    
+    if (onAddToWatchlist) {
+      onAddToWatchlist(asset);
+    } else {
+      toast({
+        title: "Added to watchlist",
+        description: `${asset.name} (${asset.symbol}) has been added to your watchlist.`,
+      });
+    }
   };
 
   const handleSetAlert = (e: React.MouseEvent, asset: Asset) => {
     e.stopPropagation(); // Prevent row click
+    setSelectedAlertAsset(asset);
+    setAlertPrice(asset.price.toString());
+    setIsPriceAlertOpen(true);
+  };
+  
+  const handleSaveAlert = () => {
+    if (!selectedAlertAsset) return;
+    
+    // Get existing alerts from localStorage
+    const existingAlerts = JSON.parse(localStorage.getItem('priceAlerts') || '[]');
+    
+    // Add new alert
+    const newAlert = {
+      id: Date.now().toString(),
+      assetSymbol: selectedAlertAsset.symbol,
+      assetName: selectedAlertAsset.name,
+      targetPrice: parseFloat(alertPrice),
+      currentPrice: selectedAlertAsset.price,
+      marketType: selectedAlertAsset.market_type,
+      createdAt: new Date().toISOString(),
+      triggered: false
+    };
+    
+    // Save updated alerts
+    const updatedAlerts = [...existingAlerts, newAlert];
+    localStorage.setItem('priceAlerts', JSON.stringify(updatedAlerts));
+    
     toast({
-      title: "Price alert",
-      description: `Set a price alert for ${asset.name} (${asset.symbol}).`,
+      title: "Price alert set",
+      description: `You'll be notified when ${selectedAlertAsset.name} reaches $${alertPrice}.`,
     });
+    
+    setIsPriceAlertOpen(false);
   };
 
   if (isLoading) {
@@ -157,7 +196,7 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={(e) => handleAddToWatchlist(e, asset)}
+                              onClick={(e) => handleAddToWatchlist(e, enhancedAsset)}
                             >
                               <Star className="h-4 w-4" />
                             </Button>
@@ -172,7 +211,7 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
-                              onClick={(e) => handleSetAlert(e, asset)}
+                              onClick={(e) => handleSetAlert(e, enhancedAsset)}
                             >
                               <Bell className="h-4 w-4" />
                             </Button>
@@ -190,6 +229,44 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
           </Table>
         </div>
       </div>
+      
+      {/* Price Alert Dialog */}
+      <Dialog open={isPriceAlertOpen} onOpenChange={setIsPriceAlertOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Set Price Alert</DialogTitle>
+            <DialogDescription>
+              You'll be notified when {selectedAlertAsset?.name} reaches the target price.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex items-center gap-4">
+              <Label htmlFor="assetName" className="w-24">Asset:</Label>
+              <div className="font-medium">{selectedAlertAsset?.name} ({selectedAlertAsset?.symbol})</div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Label htmlFor="currentPrice" className="w-24">Current Price:</Label>
+              <div>${selectedAlertAsset?.price.toFixed(2)}</div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Label htmlFor="targetPrice" className="w-24">Target Price:</Label>
+              <Input
+                id="targetPrice"
+                type="number"
+                value={alertPrice}
+                onChange={(e) => setAlertPrice(e.target.value)}
+                step="0.01"
+                min="0"
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsPriceAlertOpen(false)}>Cancel</Button>
+            <Button type="button" onClick={handleSaveAlert}>Save Alert</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   );
 };
