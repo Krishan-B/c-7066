@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { CreditCard } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -9,6 +9,8 @@ import { useMarketData, Asset } from "@/hooks/useMarketData";
 import { TradeForm } from "@/components/trade";
 import { MarketStatusAlert } from "@/components/trade";
 import { getLeverageForAssetType, formatLeverageRatio } from "@/utils/leverageUtils";
+import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
+import { mockAccountMetrics } from "@/utils/metricUtils";
 
 interface QuickTradePanelProps {
   asset: {
@@ -23,10 +25,14 @@ interface QuickTradePanelProps {
 const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
   const [isExecuting, setIsExecuting] = useState(false);
+  const [assetCategory, setAssetCategory] = useState<string>(asset.market_type);
   const { toast } = useToast();
   
-  // Use our useMarketData hook to get real-time price data
-  const { marketData, isLoading, refetch } = useMarketData([asset.market_type], {
+  // Get available funds from account metrics
+  const availableFunds = mockAccountMetrics.availableFunds;
+  
+  // Use our combined market data hook to get data for all market types
+  const { marketData, isLoading, refetch } = useCombinedMarketData([assetCategory], {
     refetchInterval: 10000, // Refresh every 10 seconds for trade panel
     enableRefresh: true,
   });
@@ -51,7 +57,11 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
     }
   };
 
-  const handleSubmit = async (action: "buy" | "sell", amount: string) => {
+  const handleAssetCategoryChange = (category: string) => {
+    setAssetCategory(category);
+  };
+
+  const handleSubmit = async (action: "buy" | "sell", units: string) => {
     if (!marketIsOpen) {
       toast({
         title: "Market Closed",
@@ -72,7 +82,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
       
       toast({
         title: `Order Executed: ${action.toUpperCase()} ${asset.name}`,
-        description: `${action.toUpperCase()} order for $${amount} of ${asset.symbol} at $${currentPrice.toLocaleString()} with ${formatLeverageRatio(fixedLeverage)} leverage`,
+        description: `${action.toUpperCase()} order for ${units} units of ${asset.symbol} at $${currentPrice.toLocaleString()} executed successfully`,
         variant: action === "buy" ? "default" : "destructive",
       });
     } catch (error) {
@@ -102,10 +112,6 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
             ${isLoading ? "Loading..." : currentPrice.toLocaleString()}
           </span>
         </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-sm text-muted-foreground">Fixed Leverage</span>
-          <span className="text-sm font-medium">{formatLeverageRatio(fixedLeverage)}</span>
-        </div>
       </div>
       
       {!marketIsOpen && <MarketStatusAlert marketType={asset.market_type} />}
@@ -125,7 +131,9 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
             isExecuting={isExecuting}
             marketIsOpen={marketIsOpen}
             fixedLeverage={fixedLeverage}
-            onSubmit={(amount, orderType) => handleSubmit("buy", amount)}
+            onSubmit={(units, orderType) => handleSubmit("buy", units)}
+            availableFunds={availableFunds}
+            marketData={marketData}
           />
         </TabsContent>
         
@@ -138,7 +146,9 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
             isExecuting={isExecuting}
             marketIsOpen={marketIsOpen}
             fixedLeverage={fixedLeverage}
-            onSubmit={(amount, orderType) => handleSubmit("sell", amount)}
+            onSubmit={(units, orderType) => handleSubmit("sell", units)}
+            availableFunds={availableFunds}
+            marketData={marketData}
           />
         </TabsContent>
       </Tabs>

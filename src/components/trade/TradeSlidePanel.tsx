@@ -1,10 +1,9 @@
 
 import { useState, useEffect } from "react";
-import { X, ChevronDown, Clock, AlertTriangle, Info } from "lucide-react";
+import { X, Info } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { 
   Select, 
   SelectContent, 
@@ -17,19 +16,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useMarketData } from "@/hooks/useMarketData";
 import { isMarketOpen } from "@/utils/marketHours";
 import { useAuth } from "@/hooks/useAuth";
-import { getLeverageForAssetType, calculateRequiredMargin, formatLeverageRatio } from "@/utils/leverageUtils";
+import { getLeverageForAssetType, formatLeverageRatio } from "@/utils/leverageUtils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { mockAccountMetrics } from "@/utils/metricUtils";
+import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 
-const SUPPORTED_ASSETS = [
-  { name: "Bitcoin", symbol: "BTCUSD", market_type: "Crypto" },
-  { name: "Ethereum", symbol: "ETHUSD", market_type: "Crypto" },
-  { name: "Apple Inc.", symbol: "AAPL", market_type: "Stocks" },
-  { name: "Tesla", symbol: "TSLA", market_type: "Stocks" },
-  { name: "S&P 500", symbol: "SPX", market_type: "Indices" },
-  { name: "Gold", symbol: "XAUUSD", market_type: "Commodities" },
-  { name: "EUR/USD", symbol: "EURUSD", market_type: "Forex" }
-];
+const ASSET_CATEGORIES = ["Crypto", "Stocks", "Forex", "Indices", "Commodities"];
 
 interface TradeSlidePanelProps {
   open: boolean;
@@ -38,9 +31,14 @@ interface TradeSlidePanelProps {
 
 export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   const { user } = useAuth();
-  const [selectedAsset, setSelectedAsset] = useState(SUPPORTED_ASSETS[0]);
+  const [assetCategory, setAssetCategory] = useState<string>("Crypto");
+  const [selectedAsset, setSelectedAsset] = useState({
+    name: "Bitcoin",
+    symbol: "BTCUSD",
+    market_type: "Crypto"
+  });
   const [orderType, setOrderType] = useState<"market" | "entry">("market");
-  const [quantity, setQuantity] = useState("0.01");
+  const [units, setUnits] = useState("0.01");
   const [tradeAction, setTradeAction] = useState<"buy" | "sell">("buy");
   const [isExecuting, setIsExecuting] = useState(false);
   const [hasStopLoss, setHasStopLoss] = useState(false);
@@ -49,15 +47,17 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   const [orderRate, setOrderRate] = useState("");
   const { toast } = useToast();
   
-  // Use market data hook to get real-time price
-  const { marketData, isLoading, refetch } = useMarketData(
-    [selectedAsset.market_type],
-    { refetchInterval: 1000, enableRefresh: true }
+  // Use the combined market data hook for the selected category
+  const { marketData, isLoading, refetch } = useCombinedMarketData(
+    [assetCategory], 
+    { refetchInterval: 1000 * 10, enableRefresh: true }
   );
   
   // Find current price in market data
   const currentAssetData = marketData.find(item => item.symbol === selectedAsset.symbol);
   const currentPrice = currentAssetData?.price || 0;
+  const buyPrice = currentPrice * 1.001; // Slight markup for buy
+  const sellPrice = currentPrice * 0.999; // Slight discount for sell
   
   // Update order rate when current price changes
   useEffect(() => {
@@ -79,20 +79,45 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   }, [refetch]);
   
   // Get the fixed leverage for the selected asset type
-  const fixedLeverage = getLeverageForAssetType(selectedAsset.market_type);
+  const fixedLeverage = getLeverageForAssetType(assetCategory);
+  
+  // Get user's available funds
+  const availableFunds = mockAccountMetrics.availableFunds;
   
   // Calculate required margin and estimated cost
-  const parsedQuantity = parseFloat(quantity) || 0;
-  const estimatedCost = currentPrice * parsedQuantity;
-  const marginRequirement = calculateRequiredMargin(estimatedCost, selectedAsset.market_type);
-  const fee = estimatedCost * 0.001; // 0.1% fee
-  const totalCost = estimatedCost + fee;
+  const parsedUnits = parseFloat(units) || 0;
+  const positionValue = currentPrice * parsedUnits;
+  const marginRequirement = positionValue / fixedLeverage;
+  const fee = marginRequirement * 0.001; // 0.1% fee
+  const totalCost = marginRequirement + fee;
+  
+  // Check if user can afford the trade
+  const canAfford = availableFunds >= marginRequirement;
+  
+  // Handle asset category change
+  const handleAssetCategoryChange = (category: string) => {
+    setAssetCategory(category);
+    
+    // Select the first asset in this category
+    const assetsInCategory = marketData.filter(asset => asset.market_type === category);
+    if (assetsInCategory.length > 0) {
+      setSelectedAsset({
+        name: assetsInCategory[0].name,
+        symbol: assetsInCategory[0].symbol,
+        market_type: category
+      });
+    }
+  };
   
   // Handle asset selection
   const handleAssetSelect = (symbol: string) => {
-    const asset = SUPPORTED_ASSETS.find(a => a.symbol === symbol);
+    const asset = marketData.find(a => a.symbol === symbol);
     if (asset) {
-      setSelectedAsset(asset);
+      setSelectedAsset({
+        name: asset.name,
+        symbol: asset.symbol,
+        market_type: asset.market_type
+      });
     }
   };
   
@@ -116,6 +141,15 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
       return;
     }
     
+    if (!canAfford && action === "buy") {
+      toast({
+        title: "Insufficient Funds",
+        description: "You do not have enough funds to execute this trade.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsExecuting(true);
     setTradeAction(action);
     
@@ -129,26 +163,26 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
       // Create order object based on order type
       const orderDetails = {
         asset: selectedAsset.symbol,
-        quantity: parsedQuantity,
+        units: parsedUnits,
         leverage: fixedLeverage,
         orderType: orderType,
         action: action,
-        stopLoss: hasStopLoss ? true : false,
-        takeProfit: hasTakeProfit ? true : false,
-        expiration: hasExpirationDate && orderType === "entry" ? true : false,
+        stopLoss: hasStopLoss,
+        takeProfit: hasTakeProfit,
+        expiration: hasExpirationDate && orderType === "entry",
       };
       
       // Display different success message based on order type
       if (orderType === "market") {
         toast({
           title: `Position Opened: ${action.toUpperCase()} ${selectedAsset.symbol}`,
-          description: `${action.toUpperCase()} order for ${parsedQuantity} ${selectedAsset.symbol} at $${currentPrice.toLocaleString()} with ${formatLeverageRatio(fixedLeverage)} leverage executed successfully.`,
+          description: `${action.toUpperCase()} order for ${parsedUnits} ${selectedAsset.symbol} at ${action === "buy" ? "$" + buyPrice.toFixed(4) : "$" + sellPrice.toFixed(4)} executed successfully.`,
           variant: action === "buy" ? "default" : "destructive",
         });
       } else {
         toast({
           title: `Entry Order Placed: ${action.toUpperCase()} ${selectedAsset.symbol}`,
-          description: `${action.toUpperCase()} entry order for ${parsedQuantity} ${selectedAsset.symbol} at $${orderRate} with ${formatLeverageRatio(fixedLeverage)} leverage has been placed.`,
+          description: `${action.toUpperCase()} entry order for ${parsedUnits} ${selectedAsset.symbol} at $${orderRate} has been placed.`,
           variant: "default",
         });
       }
@@ -180,6 +214,27 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
         </SheetHeader>
         
         <div className="space-y-4">
+          {/* Asset Category Selection */}
+          <div className="space-y-1.5">
+            <label htmlFor="asset-category" className="text-sm font-medium">
+              Asset Category
+            </label>
+            <Select value={assetCategory} onValueChange={handleAssetCategoryChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {ASSET_CATEGORIES.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          
           {/* Asset Selection */}
           <div className="space-y-1.5">
             <label htmlFor="asset-select" className="text-sm font-medium">
@@ -191,43 +246,71 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {SUPPORTED_ASSETS.map((asset) => (
-                    <SelectItem key={asset.symbol} value={asset.symbol}>
-                      {asset.name} ({asset.symbol})
-                    </SelectItem>
-                  ))}
+                  {isLoading ? (
+                    <SelectItem value="loading">Loading...</SelectItem>
+                  ) : marketData.filter(asset => asset.market_type === assetCategory).length > 0 ? (
+                    marketData
+                      .filter(asset => asset.market_type === assetCategory)
+                      .map((asset) => (
+                        <SelectItem key={asset.symbol} value={asset.symbol}>
+                          {asset.name} ({asset.symbol})
+                        </SelectItem>
+                      ))
+                  ) : (
+                    <SelectItem value="none">No assets available</SelectItem>
+                  )}
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
           
-          {/* Current Price */}
-          <div className="flex justify-between items-center p-3 bg-secondary/30 rounded-md">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Current Price</span>
+          {/* Real-time prices with Buy/Sell buttons */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <div className="text-sm text-muted-foreground">Buy Price</div>
+              <div className="text-lg font-medium">${buyPrice.toFixed(4)}</div>
+              <Button 
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => handleExecuteTrade("buy")}
+                disabled={isExecuting || (orderType === "market" && !marketIsOpen) || !canAfford}
+              >
+                {isExecuting && tradeAction === "buy" ? "Processing..." : "Buy"}
+              </Button>
             </div>
-            <div className="font-medium">
-              {isLoading ? (
-                <div className="h-5 w-20 animate-pulse bg-secondary rounded"></div>
-              ) : (
-                `$${currentPrice.toLocaleString()}`
-              )}
+            <div className="space-y-2">
+              <div className="text-sm text-muted-foreground">Sell Price</div>
+              <div className="text-lg font-medium">${sellPrice.toFixed(4)}</div>
+              <Button 
+                className="w-full bg-red-500 hover:bg-red-600 text-white"
+                onClick={() => handleExecuteTrade("sell")}
+                disabled={isExecuting || (orderType === "market" && !marketIsOpen) || parsedUnits <= 0}
+              >
+                {isExecuting && tradeAction === "sell" ? "Processing..." : "Sell"}
+              </Button>
             </div>
           </div>
           
-          {/* Market Status Alert */}
-          {!marketIsOpen && (
-            <div className="flex items-start gap-2 p-3 bg-warning/10 border border-warning/20 text-warning rounded-md">
-              <AlertTriangle className="h-4 w-4 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium">Market Closed</p>
-                <p className="text-xs text-muted-foreground">
-                  {selectedAsset.market_type} market is currently closed. You can place entry orders now or market orders when the market opens.
-                </p>
-              </div>
+          {/* Units Input */}
+          <div className="space-y-1.5">
+            <label htmlFor="units" className="text-sm font-medium">
+              Units
+            </label>
+            <Input
+              id="units"
+              type="number"
+              step="0.01"
+              value={units}
+              onChange={(e) => setUnits(e.target.value)}
+              placeholder="Enter units"
+              className="w-full"
+            />
+            <div className="text-xs text-muted-foreground">
+              Funds required to open the position: <span className={`font-medium ${!canAfford ? 'text-red-500' : ''}`}>${marginRequirement.toFixed(2)}</span>
             </div>
-          )}
+            <div className="text-xs text-muted-foreground">
+              Available: <span className="font-medium">${availableFunds.toFixed(2)}</span>
+            </div>
+          </div>
           
           {/* Order Type Selection */}
           <div className="space-y-1.5">
@@ -255,12 +338,6 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
             </p>
           </div>
 
-          {/* Leverage Info */}
-          <div className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-md">
-            <span className="text-sm">Fixed Leverage</span>
-            <span className="font-medium">{formatLeverageRatio(fixedLeverage)}</span>
-          </div>
-
           {/* Entry Order Rate (only for entry orders) */}
           {orderType === "entry" && (
             <div className="space-y-1.5">
@@ -280,22 +357,6 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
               </p>
             </div>
           )}
-          
-          {/* Quantity Input */}
-          <div className="space-y-1.5">
-            <label htmlFor="quantity" className="text-sm font-medium">
-              Quantity
-            </label>
-            <Input
-              id="quantity"
-              type="number"
-              step="0.01"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              placeholder="Enter quantity"
-              className="w-full"
-            />
-          </div>
           
           {/* Stop Loss Checkbox */}
           <div className="flex items-center space-x-2">
@@ -370,16 +431,12 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
             <h3 className="text-sm font-medium">Trade Summary</h3>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Leverage</span>
-                <span>{formatLeverageRatio(fixedLeverage)}</span>
+                <span className="text-muted-foreground">Position Value</span>
+                <span>${positionValue.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Required Margin</span>
                 <span>${marginRequirement.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Position Value</span>
-                <span>${estimatedCost.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Fee (0.1%)</span>
@@ -391,25 +448,6 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
                 <span className="font-medium">${totalCost.toFixed(2)}</span>
               </div>
             </div>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-4 pt-4">
-            <Button
-              variant="outline"
-              className="bg-warning hover:bg-warning/90 text-white"
-              onClick={() => handleExecuteTrade("sell")}
-              disabled={isExecuting || parsedQuantity <= 0}
-            >
-              {isExecuting && tradeAction === "sell" ? "Processing..." : "Sell"}
-            </Button>
-            <Button
-              className="bg-success hover:bg-success/90 text-white"
-              onClick={() => handleExecuteTrade("buy")}
-              disabled={isExecuting || parsedQuantity <= 0}
-            >
-              {isExecuting && tradeAction === "buy" ? "Processing..." : "Buy"}
-            </Button>
           </div>
         </div>
       </SheetContent>
