@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
@@ -27,7 +26,8 @@ const Markets = () => {
     volume: "14.2B"
   });
   
-  const { toast } = useToast();
+  // Use the shadcn toast hooks for notifications that need to follow the UI system
+  const { toast: uiToast } = useToast();
   const chartSectionRef = useRef<HTMLDivElement>(null);
   
   // Use the combined market data hook with a 1-minute refetch interval for more real-time market data
@@ -52,12 +52,10 @@ const Markets = () => {
     // In a real app, this would submit the order to an API
     const orderTypeDisplay = values.orderType === "market" ? "Market" : "Entry";
     
-    toast.success(
-      `${orderTypeDisplay} ${action.toUpperCase()} order for ${selectedAsset.symbol} created successfully`, 
-      { 
-        description: `Order type: ${orderTypeDisplay}, Stop Loss: ${values.stopLoss ? 'Yes' : 'No'}, Take Profit: ${values.takeProfit ? 'Yes' : 'No'}` 
-      }
-    );
+    // Using sonner toast for transactional notifications
+    toast(`${orderTypeDisplay} ${action.toUpperCase()} order for ${selectedAsset.symbol} created successfully`, {
+      description: `Order type: ${orderTypeDisplay}, Stop Loss: ${values.stopLoss ? 'Yes' : 'No'}, Take Profit: ${values.takeProfit ? 'Yes' : 'No'}`,
+    });
   };
 
   return (
