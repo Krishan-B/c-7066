@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import MarketSearch from "@/components/markets/MarketSearch";
 import MarketTabs from "@/components/markets/MarketTabs";
 import AssetDetails from "@/components/markets/AssetDetails";
 import MarketDetailsCard from "@/components/markets/MarketDetailsCard";
+import MarketHoursChart from "@/components/markets/MarketHoursChart";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import { Asset } from "@/hooks/useMarketData";
@@ -100,7 +100,10 @@ const Markets = () => {
             <AssetDetails selectedAsset={selectedAsset} />
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-              <EnhancedNewsWidget marketType={selectedAsset.market_type} />
+              <div className="space-y-6">
+                <EnhancedNewsWidget marketType={selectedAsset.market_type} />
+                <MarketHoursChart marketType={selectedAsset.market_type} />
+              </div>
               <MarketDetailsCard 
                 selectedAsset={selectedAsset} 
                 marketIsOpen={marketIsOpen}

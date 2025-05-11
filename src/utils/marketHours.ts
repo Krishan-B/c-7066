@@ -8,7 +8,7 @@ interface MarketHoursConfig {
   openDays: number[]; // Days of week when market is open (0 = Sunday, 6 = Saturday)
 }
 
-const marketConfig: Record<string, MarketHoursConfig> = {
+export const marketConfig: Record<string, MarketHoursConfig> = {
   "Crypto": {
     openTime: 0,
     closeTime: 24,
