@@ -1,7 +1,9 @@
+
 import { useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { fetchAlphaVantageData, transformStockData, transformForexData } from "@/utils/alphaVantageApi";
 
 export interface Asset {
   id?: string;
@@ -28,7 +30,7 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
     enableRefresh = true 
   } = options;
   
-  // Function to fetch market data from Supabase
+  // Function to fetch market data from multiple sources
   const fetchMarketData = async (marketTypes: string | string[]): Promise<Asset[]> => {
     try {
       // Convert single market type to array for consistent handling
@@ -50,7 +52,71 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
 
       console.log(`Fetching fresh data for ${marketTypeArray.join(', ')}`);
       
-      // Otherwise, call our edge functions to get fresh data for each market type
+      // Try to use Alpha Vantage API first
+      try {
+        // Example symbols to fetch (in production, this would be more comprehensive)
+        const symbols = getSymbolsForMarketType(marketTypeArray);
+        let alphaVantageData: Asset[] = [];
+        
+        // Fetch data for each symbol
+        for (const marketType of marketTypeArray) {
+          if (marketType === 'Stock') {
+            for (const symbol of symbols[marketType]) {
+              const data = await fetchAlphaVantageData('GLOBAL_QUOTE', { symbol });
+              if (data && data['Global Quote']) {
+                const transformedData = transformStockData(data);
+                if (transformedData) {
+                  alphaVantageData.push(transformedData);
+                }
+              }
+            }
+          } 
+          else if (marketType === 'Forex') {
+            for (const pair of symbols[marketType]) {
+              const [fromCurrency, toCurrency] = pair.split('/');
+              const data = await fetchAlphaVantageData('CURRENCY_EXCHANGE_RATE', {
+                from_currency: fromCurrency,
+                to_currency: toCurrency
+              });
+              if (data) {
+                const transformedData = transformForexData(data);
+                if (transformedData) {
+                  alphaVantageData.push(transformedData);
+                }
+              }
+            }
+          }
+          
+          // For other market types, we'll fall back to our existing data sources
+        }
+        
+        // If we got enough data from Alpha Vantage, use it
+        if (alphaVantageData.length > 0) {
+          console.log(`Fetched ${alphaVantageData.length} assets from Alpha Vantage`);
+          
+          // Update our database with the new data
+          for (const asset of alphaVantageData) {
+            await supabase
+              .from('market_data')
+              .upsert({
+                symbol: asset.symbol,
+                name: asset.name,
+                price: asset.price,
+                change_percentage: asset.change_percentage,
+                volume: asset.volume,
+                market_cap: asset.market_cap,
+                market_type: asset.market_type,
+                last_updated: new Date().toISOString(),
+              }, { onConflict: 'symbol' });
+          }
+          
+          return alphaVantageData;
+        }
+      } catch (alphaError) {
+        console.error('Alpha Vantage error, falling back to edge functions:', alphaError);
+      }
+      
+      // Fall back to our edge functions if Alpha Vantage fails or doesn't have enough data
       const dataPromises = marketTypeArray.map(async (type) => {
         const { data, error } = await supabase.functions.invoke('fetch-market-data', {
           body: { market: type },
@@ -81,6 +147,19 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
       });
       throw error;
     }
+  };
+
+  // Helper function to get symbols for different market types
+  const getSymbolsForMarketType = (marketTypes: string[]): Record<string, string[]> => {
+    const symbols: Record<string, string[]> = {
+      'Stock': ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA'],
+      'Forex': ['EUR/USD', 'USD/JPY', 'GBP/USD', 'USD/CAD', 'AUD/USD'],
+      'Crypto': ['BTC', 'ETH', 'XRP', 'LTC', 'ADA'],
+      'Index': [], // Alpha Vantage requires premium for indices
+      'Commodity': [] // Alpha Vantage requires premium for commodities
+    };
+    
+    return symbols;
   };
 
   // Use ReactQuery to manage data fetching

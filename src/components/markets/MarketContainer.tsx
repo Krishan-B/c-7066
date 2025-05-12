@@ -9,6 +9,7 @@ import MarketTabs from "@/components/markets/MarketTabs";
 import MarketChartSection from "@/components/markets/MarketChartSection";
 import MarketOrderForm from "@/components/markets/MarketOrderForm";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
+import { Badge } from "@/components/ui/badge";
 
 interface MarketContainerProps {
   marketData: Asset[];
@@ -16,9 +17,17 @@ interface MarketContainerProps {
   error: Error | null;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  dataSource?: string;
 }
 
-const MarketContainer = ({ marketData, isLoading, error, activeTab, onTabChange }: MarketContainerProps) => {
+const MarketContainer = ({ 
+  marketData, 
+  isLoading, 
+  error, 
+  activeTab, 
+  onTabChange,
+  dataSource = "Simulated"
+}: MarketContainerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAsset, setSelectedAsset] = useState<Asset>({
     name: "Bitcoin",
@@ -38,10 +47,16 @@ const MarketContainer = ({ marketData, isLoading, error, activeTab, onTabChange 
     <div className="min-h-screen bg-background">
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
         {/* Market header section */}
-        <MarketHeader 
-          selectedAsset={selectedAsset}
-          marketIsOpen={marketIsOpen}
-        />
+        <div className="flex items-center justify-between mb-4">
+          <MarketHeader 
+            selectedAsset={selectedAsset}
+            marketIsOpen={marketIsOpen}
+          />
+          
+          <Badge variant={dataSource === "Alpha Vantage" ? "default" : "outline"} className="ml-2">
+            {dataSource} Data
+          </Badge>
+        </div>
         
         {/* Market search and table section */}
         <div className="mb-8">
