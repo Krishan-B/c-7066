@@ -95,7 +95,9 @@
 
 /* Gradient backgrounds */
 .gradient-bg {
-  @apply bg-gradient-to-br from-primary/20 to-background;
+  @apply bg-gradient-to-br;
+  background-color: var(--background);
+  background-image: linear-gradient(to bottom right, rgba(99, 102, 241, 0.2), var(--background));
 }
 
 .glass-effect {

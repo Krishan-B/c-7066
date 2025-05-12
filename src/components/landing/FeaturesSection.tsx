@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 const FeaturesSection = () => {
   return (
-    <section id="features" className="py-16 md:py-24 bg-gradient-to-b from-background to-secondary/5">
+    <section id="features" className="py-16 md:py-24 gradient-bg">
       <div className="container">
         <motion.div 
           className="text-center mb-16"
