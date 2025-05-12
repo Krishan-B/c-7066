@@ -25,8 +25,7 @@ export async function fetchWatchlistData(userId: string | undefined): Promise<As
     // Ensure access token is a string
     let accessToken = "";
     if (session?.access_token) {
-      accessToken = typeof session.access_token === 'string' ? 
-        session.access_token : String(session.access_token);
+      accessToken = String(session.access_token);
     }
     
     // Fetch the user's watchlist through the edge function
@@ -123,8 +122,7 @@ export async function addToWatchlist(userId: string | undefined, asset: Asset): 
     // Ensure access token is a string
     let accessToken = "";
     if (session?.access_token) {
-      accessToken = typeof session.access_token === 'string' ? 
-        session.access_token : String(session.access_token);
+      accessToken = String(session.access_token);
     }
     
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
@@ -171,8 +169,7 @@ export async function removeFromWatchlist(userId: string | undefined, asset: Ass
     // Ensure access token is a string
     let accessToken = "";
     if (session?.access_token) {
-      accessToken = typeof session.access_token === 'string' ? 
-        session.access_token : String(session.access_token);
+      accessToken = String(session.access_token);
     }
     
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
