@@ -22,10 +22,12 @@ export async function fetchWatchlistData(userId: string | undefined): Promise<As
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Properly convert the access_token to string with TypeScript safety
-    const accessToken = session?.access_token ? 
-      (typeof session.access_token === 'string' ? session.access_token : String(session.access_token)) : 
-      "";
+    // Type-safe access token handling
+    let accessToken = "";
+    if (session?.access_token) {
+      accessToken = typeof session.access_token === 'string' ? 
+        session.access_token : String(session.access_token);
+    }
     
     // Fetch the user's watchlist through the edge function
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
@@ -118,10 +120,12 @@ export async function addToWatchlist(userId: string | undefined, asset: Asset): 
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Properly convert the access_token to string with TypeScript safety
-    const accessToken = session?.access_token ? 
-      (typeof session.access_token === 'string' ? session.access_token : String(session.access_token)) : 
-      "";
+    // Type-safe access token handling
+    let accessToken = "";
+    if (session?.access_token) {
+      accessToken = typeof session.access_token === 'string' ? 
+        session.access_token : String(session.access_token);
+    }
     
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
       body: { 
@@ -164,10 +168,12 @@ export async function removeFromWatchlist(userId: string | undefined, asset: Ass
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Properly convert the access_token to string with TypeScript safety
-    const accessToken = session?.access_token ? 
-      (typeof session.access_token === 'string' ? session.access_token : String(session.access_token)) : 
-      "";
+    // Type-safe access token handling
+    let accessToken = "";
+    if (session?.access_token) {
+      accessToken = typeof session.access_token === 'string' ? 
+        session.access_token : String(session.access_token);
+    }
     
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
       body: { 
