@@ -101,9 +101,10 @@
 }
 
 .glass-effect {
-  @apply backdrop-blur-md border;
   background-color: var(--secondary);
-  background-opacity: 0.2;
+  opacity: 0.2;
+  backdrop-filter: blur(8px);
+  border: 1px solid;
   border-color: var(--secondary);
   border-opacity: 0.4;
 }

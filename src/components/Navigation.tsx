@@ -24,7 +24,7 @@ export function Navigation({ onMenuToggle }: NavigationProps) {
   };
   
   return (
-    <div className="border-b sticky top-0 z-50 bg-background shadow-sm transition-colors">
+    <div className="border-b sticky top-0 z-50 bg-background shadow-sm">
       <div className="container flex h-16 items-center">
         <ApplicationLogo />
         <MainNav className="mx-6 flex-1" />
