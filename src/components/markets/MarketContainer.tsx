@@ -14,11 +14,12 @@ interface MarketContainerProps {
   marketData: Asset[];
   isLoading: boolean;
   error: Error | null;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
-const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps) => {
+const MarketContainer = ({ marketData, isLoading, error, activeTab, onTabChange }: MarketContainerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("Crypto");
   const [selectedAsset, setSelectedAsset] = useState<Asset>({
     name: "Bitcoin",
     symbol: "BTCUSD",
@@ -48,7 +49,7 @@ const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps)
           <div className="mt-4">
             <MarketTabs 
               activeTab={activeTab}
-              setActiveTab={setActiveTab}
+              setActiveTab={onTabChange}
               marketData={marketData}
               isLoading={isLoading}
               error={error}

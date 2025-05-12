@@ -96,10 +96,10 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
 
   return (
     <TooltipProvider>
-      <div className="rounded-md border overflow-hidden">
+      <div className="glass-card rounded-lg p-4">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-muted/60">
+            <TableHeader className="bg-muted/40">
               <TableRow>
                 <TableHead className="font-semibold py-3 px-2 text-left">Symbol</TableHead>
                 <TableHead className="font-semibold py-3 px-2 text-left">Asset Name</TableHead>
@@ -116,7 +116,7 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
                 return (
                   <TableRow 
                     key={asset.symbol} 
-                    className="cursor-pointer border-b hover:bg-muted/40"
+                    className="cursor-pointer border-b hover:bg-muted/30"
                     onClick={() => onSelectAsset(enhancedAsset)}
                   >
                     <TableCell className="font-medium py-3 px-2">
@@ -128,7 +128,7 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
                       </div>
                     </TableCell>
                     <TableCell className="py-3 px-2">{asset.name}</TableCell>
-                    <TableCell className={`py-3 px-2 text-right ${asset.change_percentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <TableCell className={`py-3 px-2 text-right ${asset.change_percentage >= 0 ? 'text-success' : 'text-destructive'}`}>
                       <span className="flex items-center justify-end">
                         {asset.change_percentage >= 0 
                           ? <ArrowUp className="mr-1 h-4 w-4" />
@@ -144,7 +144,7 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
                         <span>{formatCurrency(enhancedAsset.day_high!)}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="py-3 px-2 text-right font-mono text-warning">
+                    <TableCell className="py-3 px-2 text-right font-mono text-destructive">
                       {formatCurrency(enhancedAsset.sell_price!)}
                     </TableCell>
                     <TableCell className="py-3 px-2 text-right font-mono text-success">

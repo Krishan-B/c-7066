@@ -25,3 +25,14 @@ export const formatNumber = (value: number, decimals: number = 2): string => {
     maximumFractionDigits: decimals
   }).format(value);
 };
+
+/**
+ * Format percentage with proper sign and decimals
+ * @param value The percentage value
+ * @param decimals Number of decimal places (default: 2)
+ * @returns Formatted percentage string
+ */
+export const formatPercentage = (value: number, decimals: number = 2): string => {
+  const formatted = value.toFixed(decimals);
+  return `${value >= 0 ? '+' : ''}${formatted}%`;
+};

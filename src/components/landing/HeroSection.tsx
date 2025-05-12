@@ -23,9 +23,9 @@ const HeroSection = () => {
           </div>
           
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
-            Trade <span className="text-primary bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Smarter</span>
+            Trade <span className="text-primary">Smarter</span>
             <br />
-            Invest <span className="text-primary bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Wiser</span>
+            Invest <span className="text-primary">Wiser</span>
           </h1>
           
           <p className="text-base md:text-lg text-muted-foreground max-w-lg">
@@ -37,7 +37,7 @@ const HeroSection = () => {
             <Button 
               size="lg" 
               onClick={() => navigate("/auth?tab=signup")}
-              className="whitespace-nowrap bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-all duration-300"
+              className="whitespace-nowrap bg-primary hover:opacity-90 transition-all duration-300"
             >
               Get Started
               <ChevronRight className="ml-2 h-4 w-4" />

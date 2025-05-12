@@ -15,7 +15,7 @@ const MainNav = ({
   }
 
   return (
-    <div className="hidden md:flex flex-1 items-center justify-center overflow-x-auto">
+    <div className="hidden md:flex flex-1 items-center justify-end pr-8">
       <AccountMetricsHeader />
     </div>
   );
