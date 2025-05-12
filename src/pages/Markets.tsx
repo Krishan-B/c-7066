@@ -1,15 +1,12 @@
 
-import React, { useState, useRef } from "react";
+import React from "react";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import MarketContainer from "@/components/markets/MarketContainer";
 
 const Markets = () => {
-  // Maintain active tab state at the page level
-  const [activeTab, setActiveTab] = useState("Crypto");
-  
-  // Use the combined market data hook with chosen category and 1-minute refetch interval
+  // Use the combined market data hook with a 1-minute refetch interval for more real-time market data
   const { marketData, isLoading, error } = useCombinedMarketData(
-    [activeTab], // Use the active tab as the market type
+    ["Crypto"], // Default to Crypto tab
     { refetchInterval: 1000 * 60 } // Refresh every minute
   );
   
@@ -18,8 +15,6 @@ const Markets = () => {
       marketData={marketData}
       isLoading={isLoading}
       error={error}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
     />
   );
 };

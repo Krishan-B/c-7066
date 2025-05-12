@@ -22,24 +22,10 @@ interface WatchlistTableProps {
 }
 
 const WatchlistTable = ({ onAssetSelect }: WatchlistTableProps) => {
-  const { 
-    watchlist, 
-    isLoading, 
-    handleRefreshData,
-    removeFromWatchlist 
-  } = useWatchlistData();
+  const { watchlist, isLoading, handleRefreshData } = useWatchlistData();
 
   if (isLoading) {
     return <WatchlistLoading />;
-  }
-
-  if (watchlist.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p>Your watchlist is empty.</p>
-        <p className="text-sm mt-2">Browse markets to add assets to your watchlist.</p>
-      </div>
-    );
   }
 
   return (
@@ -50,10 +36,9 @@ const WatchlistTable = ({ onAssetSelect }: WatchlistTableProps) => {
         <tbody>
           {watchlist.map((asset) => (
             <WatchlistTableRow 
-              key={`${asset.symbol}-${asset.market_type}`} 
+              key={asset.symbol} 
               asset={asset}
               onSelect={onAssetSelect}
-              onRemove={removeFromWatchlist}
             />
           ))}
         </tbody>

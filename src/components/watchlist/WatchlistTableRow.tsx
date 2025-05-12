@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { ArrowUpIcon, ArrowDownIcon, StarIcon, XCircle } from "lucide-react";
+import { ArrowUpIcon, ArrowDownIcon, StarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface Asset {
   id?: string;
@@ -18,17 +17,9 @@ interface Asset {
 interface WatchlistTableRowProps {
   asset: Asset;
   onSelect: (asset: Asset) => void;
-  onRemove?: (asset: Asset) => void;
 }
 
-const WatchlistTableRow = ({ asset, onSelect, onRemove }: WatchlistTableRowProps) => {
-  const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onRemove) {
-      onRemove(asset);
-    }
-  };
-
+const WatchlistTableRow = ({ asset, onSelect }: WatchlistTableRowProps) => {
   return (
     <tr 
       className="border-b border-secondary/40 text-sm hover:bg-secondary/20 cursor-pointer"
@@ -36,23 +27,7 @@ const WatchlistTableRow = ({ asset, onSelect, onRemove }: WatchlistTableRowProps
     >
       <td className="py-3 px-2">
         <div className="flex items-center gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-5 w-5 rounded-full hover:bg-red-100 hover:text-red-500 p-0"
-                  onClick={handleRemove}
-                >
-                  <XCircle className="w-3.5 h-3.5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>Remove from watchlist</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <StarIcon className="w-3 h-3 text-yellow-500 fill-yellow-500" />
           <div>
             <p>{asset.name}</p>
             <p className="text-xs text-muted-foreground">{asset.symbol}</p>

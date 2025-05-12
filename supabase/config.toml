@@ -13,5 +13,3 @@ port = 54322
 enabled = true
 port = 54323
 
-[functions.finnhub-market-data]
-verify_jwt = false

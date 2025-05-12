@@ -9,132 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      historical_market_data: {
-        Row: {
-          close_price: number
-          high_price: number
-          id: string
-          low_price: number
-          market_type: string
-          open_price: number
-          symbol: string
-          timestamp: string
-          volume: number | null
-        }
-        Insert: {
-          close_price: number
-          high_price: number
-          id?: string
-          low_price: number
-          market_type: string
-          open_price: number
-          symbol: string
-          timestamp: string
-          volume?: number | null
-        }
-        Update: {
-          close_price?: number
-          high_price?: number
-          id?: string
-          low_price?: number
-          market_type?: string
-          open_price?: number
-          symbol?: string
-          timestamp?: string
-          volume?: number | null
-        }
-        Relationships: []
-      }
       market_data: {
         Row: {
           change_percentage: number
-          high_price: number | null
           id: string
-          last_price: number | null
           last_updated: string | null
-          low_price: number | null
           market_cap: string | null
           market_type: string
           name: string
-          open_price: number | null
-          previous_close: number | null
           price: number
           symbol: string
-          timestamp: string | null
           volume: string
         }
         Insert: {
           change_percentage: number
-          high_price?: number | null
           id?: string
-          last_price?: number | null
           last_updated?: string | null
-          low_price?: number | null
           market_cap?: string | null
           market_type: string
           name: string
-          open_price?: number | null
-          previous_close?: number | null
           price: number
           symbol: string
-          timestamp?: string | null
           volume: string
         }
         Update: {
           change_percentage?: number
-          high_price?: number | null
           id?: string
-          last_price?: number | null
           last_updated?: string | null
-          low_price?: number | null
           market_cap?: string | null
           market_type?: string
           name?: string
-          open_price?: number | null
-          previous_close?: number | null
           price?: number
           symbol?: string
-          timestamp?: string | null
           volume?: string
-        }
-        Relationships: []
-      }
-      price_alerts: {
-        Row: {
-          asset_name: string
-          asset_symbol: string
-          condition: string
-          created_at: string | null
-          id: string
-          is_triggered: boolean | null
-          market_type: string
-          target_price: number
-          triggered_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          asset_name: string
-          asset_symbol: string
-          condition: string
-          created_at?: string | null
-          id?: string
-          is_triggered?: boolean | null
-          market_type: string
-          target_price: number
-          triggered_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          asset_name?: string
-          asset_symbol?: string
-          condition?: string
-          created_at?: string | null
-          id?: string
-          is_triggered?: boolean | null
-          market_type?: string
-          target_price?: number
-          triggered_at?: string | null
-          user_id?: string | null
         }
         Relationships: []
       }
@@ -159,174 +66,6 @@ export type Database = {
           id?: string
           updated_at?: string
           username?: string | null
-        }
-        Relationships: []
-      }
-      user_account: {
-        Row: {
-          available_funds: number
-          cash_balance: number
-          equity: number
-          id: string
-          last_updated: string | null
-          realized_pnl: number
-          unrealized_pnl: number
-          used_margin: number
-        }
-        Insert: {
-          available_funds?: number
-          cash_balance?: number
-          equity?: number
-          id: string
-          last_updated?: string | null
-          realized_pnl?: number
-          unrealized_pnl?: number
-          used_margin?: number
-        }
-        Update: {
-          available_funds?: number
-          cash_balance?: number
-          equity?: number
-          id?: string
-          last_updated?: string | null
-          realized_pnl?: number
-          unrealized_pnl?: number
-          used_margin?: number
-        }
-        Relationships: []
-      }
-      user_portfolio: {
-        Row: {
-          asset_name: string
-          asset_symbol: string
-          average_price: number
-          current_price: number
-          id: string
-          last_updated: string | null
-          market_type: string
-          pnl: number
-          pnl_percentage: number
-          total_value: number
-          units: number
-          user_id: string | null
-        }
-        Insert: {
-          asset_name: string
-          asset_symbol: string
-          average_price: number
-          current_price: number
-          id?: string
-          last_updated?: string | null
-          market_type: string
-          pnl: number
-          pnl_percentage: number
-          total_value: number
-          units: number
-          user_id?: string | null
-        }
-        Update: {
-          asset_name?: string
-          asset_symbol?: string
-          average_price?: number
-          current_price?: number
-          id?: string
-          last_updated?: string | null
-          market_type?: string
-          pnl?: number
-          pnl_percentage?: number
-          total_value?: number
-          units?: number
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      user_trades: {
-        Row: {
-          asset_name: string
-          asset_symbol: string
-          closed_at: string | null
-          created_at: string | null
-          executed_at: string | null
-          expiration_date: string | null
-          id: string
-          market_type: string
-          order_type: string
-          pnl: number | null
-          price_per_unit: number
-          status: string
-          stop_loss: number | null
-          take_profit: number | null
-          total_amount: number
-          trade_type: string
-          units: number
-          user_id: string | null
-        }
-        Insert: {
-          asset_name: string
-          asset_symbol: string
-          closed_at?: string | null
-          created_at?: string | null
-          executed_at?: string | null
-          expiration_date?: string | null
-          id?: string
-          market_type: string
-          order_type: string
-          pnl?: number | null
-          price_per_unit: number
-          status: string
-          stop_loss?: number | null
-          take_profit?: number | null
-          total_amount: number
-          trade_type: string
-          units: number
-          user_id?: string | null
-        }
-        Update: {
-          asset_name?: string
-          asset_symbol?: string
-          closed_at?: string | null
-          created_at?: string | null
-          executed_at?: string | null
-          expiration_date?: string | null
-          id?: string
-          market_type?: string
-          order_type?: string
-          pnl?: number | null
-          price_per_unit?: number
-          status?: string
-          stop_loss?: number | null
-          take_profit?: number | null
-          total_amount?: number
-          trade_type?: string
-          units?: number
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      user_watchlist: {
-        Row: {
-          added_at: string | null
-          asset_name: string
-          asset_symbol: string
-          id: string
-          market_type: string
-          user_id: string | null
-        }
-        Insert: {
-          added_at?: string | null
-          asset_name: string
-          asset_symbol: string
-          id?: string
-          market_type: string
-          user_id?: string | null
-        }
-        Update: {
-          added_at?: string | null
-          asset_name?: string
-          asset_symbol?: string
-          id?: string
-          market_type?: string
-          user_id?: string | null
         }
         Relationships: []
       }

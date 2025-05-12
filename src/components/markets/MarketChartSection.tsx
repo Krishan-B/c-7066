@@ -11,14 +11,12 @@ interface MarketChartSectionProps {
   chartSectionRef: React.RefObject<HTMLDivElement>;
   selectedAsset: Asset;
   marketIsOpen: boolean;
-  onTradeClick?: () => void;
 }
 
 const MarketChartSection: React.FC<MarketChartSectionProps> = ({
   chartSectionRef,
   selectedAsset,
-  marketIsOpen,
-  onTradeClick
+  marketIsOpen
 }) => {
   return (
     <div ref={chartSectionRef}>
@@ -68,21 +66,6 @@ const MarketChartSection: React.FC<MarketChartSectionProps> = ({
                 </div>
               </div>
               
-              {selectedAsset.high_price && selectedAsset.low_price && (
-                <>
-                  <div className="grid grid-cols-2 gap-4 mt-4">
-                    <div>
-                      <div className="text-xs text-muted-foreground mb-1">Day High</div>
-                      <div className="font-semibold text-success">${selectedAsset.high_price.toLocaleString()}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground mb-1">Day Low</div>
-                      <div className="font-semibold text-warning">${selectedAsset.low_price.toLocaleString()}</div>
-                    </div>
-                  </div>
-                </>
-              )}
-              
               <Separator />
               
               {/* Integrated trading hours info - Now part of the Market Details card */}
@@ -102,7 +85,7 @@ const MarketChartSection: React.FC<MarketChartSectionProps> = ({
                 <div className="flex justify-center space-x-2">
                   <Button 
                     className="flex-1" 
-                    onClick={onTradeClick}
+                    disabled={!marketIsOpen}
                   >
                     Trade
                   </Button>
@@ -110,6 +93,12 @@ const MarketChartSection: React.FC<MarketChartSectionProps> = ({
                     <RefreshCcw className="h-4 w-4" />
                   </Button>
                 </div>
+                
+                {!marketIsOpen && (
+                  <div className="mt-2 text-xs text-warning text-center">
+                    The market is currently closed. Please try again during market hours.
+                  </div>
+                )}
               </div>
             </div>
           </div>
