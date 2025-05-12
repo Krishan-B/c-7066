@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 // Base API URL for Alpha Vantage
 const ALPHA_VANTAGE_BASE_URL = 'https://www.alphavantage.co/query';
@@ -45,7 +45,7 @@ export async function fetchAlphaVantageData(
         description: "Alpha Vantage API key is not configured.",
         variant: "destructive"
       });
-      return null;
+      return { error: "API key missing" };
     }
     
     // Build query parameters
@@ -54,6 +54,8 @@ export async function fetchAlphaVantageData(
       apikey: apiKey,
       function: endpoint,
     });
+    
+    console.log(`Fetching Alpha Vantage data: ${endpoint}`);
     
     // Make the API call
     const response = await fetch(`${ALPHA_VANTAGE_BASE_URL}?${queryParams}`);
@@ -71,6 +73,14 @@ export async function fetchAlphaVantageData(
     
     if (data['Information']) {
       console.info('Alpha Vantage info:', data['Information']);
+      // This usually means we hit an API limit
+      if (data['Information'].includes('API call frequency')) {
+        toast({
+          title: "API Rate Limit",
+          description: "Alpha Vantage API rate limit reached. Using simulated data instead.",
+        });
+        return { error: "Rate limit", information: data['Information'] };
+      }
     }
     
     return data;
@@ -81,7 +91,7 @@ export async function fetchAlphaVantageData(
       description: error instanceof Error ? error.message : "Failed to fetch market data",
       variant: "destructive"
     });
-    return null;
+    return { error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
 
@@ -119,9 +129,11 @@ export async function searchSecurities(keywords: string) {
  * @param market Market (e.g., USD)
  */
 export async function getCryptoQuote(symbol: string, market: string = 'USD') {
-  return fetchAlphaVantageData('CRYPTO_QUOTE', {
+  return fetchAlphaVantageData('CURRENCY_INTRADAY', {
     symbol,
-    market
+    market,
+    interval: '5min',
+    outputsize: 'compact'
   });
 }
 
@@ -129,7 +141,7 @@ export async function getCryptoQuote(symbol: string, market: string = 'USD') {
  * Transform Alpha Vantage stock data to our app's Asset format
  */
 export function transformStockData(data: any): any {
-  if (!data || !data['Global Quote']) return null;
+  if (!data || !data['Global Quote'] || Object.keys(data['Global Quote']).length === 0) return null;
   
   const quote = data['Global Quote'];
   
@@ -138,7 +150,7 @@ export function transformStockData(data: any): any {
     name: quote['01. symbol'], // Alpha Vantage doesn't provide name in quote
     price: parseFloat(quote['05. price']),
     change_percentage: parseFloat(quote['10. change percent'].replace('%', '')),
-    volume: quote['06. volume'],
+    volume: formatVolume(quote['06. volume']),
     market_type: 'Stock',
     last_updated: new Date().toISOString()
   };
@@ -164,4 +176,60 @@ export function transformForexData(data: any): any {
     market_type: 'Forex',
     last_updated: exchangeRate['6. Last Refreshed']
   };
+}
+
+/**
+ * Transform Alpha Vantage crypto data to our app's Asset format
+ */
+export function transformCryptoData(data: any): any {
+  if (!data || !data['Time Series Crypto (5min)']) return null;
+  
+  // Get the most recent data point
+  const timeSeriesData = data['Time Series Crypto (5min)'];
+  const timestamps = Object.keys(timeSeriesData).sort().reverse();
+  
+  if (timestamps.length === 0) return null;
+  
+  const latestData = timeSeriesData[timestamps[0]];
+  const prevData = timestamps.length > 1 ? timeSeriesData[timestamps[1]] : null;
+  
+  const currentPrice = parseFloat(latestData['4. close']);
+  let changePercentage = 0;
+  
+  if (prevData) {
+    const prevPrice = parseFloat(prevData['4. close']);
+    changePercentage = ((currentPrice - prevPrice) / prevPrice) * 100;
+  }
+  
+  const metaData = data['Meta Data'];
+  const symbol = metaData ? metaData['2. Digital Currency Code'] : data.symbol || "CRYPTO";
+  const market = metaData ? metaData['4. Market Code'] : "USD";
+  
+  return {
+    symbol: `${symbol}${market}`,
+    name: `${symbol}/${market}`,
+    price: currentPrice,
+    change_percentage: changePercentage,
+    volume: formatVolume(latestData['5. volume']),
+    market_type: 'Crypto',
+    last_updated: timestamps[0]
+  };
+}
+
+/**
+ * Format volume to a readable string (e.g. 1.2B, 45.3M, etc.)
+ */
+function formatVolume(volumeStr: string): string {
+  const volume = parseFloat(volumeStr);
+  if (isNaN(volume)) return 'N/A';
+  
+  if (volume >= 1e9) {
+    return `$${(volume / 1e9).toFixed(1)}B`;
+  } else if (volume >= 1e6) {
+    return `$${(volume / 1e6).toFixed(1)}M`;
+  } else if (volume >= 1e3) {
+    return `$${(volume / 1e3).toFixed(1)}K`;
+  } else {
+    return `$${volume.toFixed(0)}`;
+  }
 }

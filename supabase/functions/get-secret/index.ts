@@ -27,6 +27,8 @@ serve(async (req) => {
     // Get the secret from Deno.env
     const secretValue = Deno.env.get(secretName);
     
+    console.log(`Requested secret: ${secretName}, ${secretValue ? "Found" : "Not Found"}`);
+    
     if (!secretValue) {
       return new Response(
         JSON.stringify({ error: `Secret '${secretName}' not found` }),
@@ -40,6 +42,8 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
   } catch (error) {
+    console.error("Error processing secret request:", error.message);
+    
     // Handle errors
     return new Response(
       JSON.stringify({ error: error.message }),

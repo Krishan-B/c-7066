@@ -3,7 +3,15 @@ import { useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { fetchAlphaVantageData, transformStockData, transformForexData } from "@/utils/alphaVantageApi";
+import { 
+  fetchAlphaVantageData, 
+  getStockQuote,
+  getForexRate,
+  getCryptoQuote,
+  transformStockData, 
+  transformForexData,
+  transformCryptoData 
+} from "@/utils/alphaVantageApi";
 
 export interface Asset {
   id?: string;
@@ -14,6 +22,7 @@ export interface Asset {
   volume: string;
   market_cap?: string;
   market_type: string;
+  last_updated?: string;
 }
 
 interface UseMarketDataOptions {
@@ -58,12 +67,22 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
         const symbols = getSymbolsForMarketType(marketTypeArray);
         let alphaVantageData: Asset[] = [];
         
-        // Fetch data for each symbol
+        // First check if the Alpha Vantage API key is configured
+        const { data: secretData } = await supabase.functions.invoke('get-secret', {
+          body: { secretName: 'ALPHA_VANTAGE_API_KEY' }
+        });
+        
+        if (!secretData?.value) {
+          console.log("Alpha Vantage API key not configured, falling back to edge functions");
+          throw new Error("API key not configured");
+        }
+        
+        // Fetch data for each symbol based on market type
         for (const marketType of marketTypeArray) {
           if (marketType === 'Stock') {
             for (const symbol of symbols[marketType]) {
-              const data = await fetchAlphaVantageData('GLOBAL_QUOTE', { symbol });
-              if (data && data['Global Quote']) {
+              const data = await getStockQuote(symbol);
+              if (data && !data.error && data['Global Quote']) {
                 const transformedData = transformStockData(data);
                 if (transformedData) {
                   alphaVantageData.push(transformedData);
@@ -74,11 +93,8 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
           else if (marketType === 'Forex') {
             for (const pair of symbols[marketType]) {
               const [fromCurrency, toCurrency] = pair.split('/');
-              const data = await fetchAlphaVantageData('CURRENCY_EXCHANGE_RATE', {
-                from_currency: fromCurrency,
-                to_currency: toCurrency
-              });
-              if (data) {
+              const data = await getForexRate(fromCurrency, toCurrency);
+              if (data && !data.error) {
                 const transformedData = transformForexData(data);
                 if (transformedData) {
                   alphaVantageData.push(transformedData);
@@ -86,11 +102,20 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
               }
             }
           }
-          
-          // For other market types, we'll fall back to our existing data sources
+          else if (marketType === 'Crypto') {
+            for (const symbol of symbols[marketType]) {
+              const data = await getCryptoQuote(symbol);
+              if (data && !data.error) {
+                const transformedData = transformCryptoData(data);
+                if (transformedData) {
+                  alphaVantageData.push(transformedData);
+                }
+              }
+            }
+          }
         }
         
-        // If we got enough data from Alpha Vantage, use it
+        // If we got at least some data from Alpha Vantage, use it
         if (alphaVantageData.length > 0) {
           console.log(`Fetched ${alphaVantageData.length} assets from Alpha Vantage`);
           
@@ -152,11 +177,11 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
   // Helper function to get symbols for different market types
   const getSymbolsForMarketType = (marketTypes: string[]): Record<string, string[]> => {
     const symbols: Record<string, string[]> = {
-      'Stock': ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA'],
-      'Forex': ['EUR/USD', 'USD/JPY', 'GBP/USD', 'USD/CAD', 'AUD/USD'],
-      'Crypto': ['BTC', 'ETH', 'XRP', 'LTC', 'ADA'],
-      'Index': [], // Alpha Vantage requires premium for indices
-      'Commodity': [] // Alpha Vantage requires premium for commodities
+      'Stock': ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NFLX', 'DIS', 'INTC', 'AMD'],
+      'Forex': ['EUR/USD', 'USD/JPY', 'GBP/USD', 'USD/CAD', 'AUD/USD', 'USD/CHF', 'EUR/GBP', 'EUR/JPY'],
+      'Crypto': ['BTC', 'ETH', 'XRP', 'LTC', 'SOL', 'ADA', 'DOT', 'DOGE', 'AVAX', 'LINK'],
+      'Index': ['SPY', 'QQQ', 'DIA', 'IWM', 'VTI'], // Alpha Vantage requires premium for some indices
+      'Commodity': ['GLD', 'SLV', 'USO', 'UNG', 'DBC'] // For commodities we use ETFs as proxy
     };
     
     return symbols;
