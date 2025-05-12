@@ -16,167 +16,408 @@ function handleOptions() {
   });
 }
 
-// Get market data from Finnhub
-async function getMarketData(market: string) {
-  const FINNHUB_API_KEY = Deno.env.get("FINNHUB_API_KEY");
-  
-  if (!FINNHUB_API_KEY) {
-    return { error: "Finnhub API key not configured" };
-  }
-
+// Generate mock market data instead of fetching from Finnhub
+async function getMockMarketData(market: string) {
   try {
-    let symbols = [];
-    let url = "";
+    let mockData = [];
     
-    // Define symbols based on market type
+    // Define mock data based on market type
     switch (market.toLowerCase()) {
       case "crypto":
-        symbols = ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:DOGEUSDT", "BINANCE:ADAUSDT"];
+        mockData = [
+          {
+            symbol: "BTCUSDT",
+            name: "Bitcoin",
+            price: 67543.21,
+            change_percentage: 2.4,
+            volume: "14.2B",
+            market_type: "crypto",
+            high_price: 68125.45,
+            low_price: 66891.32,
+            open_price: 66932.15,
+            last_price: 67543.21,
+            previous_close: 66932.15,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "ETHUSDT",
+            name: "Ethereum",
+            price: 3211.43,
+            change_percentage: -1.2,
+            volume: "5.7B",
+            market_type: "crypto",
+            high_price: 3315.78,
+            low_price: 3180.45,
+            open_price: 3250.65,
+            last_price: 3211.43,
+            previous_close: 3250.65,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "SOLUSDT",
+            name: "Solana",
+            price: 143.56,
+            change_percentage: 3.8,
+            volume: "1.2B",
+            market_type: "crypto",
+            high_price: 145.21,
+            low_price: 138.45,
+            open_price: 138.32,
+            last_price: 143.56,
+            previous_close: 138.32,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "DOGEUSDT",
+            name: "Dogecoin",
+            price: 0.1234,
+            change_percentage: 5.1,
+            volume: "845.3M",
+            market_type: "crypto",
+            high_price: 0.1278,
+            low_price: 0.1176,
+            open_price: 0.1176,
+            last_price: 0.1234,
+            previous_close: 0.1176,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "ADAUSDT",
+            name: "Cardano",
+            price: 0.4532,
+            change_percentage: -0.3,
+            volume: "432.1M",
+            market_type: "crypto",
+            high_price: 0.4578,
+            low_price: 0.4489,
+            open_price: 0.4545,
+            last_price: 0.4532,
+            previous_close: 0.4545,
+            timestamp: new Date().toISOString(),
+          }
+        ];
         break;
       case "stock":
-        symbols = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA"];
+        mockData = [
+          {
+            symbol: "AAPL",
+            name: "Apple Inc.",
+            price: 184.21,
+            change_percentage: 0.4,
+            volume: "58.3M",
+            market_type: "stock",
+            high_price: 185.42,
+            low_price: 183.10,
+            open_price: 183.45,
+            last_price: 184.21,
+            previous_close: 183.45,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "MSFT",
+            name: "Microsoft Corp.",
+            price: 410.34,
+            change_percentage: 1.2,
+            volume: "23.1M",
+            market_type: "stock",
+            high_price: 413.21,
+            low_price: 405.67,
+            open_price: 405.78,
+            last_price: 410.34,
+            previous_close: 405.78,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "GOOGL",
+            name: "Alphabet Inc.",
+            price: 165.78,
+            change_percentage: -0.7,
+            volume: "18.4M",
+            market_type: "stock",
+            high_price: 167.34,
+            low_price: 164.21,
+            open_price: 166.89,
+            last_price: 165.78,
+            previous_close: 166.89,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "AMZN",
+            name: "Amazon.com Inc.",
+            price: 178.32,
+            change_percentage: 1.8,
+            volume: "32.7M",
+            market_type: "stock",
+            high_price: 180.21,
+            low_price: 175.45,
+            open_price: 175.23,
+            last_price: 178.32,
+            previous_close: 175.23,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "TSLA",
+            name: "Tesla Inc.",
+            price: 173.45,
+            change_percentage: -2.1,
+            volume: "87.3M",
+            market_type: "stock",
+            high_price: 178.90,
+            low_price: 172.45,
+            open_price: 177.21,
+            last_price: 173.45,
+            previous_close: 177.21,
+            timestamp: new Date().toISOString(),
+          }
+        ];
         break;
       case "forex":
-        symbols = ["OANDA:EUR_USD", "OANDA:GBP_USD", "OANDA:USD_JPY", "OANDA:USD_CAD", "OANDA:AUD_USD"];
+        mockData = [
+          {
+            symbol: "EUR_USD",
+            name: "Euro/US Dollar",
+            price: 1.0934,
+            change_percentage: -0.1,
+            volume: "98.2B",
+            market_type: "forex",
+            high_price: 1.0956,
+            low_price: 1.0923,
+            open_price: 1.0945,
+            last_price: 1.0934,
+            previous_close: 1.0945,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "GBP_USD",
+            name: "British Pound/US Dollar",
+            price: 1.2654,
+            change_percentage: 0.3,
+            volume: "45.7B",
+            market_type: "forex",
+            high_price: 1.2678,
+            low_price: 1.2621,
+            open_price: 1.2632,
+            last_price: 1.2654,
+            previous_close: 1.2632,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "USD_JPY",
+            name: "US Dollar/Japanese Yen",
+            price: 153.67,
+            change_percentage: 0.2,
+            volume: "37.8B",
+            market_type: "forex",
+            high_price: 153.89,
+            low_price: 153.21,
+            open_price: 153.34,
+            last_price: 153.67,
+            previous_close: 153.34,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "USD_CAD",
+            name: "US Dollar/Canadian Dollar",
+            price: 1.3576,
+            change_percentage: -0.3,
+            volume: "18.3B",
+            market_type: "forex",
+            high_price: 1.3598,
+            low_price: 1.3545,
+            open_price: 1.3595,
+            last_price: 1.3576,
+            previous_close: 1.3595,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "AUD_USD",
+            name: "Australian Dollar/US Dollar",
+            price: 0.6534,
+            change_percentage: 0.5,
+            volume: "15.7B",
+            market_type: "forex",
+            high_price: 0.6547,
+            low_price: 0.6512,
+            open_price: 0.6512,
+            last_price: 0.6534,
+            previous_close: 0.6512,
+            timestamp: new Date().toISOString(),
+          }
+        ];
         break;
       case "index":
-        symbols = ["^GSPC", "^DJI", "^IXIC", "^FTSE", "^N225"];
+        mockData = [
+          {
+            symbol: "GSPC",
+            name: "S&P 500",
+            price: 5204.35,
+            change_percentage: 0.4,
+            volume: "2.1B",
+            market_type: "index",
+            high_price: 5217.89,
+            low_price: 5194.32,
+            open_price: 5196.45,
+            last_price: 5204.35,
+            previous_close: 5196.45,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "DJI",
+            name: "Dow Jones Industrial Average",
+            price: 38567.12,
+            change_percentage: 0.2,
+            volume: "320.4M",
+            market_type: "index",
+            high_price: 38612.45,
+            low_price: 38532.17,
+            open_price: 38545.32,
+            last_price: 38567.12,
+            previous_close: 38545.32,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "IXIC",
+            name: "NASDAQ Composite",
+            price: 16321.78,
+            change_percentage: 0.8,
+            volume: "1.8B",
+            market_type: "index",
+            high_price: 16365.45,
+            low_price: 16278.32,
+            open_price: 16285.23,
+            last_price: 16321.78,
+            previous_close: 16285.23,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "FTSE",
+            name: "FTSE 100",
+            price: 7876.34,
+            change_percentage: -0.3,
+            volume: "453.2M",
+            market_type: "index",
+            high_price: 7912.45,
+            low_price: 7865.23,
+            open_price: 7895.45,
+            last_price: 7876.34,
+            previous_close: 7895.45,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "N225",
+            name: "Nikkei 225",
+            price: 38432.56,
+            change_percentage: 1.2,
+            volume: "567.3M",
+            market_type: "index",
+            high_price: 38521.34,
+            low_price: 38345.21,
+            open_price: 37978.45,
+            last_price: 38432.56,
+            previous_close: 37978.45,
+            timestamp: new Date().toISOString(),
+          }
+        ];
         break;
       case "commodity":
-        symbols = ["CBOT:ZC", "COMEX:GC", "NYMEX:CL", "COMEX:SI", "CBOT:ZS"];
+        mockData = [
+          {
+            symbol: "GC",
+            name: "Gold Futures",
+            price: 2326.45,
+            change_percentage: 1.3,
+            volume: "215.4K",
+            market_type: "commodity",
+            high_price: 2334.12,
+            low_price: 2315.67,
+            open_price: 2298.32,
+            last_price: 2326.45,
+            previous_close: 2298.32,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "CL",
+            name: "Crude Oil WTI Futures",
+            price: 74.32,
+            change_percentage: -0.8,
+            volume: "354.7K",
+            market_type: "commodity",
+            high_price: 75.21,
+            low_price: 74.10,
+            open_price: 74.89,
+            last_price: 74.32,
+            previous_close: 74.89,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "SI",
+            name: "Silver Futures",
+            price: 27.45,
+            change_percentage: 2.1,
+            volume: "132.5K",
+            market_type: "commodity",
+            high_price: 27.67,
+            low_price: 26.89,
+            open_price: 26.91,
+            last_price: 27.45,
+            previous_close: 26.91,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "ZC",
+            name: "Corn Futures",
+            price: 442.75,
+            change_percentage: 0.4,
+            volume: "87.2K",
+            market_type: "commodity",
+            high_price: 445.25,
+            low_price: 440.50,
+            open_price: 441.25,
+            last_price: 442.75,
+            previous_close: 441.25,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            symbol: "ZS",
+            name: "Soybean Futures",
+            price: 1182.25,
+            change_percentage: -0.3,
+            volume: "76.3K",
+            market_type: "commodity",
+            high_price: 1186.75,
+            low_price: 1178.50,
+            open_price: 1185.75,
+            last_price: 1182.25,
+            previous_close: 1185.75,
+            timestamp: new Date().toISOString(),
+          }
+        ];
         break;
       default:
         return { error: "Invalid market type" };
     }
     
-    // Fetch market data for each symbol
-    const marketData = await Promise.all(
-      symbols.map(async (symbol) => {
-        try {
-          // Use different endpoint based on market type
-          if (market.toLowerCase() === "crypto") {
-            url = `https://finnhub.io/api/v1/crypto/candle?symbol=${symbol}&resolution=D&count=1&token=${FINNHUB_API_KEY}`;
-          } else if (market.toLowerCase() === "forex") {
-            url = `https://finnhub.io/api/v1/forex/candle?symbol=${symbol}&resolution=D&count=1&token=${FINNHUB_API_KEY}`;
-          } else {
-            url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`;
-          }
-          
-          const response = await fetch(url);
-          const data = await response.json();
-          
-          // Format the data based on response structure
-          let formattedData: any = {};
-          
-          if (market.toLowerCase() === "crypto" || market.toLowerCase() === "forex") {
-            // Candle data format
-            if (data.s === "ok" && data.c && data.c.length > 0) {
-              const lastIndex = data.c.length - 1;
-              const symbolName = symbol.split(":")[1] || symbol;
-              
-              formattedData = {
-                symbol: symbolName,
-                name: getAssetName(symbolName),
-                price: data.c[lastIndex],
-                change_percentage: ((data.c[lastIndex] - data.o[lastIndex]) / data.o[lastIndex]) * 100,
-                volume: formatVolume(data.v ? data.v[lastIndex] : 0),
-                market_type: market,
-                high_price: data.h[lastIndex],
-                low_price: data.l[lastIndex],
-                open_price: data.o[lastIndex],
-                last_price: data.c[lastIndex],
-                previous_close: data.o[lastIndex],
-                timestamp: new Date(data.t[lastIndex] * 1000).toISOString(),
-              };
-            }
-          } else {
-            // Quote data format
-            const symbolName = symbol.startsWith("^") ? symbol.substring(1) : symbol;
-            
-            formattedData = {
-              symbol: symbol,
-              name: getAssetName(symbolName),
-              price: data.c,
-              change_percentage: data.dp,
-              volume: formatVolume(data.v),
-              market_type: market,
-              high_price: data.h,
-              low_price: data.l,
-              open_price: data.o,
-              last_price: data.c,
-              previous_close: data.pc,
-              timestamp: new Date().toISOString(),
-            };
-          }
-          
-          return formattedData;
-        } catch (error) {
-          console.error(`Error fetching data for ${symbol}:`, error);
-          return null;
-        }
-      })
-    );
-    
-    // Filter out null results and return
-    return { data: marketData.filter(Boolean) };
+    // Add some small random variations to the price to simulate market movement
+    return { 
+      data: mockData.map(item => {
+        // Add a small random variation to price (±0.5%)
+        const randomFactor = 1 + (Math.random() * 0.01 - 0.005);
+        const newPrice = item.price * randomFactor;
+        
+        // Adjust other related fields
+        const priceChange = newPrice - item.price;
+        const newChangePercentage = item.change_percentage + (priceChange / item.price) * 100;
+        
+        return {
+          ...item,
+          price: parseFloat(newPrice.toFixed(4)),
+          change_percentage: parseFloat(newChangePercentage.toFixed(2))
+        };
+      }) 
+    };
   } catch (error) {
-    console.error("Error fetching market data:", error);
-    return { error: "Failed to fetch market data" };
-  }
-}
-
-// Helper to get asset names
-function getAssetName(symbol: string) {
-  const names: { [key: string]: string } = {
-    // Crypto
-    "BTCUSDT": "Bitcoin",
-    "ETHUSDT": "Ethereum",
-    "SOLUSDT": "Solana",
-    "DOGEUSDT": "Dogecoin",
-    "ADAUSDT": "Cardano",
-    
-    // Stocks
-    "AAPL": "Apple Inc.",
-    "MSFT": "Microsoft Corp.",
-    "GOOGL": "Alphabet Inc.",
-    "AMZN": "Amazon.com Inc.",
-    "TSLA": "Tesla Inc.",
-    
-    // Forex
-    "EUR_USD": "Euro/US Dollar",
-    "GBP_USD": "British Pound/US Dollar",
-    "USD_JPY": "US Dollar/Japanese Yen",
-    "USD_CAD": "US Dollar/Canadian Dollar",
-    "AUD_USD": "Australian Dollar/US Dollar",
-    
-    // Indices
-    "GSPC": "S&P 500",
-    "DJI": "Dow Jones Industrial Average",
-    "IXIC": "NASDAQ Composite",
-    "FTSE": "FTSE 100",
-    "N225": "Nikkei 225",
-    
-    // Commodities
-    "ZC": "Corn Futures",
-    "GC": "Gold Futures",
-    "CL": "Crude Oil WTI Futures",
-    "SI": "Silver Futures",
-    "ZS": "Soybean Futures",
-  };
-  
-  return names[symbol] || symbol;
-}
-
-// Format volume to human-readable format
-function formatVolume(volume: number): string {
-  if (volume >= 1_000_000_000) {
-    return `${(volume / 1_000_000_000).toFixed(2)}B`;
-  } else if (volume >= 1_000_000) {
-    return `${(volume / 1_000_000).toFixed(2)}M`;
-  } else if (volume >= 1_000) {
-    return `${(volume / 1_000).toFixed(2)}K`;
-  } else {
-    return volume.toString();
+    console.error("Error generating mock market data:", error);
+    return { error: "Failed to generate mock market data" };
   }
 }
 
@@ -197,7 +438,7 @@ serve(async (req) => {
       );
     }
     
-    const result = await getMarketData(market);
+    const result = await getMockMarketData(market);
     
     if (result.error) {
       return new Response(
@@ -206,15 +447,15 @@ serve(async (req) => {
       );
     }
     
-    // Store the data in the Supabase database
+    // Store the mock data in the Supabase database
     const { supabaseClient } = await import("https://esm.sh/@supabase/supabase-js@2");
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
     const supabase = supabaseClient(supabaseUrl, supabaseKey);
     
-    // Update or insert market data
+    // Update or insert mock market data
     for (const item of result.data) {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("market_data")
         .upsert(item, { onConflict: "symbol,market_type" });
       
