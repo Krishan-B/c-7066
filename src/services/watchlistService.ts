@@ -72,7 +72,7 @@ export const addToWatchlist = async (asset: Asset): Promise<boolean> => {
       return false;
     }
     
-    // Safely convert access_token to string using String() function
+    // Convert access_token to string to fix TypeScript error
     const accessToken = String(session.session.access_token);
     
     const { error } = await supabase
@@ -109,7 +109,7 @@ export const removeFromWatchlist = async (symbol: string): Promise<boolean> => {
       return false;
     }
 
-    // Safely convert access_token to string using String() function
+    // Convert access_token to string to fix TypeScript error
     const accessToken = String(session.session.access_token);
     
     const { error } = await supabase

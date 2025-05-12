@@ -2,10 +2,14 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
 import { LineChart } from "lucide-react"
+import { useAuth } from "@/hooks/useAuth"
 
 const ApplicationLogo = () => {
+  const { user } = useAuth();
+  const linkTo = user ? "/dashboard" : "/";
+  
   return (
-    <Link to="/" className="mr-4 flex items-center space-x-2 fixed">
+    <Link to={linkTo} className="mr-4 flex items-center space-x-2 fixed">
       <LineChart className="h-6 w-6 text-primary" />
       <span className="font-bold sm:inline-block">
         TradePro

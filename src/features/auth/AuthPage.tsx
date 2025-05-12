@@ -16,7 +16,7 @@ const AuthPage = () => {
   const location = useLocation();
   const { toast } = useToast();
   
-  const from = location.state?.from || "/";
+  const from = location.state?.from || "/dashboard";
 
   // Set default tab based on URL params
   useEffect(() => {

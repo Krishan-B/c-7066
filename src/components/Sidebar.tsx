@@ -42,7 +42,7 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
       toast({
         title: "Signed out successfully",
       });
-      navigate("/auth");
+      navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
@@ -63,19 +63,19 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
       <div className="flex flex-col h-full p-4">
         <div className="flex-grow">
           <nav className="space-y-1">
-            <SidebarItem to="/" icon={<LayoutDashboard className="h-5 w-5" />} label="Dashboard" />
-            <SidebarItem to="/markets" icon={<LineChart className="h-5 w-5" />} label="Markets" />
-            <SidebarItem to="/portfolio" icon={<BarChart3 className="h-5 w-5" />} label="Portfolio" />
-            <SidebarItem to="/orders" icon={<ListCheck className="h-5 w-5" />} label="Orders" />
-            <SidebarItem to="/news" icon={<Newspaper className="h-5 w-5" />} label="News" />
-            <SidebarItem to="/wallet" icon={<Wallet className="h-5 w-5" />} label="Wallet" />
+            <SidebarItem to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} label="Dashboard" />
+            <SidebarItem to="/dashboard/markets" icon={<LineChart className="h-5 w-5" />} label="Markets" />
+            <SidebarItem to="/dashboard/portfolio" icon={<BarChart3 className="h-5 w-5" />} label="Portfolio" />
+            <SidebarItem to="/dashboard/orders" icon={<ListCheck className="h-5 w-5" />} label="Orders" />
+            <SidebarItem to="/dashboard/news" icon={<Newspaper className="h-5 w-5" />} label="News" />
+            <SidebarItem to="/dashboard/wallet" icon={<Wallet className="h-5 w-5" />} label="Wallet" />
           </nav>
           
           <div className="mt-8">
             <p className="px-4 text-xs font-medium text-muted-foreground mb-2">ACCOUNT</p>
             <nav className="space-y-1">
-              <SidebarItem to="/profile" icon={<UserCircle className="h-5 w-5" />} label="My Profile" />
-              <SidebarItem to="/account" icon={<Settings className="h-5 w-5" />} label="Settings" />
+              <SidebarItem to="/dashboard/profile" icon={<UserCircle className="h-5 w-5" />} label="My Profile" />
+              <SidebarItem to="/dashboard/account" icon={<Settings className="h-5 w-5" />} label="Settings" />
               <button 
                 onClick={handleLogout}
                 className="w-full flex items-center py-2 px-4 rounded-md text-sm text-muted-foreground hover:bg-accent/50 transition-colors text-left"

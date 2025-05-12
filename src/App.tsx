@@ -24,7 +24,12 @@ export default function App() {
       <TradePanelProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Layout />}>
+            {/* Landing page is now the root */}
+            <Route path="/" element={<Landing />} />
+            {/* Auth page */}
+            <Route path="/auth" element={<Auth />} />
+            {/* Protected routes inside Layout */}
+            <Route path="/dashboard" element={<Layout />}>
               <Route index element={<Index />} />
               <Route path="markets" element={<Markets />} />
               <Route path="portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
@@ -33,10 +38,9 @@ export default function App() {
               <Route path="wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
               <Route path="account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
               <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/landing" element={<Landing />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
         <Toaster />

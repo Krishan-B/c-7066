@@ -25,7 +25,7 @@ const UserMenu = () => {
   const handleSignOut = async () => {
     try {
       await signOut()
-      navigate("/auth")
+      navigate("/")
       toast({
         title: "Signed out",
         description: "You have been signed out successfully",
@@ -42,7 +42,7 @@ const UserMenu = () => {
   if (!user) {
     return (
       <Button variant="ghost" asChild>
-        <Link to="/auth?mode=signIn">
+        <Link to="/auth">
           Sign In
         </Link>
       </Button>
@@ -73,12 +73,12 @@ const UserMenu = () => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => navigate("/account")}>
+        <DropdownMenuItem onSelect={() => navigate("/dashboard/account")}>
           <Settings className="mr-2 h-4 w-4" />
           <span>Account</span>
           <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => navigate("/profile")}>
+        <DropdownMenuItem onSelect={() => navigate("/dashboard/profile")}>
           <User className="mr-2 h-4 w-4" />
           <span>Profile</span>
           <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
