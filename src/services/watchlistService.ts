@@ -22,7 +22,7 @@ export async function fetchWatchlistData(userId: string | undefined): Promise<As
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Type-safe access token handling
+    // Ensure access token is a string
     let accessToken = "";
     if (session?.access_token) {
       accessToken = typeof session.access_token === 'string' ? 
@@ -120,7 +120,7 @@ export async function addToWatchlist(userId: string | undefined, asset: Asset): 
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Type-safe access token handling
+    // Ensure access token is a string
     let accessToken = "";
     if (session?.access_token) {
       accessToken = typeof session.access_token === 'string' ? 
@@ -168,7 +168,7 @@ export async function removeFromWatchlist(userId: string | undefined, asset: Ass
     const { data } = await supabase.auth.getSession();
     const session = data.session;
     
-    // Type-safe access token handling
+    // Ensure access token is a string
     let accessToken = "";
     if (session?.access_token) {
       accessToken = typeof session.access_token === 'string' ? 
