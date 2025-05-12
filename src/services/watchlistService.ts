@@ -33,7 +33,7 @@ export async function fetchWatchlistData(userId: string | undefined): Promise<As
     const { data: responseData, error } = await supabase.functions.invoke('watchlist-operations', {
       body: { operation: "get" },
       headers: {
-        Authorization: `Bearer ${accessToken}` as string
+        Authorization: `Bearer ${accessToken}`
       }
     });
     
@@ -137,7 +137,7 @@ export async function addToWatchlist(userId: string | undefined, asset: Asset): 
         }
       },
       headers: {
-        Authorization: `Bearer ${accessToken}` as string
+        Authorization: `Bearer ${accessToken}`
       }
     });
     
@@ -184,7 +184,7 @@ export async function removeFromWatchlist(userId: string | undefined, asset: Ass
         }
       },
       headers: {
-        Authorization: `Bearer ${accessToken}` as string
+        Authorization: `Bearer ${accessToken}`
       }
     });
     
