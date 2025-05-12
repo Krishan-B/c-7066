@@ -7,6 +7,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
+import { formatCurrency, formatNumber } from "@/utils/formatUtils";
 
 interface Asset {
   id?: string;
@@ -98,15 +99,15 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
       <div className="rounded-md border overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-secondary/20">
+            <TableHeader className="bg-muted/60">
               <TableRow>
-                <TableHead className="font-semibold">Symbol</TableHead>
-                <TableHead className="font-semibold">Asset Name</TableHead>
-                <TableHead className="font-semibold text-right">24h Change</TableHead>
-                <TableHead className="font-semibold text-right">Day Range</TableHead>
-                <TableHead className="font-semibold text-right">Sell Price</TableHead>
-                <TableHead className="font-semibold text-right">Buy Price</TableHead>
-                <TableHead className="text-center w-[100px]">Actions</TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-left">Symbol</TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-left">Asset Name</TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-right">24h Change</TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-right">Day Range</TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-right">Sell Price</TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-right">Buy Price</TableHead>
+                <TableHead className="text-center py-3 px-2 w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -115,10 +116,10 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
                 return (
                   <TableRow 
                     key={asset.symbol} 
-                    className="cursor-pointer hover:bg-muted"
+                    className="cursor-pointer border-b hover:bg-muted/40"
                     onClick={() => onSelectAsset(enhancedAsset)}
                   >
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium py-3 px-2">
                       <div className="flex items-center gap-2">
                         <div className="rounded-full bg-primary/10 w-8 h-8 flex items-center justify-center text-xs text-primary font-bold">
                           {asset.symbol.substring(0, 2)}
@@ -126,30 +127,30 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
                         <span>{asset.symbol}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{asset.name}</TableCell>
-                    <TableCell className={`text-right ${asset.change_percentage >= 0 ? 'text-success' : 'text-warning'}`}>
+                    <TableCell className="py-3 px-2">{asset.name}</TableCell>
+                    <TableCell className={`py-3 px-2 text-right ${asset.change_percentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                       <span className="flex items-center justify-end">
                         {asset.change_percentage >= 0 
                           ? <ArrowUp className="mr-1 h-4 w-4" />
                           : <ArrowDown className="mr-1 h-4 w-4" />
                         }
-                        {Math.abs(asset.change_percentage).toFixed(2)}%
+                        {formatNumber(Math.abs(asset.change_percentage), 2)}%
                       </span>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="py-3 px-2 text-right">
                       <div className="flex items-center justify-end text-xs text-muted-foreground">
-                        <span>${enhancedAsset.day_low.toFixed(2)}</span>
+                        <span>{formatCurrency(enhancedAsset.day_low!)}</span>
                         <span className="mx-1">-</span>
-                        <span>${enhancedAsset.day_high.toFixed(2)}</span>
+                        <span>{formatCurrency(enhancedAsset.day_high!)}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-mono text-warning">
-                      ${enhancedAsset.sell_price.toFixed(2)}
+                    <TableCell className="py-3 px-2 text-right font-mono text-warning">
+                      {formatCurrency(enhancedAsset.sell_price!)}
                     </TableCell>
-                    <TableCell className="text-right font-mono text-success">
-                      ${enhancedAsset.buy_price.toFixed(2)}
+                    <TableCell className="py-3 px-2 text-right font-mono text-success">
+                      {formatCurrency(enhancedAsset.buy_price!)}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="py-3 px-2">
                       <div className="flex justify-center items-center gap-2">
                         <Tooltip>
                           <TooltipTrigger asChild>

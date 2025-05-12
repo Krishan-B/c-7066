@@ -3,6 +3,7 @@ import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ArrowUp, ArrowDown, Eye } from "lucide-react";
+import { formatCurrency, formatNumber } from "@/utils/formatUtils";
 
 interface Asset {
   name: string;
@@ -25,37 +26,37 @@ const PositionsTable = ({ assets, onViewDetails }: PositionsTableProps) => {
   return (
     <div className="rounded-md border">
       <Table>
-        <TableHeader>
+        <TableHeader className="bg-muted/60">
           <TableRow>
-            <TableHead>Asset</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
-            <TableHead className="text-right">Entry Price</TableHead>
-            <TableHead className="text-right">Current Price</TableHead>
-            <TableHead className="text-right">Value</TableHead>
-            <TableHead className="text-right">P&L</TableHead>
-            <TableHead></TableHead>
+            <TableHead className="py-3 px-2 text-left">Asset</TableHead>
+            <TableHead className="py-3 px-2 text-right">Amount</TableHead>
+            <TableHead className="py-3 px-2 text-right">Entry Price</TableHead>
+            <TableHead className="py-3 px-2 text-right">Current Price</TableHead>
+            <TableHead className="py-3 px-2 text-right">Value</TableHead>
+            <TableHead className="py-3 px-2 text-right">P&L</TableHead>
+            <TableHead className="py-3 px-2"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {assets.map((asset) => (
-            <TableRow key={asset.symbol}>
-              <TableCell className="font-medium">
+            <TableRow key={asset.symbol} className="border-b hover:bg-muted/40">
+              <TableCell className="font-medium py-3 px-2">
                 {asset.name} ({asset.symbol})
               </TableCell>
-              <TableCell className="text-right">{asset.amount}</TableCell>
-              <TableCell className="text-right">${asset.entryPrice.toLocaleString()}</TableCell>
-              <TableCell className="text-right">${asset.price.toLocaleString()}</TableCell>
-              <TableCell className="text-right">${asset.value.toLocaleString()}</TableCell>
-              <TableCell className={`text-right ${asset.pnl >= 0 ? 'text-success' : 'text-destructive'}`}>
+              <TableCell className="py-3 px-2 text-right">{formatNumber(asset.amount, 4)}</TableCell>
+              <TableCell className="py-3 px-2 text-right">{formatCurrency(asset.entryPrice)}</TableCell>
+              <TableCell className="py-3 px-2 text-right">{formatCurrency(asset.price)}</TableCell>
+              <TableCell className="py-3 px-2 text-right">{formatCurrency(asset.value)}</TableCell>
+              <TableCell className={`py-3 px-2 text-right ${asset.pnl >= 0 ? 'text-success' : 'text-destructive'}`}>
                 <div className="flex items-center justify-end">
                   {asset.pnl >= 0 
                     ? <ArrowUp className="mr-1 h-4 w-4" />
                     : <ArrowDown className="mr-1 h-4 w-4" />
                   }
-                  ${Math.abs(asset.pnl).toLocaleString()} ({Math.abs(asset.pnlPercentage).toFixed(2)}%)
+                  {formatCurrency(Math.abs(asset.pnl))} ({formatNumber(Math.abs(asset.pnlPercentage), 2)}%)
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="py-3 px-2">
                 <Button 
                   variant="ghost" 
                   size="sm"

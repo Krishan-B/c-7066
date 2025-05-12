@@ -16,7 +16,7 @@ const ApplicationLogo = () => {
   return (
     <div onClick={handleLogoClick} className="mr-4 flex items-center space-x-2 fixed cursor-pointer">
       <LineChart className="h-6 w-6 text-primary" />
-      <span className="font-bold sm:inline-block">
+      <span className="font-bold text-foreground sm:inline-block">
         TradePro
       </span>
     </div>

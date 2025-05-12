@@ -49,7 +49,7 @@ const AccountMetricsHeader = () => {
 
   return (
     <TooltipProvider>
-      <div className="flex items-center gap-6">
+      <div className="flex items-center justify-center w-full gap-6">
         {displayedMetrics.map((item, index) => (
           <MetricItem 
             key={index} 

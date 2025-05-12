@@ -14,12 +14,12 @@ const Header = () => {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="border-b border-secondary/40 sticky top-0 z-50 bg-background/95 backdrop-blur"
+      className="border-b border-secondary/40 sticky top-0 z-50 bg-background shadow-sm"
     >
       <div className="container flex items-center justify-between py-4">
         <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
           <LineChart className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-bold ml-2 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">TradePro</h1>
+          <h1 className="text-xl font-bold ml-2 text-primary">TradePro</h1>
         </div>
         
         <nav className="hidden md:flex items-center gap-6">
@@ -42,7 +42,7 @@ const Header = () => {
           <Button 
             size="sm" 
             onClick={() => navigate("/auth?tab=signup")}
-            className="whitespace-nowrap bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-opacity duration-300"
+            className="whitespace-nowrap bg-primary hover:opacity-90 transition-opacity duration-300"
           >
             Sign Up
           </Button>
