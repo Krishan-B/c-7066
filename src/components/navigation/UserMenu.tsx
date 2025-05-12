@@ -25,11 +25,8 @@ const UserMenu = () => {
   const handleSignOut = async () => {
     try {
       await signOut()
-      navigate("/")
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully",
-      })
+      // Removed the navigate call here since signOut function in AuthProvider
+      // already redirects to the landing page
     } catch (error: any) {
       toast({
         title: "Error signing out",

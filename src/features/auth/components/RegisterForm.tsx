@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -109,10 +108,8 @@ const RegisterForm = () => {
         description: "Please check your email for verification and then log in"
       });
       
-      // Reset form and redirect to login after a short delay
-      setTimeout(() => {
-        window.location.href = "/auth";
-      }, 2000);
+      // Use navigate instead of window.location to avoid full page reload
+      navigate("/auth");
       
     } catch (error: any) {
       console.error("Signup error:", error);

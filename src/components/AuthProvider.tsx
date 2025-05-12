@@ -12,6 +12,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
+  // Add a new state to track initialization
+  const [initialized, setInitialized] = useState(false);
   const { toast } = useToast();
 
   // Fetch profile data from user metadata
@@ -73,6 +75,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       async (event, newSession) => {
         console.log("Auth state change event:", event);
         
+        // Only process events after initialization is complete
+        // This prevents duplicate events during setup
+        if (!initialized && event === 'INITIAL_SESSION') {
+          return;
+        }
+        
         // Update state synchronously
         setSession(newSession);
         setUser(newSession?.user ?? null);
@@ -82,13 +90,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Defer profile fetching to prevent auth deadlocks
           setTimeout(() => {
             fetchProfile(newSession.user!);
+            
+            // Only show welcome toast for non-initial sessions
+            if (initialized) {
+              toast({
+                title: "Welcome to TradePro",
+                description: "You have been signed in successfully",
+              });
+            }
           }, 0);
         } else if (event === 'SIGNED_OUT') {
           setProfile(null);
-          toast({
-            title: "Signed out",
-            description: "You have been signed out successfully",
-          });
+          if (initialized) {
+            toast({
+              title: "Signed out",
+              description: "You have been signed out successfully",
+            });
+          }
         } else if (event === 'USER_UPDATED' && newSession?.user) {
           // Defer profile updating
           setTimeout(() => {
@@ -131,6 +149,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
       } finally {
         setLoading(false);
+        // Mark initialization as complete after getting initial session
+        setInitialized(true);
       }
     };
     
@@ -151,7 +171,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setProfile(null);
       
       // Force page reload for clean state
-      window.location.href = '/auth';
+      window.location.href = '/';
     } catch (error) {
       console.error("Error signing out:", error);
       toast({

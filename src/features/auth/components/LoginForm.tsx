@@ -79,13 +79,10 @@ const LoginForm = () => {
       if (error) throw error;
       
       console.log("Login successful:", data);
-      toast({
-        title: "Success",
-        description: "Logged in successfully"
-      });
       
-      // Force page reload to ensure clean state
-      window.location.href = "/";
+      // Instead of displaying a toast here, let AuthProvider handle it
+      // and navigate programmatically instead of forcing a page reload
+      navigate("/dashboard", { replace: true });
       
     } catch (error: any) {
       console.error("Login error:", error);
