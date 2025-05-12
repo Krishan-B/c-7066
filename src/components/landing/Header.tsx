@@ -10,16 +10,16 @@ const Header = () => {
   return (
     <header className="border-b border-secondary sticky top-0 z-50 bg-background/95 backdrop-blur">
       <div className="container flex items-center justify-between py-4">
-        <div className="flex items-center">
+        <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
           <LineChart className="h-6 w-6 text-primary" />
           <h1 className="text-xl font-bold ml-2">TradePro</h1>
         </div>
         
         <nav className="hidden md:flex items-center gap-6">
-          <Link to="#features" className="text-sm text-muted-foreground hover:text-foreground">Features</Link>
-          <Link to="#pricing" className="text-sm text-muted-foreground hover:text-foreground">Pricing</Link>
-          <Link to="#testimonials" className="text-sm text-muted-foreground hover:text-foreground">Testimonials</Link>
-          <Link to="#about" className="text-sm text-muted-foreground hover:text-foreground">About</Link>
+          <a href="#features" className="text-sm text-muted-foreground hover:text-foreground">Features</a>
+          <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground">Pricing</a>
+          <a href="#testimonials" className="text-sm text-muted-foreground hover:text-foreground">Testimonials</a>
+          <a href="#about" className="text-sm text-muted-foreground hover:text-foreground">About</a>
         </nav>
         
         <div className="flex items-center gap-2">

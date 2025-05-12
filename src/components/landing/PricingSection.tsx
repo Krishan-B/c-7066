@@ -1,8 +1,22 @@
 
 import React from "react";
 import PricingCard from "./PricingCard";
+import { useNavigate } from "react-router-dom";
 
 const PricingSection = () => {
+  const navigate = useNavigate();
+
+  const handlePricingAction = (plan: string) => {
+    if (plan === "basic") {
+      navigate("/auth?tab=signup&plan=basic");
+    } else if (plan === "pro") {
+      navigate("/auth?tab=signup&plan=pro");
+    } else {
+      // Enterprise plan - show contact info or navigate to contact page
+      window.open("mailto:sales@tradepro.com?subject=Enterprise Plan Inquiry");
+    }
+  };
+
   return (
     <section id="pricing" className="py-16 md:py-20 container">
       <div className="text-center mb-16">
@@ -24,6 +38,7 @@ const PricingSection = () => {
             "5 watchlists"
           ]}
           ctaText="Start Free"
+          onClick={() => handlePricingAction("basic")}
         />
         <PricingCard 
           title="Pro"
@@ -38,6 +53,7 @@ const PricingSection = () => {
           ]}
           ctaText="Upgrade to Pro"
           highlighted={true}
+          onClick={() => handlePricingAction("pro")}
         />
         <PricingCard 
           title="Enterprise"
@@ -51,6 +67,7 @@ const PricingSection = () => {
             "Advanced risk management"
           ]}
           ctaText="Contact Sales"
+          onClick={() => handlePricingAction("enterprise")}
         />
       </div>
     </section>

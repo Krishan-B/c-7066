@@ -69,6 +69,10 @@ const AuthPage = () => {
     return () => subscription.unsubscribe();
   }, [navigate, from, toast]);
 
+  const navigateToHome = () => {
+    navigate('/');
+  };
+
   if (checkingSession) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen gap-4">
@@ -82,7 +86,7 @@ const AuthPage = () => {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="flex items-center justify-center mb-2">
+          <div onClick={navigateToHome} className="flex items-center justify-center mb-2 cursor-pointer">
             <LineChart className="h-8 w-8 text-primary" />
             <h1 className="text-2xl font-bold ml-2">TradePro</h1>
           </div>

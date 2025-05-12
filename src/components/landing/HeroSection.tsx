@@ -1,8 +1,8 @@
 
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ArrowRight, BarChart3, LineChart, TrendingUp } from "lucide-react";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -11,6 +11,9 @@ const HeroSection = () => {
     <section className="py-16 md:py-20 container">
       <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
         <div className="flex-1 space-y-5 md:space-y-6">
+          <div className="inline-block px-3 py-1 text-sm bg-primary/10 text-primary rounded-full">
+            Trading made simple - Start today
+          </div>
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold leading-tight">
             Trade Smarter<br />
             <span className="text-primary">Invest Wiser</span>
@@ -28,9 +31,30 @@ const HeroSection = () => {
               Get Started
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
-            <Link to="#features">
-              <Button variant="outline" size="lg">Explore Features</Button>
-            </Link>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              onClick={() => {
+                const element = document.getElementById('features');
+                element?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Explore Features
+            </Button>
+          </div>
+          
+          <div className="flex items-center gap-2 text-muted-foreground pt-2">
+            <span className="flex items-center gap-1">
+              <TrendingUp className="h-4 w-4 text-success" /> 10k+ Users
+            </span>
+            <span className="w-1 h-1 rounded-full bg-muted-foreground"></span>
+            <span className="flex items-center gap-1">
+              <BarChart3 className="h-4 w-4 text-success" /> 98% Uptime
+            </span>
+            <span className="w-1 h-1 rounded-full bg-muted-foreground"></span>
+            <span className="flex items-center gap-1">
+              <LineChart className="h-4 w-4 text-success" /> Real-time Data
+            </span>
           </div>
         </div>
         <div className="flex-1 flex justify-center w-full mt-8 md:mt-0">
