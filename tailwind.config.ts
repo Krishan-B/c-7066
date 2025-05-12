@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -22,31 +23,43 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        background: "#141413",
-        foreground: "#FAFAF8",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
         primary: {
-          DEFAULT: "#8989DE",
-          foreground: "#FAFAF8",
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
         },
         secondary: {
-          DEFAULT: "#3A3935",
-          foreground: "#FAFAF8",
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
         },
         success: {
-          DEFAULT: "#7EBF8E",
-          foreground: "#FAFAF8",
+          DEFAULT: "var(--success)",
+          foreground: "var(--success-foreground)",
         },
         warning: {
-          DEFAULT: "#D2886F",
-          foreground: "#FAFAF8",
+          DEFAULT: "var(--warning)",
+          foreground: "var(--warning-foreground)",
         },
         muted: {
-          DEFAULT: "#605F5B",
-          foreground: "#E6E4DD",
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
         },
         accent: {
-          DEFAULT: "#8989DE",
-          foreground: "#FAFAF8",
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
+        },
+        destructive: {
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
+        },
+        card: {
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
+        },
+        popover: {
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
         },
       },
       borderRadius: {
@@ -57,6 +70,11 @@ export default {
       animation: {
         "fade-in": "fade-in 0.5s ease-out",
         "slide-up": "slide-up 0.5s ease-out",
+        "slide-down": "slide-down 0.5s ease-out",
+        "slide-in-right": "slide-in-right 0.5s ease-out",
+        "slide-in-left": "slide-in-left 0.5s ease-out",
+        "scale-in": "scale-in 0.2s ease-out",
+        "pulse-subtle": "pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
       keyframes: {
         "fade-in": {
@@ -66,6 +84,26 @@ export default {
         "slide-up": {
           "0%": { transform: "translateY(10px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        "slide-down": {
+          "0%": { transform: "translateY(-10px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        "slide-in-right": {
+          "0%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(0)" },
+        },
+        "slide-in-left": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(0)" },
+        },
+        "scale-in": {
+          "0%": { transform: "scale(0.95)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        "pulse-subtle": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.8" },
         },
       },
     },

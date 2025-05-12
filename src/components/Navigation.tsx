@@ -7,6 +7,7 @@ import MobileMenu from "./navigation/MobileMenu"
 import { Bell } from "lucide-react"
 import { Button } from "./ui/button"
 import { useToast } from "@/hooks/use-toast"
+import { ThemeSwitcher } from "./theme/ThemeSwitcher"
 
 interface NavigationProps {
   onMenuToggle?: () => void;
@@ -23,11 +24,12 @@ export function Navigation({ onMenuToggle }: NavigationProps) {
   };
   
   return (
-    <div className="border-b sticky top-0 z-50 bg-background">
+    <div className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur-sm transition-colors">
       <div className="container flex h-16 items-center">
         <ApplicationLogo />
         <MainNav className="mx-6 flex-1" />
-        <nav className="flex items-center space-x-1">
+        <nav className="flex items-center space-x-2">
+          <ThemeSwitcher />
           <Button
             variant="ghost"
             size="icon"

@@ -1,17 +1,25 @@
 
 import React from "react";
 import { Star } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface TestimonialCardProps {
   quote: string;
   author: string;
   role: string;
   rating: number;
+  delay?: number;
 }
 
-const TestimonialCard = ({ quote, author, role, rating }: TestimonialCardProps) => {
+const TestimonialCard = ({ quote, author, role, rating, delay = 0 }: TestimonialCardProps) => {
   return (
-    <div className="bg-background border border-secondary/20 p-6 rounded-lg">
+    <motion.div 
+      className="hover-card glass-effect p-6 rounded-lg"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay }}
+      viewport={{ once: true }}
+    >
       <div className="flex mb-4">
         {[...Array(5)].map((_, i) => (
           <Star 
@@ -27,7 +35,7 @@ const TestimonialCard = ({ quote, author, role, rating }: TestimonialCardProps) 
         <p className="font-medium">{author}</p>
         <p className="text-sm text-muted-foreground">{role}</p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

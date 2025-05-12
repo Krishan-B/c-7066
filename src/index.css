@@ -1,10 +1,65 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Light mode variables */
+    --background: #ffffff;
+    --foreground: #111827;
+    --card: #ffffff;
+    --card-foreground: #111827;
+    --popover: #ffffff;
+    --popover-foreground: #111827;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #f3f4f6;
+    --secondary-foreground: #1f2937;
+    --muted: #f3f4f6;
+    --muted-foreground: #6b7280;
+    --accent: rgba(99, 102, 241, 0.1);
+    --accent-foreground: #6366f1;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #e5e7eb;
+    --input: #e5e7eb;
+    --ring: #6366f1;
+    --success: #10b981;
+    --success-foreground: #ffffff;
+    --warning: #f59e0b;
+    --warning-foreground: #ffffff;
+  }
+
+  .dark {
+    /* Dark mode variables */
+    --background: #0f1117;
+    --foreground: #f9fafb;
+    --card: #1a1f2c;
+    --card-foreground: #f9fafb;
+    --popover: #1a1f2c;
+    --popover-foreground: #f9fafb;
+    --primary: #8989DE;
+    --primary-foreground: #f9fafb;
+    --secondary: #1e2533;
+    --secondary-foreground: #f9fafb;
+    --muted: #1e2533;
+    --muted-foreground: #9ca3af;
+    --accent: rgba(137, 137, 222, 0.2);
+    --accent-foreground: #8989DE;
+    --destructive: #ef4444;
+    --destructive-foreground: #f9fafb;
+    --border: #1e2533;
+    --input: #1e2533;
+    --ring: #8989DE;
+    --success: #7EBF8E;
+    --success-foreground: #f9fafb;
+    --warning: #D2886F;
+    --warning-foreground: #f9fafb;
+  }
+
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased transition-colors duration-300;
   }
 }
 
@@ -27,4 +82,27 @@
 
 .animate-pulse-subtle {
   animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Card hover animation */
+.hover-card {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.hover-card:hover {
+  @apply transform -translate-y-1 shadow-lg;
+}
+
+/* Gradient backgrounds */
+.gradient-bg {
+  @apply bg-gradient-to-br from-primary/20 to-background;
+}
+
+.glass-effect {
+  @apply bg-secondary/20 backdrop-blur-md border border-secondary/40;
+}
+
+/* Animated underline for navigation links */
+.nav-link {
+  @apply relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full;
 }
