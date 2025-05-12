@@ -101,7 +101,11 @@
 }
 
 .glass-effect {
-  @apply bg-secondary/20 backdrop-blur-md border border-secondary/40;
+  @apply backdrop-blur-md border;
+  background-color: var(--secondary);
+  background-opacity: 0.2;
+  border-color: var(--secondary);
+  border-opacity: 0.4;
 }
 
 /* Animated underline for navigation links */
