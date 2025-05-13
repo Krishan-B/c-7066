@@ -2,16 +2,38 @@
 import { supabase } from "@/integrations/supabase/client";
 import { 
   fetchAlphaVantageData, 
-  getStockQuote,
-  getForexRate,
-  getCryptoQuote,
-  transformStockData, 
-  transformForexData,
-  transformCryptoData 
+  getStockQuote as getAlphaVantageStockQuote,
+  getForexRate as getAlphaVantageForexRate,
+  getCryptoQuote as getAlphaVantageCryptoQuote,
+  transformStockData as transformAlphaVantageStockData, 
+  transformForexData as transformAlphaVantageForexData,
+  transformCryptoData as transformAlphaVantageCryptoData 
 } from "@/utils/api/alphaVantage";
+
+import {
+  setPolygonApiKey,
+  getPolygonApiKey,
+  hasPolygonApiKey,
+  getStockQuote as getPolygonStockQuote,
+  getCryptoQuote as getPolygonCryptoQuote,
+  getForexQuote as getPolygonForexQuote,
+  transformStockData as transformPolygonStockData,
+  transformCryptoData as transformPolygonCryptoData,
+  transformForexData as transformPolygonForexData
+} from "@/utils/api/polygon";
+
 import { getSymbolsForMarketType } from "./marketSymbols";
 import { Asset } from "./types";
 import { toast } from "@/hooks/use-toast";
+
+/**
+ * Data source preference order
+ */
+enum DataSource {
+  POLYGON = 'polygon',
+  ALPHA_VANTAGE = 'alpha_vantage',
+  EDGE_FUNCTION = 'edge_function',
+}
 
 export const fetchMarketData = async (marketTypes: string | string[], toastFn = toast): Promise<Asset[]> => {
   try {
@@ -34,87 +56,149 @@ export const fetchMarketData = async (marketTypes: string | string[], toastFn = 
 
     console.log(`Fetching fresh data for ${marketTypeArray.join(', ')}`);
     
-    // Try to use Alpha Vantage API first
-    try {
-      // Example symbols to fetch (in production, this would be more comprehensive)
-      const symbols = getSymbolsForMarketType(marketTypeArray);
-      let alphaVantageData: Asset[] = [];
-      
-      // First check if the Alpha Vantage API key is configured
-      const { data: secretData } = await supabase.functions.invoke('get-secret', {
+    // Determine which data source to use, based on available API keys
+    let dataSource = DataSource.EDGE_FUNCTION; // Default source
+    let polygonApiKey: string | undefined;
+    let alphaVantageApiKey: string | undefined;
+    
+    // Check for Polygon API key
+    const { data: polygonSecret } = await supabase.functions.invoke('get-secret', {
+      body: { secretName: 'POLYGON_API_KEY' }
+    });
+    
+    if (polygonSecret?.value) {
+      dataSource = DataSource.POLYGON;
+      polygonApiKey = polygonSecret.value;
+      setPolygonApiKey(polygonApiKey);
+    } else {
+      // Check for Alpha Vantage API key as fallback
+      const { data: alphaVantageSecret } = await supabase.functions.invoke('get-secret', {
         body: { secretName: 'ALPHA_VANTAGE_API_KEY' }
       });
       
-      if (!secretData?.value) {
-        console.log("Alpha Vantage API key not configured, falling back to edge functions");
-        throw new Error("API key not configured");
+      if (alphaVantageSecret?.value) {
+        dataSource = DataSource.ALPHA_VANTAGE;
+        alphaVantageApiKey = alphaVantageSecret.value;
       }
-      
-      // Fetch data for each symbol based on market type
-      for (const marketType of marketTypeArray) {
-        if (marketType === 'Stock') {
-          for (const symbol of symbols[marketType]) {
-            const data = await getStockQuote(symbol);
-            if (data && !data.error && data['Global Quote']) {
-              const transformedData = transformStockData(data);
-              if (transformedData) {
-                alphaVantageData.push(transformedData);
-              }
-            }
-          }
-        } 
-        else if (marketType === 'Forex') {
-          for (const pair of symbols[marketType]) {
-            const [fromCurrency, toCurrency] = pair.split('/');
-            const data = await getForexRate(fromCurrency, toCurrency);
-            if (data && !data.error) {
-              const transformedData = transformForexData(data);
-              if (transformedData) {
-                alphaVantageData.push(transformedData);
-              }
-            }
-          }
-        }
-        else if (marketType === 'Crypto') {
-          for (const symbol of symbols[marketType]) {
-            const data = await getCryptoQuote(symbol);
-            if (data && !data.error) {
-              const transformedData = transformCryptoData(data);
-              if (transformedData) {
-                alphaVantageData.push(transformedData);
-              }
-            }
-          }
-        }
-      }
-      
-      // If we got at least some data from Alpha Vantage, use it
-      if (alphaVantageData.length > 0) {
-        console.log(`Fetched ${alphaVantageData.length} assets from Alpha Vantage`);
-        
-        // Update our database with the new data
-        for (const asset of alphaVantageData) {
-          await supabase
-            .from('market_data')
-            .upsert({
-              symbol: asset.symbol,
-              name: asset.name,
-              price: asset.price,
-              change_percentage: asset.change_percentage,
-              volume: asset.volume,
-              market_cap: asset.market_cap,
-              market_type: asset.market_type,
-              last_updated: new Date().toISOString(),
-            }, { onConflict: 'symbol' });
-        }
-        
-        return alphaVantageData;
-      }
-    } catch (alphaError) {
-      console.error('Alpha Vantage error, falling back to edge functions:', alphaError);
     }
     
-    // Fall back to our edge functions if Alpha Vantage fails or doesn't have enough data
+    console.log(`Using data source: ${dataSource}`);
+    
+    // Example symbols to fetch (in production, this would be more comprehensive)
+    const symbols = getSymbolsForMarketType(marketTypeArray);
+    let marketData: Asset[] = [];
+    
+    // Try to use Polygon API first (if API key is available)
+    if (dataSource === DataSource.POLYGON && hasPolygonApiKey()) {
+      try {
+        console.log('Fetching data from Polygon.io');
+        
+        // Fetch data for each symbol based on market type
+        for (const marketType of marketTypeArray) {
+          if (marketType === 'Stock') {
+            for (const symbol of symbols[marketType]) {
+              const data = await getPolygonStockQuote(symbol);
+              const transformedData = transformPolygonStockData(data);
+              if (transformedData) {
+                marketData.push(transformedData);
+              }
+            }
+          } 
+          else if (marketType === 'Forex') {
+            for (const pair of symbols[marketType]) {
+              const [fromCurrency, toCurrency] = pair.split('/');
+              const data = await getPolygonForexQuote(fromCurrency, toCurrency);
+              const transformedData = transformPolygonForexData(data);
+              if (transformedData) {
+                marketData.push(transformedData);
+              }
+            }
+          }
+          else if (marketType === 'Crypto') {
+            for (const symbol of symbols[marketType]) {
+              const data = await getPolygonCryptoQuote(symbol);
+              const transformedData = transformPolygonCryptoData(data);
+              if (transformedData) {
+                marketData.push(transformedData);
+              }
+            }
+          }
+        }
+        
+        // If we got data from Polygon, use it
+        if (marketData.length > 0) {
+          console.log(`Fetched ${marketData.length} assets from Polygon.io`);
+          
+          // Update our database with the new data
+          await updateMarketDataInDatabase(marketData);
+          
+          return marketData;
+        }
+      } catch (polygonError) {
+        console.error('Polygon.io error, falling back to Alpha Vantage:', polygonError);
+      }
+    }
+    
+    // Try to use Alpha Vantage API as fallback (if API key is available and Polygon failed or wasn't available)
+    if (dataSource === DataSource.ALPHA_VANTAGE || (dataSource === DataSource.POLYGON && marketData.length === 0)) {
+      try {
+        console.log('Falling back to Alpha Vantage');
+        
+        // Fetch data for each symbol based on market type
+        for (const marketType of marketTypeArray) {
+          if (marketType === 'Stock') {
+            for (const symbol of symbols[marketType]) {
+              const data = await getAlphaVantageStockQuote(symbol);
+              if (data && !data.error && data['Global Quote']) {
+                const transformedData = transformAlphaVantageStockData(data);
+                if (transformedData) {
+                  marketData.push(transformedData);
+                }
+              }
+            }
+          } 
+          else if (marketType === 'Forex') {
+            for (const pair of symbols[marketType]) {
+              const [fromCurrency, toCurrency] = pair.split('/');
+              const data = await getAlphaVantageForexRate(fromCurrency, toCurrency);
+              if (data && !data.error) {
+                const transformedData = transformAlphaVantageForexData(data);
+                if (transformedData) {
+                  marketData.push(transformedData);
+                }
+              }
+            }
+          }
+          else if (marketType === 'Crypto') {
+            for (const symbol of symbols[marketType]) {
+              const data = await getAlphaVantageCryptoQuote(symbol);
+              if (data && !data.error) {
+                const transformedData = transformAlphaVantageCryptoData(data);
+                if (transformedData) {
+                  marketData.push(transformedData);
+                }
+              }
+            }
+          }
+        }
+        
+        // If we got data from Alpha Vantage, use it
+        if (marketData.length > 0) {
+          console.log(`Fetched ${marketData.length} assets from Alpha Vantage`);
+          
+          // Update our database with the new data
+          await updateMarketDataInDatabase(marketData);
+          
+          return marketData;
+        }
+      } catch (alphaError) {
+        console.error('Alpha Vantage error, falling back to edge functions:', alphaError);
+      }
+    }
+    
+    // Fall back to our edge functions if Polygon and Alpha Vantage fail or don't have enough data
+    console.log('Falling back to edge functions');
+    
     const dataPromises = marketTypeArray.map(async (type) => {
       const { data, error } = await supabase.functions.invoke('fetch-market-data', {
         body: { market: type },
@@ -133,7 +217,7 @@ export const fetchMarketData = async (marketTypes: string | string[], toastFn = 
     
     // Flatten the array of arrays into a single array
     const combinedData = results.flat();
-    console.log(`Fetched ${combinedData.length} total assets for ${marketTypeArray.join(', ')}`);
+    console.log(`Fetched ${combinedData.length} total assets from edge functions for ${marketTypeArray.join(', ')}`);
     
     return combinedData;
   } catch (error) {
@@ -145,3 +229,28 @@ export const fetchMarketData = async (marketTypes: string | string[], toastFn = 
     throw error;
   }
 };
+
+/**
+ * Helper function to update market data in the database
+ */
+async function updateMarketDataInDatabase(assets: Asset[]): Promise<void> {
+  try {
+    for (const asset of assets) {
+      await supabase
+        .from('market_data')
+        .upsert({
+          symbol: asset.symbol,
+          name: asset.name,
+          price: asset.price,
+          change_percentage: asset.change_percentage,
+          volume: asset.volume,
+          market_cap: asset.market_cap,
+          market_type: asset.market_type,
+          last_updated: new Date().toISOString(),
+        }, { onConflict: 'symbol' });
+    }
+    console.log(`Updated ${assets.length} assets in the database`);
+  } catch (error) {
+    console.error('Error updating market data in database:', error);
+  }
+}
