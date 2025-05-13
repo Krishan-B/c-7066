@@ -6,7 +6,7 @@ import { type PasswordStrength } from "../../hooks/usePasswordStrength";
 interface PasswordStrengthIndicatorProps {
   password: string;
   confirmPassword: string;
-  passwordStrength: number;
+  passwordStrength: number; // This now expects the score directly
   getPasswordStrengthLabel: () => string;
   getPasswordStrengthColor: () => string;
   feedback?: string[];
@@ -15,7 +15,7 @@ interface PasswordStrengthIndicatorProps {
 const PasswordStrengthIndicator = ({
   password,
   confirmPassword,
-  passwordStrength,
+  passwordStrength, // This is now the score value
   getPasswordStrengthLabel,
   getPasswordStrengthColor,
   feedback = []

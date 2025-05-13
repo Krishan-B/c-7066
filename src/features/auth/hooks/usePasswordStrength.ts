@@ -103,9 +103,8 @@ export const usePasswordStrength = (password: string): PasswordStrength & {
 
   return { 
     ...passwordStrength, 
-    passwordStrength: passwordStrength.score, // For backward compatibility
+    meetsMinimumRequirements,
     getPasswordStrengthLabel,
     getPasswordStrengthColor,
-    meetsMinimumRequirements
   };
 };

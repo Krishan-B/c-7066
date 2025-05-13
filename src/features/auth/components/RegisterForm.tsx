@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +32,7 @@ const RegisterForm = () => {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   
   const { 
-    passwordStrength, 
+    score, 
     getPasswordStrengthLabel, 
     getPasswordStrengthColor,
     feedback,
@@ -172,7 +173,7 @@ const RegisterForm = () => {
             <PasswordStrengthIndicator 
               password={password}
               confirmPassword={confirmPassword}
-              passwordStrength={passwordStrength}
+              passwordStrength={score}
               getPasswordStrengthLabel={getPasswordStrengthLabel}
               getPasswordStrengthColor={getPasswordStrengthColor}
               feedback={feedback}

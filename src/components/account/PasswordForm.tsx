@@ -13,7 +13,7 @@ export function PasswordForm() {
   const { toast } = useToast();
   const [newPassword, setNewPassword] = useState("");
   const { 
-    passwordStrength, 
+    score, 
     getPasswordStrengthLabel, 
     getPasswordStrengthColor,
     feedback,
@@ -97,7 +97,7 @@ export function PasswordForm() {
                 <PasswordStrengthIndicator 
                   password={newPassword}
                   confirmPassword={form.getValues("confirmPassword")}
-                  passwordStrength={passwordStrength}
+                  passwordStrength={score}
                   getPasswordStrengthLabel={getPasswordStrengthLabel}
                   getPasswordStrengthColor={getPasswordStrengthColor}
                   feedback={feedback}
