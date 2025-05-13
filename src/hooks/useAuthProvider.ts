@@ -1,29 +1,18 @@
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { UserProfile } from "@/features/profile/types";
-
-// Clean up auth state - essential for consistent auth behavior
-const cleanupAuthState = () => {
-  // Remove standard auth tokens
-  localStorage.removeItem('supabase.auth.token');
-  
-  // Remove all Supabase auth keys from localStorage
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  
-  // Remove from sessionStorage if in use
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
-    }
-  });
-};
+import {
+  cleanupAuthState,
+  signOutUser,
+  refreshUserSession,
+  extractProfileFromUser,
+  updateUserProfile,
+  getCurrentUser,
+  initializeAuthListeners
+} from "@/utils/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useAuthProvider = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -31,7 +20,6 @@ export const useAuthProvider = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
-  // Add a new state to track initialization
   const [initialized, setInitialized] = useState(false);
   const { toast } = useToast();
 
@@ -41,18 +29,7 @@ export const useAuthProvider = () => {
     
     try {
       setProfileLoading(true);
-      // Get profile data from user metadata
-      const metadata = currentUser.user_metadata || {};
-      
-      const userProfile: UserProfile = {
-        id: currentUser.id,
-        firstName: metadata.first_name || "",
-        lastName: metadata.last_name || "",
-        email: currentUser.email || "",
-        country: metadata.country || "",
-        phoneNumber: metadata.phone_number || ""
-      };
-      
+      const userProfile = extractProfileFromUser(currentUser);
       setProfile(userProfile);
       return userProfile;
     } catch (error) {
@@ -70,62 +47,45 @@ export const useAuthProvider = () => {
 
   // Set up auth state listener and initialize session
   useEffect(() => {
-    // Set up auth state listener FIRST - do this before anything else
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log("Auth state change event:", event);
-        
+    const subscription = initializeAuthListeners({
+      onStateChange: (newSession, newUser) => {
         // Only process events after initialization is complete
-        // This prevents duplicate events during setup
-        if (!initialized && event === 'INITIAL_SESSION') {
+        if (!initialized && !newSession) {
           return;
         }
         
-        // Update state synchronously
         setSession(newSession);
-        setUser(newSession?.user ?? null);
-        
-        // Handle specific auth events
-        if (event === 'SIGNED_IN' && newSession?.user) {
-          // Defer profile fetching to prevent auth deadlocks
-          setTimeout(() => {
-            fetchProfile(newSession.user!);
-            
-            // Only show welcome toast for non-initial sessions
-            if (initialized) {
-              toast({
-                title: "Welcome to TradePro",
-                description: "You have been signed in successfully",
-              });
-            }
-          }, 0);
-        } else if (event === 'SIGNED_OUT') {
-          setProfile(null);
-          if (initialized) {
-            toast({
-              title: "Signed out",
-              description: "You have been signed out successfully",
-            });
-          }
-        } else if (event === 'USER_UPDATED' && newSession?.user) {
-          // Defer profile updating
-          setTimeout(() => {
-            fetchProfile(newSession.user!);
-          }, 0);
-          toast({
-            title: "Profile updated",
-            description: "Your profile has been updated successfully",
-          });
-        }
+        setUser(newUser);
         
         // Set loading to false once we've processed this event
-        if (event !== 'INITIAL_SESSION') {
-          setLoading(false);
+        setLoading(false);
+      },
+      onProfileLoad: (userProfile) => {
+        setProfile(userProfile);
+        
+        // Show welcome toast for non-initial sessions
+        if (initialized && userProfile) {
+          toast({
+            title: "Welcome to TradePro",
+            description: "You have been signed in successfully",
+          });
+        } else if (initialized && !userProfile) {
+          toast({
+            title: "Signed out",
+            description: "You have been signed out successfully",
+          });
         }
+      },
+      onError: (error) => {
+        toast({
+          title: "Session error",
+          description: error.message || "There was a problem with your session",
+          variant: "destructive",
+        });
       }
-    );
+    });
 
-    // THEN check for existing session
+    // Check for existing session
     const initializeSession = async () => {
       try {
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
@@ -163,17 +123,9 @@ export const useAuthProvider = () => {
 
   const signOut = async () => {
     try {
-      // Clean up auth state first
-      cleanupAuthState();
-      
-      // Then attempt a global sign out
-      await supabase.auth.signOut({ scope: 'global' });
+      await signOutUser();
       setProfile(null);
-      
-      // Force page reload for clean state
-      window.location.href = '/';
-    } catch (error) {
-      console.error("Error signing out:", error);
+    } catch (error: any) {
       toast({
         title: "Error signing out",
         description: "There was a problem signing out. Please try again.",
@@ -182,27 +134,18 @@ export const useAuthProvider = () => {
     }
   };
   
-  // Function to manually refresh the session - fixed return type
   const refreshSession = async (): Promise<Session | null> => {
     try {
       setLoading(true);
+      const refreshedSession = await refreshUserSession();
+      setSession(refreshedSession);
+      setUser(refreshedSession?.user ?? null);
       
-      // Clean up first to avoid conflicts
-      cleanupAuthState();
-      
-      // Then get a fresh session
-      const { data, error } = await supabase.auth.refreshSession();
-      
-      if (error) throw error;
-      
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      
-      if (data.session?.user) {
-        await fetchProfile(data.session.user);
+      if (refreshedSession?.user) {
+        await fetchProfile(refreshedSession.user);
       }
       
-      return data.session; // Return session data
+      return refreshedSession;
     } catch (error: any) {
       console.error("Error refreshing session:", error);
       toast({
@@ -210,17 +153,12 @@ export const useAuthProvider = () => {
         description: error.message || "Unable to refresh your session",
         variant: "destructive",
       });
-      
-      // If refreshing fails, clean up and force re-login
-      cleanupAuthState();
-      window.location.href = '/auth';
-      return null; // Return null on error
+      return null;
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to update user profile
   const updateProfile = async (profileData: Partial<UserProfile>) => {
     if (!user) {
       toast({
@@ -233,17 +171,7 @@ export const useAuthProvider = () => {
 
     try {
       setProfileLoading(true);
-      
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          first_name: profileData.firstName,
-          last_name: profileData.lastName,
-          country: profileData.country,
-          phone_number: profileData.phoneNumber
-        }
-      });
-      
-      if (error) throw error;
+      await updateUserProfile(profileData);
       
       // Update local profile state
       setProfile(prev => prev ? { ...prev, ...profileData } : null);
@@ -264,15 +192,14 @@ export const useAuthProvider = () => {
     }
   };
 
-  // Function to manually refresh the profile
   const refreshProfile = async () => {
     if (!user) return;
     
     try {
       setProfileLoading(true);
-      const { data } = await supabase.auth.getUser();
-      if (data?.user) {
-        await fetchProfile(data.user);
+      const { user: currentUser } = await getCurrentUser();
+      if (currentUser) {
+        await fetchProfile(currentUser);
       }
     } catch (error) {
       console.error("Error refreshing profile:", error);

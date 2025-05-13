@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, AlertCircle, ArrowRight } from "lucide-react";
 import { validateSignIn } from "../utils/validation";
 import PasswordResetDialog from "./PasswordResetDialog";
+import { cleanupAuthState } from "@/utils/auth";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -24,26 +24,6 @@ const LoginForm = () => {
   
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Utility function to clean up auth state
-  const cleanupAuthState = () => {
-    // Remove standard auth tokens
-    localStorage.removeItem('supabase.auth.token');
-    
-    // Remove all Supabase auth keys from localStorage
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    
-    // Remove from sessionStorage if in use
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { countries } from "@/lib/countries";
 import { validateSignUp } from "../utils/validation";
 import { usePasswordStrength } from "../hooks/usePasswordStrength";
+import { cleanupAuthState } from "@/utils/auth";
 
 const RegisterForm = () => {
   const [firstName, setFirstName] = useState("");
