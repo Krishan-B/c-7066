@@ -23,6 +23,9 @@ import { TradeSlidePanelOptionCheckbox } from "./TradeSlidePanelOptionCheckbox";
 import { TradeSlidePanelSummary } from "./TradeSlidePanelSummary";
 import MarketHoursDisplay from "./MarketHoursDisplay";
 import LeverageSlider from "./LeverageSlider";
+import { EntryRateInput } from "./EntryRateInput";
+import { StopLossSettings } from "./StopLossSettings";
+import { TakeProfitSettings } from "./TakeProfitSettings";
 
 export {
   TradeForm,
@@ -47,5 +50,8 @@ export {
   TradeSlidePanelOptionCheckbox,
   TradeSlidePanelSummary,
   MarketHoursDisplay,
-  LeverageSlider
+  LeverageSlider,
+  EntryRateInput,
+  StopLossSettings,
+  TakeProfitSettings
 };

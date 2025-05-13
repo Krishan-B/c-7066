@@ -3,13 +3,17 @@ import { useState, useEffect } from "react";
 import { Asset } from "@/hooks/useMarketData";
 import { OrderTypeSelector } from "@/components/trade";
 import { TradeSummary } from "@/components/trade";
-import { getLeverageForAssetType } from "@/utils/leverageUtils";
 import { AssetCategorySelector } from "./AssetCategorySelector";
 import { AssetSelector } from "./AssetSelector";
 import { UnitsInput } from "./UnitsInput";
 import { StopLossCheckbox } from "./StopLossCheckbox";
 import { TakeProfitCheckbox } from "./TakeProfitCheckbox";
 import { TradeActionButton } from "./TradeActionButton";
+import { EntryRateInput } from "./EntryRateInput";
+import { StopLossSettings } from "./StopLossSettings";
+import { TakeProfitSettings } from "./TakeProfitSettings";
+import { usePriceMovement } from "@/hooks/usePriceMovement";
+import { useTradeCalculations } from "@/hooks/useTradeCalculations";
 
 interface TradeFormProps {
   action: "buy" | "sell";
@@ -47,37 +51,22 @@ const TradeForm = ({
   const [selectedAsset, setSelectedAsset] = useState(asset.symbol);
   const [hasStopLoss, setHasStopLoss] = useState(false);
   const [hasTakeProfit, setHasTakeProfit] = useState(false);
-  const [buyPrice, setBuyPrice] = useState(currentPrice * 1.001);
-  const [sellPrice, setSellPrice] = useState(currentPrice * 0.999);
   
-  // Update buy/sell prices when current price changes
-  useEffect(() => {
-    setBuyPrice(currentPrice * 1.001);
-    setSellPrice(currentPrice * 0.999);
-    
-    // Simulate real-time price movement
-    const interval = setInterval(() => {
-      const random = Math.random() * 0.002 - 0.001;
-      setBuyPrice(prev => prev * (1 + random));
-      setSellPrice(prev => prev * (1 + random));
-    }, 2000);
-    
-    return () => clearInterval(interval);
-  }, [currentPrice]);
+  // Use our custom hooks
+  const { buyPrice, sellPrice } = usePriceMovement(currentPrice);
   
   // Filter assets based on selected category
   const filteredAssets = marketData?.filter(a => a.market_type === assetCategory) || [];
   
-  // Calculate values based on units
-  const parsedUnits = parseFloat(units) || 0;
-  const leverage = getLeverageForAssetType(assetCategory);
-  const positionValue = currentPrice * parsedUnits;
-  const requiredFunds = positionValue / leverage;
-  const fee = requiredFunds * 0.001; // 0.1% fee
-  const total = requiredFunds + fee;
-  
-  // Check if user has enough funds
-  const canAfford = availableFunds >= requiredFunds;
+  // Calculate trade values using our custom hook
+  const {
+    parsedUnits,
+    leverage,
+    requiredFunds,
+    fee,
+    total,
+    canAfford
+  } = useTradeCalculations(units, currentPrice, assetCategory, availableFunds);
 
   const handleAssetCategoryChange = (value: string) => {
     setAssetCategory(value);
@@ -131,34 +120,7 @@ const TradeForm = ({
       
       {/* Show Entry Rate input if entry order is selected */}
       {orderType === "entry" && (
-        <div className="mb-4">
-          <label className="text-sm text-muted-foreground mb-1 block">Order rate:</label>
-          <div className="flex items-center">
-            <button 
-              type="button" 
-              className="px-3 py-2 border border-input bg-background rounded-l-md"
-              onClick={() => {}}
-            >
-              -
-            </button>
-            <input 
-              type="text" 
-              className="flex-1 text-center border-y border-input bg-background py-2"
-              placeholder="Enter rate"
-              defaultValue={currentPrice.toFixed(4)}
-            />
-            <button 
-              type="button" 
-              className="px-3 py-2 border border-input bg-background rounded-r-md"
-              onClick={() => {}}
-            >
-              +
-            </button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Rate should be above {(currentPrice * 0.98).toFixed(4)} or below {(currentPrice * 1.02).toFixed(4)}
-          </p>
-        </div>
+        <EntryRateInput currentPrice={currentPrice} />
       )}
       
       {/* Stop Loss Checkbox */}
@@ -169,63 +131,7 @@ const TradeForm = ({
       />
       
       {/* Stop Loss Settings */}
-      {hasStopLoss && (
-        <div className="ml-6 mb-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Close rate:</label>
-              <div className="flex items-center">
-                <button 
-                  type="button" 
-                  className="px-3 py-2 border border-input bg-background rounded-l-md"
-                  onClick={() => {}}
-                >
-                  -
-                </button>
-                <input 
-                  type="text" 
-                  className="flex-1 text-center border-y border-input bg-background py-2"
-                  placeholder="Rate"
-                />
-                <button 
-                  type="button" 
-                  className="px-3 py-2 border border-input bg-background rounded-r-md"
-                  onClick={() => {}}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Close amount:</label>
-              <div className="flex items-center">
-                <button 
-                  type="button" 
-                  className="px-3 py-2 border border-input bg-background rounded-l-md"
-                  onClick={() => {}}
-                >
-                  -
-                </button>
-                <input 
-                  type="text" 
-                  className="flex-1 text-center border-y border-input bg-background py-2"
-                  placeholder="Amount"
-                />
-                <button 
-                  type="button" 
-                  className="px-3 py-2 border border-input bg-background rounded-r-md"
-                  onClick={() => {}}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Rate should be between {(currentPrice * 0.9).toFixed(4)} and {(currentPrice * 0.95).toFixed(4)}
-          </p>
-        </div>
-      )}
+      {hasStopLoss && <StopLossSettings currentPrice={currentPrice} />}
       
       {/* Take Profit Checkbox */}
       <TakeProfitCheckbox
@@ -235,63 +141,7 @@ const TradeForm = ({
       />
       
       {/* Take Profit Settings */}
-      {hasTakeProfit && (
-        <div className="ml-6 mb-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Close rate:</label>
-              <div className="flex items-center">
-                <button 
-                  type="button" 
-                  className="px-3 py-2 border border-input bg-background rounded-l-md"
-                  onClick={() => {}}
-                >
-                  -
-                </button>
-                <input 
-                  type="text" 
-                  className="flex-1 text-center border-y border-input bg-background py-2"
-                  placeholder="Rate"
-                />
-                <button 
-                  type="button" 
-                  className="px-3 py-2 border border-input bg-background rounded-r-md"
-                  onClick={() => {}}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Close amount:</label>
-              <div className="flex items-center">
-                <button 
-                  type="button" 
-                  className="px-3 py-2 border border-input bg-background rounded-l-md"
-                  onClick={() => {}}
-                >
-                  -
-                </button>
-                <input 
-                  type="text" 
-                  className="flex-1 text-center border-y border-input bg-background py-2"
-                  placeholder="Amount"
-                />
-                <button 
-                  type="button" 
-                  className="px-3 py-2 border border-input bg-background rounded-r-md"
-                  onClick={() => {}}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Rate should be between {(currentPrice * 1.05).toFixed(4)} and {(currentPrice * 1.1).toFixed(4)}
-          </p>
-        </div>
-      )}
+      {hasTakeProfit && <TakeProfitSettings currentPrice={currentPrice} />}
       
       {/* Trade Summary */}
       <TradeSummary
