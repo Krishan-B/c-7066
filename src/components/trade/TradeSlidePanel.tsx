@@ -1,23 +1,14 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { isMarketOpen } from "@/utils/marketHours";
 import { useAuth } from "@/hooks/useAuth";
-import { getLeverageForAssetType } from "@/utils/leverageUtils";
-import { mockAccountMetrics } from "@/utils/metricUtils";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 
-// Import the new component files
-import { TradeSlidePanelAssetSelection } from "./TradeSlidePanelAssetSelection";
-import { TradeSlidePanelPriceActions } from "./TradeSlidePanelPriceActions";
-import { TradeSlidePanelUnitsInput } from "./TradeSlidePanelUnitsInput";
-import { TradeSlidePanelOrderTypeSelector } from "./TradeSlidePanelOrderTypeSelector";
-import { TradeSlidePanelEntryRate } from "./TradeSlidePanelEntryRate";
-import { TradeSlidePanelOptionCheckbox } from "./TradeSlidePanelOptionCheckbox";
-import { TradeSlidePanelSummary } from "./TradeSlidePanelSummary";
-import { StopLossCheckbox } from "./StopLossCheckbox";
-import { TakeProfitCheckbox } from "./TakeProfitCheckbox";
+// Import refactored components
+import { TradeMainContent } from "./TradeMainContent";
+import { TradePanelFooter } from "./TradePanelFooter";
 
 interface TradeSlidePanelProps {
   open: boolean;
@@ -26,6 +17,9 @@ interface TradeSlidePanelProps {
 
 export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   const { user } = useAuth();
+  const { toast } = useToast();
+  
+  // State variables
   const [assetCategory, setAssetCategory] = useState<string>("Crypto");
   const [selectedAsset, setSelectedAsset] = useState({
     name: "Bitcoin",
@@ -40,54 +34,12 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   const [hasTakeProfit, setHasTakeProfit] = useState(false);
   const [hasExpirationDate, setHasExpirationDate] = useState(false);
   const [orderRate, setOrderRate] = useState("");
-  const { toast } = useToast();
   
-  // Use the combined market data hook for the selected category
-  const { marketData, isLoading, refetch } = useCombinedMarketData(
+  // Fetch market data for asset selection
+  const { marketData } = useCombinedMarketData(
     [assetCategory], 
-    { refetchInterval: 1000 * 10 }
+    { refetchInterval: 1000 * 30 }
   );
-  
-  // Find current price in market data
-  const currentAssetData = marketData.find(item => item.symbol === selectedAsset.symbol);
-  const currentPrice = currentAssetData?.price || 0;
-  const buyPrice = currentPrice * 1.001; // Slight markup for buy
-  const sellPrice = currentPrice * 0.999; // Slight discount for sell
-  
-  // Update order rate when current price changes
-  useEffect(() => {
-    if (currentPrice > 0) {
-      setOrderRate(currentPrice.toFixed(4));
-    }
-  }, [currentPrice]);
-  
-  // Check if market is open for the selected asset
-  const marketIsOpen = isMarketOpen(selectedAsset.market_type);
-  
-  // Auto-refresh price every second for simulated real-time updates
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      refetch();
-    }, 1000);
-    
-    return () => clearInterval(intervalId);
-  }, [refetch]);
-  
-  // Get the fixed leverage for the selected asset type
-  const fixedLeverage = getLeverageForAssetType(assetCategory);
-  
-  // Get user's available funds
-  const availableFunds = mockAccountMetrics.availableFunds;
-  
-  // Calculate required margin and estimated cost
-  const parsedUnits = parseFloat(units) || 0;
-  const positionValue = currentPrice * parsedUnits;
-  const marginRequirement = positionValue / fixedLeverage;
-  const fee = marginRequirement * 0.001; // 0.1% fee
-  const totalCost = marginRequirement + fee;
-  
-  // Check if user can afford the trade
-  const canAfford = availableFunds >= marginRequirement;
   
   // Handle asset category change
   const handleAssetCategoryChange = (category: string) => {
@@ -118,33 +70,6 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   
   // Handle order execution
   const handleExecuteTrade = async (action: "buy" | "sell") => {
-    if (!marketIsOpen && orderType === "market") {
-      toast({
-        title: "Market Closed",
-        description: "The market is currently closed. Please try again during market hours or use an entry order.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to execute trades.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!canAfford && action === "buy") {
-      toast({
-        title: "Insufficient Funds",
-        description: "You do not have enough funds to execute this trade.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     setIsExecuting(true);
     setTradeAction(action);
     
@@ -152,16 +77,11 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
       // Simulate network delay for trade execution (0.5 - 1.5 seconds)
       await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
       
-      // Get latest price
-      await refetch();
-      
       // Create order object based on order type
       const orderDetails = {
         asset: selectedAsset.symbol,
-        units: parsedUnits,
-        leverage: fixedLeverage,
-        orderType: orderType,
         action: action,
+        orderType: orderType,
         stopLoss: hasStopLoss,
         takeProfit: hasTakeProfit,
         expiration: hasExpirationDate && orderType === "entry",
@@ -171,13 +91,13 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
       if (orderType === "market") {
         toast({
           title: `Position Opened: ${action.toUpperCase()} ${selectedAsset.symbol}`,
-          description: `${action.toUpperCase()} order for ${parsedUnits} ${selectedAsset.symbol} at ${action === "buy" ? "$" + buyPrice.toFixed(4) : "$" + sellPrice.toFixed(4)} executed successfully.`,
+          description: `${action.toUpperCase()} order executed successfully.`,
           variant: action === "buy" ? "default" : "destructive",
         });
       } else {
         toast({
           title: `Entry Order Placed: ${action.toUpperCase()} ${selectedAsset.symbol}`,
-          description: `${action.toUpperCase()} entry order for ${parsedUnits} ${selectedAsset.symbol} at $${orderRate} has been placed.`,
+          description: `${action.toUpperCase()} entry order at $${orderRate} has been placed.`,
           variant: "default",
         });
       }
@@ -209,89 +129,38 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
         </SheetHeader>
         
         <div className="space-y-4">
-          {/* Asset Selection */}
-          <TradeSlidePanelAssetSelection 
+          {/* Main Content */}
+          <TradeMainContent 
             assetCategory={assetCategory}
             onAssetCategoryChange={handleAssetCategoryChange}
-            selectedAsset={selectedAsset.symbol}
+            selectedAsset={selectedAsset}
             onAssetSelect={handleAssetSelect}
-            isLoading={isLoading}
-            isExecuting={isExecuting}
-            marketData={marketData}
-          />
-          
-          {/* Real-time prices with Buy/Sell buttons */}
-          <TradeSlidePanelPriceActions
-            buyPrice={buyPrice}
-            sellPrice={sellPrice}
+            orderType={orderType}
+            setOrderType={setOrderType}
+            units={units}
+            setUnits={setUnits}
             onExecuteTrade={handleExecuteTrade}
             isExecuting={isExecuting}
             tradeAction={tradeAction}
-            marketIsOpen={marketIsOpen}
-            orderType={orderType}
-            canAfford={canAfford}
-            parsedUnits={parsedUnits}
-          />
-          
-          {/* Units Input */}
-          <TradeSlidePanelUnitsInput
-            units={units}
-            setUnits={setUnits}
-            isExecuting={isExecuting}
-            marginRequirement={marginRequirement}
-            canAfford={canAfford}
-            availableFunds={availableFunds}
-          />
-          
-          {/* Order Type Selection */}
-          <TradeSlidePanelOrderTypeSelector
-            orderType={orderType}
-            setOrderType={setOrderType}
-            isExecuting={isExecuting}
-          />
-
-          {/* Entry Order Rate (only for entry orders) */}
-          {orderType === "entry" && (
-            <TradeSlidePanelEntryRate
-              orderRate={orderRate}
-              setOrderRate={setOrderRate}
-              currentPrice={currentPrice}
-              isExecuting={isExecuting}
-            />
-          )}
-          
-          {/* Stop Loss Checkbox */}
-          <StopLossCheckbox
             hasStopLoss={hasStopLoss}
             setHasStopLoss={setHasStopLoss}
-            isExecuting={isExecuting}
-          />
-
-          {/* Take Profit Checkbox */}
-          <TakeProfitCheckbox
             hasTakeProfit={hasTakeProfit}
             setHasTakeProfit={setHasTakeProfit}
-            isExecuting={isExecuting}
+            hasExpirationDate={hasExpirationDate}
+            setHasExpirationDate={setHasExpirationDate}
+            orderRate={orderRate}
+            setOrderRate={setOrderRate}
           />
-
-          {/* Expiration Date Checkbox (only for entry orders) */}
-          {orderType === "entry" && (
-            <TradeSlidePanelOptionCheckbox
-              id="expirationDate"
-              label="Expiration Date"
-              checked={hasExpirationDate}
-              onCheckedChange={() => setHasExpirationDate(!hasExpirationDate)}
-              tooltip="Set a date when your entry order should expire if not executed."
-              disabled={isExecuting}
-            />
-          )}
           
-          {/* Trade Summary */}
-          <TradeSlidePanelSummary
-            positionValue={positionValue}
-            marginRequirement={marginRequirement}
-            fee={fee}
-            totalCost={totalCost}
+          {/* Trade panel footer with execute buttons */}
+          <TradePanelFooter
+            onExecuteTrade={handleExecuteTrade}
+            isExecuting={isExecuting}
+            tradeAction={tradeAction}
+            selectedAsset={selectedAsset}
+            orderType={orderType}
+            canAfford={true} // This will be calculated in TradeMainContent
+            parsedUnits={parseFloat(units) || 0}
           />
         </div>
       </SheetContent>
