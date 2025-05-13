@@ -6,27 +6,39 @@ import PendingOrdersTable from "./PendingOrdersTable";
 import ClosedTradesTable from "./ClosedTradesTable";
 import OrderHistoryTable from "./OrderHistoryTable";
 import { AdvancedOrderForm, AdvancedOrderFormValues } from "@/components/trade/AdvancedOrderForm";
-import { openTrades, pendingOrders, closedTrades, ordersHistory } from "./mockData";
 import { toast } from "sonner";
+import { AccountMetrics } from "@/types/account";
+import { Trade } from "@/hooks/useTradeManagement";
 
 interface OrderTabsProps {
   activeTab: string;
-  onTabChange: (value: string) => void;
+  onTabChange: (tab: string) => void;
+  positions: Trade[]; // This should be renamed from 'openPositions'
+  orders: Trade[]; // This should be renamed from 'pendingOrders'
+  history: Trade[]; // This should be renamed from 'closedTrades'
+  isLoading: {
+    open: boolean;
+    pending: boolean;
+    closed: boolean;
+  };
+  onClosePosition: (tradeId: string, currentPrice: number) => Promise<any>;
+  onCancelOrder: (tradeId: string) => Promise<any>;
+  accountMetrics: AccountMetrics;
 }
 
-const OrderTabs: React.FC<OrderTabsProps> = ({ activeTab, onTabChange }) => {
+const OrderTabs: React.FC<OrderTabsProps> = ({ 
+  activeTab, 
+  onTabChange,
+  positions,
+  orders,
+  history,
+  isLoading,
+  onClosePosition,
+  onCancelOrder,
+  accountMetrics
+}) => {
   const [selectedSymbol, setSelectedSymbol] = useState("BTCUSD");
   const [currentPrice, setCurrentPrice] = useState(67432.21);
-
-  const handleCloseTrade = (tradeId: string) => {
-    // In a real app, this would call an API to close the trade
-    toast.success(`Trade ${tradeId} closed successfully`);
-  };
-
-  const handleCancelOrder = (orderId: string) => {
-    // In a real app, this would call an API to cancel the pending order
-    toast.success(`Order ${orderId} cancelled successfully`);
-  };
 
   // Handle order submission
   const handleOrderSubmit = (values: AdvancedOrderFormValues, action: "buy" | "sell") => {
@@ -54,15 +66,17 @@ const OrderTabs: React.FC<OrderTabsProps> = ({ activeTab, onTabChange }) => {
       
       <TabsContent value="open">
         <OpenPositionsTable
-          openTrades={openTrades}
-          onCloseTrade={handleCloseTrade}
+          openTrades={positions}
+          onCloseTrade={onClosePosition}
+          isLoading={isLoading.open}
         />
       </TabsContent>
       
       <TabsContent value="pending">
         <PendingOrdersTable
-          pendingOrders={pendingOrders}
-          onCancelOrder={handleCancelOrder}
+          pendingOrders={orders}
+          onCancelOrder={onCancelOrder}
+          isLoading={isLoading.pending}
         />
         
         {/* Advanced Order Form */}
@@ -76,11 +90,14 @@ const OrderTabs: React.FC<OrderTabsProps> = ({ activeTab, onTabChange }) => {
       </TabsContent>
       
       <TabsContent value="closed">
-        <ClosedTradesTable closedTrades={closedTrades} />
+        <ClosedTradesTable 
+          closedTrades={history}
+          isLoading={isLoading.closed} 
+        />
       </TabsContent>
       
       <TabsContent value="history">
-        <OrderHistoryTable ordersHistory={ordersHistory} />
+        <OrderHistoryTable ordersHistory={history} />
       </TabsContent>
     </Tabs>
   );

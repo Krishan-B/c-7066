@@ -1,10 +1,11 @@
+
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Wifi } from "lucide-react";
 import MarketStats from "@/components/MarketStats";
 import WatchlistTable from "@/components/watchlist/WatchlistTable";
 import TradingViewChart from "@/components/TradingViewChart";
-import { QuickTradePanel, TradeButton } from "@/components/trade";
+import { TradeButton } from "@/components/trade";
 import PortfolioCard from "@/components/PortfolioCard";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +13,7 @@ import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import AlertsWidget from "@/components/AlertsWidget";
 import { Badge } from "@/components/ui/badge";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
+import { QuickTradePanel } from "@/components/trade";
 
 const Index = () => {
   const [selectedAsset, setSelectedAsset] = useState({
@@ -141,7 +143,13 @@ const Index = () => {
         </div>
         
         <div className="lg:col-span-1">
-          <QuickTradePanel asset={selectedAsset} />
+          {/* QuickTradePanel doesn't accept an 'asset' prop directly, so we need to pass the individual properties */}
+          <QuickTradePanel 
+            symbol={selectedAsset.symbol}
+            name={selectedAsset.name}
+            price={selectedAsset.price}
+            marketType={selectedAsset.market_type}
+          />
         </div>
       </div>
       
