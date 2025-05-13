@@ -5,4 +5,4 @@ import { useMarketData } from './market/useMarketData';
 import { Asset } from './market/types';
 
 export { useMarketData, Asset };
-export * from './market/types';
+export type * from './market/types';

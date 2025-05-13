@@ -11,9 +11,9 @@ import {
 } from "@/utils/api/alphaVantage";
 import { getSymbolsForMarketType } from "./marketSymbols";
 import { Asset } from "./types";
-import { toast, type ToastProps as Toast } from "@/components/ui/use-toast";
+import { type ToastProps } from "@/components/ui/toast";
 
-export const fetchMarketData = async (marketTypes: string | string[], toast: { (props: Toast): void }): Promise<Asset[]> => {
+export const fetchMarketData = async (marketTypes: string | string[], toast: { (props: ToastProps): void }): Promise<Asset[]> => {
   try {
     // Convert single market type to array for consistent handling
     const marketTypeArray = Array.isArray(marketTypes) ? marketTypes : [marketTypes];
