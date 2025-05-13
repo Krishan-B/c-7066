@@ -1,19 +1,70 @@
 
-import { useState, useEffect } from 'react';
-import { useToast } from "@/components/ui/use-toast";
+import { useState, useEffect, useCallback } from 'react';
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Asset } from './market/types';
 import { useQuery } from '@tanstack/react-query';
+import { usePolygonWebSocket } from "@/hooks/market/usePolygonWebSocket";
 
 export const useWatchlistData = () => {
   const { toast } = useToast();
+  const [watchlist, setWatchlist] = useState<Asset[]>([]);
 
   // Use React Query for data fetching and caching
-  const { data: watchlist = [], isLoading, error, refetch } = useQuery({
+  const { data: initialWatchlist = [], isLoading, error, refetch } = useQuery({
     queryKey: ["watchlist-data"],
     queryFn: fetchWatchlistData,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+  
+  // Extract symbols for WebSocket subscription
+  const symbols = watchlist.map(asset => asset.symbol);
+  
+  // Initialize WebSocket connection for real-time updates
+  const { 
+    isConnected, 
+    lastUpdate,
+    connect,
+    subscribe,
+    error: wsError 
+  } = usePolygonWebSocket({ 
+    symbols,
+    autoConnect: true
+  });
+  
+  // Update watchlist with initial data
+  useEffect(() => {
+    if (initialWatchlist && initialWatchlist.length > 0) {
+      setWatchlist(initialWatchlist);
+    }
+  }, [initialWatchlist]);
+  
+  // Handle real-time updates
+  useEffect(() => {
+    if (lastUpdate) {
+      setWatchlist(prevWatchlist => {
+        return prevWatchlist.map(item => {
+          if (item.symbol === lastUpdate.symbol) {
+            return {
+              ...item,
+              price: lastUpdate.price,
+              change_percentage: lastUpdate.change_percentage,
+              volume: lastUpdate.volume,
+              last_updated: new Date().toISOString()
+            };
+          }
+          return item;
+        });
+      });
+    }
+  }, [lastUpdate]);
+  
+  // Update WebSocket subscriptions when symbols change
+  useEffect(() => {
+    if (isConnected && symbols.length > 0) {
+      subscribe(symbols);
+    }
+  }, [symbols, isConnected, subscribe]);
 
   // Fetch market data from Supabase
   async function fetchWatchlistData(): Promise<Asset[]> {
@@ -63,14 +114,13 @@ export const useWatchlistData = () => {
         return refreshedData as Asset[];
       }
 
-      // If still no data, use default data
+      // Fallback to default data
       toast({
         title: "Using sample market data",
         description: "Could not connect to market data service. Displaying sample data instead.",
         variant: "destructive"
       });
       
-      // Fallback to default data
       return [
         { name: "Bitcoin", symbol: "BTCUSD", price: 67543.21, change_percentage: 2.4, market_type: "Crypto", volume: "$42.1B", market_cap: "$1.29T" },
         { name: "Apple Inc.", symbol: "AAPL", price: 189.56, change_percentage: 0.8, market_type: "Stock", volume: "$4.2B", market_cap: "$2.98T" },
@@ -117,6 +167,7 @@ export const useWatchlistData = () => {
     watchlist,
     isLoading,
     error,
+    realtimeEnabled: isConnected,
     handleRefreshData
   };
 };

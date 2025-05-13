@@ -1,7 +1,6 @@
-
 import { toast } from "@/hooks/use-toast";
 import { Asset } from "@/hooks/market/types";
-import { transformStockData, transformCryptoData, transformForexData } from "./transformers";
+import { transformStockData, transformCryptoData, transformForexData, transformWebSocketData } from "./transformers";
 
 // WebSocket connection state
 let ws: WebSocket | null = null;
@@ -256,23 +255,8 @@ export function processPolygonMessage(message: any): Asset | null {
   if (!message || message.ev !== 'AM') return null;
 
   try {
-    const symbol = message.sym;
-    const price = message.c; // Close price
-    const openPrice = message.o; // Open price
-    
-    // Calculate change percentage
-    const change_percentage = openPrice > 0 
-      ? ((price - openPrice) / openPrice) * 100 
-      : 0;
-    
-    return {
-      symbol,
-      name: symbol, // We may not have the full name from the WebSocket
-      price,
-      change_percentage: parseFloat(change_percentage.toFixed(2)),
-      volume: formatVolume(message.v),
-      market_type: 'Stock', // Default to stock, could be refined based on symbol prefix
-    };
+    // Use our improved transformer for better asset type detection
+    return transformWebSocketData(message);
   } catch (error) {
     console.error("Error processing Polygon message:", error);
     return null;

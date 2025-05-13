@@ -26,6 +26,7 @@ export function transformStockData(data: PolygonStockQuote): Asset | null {
     change_percentage: parseFloat(change.toFixed(2)),
     volume: formatVolume(result.v),
     market_type: 'Stock',
+    last_updated: new Date().toISOString()
   };
 }
 
@@ -52,6 +53,7 @@ export function transformCryptoData(data: PolygonCryptoQuote): Asset | null {
     change_percentage: parseFloat(change.toFixed(2)),
     volume: formatVolume(result.v),
     market_type: 'Crypto',
+    last_updated: new Date().toISOString()
   };
 }
 
@@ -80,6 +82,53 @@ export function transformForexData(data: PolygonForexQuote): Asset | null {
     change_percentage: parseFloat(change.toFixed(2)),
     volume: formatVolume(result.v),
     market_type: 'Forex',
+    last_updated: new Date().toISOString()
+  };
+}
+
+/**
+ * Transform WebSocket real-time data
+ * This handles different asset types based on the symbol pattern
+ */
+export function transformWebSocketData(data: any): Asset | null {
+  if (!data || !data.sym || !data.c) return null;
+  
+  const symbol = data.sym;
+  const currentPrice = data.c;
+  const volume = data.v || 0;
+  const openPrice = data.o || currentPrice;
+  
+  // Calculate change percentage
+  const change = openPrice > 0 ? ((currentPrice - openPrice) / openPrice) * 100 : 0;
+  
+  // Determine market type based on symbol patterns
+  let marketType = 'Stock';
+  let name = symbol;
+  
+  if (symbol.includes('USD') && symbol.length <= 6) {
+    marketType = 'Crypto';
+    name = getCryptoName(symbol);
+  } else if (symbol.length === 6 && 
+            ['EUR', 'USD', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'NZD'].some(
+              currency => symbol.includes(currency))) {
+    marketType = 'Forex';
+    const from = symbol.substring(0, 3);
+    const to = symbol.substring(3);
+    name = `${from}/${to}`;
+  } else if (['SPX', 'NDX', 'DJI', 'US500', 'FTSE', 'DAX'].some(index => symbol.includes(index))) {
+    marketType = 'Index';
+  } else if (['GC', 'SI', 'CL', 'NG', 'XAUUSD', 'XAGUSD'].some(commodity => symbol.includes(commodity))) {
+    marketType = 'Commodity';
+  }
+  
+  return {
+    symbol: symbol,
+    name: name,
+    price: currentPrice,
+    change_percentage: parseFloat(change.toFixed(2)),
+    volume: formatVolume(volume),
+    market_type: marketType,
+    last_updated: new Date().toISOString()
   };
 }
 

@@ -1,7 +1,6 @@
-
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Wifi } from "lucide-react";
 import MarketStats from "@/components/MarketStats";
 import WatchlistTable from "@/components/watchlist/WatchlistTable";
 import TradingViewChart from "@/components/TradingViewChart";
@@ -11,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import AlertsWidget from "@/components/AlertsWidget";
+import { Badge } from "@/components/ui/badge";
+import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 
 const Index = () => {
   const [selectedAsset, setSelectedAsset] = useState({
@@ -25,6 +26,11 @@ const Index = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const chartSectionRef = useRef<HTMLDivElement>(null);
+  
+  // Initialize combined market data with real-time updates
+  const { marketData, realtimeEnabled } = useCombinedMarketData(['Crypto', 'Stock', 'Forex', 'Index'], {
+    enableRealtime: true
+  });
 
   useEffect(() => {
     // Show welcome toast when dashboard loads
@@ -72,6 +78,12 @@ const Index = () => {
           <p className="text-muted-foreground">Track, analyze and trade global markets</p>
         </div>
         <div className="flex items-center space-x-2 mt-4 lg:mt-0">
+          {realtimeEnabled && (
+            <Badge variant="default" className="flex items-center gap-1 bg-green-500 hover:bg-green-600">
+              <Wifi className="h-3 w-3" />
+              <span>Real-time</span>
+            </Badge>
+          )}
           <Button 
             variant="outline" 
             size="sm" 

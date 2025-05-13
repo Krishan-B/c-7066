@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Wifi } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { isMarketOpen } from "@/utils/marketHours";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +16,7 @@ import { UnitsInput } from "@/components/trade";
 import { StopLossCheckbox } from "@/components/trade";
 import { TakeProfitCheckbox } from "@/components/trade";
 import { TradeSlidePanelOptionCheckbox } from "@/components/trade";
+import { Badge } from "@/components/ui/badge";
 
 interface QuickTradePanelProps {
   asset: {
@@ -43,9 +43,15 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   // Get available funds from account metrics
   const availableFunds = mockAccountMetrics.availableFunds;
   
-  // Use our combined market data hook to get data for all market types
-  const { marketData, isLoading, refetch } = useCombinedMarketData([asset.market_type], {
+  // Use our combined market data hook with real-time updates
+  const { 
+    marketData, 
+    isLoading, 
+    refetch, 
+    realtimeEnabled 
+  } = useCombinedMarketData([asset.market_type], {
     refetchInterval: 2000, // Refresh every 2 seconds for more frequent price updates
+    enableRealtime: true  // Enable real-time WebSocket updates
   });
   
   // Find the current asset in our market data
@@ -64,8 +70,10 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   
   // Update buy/sell prices when current price changes
   useEffect(() => {
-    setBuyPrice(currentPrice * 1.001); // 0.1% higher
-    setSellPrice(currentPrice * 0.999); // 0.1% lower
+    if (currentPrice) {
+      setBuyPrice(currentPrice * 1.001); // 0.1% higher
+      setSellPrice(currentPrice * 0.999); // 0.1% lower
+    }
   }, [currentPrice]);
 
   // Auto-refresh prices
@@ -134,7 +142,16 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
 
   return (
     <div className="glass-card rounded-lg p-4">
-      <h2 className="text-xl font-semibold mb-4">Quick Trade</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">Quick Trade</h2>
+        
+        {realtimeEnabled && (
+          <Badge variant="default" className="flex items-center gap-1 bg-green-500 hover:bg-green-600">
+            <Wifi className="h-3 w-3" />
+            <span>Real-time</span>
+          </Badge>
+        )}
+      </div>
       
       <div className="mb-4">
         <div className="flex justify-between mb-1">
