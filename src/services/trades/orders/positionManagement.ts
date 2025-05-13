@@ -42,7 +42,7 @@ export async function closePosition(
       .update({
         status: 'closed',
         closed_at: new Date().toISOString(),
-        current_price: currentPrice, // Final price
+        price_per_unit: currentPrice, // Final price
         pnl: pnl
       })
       .eq('id', tradeId)
@@ -54,8 +54,6 @@ export async function closePosition(
     }
     
     // Update user's account balance
-    // In a real app, this would likely be handled by a database trigger or transaction
-    // For simplicity, we'll just update the balance here
     await updateUserBalance(trade.user_id, pnl);
     
     return {

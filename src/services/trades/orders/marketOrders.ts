@@ -18,8 +18,9 @@ export async function executeMarketOrder(params: MarketOrderParams): Promise<Tra
       userId 
     } = params;
     
-    // In a real app, we would call the broker API here
-    // For this simulation, we'll just record the trade in our database
+    // Get asset name for the symbol (in a real app would come from a lookup)
+    const assetName = symbol.split('-')[0] || symbol;
+    const marketType = symbol.includes('USD') ? 'Crypto' : 'Stocks';
     
     // Calculate trade value
     const tradeValue = units * currentPrice;
@@ -30,14 +31,16 @@ export async function executeMarketOrder(params: MarketOrderParams): Promise<Tra
       .insert({
         user_id: userId,
         asset_symbol: symbol,
+        asset_name: assetName,
+        market_type: marketType,
         trade_type: direction, // Using trade_type instead of direction
         order_type: 'market',
-        units,
+        units: units,
         price_per_unit: currentPrice,
+        total_amount: tradeValue,
         status: 'open',
         stop_loss: stopLoss,
-        take_profit: takeProfit,
-        total_amount: tradeValue
+        take_profit: takeProfit
       })
       .select()
       .single();

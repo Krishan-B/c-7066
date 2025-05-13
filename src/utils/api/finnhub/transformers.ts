@@ -7,9 +7,8 @@ import { Asset } from '@/hooks/market/types';
  */
 export function transformStockData(data: FinnhubQuote, symbol: string): Asset {
   return {
-    id: symbol,
-    name: getStockName(symbol),
     symbol: symbol,
+    name: getStockName(symbol),
     price: data.c,
     change_percentage: data.dp,
     volume: formatLargeNumber(1000000 + Math.random() * 10000000), // Simulated volume
@@ -24,9 +23,8 @@ export function transformStockData(data: FinnhubQuote, symbol: string): Asset {
  */
 export function transformCryptoData(data: FinnhubQuote, symbol: string): Asset {
   return {
-    id: symbol,
-    name: getCryptoName(symbol),
     symbol: symbol,
+    name: getCryptoName(symbol),
     price: data.c,
     change_percentage: data.dp,
     volume: formatLargeNumber(10000000 + Math.random() * 100000000), // Simulated volume
@@ -42,9 +40,8 @@ export function transformCryptoData(data: FinnhubQuote, symbol: string): Asset {
 export function transformForexData(data: FinnhubQuote, fromCurrency: string, toCurrency: string): Asset {
   const symbol = `${fromCurrency}/${toCurrency}`;
   return {
-    id: symbol,
-    name: `${fromCurrency}/${toCurrency}`,
     symbol: symbol,
+    name: `${fromCurrency}/${toCurrency}`,
     price: data.c,
     change_percentage: data.dp,
     volume: formatLargeNumber(50000000 + Math.random() * 500000000), // Simulated volume

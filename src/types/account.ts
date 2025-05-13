@@ -25,8 +25,8 @@ export interface Asset {
   symbol: string;
   name: string;
   price: number;
-  amount: number;  // Now required, not optional
-  entryPrice?: number;
+  amount: number;
+  entryPrice: number;
   value?: number;
   change?: number;
   pnl?: number;

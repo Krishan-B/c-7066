@@ -1,12 +1,12 @@
 
-import { Button, ButtonProps } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { TradePanelContext } from "./TradePanelProvider";
 import { useContext } from "react";
 
 export interface TradeButtonProps {
   size?: "sm" | "default" | "lg";
   variant?: "default" | "outline" | "destructive" | "secondary";
-  label?: string;  // Make label a valid prop
+  label?: string;
   className?: string;
   onOpen?: () => void;
 }

@@ -1,68 +1,129 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { PortfolioUpdateParams, PortfolioUpdateResult } from "../types";
 
 /**
- * Update user's portfolio
+ * Update user portfolio with a new trade
  */
 export async function updatePortfolio(params: PortfolioUpdateParams): Promise<PortfolioUpdateResult> {
   try {
     const { userId, assetId, amount, price, direction } = params;
     
-    // Get existing portfolio entry
-    const { data: existingEntry } = await supabase
+    // Get asset name for the symbol (in a real app would come from a lookup)
+    const assetName = assetId.split('-')[0] || assetId;
+    const marketType = assetId.includes('USD') ? 'Crypto' : 'Stocks';
+    
+    // Check if the asset already exists in the portfolio
+    const { data: existingAsset, error: fetchError } = await supabase
       .from('user_portfolio')
-      .select()
+      .select('*')
       .eq('user_id', userId)
-      .eq('asset_id', assetId)
+      .eq('asset_symbol', assetId)
       .single();
+      
+    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is the "no rows returned" error
+      throw new Error(`Failed to check portfolio: ${fetchError.message}`);
+    }
     
-    let result;
+    let newUnits = amount;
+    let newAveragePrice = price;
     
-    if (existingEntry) {
+    // Calculate new position if asset already exists
+    if (existingAsset) {
+      const currentUnits = existingAsset.units;
+      
+      if (direction === 'buy') {
+        // Increase position
+        const totalValue = (currentUnits * existingAsset.average_price) + (amount * price);
+        newUnits = currentUnits + amount;
+        newAveragePrice = totalValue / newUnits;
+      } else {
+        // Decrease position
+        newUnits = currentUnits - amount;
+        // Keep the same average price when selling
+        newAveragePrice = existingAsset.average_price;
+      }
+    }
+    
+    // Calculate PnL
+    const currentValue = newUnits * price;
+    const costBasis = newUnits * newAveragePrice;
+    const pnl = currentValue - costBasis;
+    const pnlPercentage = costBasis > 0 ? (pnl / costBasis) * 100 : 0;
+    
+    // Create or update portfolio entry
+    if (existingAsset) {
+      // If units are zero or negative after selling, remove from portfolio
+      if (newUnits <= 0) {
+        const { error } = await supabase
+          .from('user_portfolio')
+          .delete()
+          .eq('id', existingAsset.id);
+        
+        if (error) {
+          throw new Error(`Failed to remove asset from portfolio: ${error.message}`);
+        }
+        
+        return {
+          success: true,
+          message: `${assetId} removed from portfolio`
+        };
+      }
+      
       // Update existing entry
-      const currentAmount = existingEntry.amount;
-      const newAmount = direction === 'buy' 
-        ? currentAmount + amount 
-        : currentAmount - amount;
-      
-      // Calculate average price
-      const avgPrice = direction === 'buy'
-        ? ((currentAmount * existingEntry.avg_price) + (amount * price)) / (currentAmount + amount)
-        : existingEntry.avg_price;
-      
-      result = await supabase
+      const { data, error } = await supabase
         .from('user_portfolio')
         .update({
-          amount: newAmount,
-          avg_price: avgPrice,
+          units: newUnits,
+          average_price: newAveragePrice,
+          current_price: price,
+          total_value: currentValue,
+          pnl: pnl,
+          pnl_percentage: pnlPercentage,
           last_updated: new Date().toISOString()
         })
-        .eq('id', existingEntry.id)
-        .select();
+        .eq('id', existingAsset.id)
+        .select()
+        .single();
+        
+      if (error) {
+        throw new Error(`Failed to update portfolio: ${error.message}`);
+      }
+      
+      return {
+        success: true,
+        portfolioId: data.id,
+        message: `Portfolio updated for ${assetId}`
+      };
+      
     } else {
       // Create new entry
-      result = await supabase
+      const { data, error } = await supabase
         .from('user_portfolio')
         .insert({
           user_id: userId,
-          asset_id: assetId,
-          amount: amount,
-          avg_price: price,
-          last_updated: new Date().toISOString()
+          asset_symbol: assetId,
+          asset_name: assetName,
+          market_type: marketType,
+          units: newUnits,
+          average_price: newAveragePrice,
+          current_price: price,
+          total_value: currentValue,
+          pnl: pnl,
+          pnl_percentage: pnlPercentage
         })
-        .select();
+        .select()
+        .single();
+        
+      if (error) {
+        throw new Error(`Failed to add asset to portfolio: ${error.message}`);
+      }
+      
+      return {
+        success: true,
+        portfolioId: data.id,
+        message: `${assetId} added to portfolio`
+      };
     }
-    
-    if (result.error) {
-      throw new Error(`Failed to update portfolio: ${result.error.message}`);
-    }
-    
-    return {
-      success: true,
-      portfolioId: result.data[0].id,
-      message: `Successfully updated portfolio for ${assetId}`
-    };
     
   } catch (error) {
     console.error("Portfolio update error:", error);

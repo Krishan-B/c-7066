@@ -6,6 +6,8 @@ export interface Asset {
   change_percentage: number;
   market_type: string;
   volume: string;
+  market_cap?: string;
+  id?: string;
   last_updated?: string;
 }
 

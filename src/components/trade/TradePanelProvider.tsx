@@ -4,11 +4,17 @@ import { TradeSlidePanel } from './TradeSlidePanel';
 
 interface TradePanelContextType {
   open: boolean;
+  setOpen: (open: boolean) => void;
   openTradePanel: () => void;
   closeTradePanel: () => void;
 }
 
-const TradePanelContext = createContext<TradePanelContextType | undefined>(undefined);
+export const TradePanelContext = createContext<TradePanelContextType>({
+  open: false,
+  setOpen: () => {},
+  openTradePanel: () => {},
+  closeTradePanel: () => {},
+});
 
 export function useTradePanelContext() {
   const context = useContext(TradePanelContext);
@@ -30,7 +36,7 @@ export function TradePanelProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <TradePanelContext.Provider value={{ open, openTradePanel, closeTradePanel }}>
+    <TradePanelContext.Provider value={{ open, setOpen, openTradePanel, closeTradePanel }}>
       {children}
       <TradeSlidePanel 
         open={open}

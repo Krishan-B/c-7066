@@ -9,13 +9,13 @@ import ClosedPositionsTable from "@/components/portfolio/ClosedPositionsTable";
 import PositionFilter from "@/components/portfolio/PositionFilter";
 import { Asset as AccountAsset, ClosedPosition } from "@/types/account";
 
-// Use a local interface that matches exactly what PositionsTable expects
+// Define a local Asset interface that matches what PositionsTable expects
 interface Asset {
   symbol: string;
   name: string;
   price: number;
-  amount: number;  // Required, not optional
-  entryPrice?: number;
+  amount: number;
+  entryPrice: number;
   value?: number;
   change?: number;
   pnl?: number;
@@ -36,13 +36,13 @@ const PositionsSection = ({
   const [filterSymbol, setFilterSymbol] = useState("");
   const [filterPnl, setFilterPnl] = useState("all");
 
-  // Convert assets to the expected format
+  // Convert assets to the expected format with explicit type definition
   const formattedAssets: Asset[] = assets.map(asset => ({
     symbol: asset.symbol,
     name: asset.name,
     price: asset.price,
-    amount: asset.amount || 0,  // Ensure amount is always provided, even if it's 0
-    entryPrice: asset.entryPrice,
+    amount: asset.amount || 0,
+    entryPrice: asset.entryPrice || 0, // Provide default value
     value: asset.value,
     change: asset.change,
     pnl: asset.pnl,

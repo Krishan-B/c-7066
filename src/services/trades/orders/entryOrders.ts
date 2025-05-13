@@ -20,17 +20,23 @@ export async function placeEntryOrder(params: EntryOrderParams): Promise<TradeRe
       userId 
     } = params;
     
+    // Get asset name for the symbol (in a real app would come from a lookup)
+    const assetName = symbol.split('-')[0] || symbol;
+    const marketType = symbol.includes('USD') ? 'Crypto' : 'Stocks';
+    
     // Insert pending order record - use user_trades table instead of trades
     const { data, error } = await supabase
       .from('user_trades')
       .insert({
         user_id: userId,
         asset_symbol: symbol,
+        asset_name: assetName,
+        market_type: marketType,
         trade_type: direction,  // Using trade_type instead of direction
         order_type: 'entry',
-        units,
+        units: units,
         price_per_unit: entryPrice,
-        current_price: currentPrice, // Reference price when order was placed
+        total_amount: units * entryPrice,
         status: 'pending',
         stop_loss: stopLoss,
         take_profit: takeProfit,
