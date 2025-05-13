@@ -1,26 +1,25 @@
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Trade, TradeManagement } from './trades/types';
 import { fetchTradesByStatus, closeTradePosition, cancelTradeOrder } from './trades/tradeAPI';
 import { useTradeSubscription } from './trades/useTradeSubscription';
+import { useTradeState } from './trades/useTradeState';
 
 /**
  * Hook for managing user trade operations
  */
 export const useTradeManagement = (): TradeManagement => {
-  const [openPositions, setOpenPositions] = useState<Trade[]>([]);
-  const [pendingOrders, setPendingOrders] = useState<Trade[]>([]);
-  const [closedTrades, setClosedTrades] = useState<Trade[]>([]);
-  const [loading, setLoading] = useState<{
-    open: boolean;
-    pending: boolean;
-    closed: boolean;
-  }>({
-    open: true,
-    pending: true,
-    closed: true,
-  });
+  const { 
+    openPositions, 
+    pendingOrders, 
+    closedTrades, 
+    loading,
+    setOpenPositions,
+    setPendingOrders,
+    setClosedTrades,
+    setLoading
+  } = useTradeState();
   
   const { user } = useAuth();
 
@@ -28,37 +27,37 @@ export const useTradeManagement = (): TradeManagement => {
     if (!user) return;
     
     try {
-      setLoading(prev => ({ ...prev, open: true }));
+      setLoading({ open: true });
       const trades = await fetchTradesByStatus('open');
       setOpenPositions(trades);
     } finally {
-      setLoading(prev => ({ ...prev, open: false }));
+      setLoading({ open: false });
     }
-  }, [user]);
+  }, [user, setOpenPositions, setLoading]);
 
   const fetchPendingOrders = useCallback(async () => {
     if (!user) return;
     
     try {
-      setLoading(prev => ({ ...prev, pending: true }));
+      setLoading({ pending: true });
       const trades = await fetchTradesByStatus('pending');
       setPendingOrders(trades);
     } finally {
-      setLoading(prev => ({ ...prev, pending: false }));
+      setLoading({ pending: false });
     }
-  }, [user]);
+  }, [user, setPendingOrders, setLoading]);
 
   const fetchClosedTrades = useCallback(async () => {
     if (!user) return;
     
     try {
-      setLoading(prev => ({ ...prev, closed: true }));
+      setLoading({ closed: true });
       const trades = await fetchTradesByStatus(['closed', 'cancelled']);
       setClosedTrades(trades);
     } finally {
-      setLoading(prev => ({ ...prev, closed: false }));
+      setLoading({ closed: false });
     }
-  }, [user]);
+  }, [user, setClosedTrades, setLoading]);
 
   const handleTradeUpdate = useCallback((status: string) => {
     // Refresh relevant data based on the status
