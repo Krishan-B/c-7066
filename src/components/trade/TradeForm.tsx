@@ -76,6 +76,11 @@ const TradeForm = ({
     onSubmit(units, orderType, [tradeCalculations.leverage]);
   };
 
+  // Create a no-parameter version of handleSubmit for the button click
+  const handleButtonClick = () => {
+    onSubmit(units, orderType, [tradeCalculations.leverage]);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-2">
       {/* Asset Category Selection */}
@@ -155,8 +160,7 @@ const TradeForm = ({
         canAfford={tradeCalculations.canAfford}
         buyPrice={buyPrice}
         sellPrice={sellPrice}
-        // Add the missing required props:
-        onClick={handleSubmit}
+        onClick={handleButtonClick}
         disabled={isExecuting || !marketIsOpen || !tradeCalculations.canAfford || tradeCalculations.parsedUnits <= 0}
       />
     </form>
