@@ -11,9 +11,9 @@ import {
 } from "@/utils/api/alphaVantage";
 import { getSymbolsForMarketType } from "./marketSymbols";
 import { Asset } from "./types";
-import { type ToastProps } from "@/components/ui/toast";
+import { toast } from "@/hooks/use-toast";
 
-export const fetchMarketData = async (marketTypes: string | string[], toast: { (props: ToastProps): void }): Promise<Asset[]> => {
+export const fetchMarketData = async (marketTypes: string | string[], toastFn = toast): Promise<Asset[]> => {
   try {
     // Convert single market type to array for consistent handling
     const marketTypeArray = Array.isArray(marketTypes) ? marketTypes : [marketTypes];
@@ -138,9 +138,8 @@ export const fetchMarketData = async (marketTypes: string | string[], toast: { (
     return combinedData;
   } catch (error) {
     console.error(`Error fetching market data:`, error);
-    toast({
+    toastFn({
       title: "Error fetching market data",
-      description: "Failed to load market data. Please try again later.",
       variant: "destructive"
     });
     throw error;

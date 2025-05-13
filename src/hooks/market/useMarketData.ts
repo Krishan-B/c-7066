@@ -1,6 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { fetchMarketData } from "./fetchMarketData";
 import { Asset } from "./types";
 
@@ -11,7 +11,6 @@ interface UseMarketDataOptions {
 }
 
 export const useMarketData = (marketType: string | string[], options: UseMarketDataOptions = {}) => {
-  const { toast } = useToast();
   const { 
     refetchInterval = 1000 * 60 * 5, // 5 minutes default
     initialData = [],
@@ -27,7 +26,7 @@ export const useMarketData = (marketType: string | string[], options: UseMarketD
     isFetching,
   } = useQuery({
     queryKey: ["market-data", marketType],
-    queryFn: () => fetchMarketData(marketType, toast),
+    queryFn: () => fetchMarketData(marketType),
     refetchOnWindowFocus: false,
     staleTime: refetchInterval,
     enabled: enableRefresh,
