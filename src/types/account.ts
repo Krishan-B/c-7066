@@ -56,3 +56,24 @@ export interface PerformanceData {
   date: string;
   value: number;
 }
+
+export interface PortfolioData {
+  totalValue: number;
+  cashBalance: number;
+  lockedFunds: number;
+  totalPnL?: number;
+  totalPnLPercentage?: number;
+  dayChange?: number;
+  dayChangePercentage?: number;
+  assets: Asset[];
+  closedPositions?: any[];
+  allocationData?: AllocationData[];
+  performanceData?: PerformanceData[];
+  performance?: {
+    allTimeReturn: number;
+    monthlyReturn: number;
+    weeklyReturn: number;
+    dailyReturn: number;
+  };
+  monthlyReturns?: any[];
+}

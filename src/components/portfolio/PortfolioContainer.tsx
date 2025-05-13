@@ -20,29 +20,15 @@ const PortfolioContainer = () => {
   const navigate = useNavigate();
   
   const { 
-    portfolioData, 
+    portfolioData,
     timeframe, 
     setTimeframe, 
-    actions, 
     activeTrades,
     isLoading,
     error,
-    refetch
+    refetch,
+    actions
   } = usePortfolioData();
-  
-  const {
-    totalValue,
-    cashBalance,
-    lockedFunds,
-    totalPnL,
-    totalPnLPercentage,
-    dayChange,
-    dayChangePercentage,
-    assets,
-    closedPositions,
-    allocationData,
-    performanceData
-  } = portfolioData;
 
   if (!user) {
     return (
@@ -62,7 +48,7 @@ const PortfolioContainer = () => {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || !portfolioData) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -94,7 +80,7 @@ const PortfolioContainer = () => {
               This could be due to network connectivity issues or a temporary server problem.
             </p>
             <div className="flex gap-4">
-              <Button onClick={refetch} className="gap-2">
+              <Button onClick={() => refetch()} className="gap-2">
                 <RefreshCw className="h-4 w-4" />
                 Retry
               </Button>
@@ -105,6 +91,20 @@ const PortfolioContainer = () => {
       </div>
     );
   }
+
+  const {
+    totalValue = 0,
+    cashBalance = 0,
+    lockedFunds = 0,
+    totalPnL = 0,
+    totalPnLPercentage = 0,
+    dayChange = 0,
+    dayChangePercentage = 0,
+    assets = [],
+    closedPositions = [],
+    allocationData = [],
+    performanceData = []
+  } = portfolioData;
 
   return (
     <div className="min-h-screen bg-background">
@@ -121,8 +121,8 @@ const PortfolioContainer = () => {
           balance={cashBalance + lockedFunds}
           equity={cashBalance + lockedFunds + totalValue}
           activeTrades={activeTrades}
-          pnl={totalPnL}
-          pnlPercentage={totalPnLPercentage}
+          pnl={totalPnL || 0}
+          pnlPercentage={totalPnLPercentage || 0}
         />
 
         {/* Portfolio Metrics Cards */}
@@ -130,15 +130,15 @@ const PortfolioContainer = () => {
           totalValue={totalValue}
           cashBalance={cashBalance}
           lockedFunds={lockedFunds}
-          totalPnL={totalPnL}
-          totalPnLPercentage={totalPnLPercentage}
+          totalPnL={totalPnL || 0}
+          totalPnLPercentage={totalPnLPercentage || 0}
           onExport={actions.handleExportReport}
           onTaxEvents={actions.handleTaxEvents}
         />
 
         {/* Performance Chart */}
         <PerformanceChart 
-          data={performanceData}
+          data={performanceData || []}
           timeframe={timeframe}
           onTimeframeChange={setTimeframe}
         />
@@ -147,17 +147,17 @@ const PortfolioContainer = () => {
           <div className="lg:col-span-3">
             <PositionsSection 
               assets={assets} 
-              closedPositions={closedPositions} 
+              closedPositions={closedPositions || []} 
               onViewDetails={actions.handleViewDetails}
             />
           </div>
           
           <PortfolioSideSection 
             totalValue={totalValue}
-            dayChange={dayChange}
-            dayChangePercentage={dayChangePercentage}
-            allocationData={allocationData}
-            performanceData={performanceData}
+            dayChange={dayChange || 0}
+            dayChangePercentage={dayChangePercentage || 0}
+            allocationData={allocationData || []}
+            performanceData={performanceData || []}
           />
         </div>
       </div>
