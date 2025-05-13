@@ -1,8 +1,32 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
-// Base API URL for Alpha Vantage
+/**
+ * Alpha Vantage API client
+ */
 const ALPHA_VANTAGE_BASE_URL = 'https://www.alphavantage.co/query';
+let ALPHA_VANTAGE_API_KEY: string | undefined;
+
+/**
+ * Set the Alpha Vantage API key
+ * @param apiKey The API key
+ */
+export function setAlphaVantageApiKey(apiKey: string) {
+  ALPHA_VANTAGE_API_KEY = apiKey;
+}
+
+/**
+ * Get the Alpha Vantage API key
+ */
+export function getAlphaVantageApiKey(): string | undefined {
+  return ALPHA_VANTAGE_API_KEY;
+}
+
+/**
+ * Check if the Alpha Vantage API key is set
+ */
+export function hasAlphaVantageApiKey(): boolean {
+  return !!ALPHA_VANTAGE_API_KEY;
+}
 
 /**
  * Fetches an API key from Supabase secrets

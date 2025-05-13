@@ -298,3 +298,6 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
     </Sheet>
   );
 }
+
+// Add a default export to fix the QuickTradePanel import issue
+export default TradeSlidePanel;

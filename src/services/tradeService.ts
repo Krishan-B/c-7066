@@ -55,7 +55,10 @@ export const executeMarketOrder = async (
       };
     }
     
-    // Create the trade record
+    // Create the trade record - Convert Date to ISO string for PostgreSQL
+    const expirationDateString = tradeParams.expirationDate ? 
+      tradeParams.expirationDate.toISOString() : null;
+    
     const { data: tradeData, error: tradeError } = await supabase
       .from('user_trades')
       .insert({
@@ -70,7 +73,7 @@ export const executeMarketOrder = async (
         status: tradeParams.orderType === 'market' ? 'open' : 'pending',
         stop_loss: tradeParams.stopLoss || null,
         take_profit: tradeParams.takeProfit || null,
-        expiration_date: tradeParams.expirationDate || null,
+        expiration_date: expirationDateString,
         executed_at: tradeParams.orderType === 'market' ? new Date().toISOString() : null
       })
       .select()
@@ -121,6 +124,10 @@ export const executeEntryOrder = async (
     // Calculate total amount
     const totalAmount = tradeParams.units * tradeParams.pricePerUnit;
     
+    // Convert Date to ISO string for PostgreSQL
+    const expirationDateString = tradeParams.expirationDate ? 
+      tradeParams.expirationDate.toISOString() : null;
+    
     // Create the trade record as a pending order
     const { data: tradeData, error: tradeError } = await supabase
       .from('user_trades')
@@ -136,7 +143,7 @@ export const executeEntryOrder = async (
         status: 'pending',
         stop_loss: tradeParams.stopLoss || null,
         take_profit: tradeParams.takeProfit || null,
-        expiration_date: tradeParams.expirationDate || null
+        expiration_date: expirationDateString
       })
       .select()
       .single();
@@ -211,13 +218,14 @@ export const closePosition = async (
     }
     
     // Update user account - release margin and update P&L and balance
+    // Use cash_balance instead of balance
     const { error: accountUpdateError } = await supabase
       .from('user_account')
       .update({
         used_margin: accountData.used_margin - marginRequired,
         available_funds: accountData.available_funds + marginRequired + pnl,
         realized_pnl: accountData.realized_pnl + pnl,
-        balance: accountData.balance + pnl,
+        cash_balance: accountData.cash_balance + pnl,
         last_updated: new Date().toISOString()
       })
       .eq('id', accountData.id);
