@@ -4,23 +4,41 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 import { Info } from "lucide-react";
 
 interface TakeProfitCheckboxProps {
-  hasTakeProfit: boolean;
-  setHasTakeProfit: (value: boolean) => void;
-  isExecuting: boolean;
+  hasTakeProfit?: boolean;
+  setHasTakeProfit?: (value: boolean) => void;
+  isExecuting?: boolean;
+  checked?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  disabled?: boolean;
 }
 
 export const TakeProfitCheckbox = ({
   hasTakeProfit,
   setHasTakeProfit,
   isExecuting,
+  checked,
+  onCheckedChange,
+  disabled
 }: TakeProfitCheckboxProps) => {
+  // Use either the new or old prop pattern
+  const isChecked = checked !== undefined ? checked : hasTakeProfit;
+  const isDisabled = disabled !== undefined ? disabled : isExecuting;
+  
+  const handleCheckedChange = (value: boolean) => {
+    if (onCheckedChange) {
+      onCheckedChange(value);
+    } else if (setHasTakeProfit) {
+      setHasTakeProfit(value);
+    }
+  };
+  
   return (
     <div className="flex items-center space-x-2">
       <Checkbox 
         id="takeProfit" 
-        checked={hasTakeProfit} 
-        onCheckedChange={() => setHasTakeProfit(!hasTakeProfit)} 
-        disabled={isExecuting}
+        checked={isChecked} 
+        onCheckedChange={handleCheckedChange} 
+        disabled={isDisabled}
       />
       <div className="flex items-center">
         <label htmlFor="takeProfit" className="text-sm font-medium cursor-pointer">

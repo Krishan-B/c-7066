@@ -13,6 +13,7 @@ import { MarketStatusAlert } from "./MarketStatusAlert";
 import { TradeSummary } from "./TradeSummary";
 import { getLeverageForAssetType } from "@/utils/leverageUtils";
 import { mockAccountMetrics } from "@/utils/metricUtils";
+import { useTradeCalculations } from "@/hooks/useTradeCalculations";
 
 export interface QuickTradePanelProps {
   symbol: string;
@@ -40,15 +41,19 @@ export default function QuickTradePanel({ symbol, name, price, marketType }: Qui
   // Get user's available funds
   const availableFunds = mockAccountMetrics.availableFunds;
   
-  // Calculate required margin and estimated cost
-  const parsedUnits = parseFloat(units) || 0;
-  const positionValue = price * parsedUnits;
-  const marginRequirement = positionValue / fixedLeverage;
-  const fee = marginRequirement * 0.001; // 0.1% fee
-  const totalCost = marginRequirement + fee;
-  
-  // Check if user can afford the trade
-  const canAfford = availableFunds >= marginRequirement;
+  // Use the trade calculations hook
+  const {
+    parsedUnits,
+    requiredFunds,
+    fee,
+    total,
+    canAfford
+  } = useTradeCalculations(
+    units,
+    price,
+    marketType,
+    availableFunds
+  );
   
   const handleExecuteTrade = async (action: "buy" | "sell") => {
     if (!marketIsOpen) {
@@ -119,24 +124,40 @@ export default function QuickTradePanel({ symbol, name, price, marketType }: Qui
             price={buyPrice} 
             onClick={() => handleExecuteTrade("buy")}
             disabled={isExecuting || !canAfford}
+            selectedAsset={symbol}
+            marketIsOpen={marketIsOpen}
+            parsedUnits={parsedUnits}
+            canAfford={canAfford}
           />
           <TradeActionButton 
             action="sell" 
             price={sellPrice} 
             onClick={() => handleExecuteTrade("sell")}
             disabled={isExecuting}
+            selectedAsset={symbol}
+            marketIsOpen={marketIsOpen}
+            parsedUnits={parsedUnits}
           />
         </div>
         
         {/* Units Input */}
         <UnitsInput 
-          value={units} 
-          onChange={setUnits} 
+          units={units}
+          setUnits={setUnits}
+          isExecuting={isExecuting}
+          value={units}
+          onChange={setUnits}
           disabled={isExecuting}
+          requiredFunds={requiredFunds}
+          canAfford={canAfford}
+          availableFunds={availableFunds}
         />
         
         {/* Stop Loss Checkbox */}
         <StopLossCheckbox
+          hasStopLoss={hasStopLoss}
+          setHasStopLoss={setHasStopLoss}
+          isExecuting={isExecuting}
           checked={hasStopLoss}
           onCheckedChange={setHasStopLoss}
           disabled={isExecuting}
@@ -144,6 +165,9 @@ export default function QuickTradePanel({ symbol, name, price, marketType }: Qui
         
         {/* Take Profit Checkbox */}
         <TakeProfitCheckbox
+          hasTakeProfit={hasTakeProfit}
+          setHasTakeProfit={setHasTakeProfit}
+          isExecuting={isExecuting}
           checked={hasTakeProfit}
           onCheckedChange={setHasTakeProfit}
           disabled={isExecuting}
@@ -151,10 +175,13 @@ export default function QuickTradePanel({ symbol, name, price, marketType }: Qui
         
         {/* Trade Summary */}
         <TradeSummary
-          positionValue={positionValue}
-          marginRequirement={marginRequirement}
+          currentPrice={price}
+          parsedAmount={parsedUnits * price}
           fee={fee}
-          totalCost={totalCost}
+          total={total}
+          positionValue={parsedUnits * price}
+          marginRequirement={requiredFunds}
+          totalCost={total}
         />
       </CardContent>
     </Card>
