@@ -1,6 +1,7 @@
 
 import { Progress } from "@/components/ui/progress";
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
+import { type PasswordStrength } from "../../hooks/usePasswordStrength";
 
 interface PasswordStrengthIndicatorProps {
   password: string;
@@ -8,6 +9,7 @@ interface PasswordStrengthIndicatorProps {
   passwordStrength: number;
   getPasswordStrengthLabel: () => string;
   getPasswordStrengthColor: () => string;
+  feedback?: string[];
 }
 
 const PasswordStrengthIndicator = ({
@@ -15,7 +17,8 @@ const PasswordStrengthIndicator = ({
   confirmPassword,
   passwordStrength,
   getPasswordStrengthLabel,
-  getPasswordStrengthColor
+  getPasswordStrengthColor,
+  feedback = []
 }: PasswordStrengthIndicatorProps) => {
   if (!password) return null;
   
@@ -24,8 +27,8 @@ const PasswordStrengthIndicator = ({
       <div className="flex justify-between text-xs">
         <span>Password strength:</span>
         <span className={
-          passwordStrength <= 25 ? "text-destructive" :
-          passwordStrength <= 75 ? "text-warning" :
+          passwordStrength <= 40 ? "text-destructive" :
+          passwordStrength <= 80 ? "text-warning" :
           "text-success"
         }>
           {getPasswordStrengthLabel()}
@@ -33,9 +36,27 @@ const PasswordStrengthIndicator = ({
       </div>
       <Progress value={passwordStrength} className={getPasswordStrengthColor()} />
       
-      {password && confirmPassword && password === confirmPassword && (
-        <div className="flex items-center text-success text-xs mt-1">
-          <Check className="h-3 w-3 mr-1" /> Passwords match
+      {feedback && feedback.length > 0 && (
+        <ul className="text-xs text-muted-foreground mt-1 space-y-1">
+          {feedback.map((item, index) => (
+            <li key={index} className="flex items-center">
+              <X className="h-3 w-3 mr-1 text-destructive" /> {item}
+            </li>
+          ))}
+        </ul>
+      )}
+      
+      {password && confirmPassword && (
+        <div className="flex items-center text-xs mt-1">
+          {password === confirmPassword ? (
+            <span className="flex items-center text-success">
+              <Check className="h-3 w-3 mr-1" /> Passwords match
+            </span>
+          ) : (
+            <span className="flex items-center text-destructive">
+              <X className="h-3 w-3 mr-1" /> Passwords don't match
+            </span>
+          )}
         </div>
       )}
     </div>

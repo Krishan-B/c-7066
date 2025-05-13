@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +30,13 @@ const RegisterForm = () => {
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   
-  const { passwordStrength, getPasswordStrengthLabel, getPasswordStrengthColor } = usePasswordStrength(password);
+  const { 
+    passwordStrength, 
+    getPasswordStrengthLabel, 
+    getPasswordStrengthColor,
+    feedback,
+    meetsMinimumRequirements 
+  } = usePasswordStrength(password);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -170,6 +175,7 @@ const RegisterForm = () => {
               passwordStrength={passwordStrength}
               getPasswordStrengthLabel={getPasswordStrengthLabel}
               getPasswordStrengthColor={getPasswordStrengthColor}
+              feedback={feedback}
             />
           )}
         </div>

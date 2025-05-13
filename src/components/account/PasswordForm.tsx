@@ -4,9 +4,22 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { usePasswordStrength } from "@/features/auth/hooks/usePasswordStrength";
+import { useState } from "react";
+import PasswordStrengthIndicator from "@/features/auth/components/register/PasswordStrengthIndicator";
+import { validatePassword } from "@/features/auth/utils/validation";
 
 export function PasswordForm() {
   const { toast } = useToast();
+  const [newPassword, setNewPassword] = useState("");
+  const { 
+    passwordStrength, 
+    getPasswordStrengthLabel, 
+    getPasswordStrengthColor,
+    feedback,
+    meetsMinimumRequirements 
+  } = usePasswordStrength(newPassword);
+  
   const form = useForm({
     defaultValues: {
       currentPassword: "",
@@ -16,12 +29,35 @@ export function PasswordForm() {
   });
 
   const onSubmit = (values: any) => {
+    // Validate password strength
+    if (!meetsMinimumRequirements) {
+      toast({
+        title: "Password too weak",
+        description: "Please choose a stronger password",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    // Check if passwords match
+    if (values.newPassword !== values.confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "New password and confirmation must match",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
     toast({
       title: "Password updated",
       description: "Your password has been changed successfully",
       duration: 3000,
     });
     form.reset();
+    setNewPassword("");
   };
 
   return (
@@ -47,8 +83,26 @@ export function PasswordForm() {
             <FormItem>
               <FormLabel>New Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Enter new password" {...field} />
+                <Input 
+                  type="password" 
+                  placeholder="Enter new password" 
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setNewPassword(e.target.value);
+                  }} 
+                />
               </FormControl>
+              {newPassword && (
+                <PasswordStrengthIndicator 
+                  password={newPassword}
+                  confirmPassword={form.getValues("confirmPassword")}
+                  passwordStrength={passwordStrength}
+                  getPasswordStrengthLabel={getPasswordStrengthLabel}
+                  getPasswordStrengthColor={getPasswordStrengthColor}
+                  feedback={feedback}
+                />
+              )}
               <FormMessage />
             </FormItem>
           )}
