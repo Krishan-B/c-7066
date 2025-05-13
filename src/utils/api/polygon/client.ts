@@ -4,10 +4,25 @@ import { supabase } from '@/integrations/supabase/client';
 // Base URL for Polygon.io API
 const POLYGON_API_BASE_URL = 'https://api.polygon.io';
 
+// Store API key in memory (not secure for production)
+let POLYGON_API_KEY: string | null = null;
+
+/**
+ * Set the API key for Polygon.io
+ */
+export function setPolygonApiKey(apiKey: string): void {
+  POLYGON_API_KEY = apiKey;
+}
+
 /**
  * Get the API key from Supabase Edge Function
  */
 export async function getPolygonApiKey(): Promise<string | null> {
+  // Use the cached API key if available
+  if (POLYGON_API_KEY) {
+    return POLYGON_API_KEY;
+  }
+  
   try {
     const { data, error } = await supabase.functions.invoke('get-secret', {
       body: { secretName: 'POLYGON_API_KEY' }
@@ -18,7 +33,12 @@ export async function getPolygonApiKey(): Promise<string | null> {
       return null;
     }
     
-    return data?.value || null;
+    // Cache the API key
+    if (data?.value) {
+      POLYGON_API_KEY = data.value;
+    }
+    
+    return POLYGON_API_KEY;
   } catch (error) {
     console.error('Error in getPolygonApiKey:', error);
     return null;
@@ -28,9 +48,8 @@ export async function getPolygonApiKey(): Promise<string | null> {
 /**
  * Check if the Polygon API key is available
  */
-export async function hasPolygonApiKey(): Promise<boolean> {
-  const key = await getPolygonApiKey();
-  return !!key;
+export function hasPolygonApiKey(): boolean {
+  return !!POLYGON_API_KEY;
 }
 
 /**
@@ -41,7 +60,7 @@ export async function polygonRequest<T>(
   params: Record<string, any> = {}
 ): Promise<T> {
   try {
-    const apiKey = await getPolygonApiKey();
+    const apiKey = POLYGON_API_KEY || await getPolygonApiKey();
     
     if (!apiKey) {
       throw new Error('Polygon API key not found');

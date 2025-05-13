@@ -13,6 +13,8 @@ interface TradeActionButtonProps {
   canAfford?: boolean;
   buyPrice?: number;
   sellPrice?: number;
+  isExecuting?: boolean;
+  className?: string;
 }
 
 export const TradeActionButton: React.FC<TradeActionButtonProps> = ({
@@ -25,15 +27,17 @@ export const TradeActionButton: React.FC<TradeActionButtonProps> = ({
   parsedUnits,
   canAfford = true,
   buyPrice,
-  sellPrice
+  sellPrice,
+  isExecuting = false,
+  className
 }) => {
   // Use provided price or fall back to action-specific price
   const displayPrice = action === "buy" 
     ? (buyPrice ?? price)
     : (sellPrice ?? price);
   
-  const isBuyDisabled = disabled || !marketIsOpen || !canAfford || parsedUnits <= 0;
-  const isSellDisabled = disabled || !marketIsOpen || parsedUnits <= 0;
+  const isBuyDisabled = disabled || !marketIsOpen || !canAfford || parsedUnits <= 0 || isExecuting;
+  const isSellDisabled = disabled || !marketIsOpen || parsedUnits <= 0 || isExecuting;
   
   return (
     <Button
@@ -41,7 +45,7 @@ export const TradeActionButton: React.FC<TradeActionButtonProps> = ({
         action === "buy" 
           ? "bg-success text-white hover:bg-success/90" 
           : "bg-warning text-white hover:bg-warning/90"
-      }`}
+      } ${className || ''}`}
       onClick={onClick}
       disabled={action === "buy" ? isBuyDisabled : isSellDisabled}
     >

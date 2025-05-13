@@ -2,8 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Calendar } from "lucide-react";
-import { TradeButton } from "@/components/trade";
+import { Download, Calendar, TrendingUp } from "lucide-react";
 
 interface QuickActionsProps {
   onExport: () => void;
@@ -17,7 +16,9 @@ const QuickActions = ({ onExport, onTaxEvents }: QuickActionsProps) => {
         <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <TradeButton variant="outline" className="w-full justify-start" label="Add New Position" />
+        <Button size="sm" variant="outline" className="w-full justify-start">
+          <TrendingUp className="h-4 w-4 mr-2" /> Add New Position
+        </Button>
         <Button size="sm" variant="outline" className="w-full justify-start" onClick={onExport}>
           <Download className="h-4 w-4 mr-2" /> Export Report
         </Button>

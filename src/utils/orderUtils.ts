@@ -26,3 +26,23 @@ export function calculatePnlPercentage(
     return ((openPrice - currentPrice) / openPrice) * 100;
   }
 }
+
+/**
+ * Calculate duration between two dates
+ */
+export function calculateDuration(
+  startDate: string | Date,
+  endDate: string | Date
+): { durationDays: number; durationHours: number } {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const diffMs = end.getTime() - start.getTime();
+  
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  
+  return {
+    durationDays: diffDays,
+    durationHours: diffHours
+  };
+}

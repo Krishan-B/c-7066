@@ -39,7 +39,9 @@ export const useAccountMetrics = () => {
           availableFunds: data.available_funds || 0,
           exposure: 0, // This we'll need to calculate from positions
           bonus: 0, // Not implemented yet
-          buyingPower: (data.available_funds || 0) * 20 // Default to stocks leverage (20x)
+          buyingPower: (data.available_funds || 0) * 20, // Default to stocks leverage (20x)
+          openPositions: 0, // Will be calculated elsewhere
+          profitLoss: data.unrealized_pnl || 0 // Alias for unrealizedPL
         };
         
         setMetrics(accountMetrics);

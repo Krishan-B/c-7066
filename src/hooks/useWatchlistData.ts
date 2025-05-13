@@ -122,11 +122,46 @@ export const useWatchlistData = () => {
       });
       
       return [
-        { name: "Bitcoin", symbol: "BTCUSD", price: 67543.21, change_percentage: 2.4, market_type: "Crypto", volume: "$42.1B", market_cap: "$1.29T" },
-        { name: "Apple Inc.", symbol: "AAPL", price: 189.56, change_percentage: 0.8, market_type: "Stock", volume: "$4.2B", market_cap: "$2.98T" },
-        { name: "S&P 500", symbol: "US500", price: 5204.34, change_percentage: 0.4, market_type: "Index", volume: "$5.1B" },
-        { name: "EUR/USD", symbol: "EURUSD", price: 1.0934, change_percentage: -0.12, market_type: "Forex", volume: "$98.3B" },
-        { name: "Gold", symbol: "XAUUSD", price: 2325.60, change_percentage: 1.3, market_type: "Commodity", volume: "$15.8B" },
+        { 
+          name: "Bitcoin", 
+          symbol: "BTCUSD", 
+          price: 67543.21, 
+          change_percentage: 2.4, 
+          market_type: "Crypto", 
+          volume: "$42.1B" 
+        },
+        { 
+          name: "Apple Inc.", 
+          symbol: "AAPL", 
+          price: 189.56, 
+          change_percentage: 0.8, 
+          market_type: "Stock", 
+          volume: "$4.2B" 
+        },
+        { 
+          name: "S&P 500", 
+          symbol: "US500", 
+          price: 5204.34, 
+          change_percentage: 0.4, 
+          market_type: "Index", 
+          volume: "$5.1B" 
+        },
+        { 
+          name: "EUR/USD", 
+          symbol: "EURUSD", 
+          price: 1.0934, 
+          change_percentage: -0.12, 
+          market_type: "Forex", 
+          volume: "$98.3B" 
+        },
+        { 
+          name: "Gold", 
+          symbol: "XAUUSD", 
+          price: 2325.60, 
+          change_percentage: 1.3, 
+          market_type: "Commodity", 
+          volume: "$15.8B" 
+        },
       ];
     } catch (error) {
       console.error("Error fetching market data:", error);

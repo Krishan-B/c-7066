@@ -53,71 +53,98 @@ export function transformTickerToAsset(tickerData: any, priceData: any = null): 
 }
 
 /**
- * Transform Polygon quote data to Asset format
+ * Transform Stock data
  */
-export function transformQuoteToAsset(symbol: string, name: string, quoteData: any): Asset | null {
-  if (!quoteData || !quoteData.results) {
+export function transformStockData(data: any): Asset | null {
+  if (!data || !data.results) {
     return null;
   }
   
-  const quote = quoteData.results;
-  
-  // Determine market type based on symbol pattern
-  let marketType = 'Stock';
-  
-  if (symbol.includes('USD')) {
-    marketType = 'Crypto';
-  } else if (symbol.includes('/')) {
-    marketType = 'Forex';
-  } else if (symbol.startsWith('^')) {
-    marketType = 'Index';
-  }
-  
-  // Calculate mid price
-  const price = (quote.ap + quote.bp) / 2;
-  
-  // We don't have previous close in quotes, so we can't calculate change
-  const changePercentage = 0;
-  
   return {
-    symbol,
-    name,
-    price,
-    change_percentage: changePercentage,
-    market_type: marketType,
-    volume: 'N/A',
+    symbol: data.results.ticker || data.results.symbol,
+    name: data.results.name || data.results.ticker || data.results.symbol,
+    price: data.results.last?.price || data.results.lastTrade?.p || 0,
+    change_percentage: data.results.todaysChange || 0,
+    market_type: 'Stock',
+    volume: data.results.volume ? `${(data.results.volume / 1000000).toFixed(1)}M` : 'N/A',
     last_updated: new Date().toISOString()
   };
 }
 
 /**
- * Transform Polygon trade data to Asset format
+ * Transform Crypto data
  */
-export function transformTradeToAsset(symbol: string, name: string, tradeData: any): Asset | null {
-  if (!tradeData || !tradeData.results) {
+export function transformCryptoData(data: any): Asset | null {
+  if (!data || !data.results) {
     return null;
   }
   
-  const trade = tradeData.results;
-  
-  // Determine market type based on symbol pattern
-  let marketType = 'Stock';
-  
-  if (symbol.includes('USD')) {
-    marketType = 'Crypto';
-  } else if (symbol.includes('/')) {
-    marketType = 'Forex';
-  } else if (symbol.startsWith('^')) {
-    marketType = 'Index';
+  return {
+    symbol: data.results.ticker || data.results.symbol,
+    name: data.results.name || data.results.ticker || data.results.symbol,
+    price: data.results.last?.price || data.results.lastTrade?.p || 0,
+    change_percentage: data.results.todaysChange || 0,
+    market_type: 'Crypto',
+    volume: data.results.volume ? `${(data.results.volume / 1000000).toFixed(1)}M` : 'N/A',
+    last_updated: new Date().toISOString()
+  };
+}
+
+/**
+ * Transform Forex data
+ */
+export function transformForexData(data: any): Asset | null {
+  if (!data || !data.results) {
+    return null;
   }
   
   return {
-    symbol,
-    name,
-    price: trade.p,
-    change_percentage: 0, // We don't have previous close in trades
-    market_type: marketType,
-    volume: trade.s ? trade.s.toString() : 'N/A',
+    symbol: data.results.ticker || data.results.symbol,
+    name: data.results.name || data.results.ticker || data.results.symbol,
+    price: data.results.last?.price || data.results.lastTrade?.p || 0,
+    change_percentage: data.results.todaysChange || 0,
+    market_type: 'Forex',
+    volume: data.results.volume ? `${(data.results.volume / 1000000).toFixed(1)}M` : 'N/A',
     last_updated: new Date().toISOString()
   };
+}
+
+/**
+ * Process WebSocket message to Asset format
+ */
+export function processPolygonMessage(message: any): Asset | null {
+  try {
+    // Skip non-trade messages or messages without price data
+    if (!message || !message.data || message.data.length === 0) {
+      return null;
+    }
+    
+    const data = message.data[0];
+    
+    // Skip if no symbol or price
+    if (!data.sym || !data.p) {
+      return null;
+    }
+    
+    // Extract market type from symbol if possible
+    let marketType = 'Stock';
+    if (data.sym.includes('-')) {
+      marketType = 'Crypto';
+    } else if (data.sym.includes('/')) {
+      marketType = 'Forex';
+    }
+    
+    return {
+      symbol: data.sym,
+      name: data.sym, // WebSocket doesn't provide names
+      price: data.p,
+      change_percentage: 0, // WebSocket doesn't provide change
+      market_type: marketType,
+      volume: data.v ? data.v.toString() : 'N/A',
+      last_updated: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Error processing Polygon message:', error);
+    return null;
+  }
 }
