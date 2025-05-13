@@ -11,7 +11,7 @@ import {
 } from "@/utils/api/alphaVantage";
 import { getSymbolsForMarketType } from "./marketSymbols";
 import { Asset } from "./types";
-import { Toast } from "@/components/ui/use-toast";
+import { toast, type ToastProps as Toast } from "@/components/ui/use-toast";
 
 export const fetchMarketData = async (marketTypes: string | string[], toast: { (props: Toast): void }): Promise<Asset[]> => {
   try {

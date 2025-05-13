@@ -1,6 +1,6 @@
 
 import { OpenTrade } from "@/types/orders";
-import { Asset } from "@/hooks/useMarketData";
+import { Asset } from "@/hooks/market/types";
 
 // Calculate profit/loss percentage for each open trade
 export const calculatePnlPercentage = (trade: OpenTrade) => {

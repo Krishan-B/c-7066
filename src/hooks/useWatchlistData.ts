@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Asset } from './useMarketData';
+import { Asset } from './market/types';
 import { useQuery } from '@tanstack/react-query';
 
 export const useWatchlistData = () => {
