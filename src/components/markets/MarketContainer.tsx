@@ -53,7 +53,7 @@ const MarketContainer = ({
             marketIsOpen={marketIsOpen}
           />
           
-          <Badge variant={dataSource === "Alpha Vantage" ? "default" : "outline"} className="ml-2">
+          <Badge variant={dataSource === "Alpha Vantage" || dataSource === "Polygon.io" ? "default" : "outline"} className="ml-2">
             {dataSource} Data
           </Badge>
         </div>

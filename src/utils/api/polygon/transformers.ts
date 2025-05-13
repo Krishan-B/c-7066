@@ -111,8 +111,8 @@ function getCryptoName(symbol: string): string {
     'BCHUSD': 'Bitcoin Cash',
     'ADAUSD': 'Cardano',
     'DOTUSD': 'Polkadot',
-    'DOTUSD': 'Polkadot',
     'SOLUSD': 'Solana',
+    'LINKUSD': 'Chainlink',
   };
   
   return cryptoNames[symbol] || symbol;
