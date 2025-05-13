@@ -155,6 +155,9 @@ const TradeForm = ({
         canAfford={tradeCalculations.canAfford}
         buyPrice={buyPrice}
         sellPrice={sellPrice}
+        // Add the missing required props:
+        onClick={handleSubmit}
+        disabled={isExecuting || !marketIsOpen || !tradeCalculations.canAfford || tradeCalculations.parsedUnits <= 0}
       />
     </form>
   );
