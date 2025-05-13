@@ -3,17 +3,19 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { Eye, EyeOff, AlertCircle, ArrowRight, Check } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { countries } from "@/lib/countries";
 import { validateSignUp } from "../utils/validation";
 import { usePasswordStrength } from "../hooks/usePasswordStrength";
 import { cleanupAuthState } from "@/utils/auth";
+
+// Import our new components
+import PersonalInfoFields from "./register/PersonalInfoFields";
+import CountrySelector from "./register/CountrySelector";
+import PhoneInput from "./register/PhoneInput";
+import EmailField from "./login/EmailField";
+import PasswordField from "./login/PasswordField";
+import PasswordStrengthIndicator from "./register/PasswordStrengthIndicator";
+import SignUpButton from "./register/SignUpButton";
+import ErrorAlert from "./login/ErrorAlert";
 
 const RegisterForm = () => {
   const [firstName, setFirstName] = useState("");
@@ -25,8 +27,6 @@ const RegisterForm = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [country, setCountry] = useState("");
   
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -35,21 +35,6 @@ const RegisterForm = () => {
   
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Utility function to clean up auth state
-  const cleanupAuthState = () => {
-    localStorage.removeItem('supabase.auth.token');
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,211 +123,66 @@ const RegisterForm = () => {
 
   return (
     <>
-      {formError && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{formError}</AlertDescription>
-        </Alert>
-      )}
+      <ErrorAlert message={formError} />
       
       <form onSubmit={handleSignUp} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="first-name">First Name</Label>
-            <Input 
-              id="first-name" 
-              type="text" 
-              placeholder="John" 
-              value={firstName} 
-              onChange={e => setFirstName(e.target.value)}
-              className={fieldErrors.firstName ? "border-destructive" : ""}
-            />
-            {fieldErrors.firstName && (
-              <p className="text-destructive text-sm">{fieldErrors.firstName}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="last-name">Last Name</Label>
-            <Input 
-              id="last-name" 
-              type="text" 
-              placeholder="Doe" 
-              value={lastName} 
-              onChange={e => setLastName(e.target.value)}
-              className={fieldErrors.lastName ? "border-destructive" : ""}
-            />
-            {fieldErrors.lastName && (
-              <p className="text-destructive text-sm">{fieldErrors.lastName}</p>
-            )}
-          </div>
-        </div>
+        <PersonalInfoFields 
+          firstName={firstName}
+          lastName={lastName}
+          onFirstNameChange={setFirstName}
+          onLastNameChange={setLastName}
+          fieldErrors={fieldErrors}
+        />
+
+        <CountrySelector 
+          country={country}
+          onChange={setCountry}
+          error={fieldErrors.country}
+        />
+
+        <PhoneInput 
+          countryCode={countryCode}
+          phoneNumber={phoneNumber}
+          onCountryCodeChange={setCountryCode}
+          onPhoneNumberChange={setPhoneNumber}
+          error={fieldErrors.phoneNumber}
+        />
+
+        <EmailField 
+          email={email}
+          onChange={setEmail}
+          error={fieldErrors.email}
+          id="signup-email"
+        />
 
         <div className="space-y-2">
-          <Label htmlFor="country">Country</Label>
-          <Select
-            value={country}
-            onValueChange={setCountry}
-          >
-            <SelectTrigger 
-              id="country"
-              className={fieldErrors.country ? "border-destructive" : ""}
-            >
-              <SelectValue placeholder="Select your country" />
-            </SelectTrigger>
-            <SelectContent className="max-h-80">
-              {countries.map(c => (
-                <SelectItem key={c.code} value={c.code}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {fieldErrors.country && (
-            <p className="text-destructive text-sm">{fieldErrors.country}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="phone-number">Phone Number</Label>
-          <div className="flex">
-            <Select
-              value={countryCode}
-              onValueChange={setCountryCode}
-            >
-              <SelectTrigger 
-                className="w-[100px] rounded-r-none"
-              >
-                <SelectValue>{countryCode}</SelectValue>
-              </SelectTrigger>
-              <SelectContent className="max-h-80">
-                {countries.map(c => (
-                  <SelectItem key={c.code} value={c.dialCode}>
-                    {c.dialCode} ({c.code})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Input 
-              id="phone-number" 
-              type="tel" 
-              placeholder="1234567890" 
-              value={phoneNumber} 
-              onChange={e => setPhoneNumber(e.target.value)}
-              className={`flex-1 rounded-l-none ${fieldErrors.phoneNumber ? "border-destructive" : ""}`}
-            />
-          </div>
-          {fieldErrors.phoneNumber && (
-            <p className="text-destructive text-sm">{fieldErrors.phoneNumber}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="signup-email">Email</Label>
-          <Input 
-            id="signup-email" 
-            type="email" 
-            placeholder="your.email@example.com" 
-            value={email} 
-            onChange={e => setEmail(e.target.value)}
-            className={fieldErrors.email ? "border-destructive" : ""}
+          <PasswordField 
+            password={password}
+            onChange={setPassword}
+            error={fieldErrors.password}
+            id="signup-password"
           />
-          {fieldErrors.email && (
-            <p className="text-destructive text-sm">{fieldErrors.email}</p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="signup-password">Password</Label>
-          <div className="relative">
-            <Input 
-              id="signup-password" 
-              type={showPassword ? "text" : "password"} 
-              placeholder="••••••••" 
-              value={password} 
-              onChange={e => setPassword(e.target.value)}
-              className={fieldErrors.password ? "border-destructive pr-10" : "pr-10"}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-1"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <Eye className="h-4 w-4 text-muted-foreground" />
-              )}
-            </Button>
-          </div>
-          {fieldErrors.password && (
-            <p className="text-destructive text-sm">{fieldErrors.password}</p>
-          )}
+          
           {password && (
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs">
-                <span>Password strength:</span>
-                <span className={
-                  passwordStrength <= 25 ? "text-destructive" :
-                  passwordStrength <= 75 ? "text-warning" :
-                  "text-success"
-                }>
-                  {getPasswordStrengthLabel()}
-                </span>
-              </div>
-              <Progress value={passwordStrength} className={getPasswordStrengthColor()} />
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="confirm-password">Confirm Password</Label>
-          <div className="relative">
-            <Input 
-              id="confirm-password" 
-              type={showConfirmPassword ? "text" : "password"} 
-              placeholder="••••••••" 
-              value={confirmPassword} 
-              onChange={e => setConfirmPassword(e.target.value)}
-              className={fieldErrors.confirmPassword ? "border-destructive pr-10" : "pr-10"}
+            <PasswordStrengthIndicator 
+              password={password}
+              confirmPassword={confirmPassword}
+              passwordStrength={passwordStrength}
+              getPasswordStrengthLabel={getPasswordStrengthLabel}
+              getPasswordStrengthColor={getPasswordStrengthColor}
             />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-1"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              {showConfirmPassword ? (
-                <EyeOff className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <Eye className="h-4 w-4 text-muted-foreground" />
-              )}
-            </Button>
-          </div>
-          {fieldErrors.confirmPassword && (
-            <p className="text-destructive text-sm">{fieldErrors.confirmPassword}</p>
-          )}
-          {password && confirmPassword && password === confirmPassword && (
-            <div className="flex items-center text-success text-xs mt-1">
-              <Check className="h-3 w-3 mr-1" /> Passwords match
-            </div>
           )}
         </div>
 
-        <Button 
-          type="submit" 
-          className="w-full" 
-          disabled={loading}
-        >
-          {loading ? "Creating account..." : (
-            <span className="flex items-center">
-              Sign Up
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </span>
-          )}
-        </Button>
+        <PasswordField 
+          password={confirmPassword}
+          onChange={setConfirmPassword}
+          error={fieldErrors.confirmPassword}
+          label="Confirm Password"
+          id="confirm-password"
+        />
+
+        <SignUpButton loading={loading} />
       </form>
     </>
   );

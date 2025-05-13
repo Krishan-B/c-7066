@@ -1,22 +1,23 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff, AlertCircle, ArrowRight } from "lucide-react";
-import { validateSignIn } from "../utils/validation";
-import PasswordResetDialog from "./PasswordResetDialog";
 import { cleanupAuthState } from "@/utils/auth";
+import PasswordResetDialog from "./PasswordResetDialog";
+import { validateSignIn } from "../utils/validation";
+
+// Import our new components
+import EmailField from "./login/EmailField";
+import PasswordField from "./login/PasswordField";
+import RememberMeCheckbox from "./login/RememberMeCheckbox";
+import LoginButton from "./login/LoginButton";
+import ErrorAlert from "./login/ErrorAlert";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -87,94 +88,29 @@ const LoginForm = () => {
 
   return (
     <>
-      {formError && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{formError}</AlertDescription>
-        </Alert>
-      )}
+      <ErrorAlert message={formError} />
       
       <form onSubmit={handleSignIn} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="signin-email">Email</Label>
-          <Input 
-            id="signin-email" 
-            type="email" 
-            placeholder="your.email@example.com" 
-            value={email} 
-            onChange={e => setEmail(e.target.value)} 
-            className={fieldErrors.email ? "border-destructive" : ""}
-          />
-          {fieldErrors.email && (
-            <p className="text-destructive text-sm">{fieldErrors.email}</p>
-          )}
-        </div>
+        <EmailField 
+          email={email}
+          onChange={setEmail}
+          error={fieldErrors.email}
+        />
         
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <Label htmlFor="signin-password">Password</Label>
-            <Button 
-              variant="link" 
-              type="button" 
-              className="p-0 h-auto text-sm" 
-              onClick={() => setResetPasswordOpen(true)}
-            >
-              Forgot password?
-            </Button>
-          </div>
-          
-          <div className="relative">
-            <Input 
-              id="signin-password" 
-              type={showPassword ? "text" : "password"} 
-              placeholder="••••••••" 
-              value={password} 
-              onChange={e => setPassword(e.target.value)}
-              className={fieldErrors.password ? "border-destructive pr-10" : "pr-10"}
-            />
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full px-3 py-1"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <Eye className="h-4 w-4 text-muted-foreground" />
-              )}
-            </Button>
-          </div>
-          
-          {fieldErrors.password && (
-            <p className="text-destructive text-sm">{fieldErrors.password}</p>
-          )}
-        </div>
+        <PasswordField 
+          password={password}
+          onChange={setPassword}
+          error={fieldErrors.password}
+          showForgotPassword={true}
+          onForgotPasswordClick={() => setResetPasswordOpen(true)}
+        />
         
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="remember-me" 
-            checked={rememberMe} 
-            onCheckedChange={checked => {
-              if (typeof checked === 'boolean') {
-                setRememberMe(checked);
-              }
-            }} 
-          />
-          <Label htmlFor="remember-me" className="text-sm font-normal">
-            Remember me
-          </Label>
-        </div>
+        <RememberMeCheckbox 
+          checked={rememberMe}
+          onCheckedChange={setRememberMe}
+        />
         
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Signing in..." : (
-            <span className="flex items-center">
-              Login
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </span>
-          )}
-        </Button>
+        <LoginButton loading={loading} />
       </form>
       
       <PasswordResetDialog 
