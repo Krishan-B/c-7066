@@ -99,9 +99,9 @@ const HeroSection: React.FC = () => {
           <div className={`relative w-full max-w-lg h-[240px] md:h-[400px] rounded-lg overflow-hidden ${theme === 'dark' ? 'shadow-[0_0_30px_rgba(255,255,255,0.15)]' : 'shadow-lg'}`}>
             <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-gradient-to-br from-white/20 to-primary/10' : 'bg-gradient-to-br from-primary/10 to-background/0'}`}></div>
             <img 
-              src="/trading-dashboard.svg" 
+              src={theme === 'dark' ? "/trading-dashboard-white.svg" : "/trading-dashboard.svg"}
               alt="Trading Dashboard" 
-              className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105" 
+              className={`absolute inset-0 w-full h-full object-cover ${theme === 'dark' ? 'brightness-100 contrast-100' : 'brightness-110 contrast-105'}`}
               onError={e => {
                 e.currentTarget.src = 'https://placehold.co/600x400/333333/8989DE?text=Trading+Dashboard';
               }} 
