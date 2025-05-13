@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import MarketContainer from "@/components/markets/MarketContainer";
 import { useToast } from "@/components/ui/use-toast";
-import { fetchAlphaVantageData } from "@/utils/alphaVantageApi";
+import { fetchAlphaVantageData } from "@/utils/api/alphaVantage";
 import { supabase } from "@/integrations/supabase/client";
 
 const Markets = () => {

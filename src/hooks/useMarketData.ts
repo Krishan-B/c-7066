@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +10,7 @@ import {
   transformStockData, 
   transformForexData,
   transformCryptoData 
-} from "@/utils/alphaVantageApi";
+} from "@/utils/api/alphaVantage";
 
 export interface Asset {
   id?: string;
