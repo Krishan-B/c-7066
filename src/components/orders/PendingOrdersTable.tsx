@@ -3,19 +3,48 @@ import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, AlertCircle, Clock, ShieldCheck } from "lucide-react";
+import { X, Clock, AlertCircle, ShieldCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { PendingOrder } from "@/types/orders";
+import { Trade } from "@/hooks/useTradeManagement";
+import { formatCurrency, formatNumber } from "@/utils/formatUtils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PendingOrdersTableProps {
-  pendingOrders: PendingOrder[];
+  pendingOrders: Trade[];
   onCancelOrder: (orderId: string) => void;
+  isLoading?: boolean;
 }
 
 const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({ 
   pendingOrders, 
-  onCancelOrder 
+  onCancelOrder,
+  isLoading = false
 }) => {
+  if (isLoading) {
+    return (
+      <div className="rounded-md border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead colSpan={9}>
+                <Skeleton className="h-8 w-full" />
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array(3).fill(0).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell colSpan={9}>
+                  <Skeleton className="h-12 w-full" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-md border overflow-hidden">
       <Table>
@@ -24,60 +53,60 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
             <TableHead>Symbol</TableHead>
             <TableHead>Direction</TableHead>
             <TableHead>Order Type</TableHead>
-            <TableHead>Order Rate</TableHead>
-            <TableHead>Units</TableHead>
-            <TableHead>Current Market</TableHead>
+            <TableHead className="text-right">Entry Rate</TableHead>
+            <TableHead className="text-right">Units</TableHead>
+            <TableHead className="text-right">Market Rate</TableHead>
             <TableHead>Protection</TableHead>
-            <TableHead>Expires</TableHead>
-            <TableHead>Order Date</TableHead>
-            <TableHead>Action</TableHead>
+            <TableHead>Expiration</TableHead>
+            <TableHead className="text-center">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {pendingOrders.map((order) => {
-            // For demo purposes, let's assume all orders here are limit orders
-            // In a real app, this would come from the database
-            const orderType = "limit";
-            const expires = "GTC"; // Good Till Canceled
-            
+            // Calculate expiration status
+            const hasExpiration = !!order.expiration_date;
+            const isExpiringSoon = hasExpiration && (
+              new Date(order.expiration_date!).getTime() - new Date().getTime() < 24 * 60 * 60 * 1000
+            );
+
             return (
               <TableRow key={order.id} className="hover:bg-muted/40">
-                <TableCell className="font-medium">{order.symbol}</TableCell>
+                <TableCell className="font-medium">{order.asset_symbol}</TableCell>
                 <TableCell>
-                  <Badge variant={order.direction === 'Buy' ? 'default' : 'destructive'}
-                    className={`${order.direction === 'Buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}>
-                    {order.direction}
+                  <Badge variant={order.trade_type === 'buy' ? 'default' : 'destructive'}
+                    className={`${order.trade_type === 'buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}>
+                    {order.trade_type === 'buy' ? 'Buy' : 'Sell'}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <span className="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full">
-                    {orderType === "limit" ? "Limit" : "Market"}
+                  <span className="text-xs px-2 py-1 bg-muted rounded-full">
+                    {order.order_type === "entry" ? "Entry" : "Market"}
                   </span>
                 </TableCell>
-                <TableCell>${order.orderRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
-                <TableCell>{order.units}</TableCell>
-                <TableCell>${order.marketRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                <TableCell className="text-right">{formatCurrency(order.price_per_unit)}</TableCell>
+                <TableCell className="text-right">{formatNumber(order.units, 0)}</TableCell>
+                <TableCell className="text-right">{formatCurrency(order.current_price || order.price_per_unit)}</TableCell>
                 <TableCell>
-                  {(order.stopLoss || order.takeProfit) ? (
+                  {(order.stop_loss || order.take_profit) ? (
                     <div className="flex gap-1">
                       <TooltipProvider>
-                        {order.stopLoss && (
+                        {order.stop_loss && (
                           <Tooltip>
                             <TooltipTrigger>
                               <AlertCircle className="h-4 w-4 text-amber-500" />
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Stop Loss: ${order.stopLoss}</p>
+                              <p>Stop Loss: {formatCurrency(order.stop_loss)}</p>
                             </TooltipContent>
                           </Tooltip>
                         )}
-                        {order.takeProfit && (
+                        {order.take_profit && (
                           <Tooltip>
                             <TooltipTrigger>
                               <ShieldCheck className="h-4 w-4 text-green-500" />
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Take Profit: ${order.takeProfit}</p>
+                              <p>Take Profit: {formatCurrency(order.take_profit)}</p>
                             </TooltipContent>
                           </Tooltip>
                         )}
@@ -88,13 +117,18 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
-                    {expires}
-                  </div>
+                  {hasExpiration ? (
+                    <div className="flex items-center">
+                      <Clock className={`h-4 w-4 mr-1 ${isExpiringSoon ? 'text-amber-500' : 'text-muted-foreground'}`} />
+                      <span className={isExpiringSoon ? 'text-amber-500' : ''}>
+                        {new Date(order.expiration_date!).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </TableCell>
-                <TableCell className="whitespace-nowrap">{order.orderDate}</TableCell>
-                <TableCell>
+                <TableCell className="text-center">
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -108,7 +142,7 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
           })}
           {pendingOrders.length === 0 && (
             <TableRow>
-              <TableCell colSpan={10} className="text-center py-6">
+              <TableCell colSpan={9} className="text-center py-6">
                 No pending orders found
               </TableCell>
             </TableRow>

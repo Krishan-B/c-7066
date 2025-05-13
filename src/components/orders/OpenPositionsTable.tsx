@@ -5,16 +5,47 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, X, AlertCircle, ShieldCheck, Percent } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { OpenTrade } from "@/types/orders";
+import { Trade } from "@/hooks/useTradeManagement";
 import { calculatePnlPercentage, calculateSpread } from "@/utils/orderUtils";
 import { formatCurrency, formatNumber } from "@/utils/formatUtils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface OpenPositionsTableProps {
-  openTrades: OpenTrade[];
-  onCloseTrade: (tradeId: string) => void;
+  openTrades: Trade[];
+  onCloseTrade: (tradeId: string, currentPrice: number) => void;
+  isLoading?: boolean;
 }
 
-const OpenPositionsTable: React.FC<OpenPositionsTableProps> = ({ openTrades, onCloseTrade }) => {
+const OpenPositionsTable: React.FC<OpenPositionsTableProps> = ({ 
+  openTrades, 
+  onCloseTrade,
+  isLoading = false 
+}) => {
+  if (isLoading) {
+    return (
+      <div className="rounded-md border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead colSpan={12}>
+                <Skeleton className="h-8 w-full" />
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array(3).fill(0).map((_, i) => (
+              <TableRow key={i}>
+                <TableCell colSpan={12}>
+                  <Skeleton className="h-12 w-full" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-md border overflow-hidden">
       <Table>
@@ -44,52 +75,59 @@ const OpenPositionsTable: React.FC<OpenPositionsTableProps> = ({ openTrades, onC
         </TableHeader>
         <TableBody>
           {openTrades.map((trade) => {
-            const pnlPercentage = calculatePnlPercentage(trade);
-            const { bid, ask } = calculateSpread(trade.marketRate);
+            // Convert Trade model to view model
+            const marketValue = trade.units * (trade.current_price || trade.price_per_unit);
+            const totalPnl = trade.pnl || 0;
+            const pnlPercentage = (totalPnl / (trade.price_per_unit * trade.units)) * 100;
+            
+            // Calculate spread
+            const currentPrice = trade.current_price || trade.price_per_unit;
+            const { bid, ask } = calculateSpread(currentPrice);
+            
             return (
               <TableRow key={trade.id} className="border-b hover:bg-muted/40">
-                <TableCell className="font-medium py-3 px-2">{trade.symbol}</TableCell>
+                <TableCell className="font-medium py-3 px-2">{trade.asset_symbol}</TableCell>
                 <TableCell className="py-3 px-2">
-                  <Badge variant={trade.direction === 'Buy' ? 'default' : 'destructive'} 
-                    className={`${trade.direction === 'Buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}>
-                    {trade.direction}
+                  <Badge variant={trade.trade_type === 'buy' ? 'default' : 'destructive'} 
+                    className={`${trade.trade_type === 'buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}>
+                    {trade.trade_type === 'buy' ? 'Buy' : 'Sell'}
                   </Badge>
                 </TableCell>
-                <TableCell className="py-3 px-2 text-right">{formatCurrency(trade.openRate)}</TableCell>
+                <TableCell className="py-3 px-2 text-right">{formatCurrency(trade.price_per_unit)}</TableCell>
                 <TableCell className="py-3 px-2 text-right">{formatNumber(trade.units, 0)}</TableCell>
-                <TableCell className="py-3 px-2 text-right">{formatCurrency(trade.marketRate)}</TableCell>
+                <TableCell className="py-3 px-2 text-right">{formatCurrency(currentPrice)}</TableCell>
                 <TableCell className="py-3 px-2 text-right text-red-500">{formatCurrency(bid)}</TableCell>
                 <TableCell className="py-3 px-2 text-right text-green-500">{formatCurrency(ask)}</TableCell>
-                <TableCell className="py-3 px-2 text-right">{formatCurrency(trade.marketValue)}</TableCell>
+                <TableCell className="py-3 px-2 text-right">{formatCurrency(marketValue)}</TableCell>
                 <TableCell className="py-3 px-2 text-right">
-                  <div className={`flex items-center justify-end ${trade.totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {formatCurrency(trade.totalPnl)}
+                  <div className={`flex items-center justify-end ${totalPnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {formatCurrency(totalPnl)}
                     <span className="ml-1 text-xs">
                       ({pnlPercentage >= 0 ? '+' : ''}{formatNumber(pnlPercentage, 2)}%)
                     </span>
                   </div>
                 </TableCell>
                 <TableCell className="py-3 px-2 text-center">
-                  {(trade.stopLoss || trade.takeProfit) ? (
+                  {(trade.stop_loss || trade.take_profit) ? (
                     <div className="flex gap-1 justify-center">
                       <TooltipProvider>
-                        {trade.stopLoss && (
+                        {trade.stop_loss && (
                           <Tooltip>
                             <TooltipTrigger>
                               <AlertCircle className="h-4 w-4 text-amber-500" />
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Stop Loss: {formatCurrency(trade.stopLoss)}</p>
+                              <p>Stop Loss: {formatCurrency(trade.stop_loss)}</p>
                             </TooltipContent>
                           </Tooltip>
                         )}
-                        {trade.takeProfit && (
+                        {trade.take_profit && (
                           <Tooltip>
                             <TooltipTrigger>
                               <ShieldCheck className="h-4 w-4 text-green-500" />
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>Take Profit: {formatCurrency(trade.takeProfit)}</p>
+                              <p>Take Profit: {formatCurrency(trade.take_profit)}</p>
                             </TooltipContent>
                           </Tooltip>
                         )}
@@ -99,12 +137,12 @@ const OpenPositionsTable: React.FC<OpenPositionsTableProps> = ({ openTrades, onC
                     <span className="text-muted-foreground">—</span>
                   )}
                 </TableCell>
-                <TableCell className="whitespace-nowrap py-3 px-2">{trade.openDate}</TableCell>
+                <TableCell className="whitespace-nowrap py-3 px-2">{new Date(trade.created_at).toLocaleString()}</TableCell>
                 <TableCell className="py-3 px-2 text-center">
                   <Button 
                     variant="destructive" 
                     size="sm" 
-                    onClick={() => onCloseTrade(trade.id)}
+                    onClick={() => onCloseTrade(trade.id, currentPrice)}
                   >
                     <X className="h-4 w-4 mr-1" /> Close
                   </Button>

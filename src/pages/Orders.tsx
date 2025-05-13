@@ -87,7 +87,6 @@ const Orders = () => {
             <CardTitle>Position & Order Management</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Passing open positions with the correct prop name based on OrderTabs component */}
             <OrderTabs 
               activeTab={activeTab}
               onTabChange={setActiveTab}

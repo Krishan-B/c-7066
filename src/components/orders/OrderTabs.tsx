@@ -9,22 +9,7 @@ import { AdvancedOrderForm, AdvancedOrderFormValues } from "@/components/trade/A
 import { toast } from "sonner";
 import { AccountMetrics } from "@/types/account";
 import { Trade } from "@/hooks/useTradeManagement";
-
-interface OrderTabsProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-  positions: Trade[]; // This should be renamed from 'openPositions'
-  orders: Trade[]; // This should be renamed from 'pendingOrders'
-  history: Trade[]; // This should be renamed from 'closedTrades'
-  isLoading: {
-    open: boolean;
-    pending: boolean;
-    closed: boolean;
-  };
-  onClosePosition: (tradeId: string, currentPrice: number) => Promise<any>;
-  onCancelOrder: (tradeId: string) => Promise<any>;
-  accountMetrics: AccountMetrics;
-}
+import { OrderTabsProps } from "./OrderTabs.d";
 
 const OrderTabs: React.FC<OrderTabsProps> = ({ 
   activeTab, 

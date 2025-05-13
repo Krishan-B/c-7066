@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Wifi } from "lucide-react";
@@ -13,7 +12,7 @@ import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import AlertsWidget from "@/components/AlertsWidget";
 import { Badge } from "@/components/ui/badge";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
-import { QuickTradePanel } from "@/components/trade";
+import QuickTradePanel from "@/components/trade/QuickTradePanel";
 
 const Index = () => {
   const [selectedAsset, setSelectedAsset] = useState({
@@ -143,7 +142,6 @@ const Index = () => {
         </div>
         
         <div className="lg:col-span-1">
-          {/* QuickTradePanel doesn't accept an 'asset' prop directly, so we need to pass the individual properties */}
           <QuickTradePanel 
             symbol={selectedAsset.symbol}
             name={selectedAsset.name}
