@@ -22,6 +22,17 @@ import {
   transformForexData as transformPolygonForexData
 } from "@/utils/api/polygon";
 
+import {
+  setFinnhubApiKey,
+  hasFinnhubApiKey,
+  getStockQuote as getFinnhubStockQuote,
+  getCryptoQuote as getFinnhubCryptoQuote,
+  getForexQuote as getFinnhubForexQuote,
+  transformStockData as transformFinnhubStockData,
+  transformCryptoData as transformFinnhubCryptoData,
+  transformForexData as transformFinnhubForexData
+} from "@/utils/api/finnhub";
+
 import { getSymbolsForMarketType } from "./marketSymbols";
 import { Asset } from "./types";
 import { toast } from "@/hooks/use-toast";
@@ -31,6 +42,7 @@ import { toast } from "@/hooks/use-toast";
  */
 enum DataSource {
   POLYGON = 'polygon',
+  FINNHUB = 'finnhub',
   ALPHA_VANTAGE = 'alpha_vantage',
   EDGE_FUNCTION = 'edge_function',
 }
@@ -59,9 +71,10 @@ export const fetchMarketData = async (marketTypes: string | string[], toastFn = 
     // Determine which data source to use, based on available API keys
     let dataSource = DataSource.EDGE_FUNCTION; // Default source
     let polygonApiKey: string | undefined;
+    let finnhubApiKey: string | undefined;
     let alphaVantageApiKey: string | undefined;
     
-    // Check for Polygon API key
+    // Check for Polygon API key (highest priority)
     const { data: polygonSecret } = await supabase.functions.invoke('get-secret', {
       body: { secretName: 'POLYGON_API_KEY' }
     });
@@ -71,14 +84,25 @@ export const fetchMarketData = async (marketTypes: string | string[], toastFn = 
       polygonApiKey = polygonSecret.value;
       setPolygonApiKey(polygonApiKey);
     } else {
-      // Check for Alpha Vantage API key as fallback
-      const { data: alphaVantageSecret } = await supabase.functions.invoke('get-secret', {
-        body: { secretName: 'ALPHA_VANTAGE_API_KEY' }
+      // Check for Finnhub API key (second priority)
+      const { data: finnhubSecret } = await supabase.functions.invoke('get-secret', {
+        body: { secretName: 'FINNHUB_API_KEY' }
       });
       
-      if (alphaVantageSecret?.value) {
-        dataSource = DataSource.ALPHA_VANTAGE;
-        alphaVantageApiKey = alphaVantageSecret.value;
+      if (finnhubSecret?.value) {
+        dataSource = DataSource.FINNHUB;
+        finnhubApiKey = finnhubSecret.value;
+        setFinnhubApiKey(finnhubApiKey);
+      } else {
+        // Check for Alpha Vantage API key as fallback (lowest priority)
+        const { data: alphaVantageSecret } = await supabase.functions.invoke('get-secret', {
+          body: { secretName: 'ALPHA_VANTAGE_API_KEY' }
+        });
+        
+        if (alphaVantageSecret?.value) {
+          dataSource = DataSource.ALPHA_VANTAGE;
+          alphaVantageApiKey = alphaVantageSecret.value;
+        }
       }
     }
     
@@ -135,12 +159,65 @@ export const fetchMarketData = async (marketTypes: string | string[], toastFn = 
           return marketData;
         }
       } catch (polygonError) {
-        console.error('Polygon.io error, falling back to Alpha Vantage:', polygonError);
+        console.error('Polygon.io error, falling back to Finnhub:', polygonError);
       }
     }
     
-    // Try to use Alpha Vantage API as fallback (if API key is available and Polygon failed or wasn't available)
-    if (dataSource === DataSource.ALPHA_VANTAGE || (dataSource === DataSource.POLYGON && marketData.length === 0)) {
+    // Try to use Finnhub API as secondary option (if API key is available and Polygon failed or wasn't available)
+    if ((dataSource === DataSource.FINNHUB && hasFinnhubApiKey()) || 
+       (dataSource === DataSource.POLYGON && marketData.length === 0)) {
+      try {
+        console.log('Fetching data from Finnhub.io');
+        
+        // Fetch data for each symbol based on market type
+        for (const marketType of marketTypeArray) {
+          if (marketType === 'Stock') {
+            for (const symbol of symbols[marketType]) {
+              const data = await getFinnhubStockQuote(symbol);
+              const transformedData = transformFinnhubStockData(data, symbol);
+              if (transformedData) {
+                marketData.push(transformedData);
+              }
+            }
+          } 
+          else if (marketType === 'Forex') {
+            for (const pair of symbols[marketType]) {
+              const [fromCurrency, toCurrency] = pair.split('/');
+              const data = await getFinnhubForexQuote(fromCurrency, toCurrency);
+              const transformedData = transformFinnhubForexData(data, fromCurrency, toCurrency);
+              if (transformedData) {
+                marketData.push(transformedData);
+              }
+            }
+          }
+          else if (marketType === 'Crypto') {
+            for (const symbol of symbols[marketType]) {
+              const data = await getFinnhubCryptoQuote(symbol);
+              const transformedData = transformFinnhubCryptoData(data, symbol);
+              if (transformedData) {
+                marketData.push(transformedData);
+              }
+            }
+          }
+        }
+        
+        // If we got data from Finnhub, use it
+        if (marketData.length > 0) {
+          console.log(`Fetched ${marketData.length} assets from Finnhub.io`);
+          
+          // Update our database with the new data
+          await updateMarketDataInDatabase(marketData);
+          
+          return marketData;
+        }
+      } catch (finnhubError) {
+        console.error('Finnhub error, falling back to Alpha Vantage:', finnhubError);
+      }
+    }
+    
+    // Try to use Alpha Vantage API as fallback (if API key is available and both Polygon and Finnhub failed or weren't available)
+    if (dataSource === DataSource.ALPHA_VANTAGE || 
+       ((dataSource === DataSource.POLYGON || dataSource === DataSource.FINNHUB) && marketData.length === 0)) {
       try {
         console.log('Falling back to Alpha Vantage');
         
@@ -196,7 +273,7 @@ export const fetchMarketData = async (marketTypes: string | string[], toastFn = 
       }
     }
     
-    // Fall back to our edge functions if Polygon and Alpha Vantage fail or don't have enough data
+    // Fall back to our edge functions if all API sources fail or don't have enough data
     console.log('Falling back to edge functions');
     
     const dataPromises = marketTypeArray.map(async (type) => {

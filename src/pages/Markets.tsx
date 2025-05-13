@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { fetchAlphaVantageData } from "@/utils/api/alphaVantage";
 import { supabase } from "@/integrations/supabase/client";
 import { hasPolygonApiKey } from "@/utils/api/polygon";
+import { hasFinnhubApiKey } from "@/utils/api/finnhub";
 
 const Markets = () => {
   // Use the combined market data hook with a 1-minute refetch interval for more real-time market data
@@ -18,13 +19,14 @@ const Markets = () => {
   const { toast } = useToast();
   const [alphaVantageAvailable, setAlphaVantageAvailable] = useState(false);
   const [polygonAvailable, setPolygonAvailable] = useState(false);
+  const [finnhubAvailable, setFinnhubAvailable] = useState(false);
   const [dataSource, setDataSource] = useState("Simulated");
   
   // Check API availability on component mount
   useEffect(() => {
     const checkApiAvailability = async () => {
       try {
-        // Check for Polygon API key
+        // Check for Polygon API key (highest priority)
         const { data: polygonSecret } = await supabase.functions.invoke('get-secret', {
           body: { secretName: 'POLYGON_API_KEY' }
         });
@@ -40,7 +42,23 @@ const Markets = () => {
           return;
         }
         
-        // If no Polygon API key, check for Alpha Vantage
+        // If no Polygon API key, check for Finnhub API key (second priority)
+        const { data: finnhubSecret } = await supabase.functions.invoke('get-secret', {
+          body: { secretName: 'FINNHUB_API_KEY' }
+        });
+        
+        if (finnhubSecret?.value) {
+          setFinnhubAvailable(true);
+          setDataSource("Finnhub.io");
+          
+          toast({
+            title: "Finnhub.io API Connected",
+            description: "Using real-time market data from Finnhub.io",
+          });
+          return;
+        }
+        
+        // If no Finnhub API key, check for Alpha Vantage API key (third priority)
         const { data: alphaVantageSecret } = await supabase.functions.invoke('get-secret', {
           body: { secretName: 'ALPHA_VANTAGE_API_KEY' }
         });
@@ -62,7 +80,7 @@ const Markets = () => {
             toast({
               title: "API Rate Limited",
               description: "Alpha Vantage API rate limited. Some data may be simulated.",
-              variant: "destructive" // Changed from "warning" to "destructive" to match allowed variants
+              variant: "destructive" 
             });
             // We still set it as available since we have the API key
             setDataSource("Alpha Vantage (Limited)");
