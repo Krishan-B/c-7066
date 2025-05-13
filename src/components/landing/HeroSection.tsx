@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ArrowRight, BarChart3, LineChart, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTheme } from "@/components/ThemeProvider";
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   
   return (
     <section className="py-16 md:py-24 container overflow-hidden">
@@ -74,19 +76,26 @@ const HeroSection = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <div className="relative w-full max-w-lg h-[240px] md:h-[400px] rounded-lg overflow-hidden glass-effect">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-background/0"></div>
+          <div className={`relative w-full max-w-lg h-[240px] md:h-[400px] rounded-lg overflow-hidden ${theme === 'dark' ? 'shadow-[0_0_30px_rgba(255,255,255,0.15)]' : 'shadow-lg'}`}>
+            <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-gradient-to-br from-white/20 to-primary/10' : 'bg-gradient-to-br from-primary/10 to-background/0'}`}></div>
             <img 
               src="/trading-dashboard.svg" 
               alt="Trading Dashboard" 
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover brightness-125 contrast-110"
+              style={{
+                filter: theme === 'dark' ? 'brightness(1.4) contrast(1.1)' : 'brightness(1.2) contrast(1.05)'
+              }}
               onError={(e) => {
                 e.currentTarget.src = 'https://placehold.co/600x400/141413/8989DE?text=Trading+Dashboard';
               }}
             />
             
             <motion.div 
-              className="absolute top-4 right-4 bg-card p-3 rounded-lg shadow-lg max-w-[180px]"
+              className={`absolute top-4 right-4 p-3 rounded-lg shadow-lg max-w-[180px] ${
+                theme === 'dark' 
+                  ? 'bg-white/10 backdrop-blur-md border border-white/20' 
+                  : 'bg-card'
+              }`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.4 }}
