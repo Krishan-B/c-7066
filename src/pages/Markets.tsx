@@ -44,7 +44,7 @@ const Markets = () => {
           toast({
             title: "API Rate Limited",
             description: "Alpha Vantage API rate limited. Some data may be simulated.",
-            variant: "warning"
+            variant: "destructive" // Changed from "warning" to "destructive" to match allowed variants
           });
           // We still set it as available since we have the API key
           setAlphaVantageAvailable(true);

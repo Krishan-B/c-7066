@@ -1,6 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useToast } from "@/components/ui/use-toast";
 
 // Base API URL for Alpha Vantage
 const ALPHA_VANTAGE_BASE_URL = 'https://www.alphavantage.co/query';
@@ -40,11 +39,7 @@ export async function fetchAlphaVantageData(
     const apiKey = await getApiKey();
     
     if (!apiKey) {
-      toast({
-        title: "API Key Missing",
-        description: "Alpha Vantage API key is not configured.",
-        variant: "destructive"
-      });
+      console.error("API Key Missing - Alpha Vantage API key is not configured.");
       return { error: "API key missing" };
     }
     
@@ -75,10 +70,7 @@ export async function fetchAlphaVantageData(
       console.info('Alpha Vantage info:', data['Information']);
       // This usually means we hit an API limit
       if (data['Information'].includes('API call frequency')) {
-        toast({
-          title: "API Rate Limit",
-          description: "Alpha Vantage API rate limit reached. Using simulated data instead.",
-        });
+        console.warn("API Rate Limit - Alpha Vantage API rate limit reached. Using simulated data instead.");
         return { error: "Rate limit", information: data['Information'] };
       }
     }
@@ -86,11 +78,6 @@ export async function fetchAlphaVantageData(
     return data;
   } catch (error) {
     console.error('Error fetching data from Alpha Vantage:', error);
-    toast({
-      title: "Data Fetch Error",
-      description: error instanceof Error ? error.message : "Failed to fetch market data",
-      variant: "destructive"
-    });
     return { error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
