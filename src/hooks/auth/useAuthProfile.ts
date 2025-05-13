@@ -1,32 +1,22 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { UserProfile } from "@/features/profile/types";
 import { extractProfileFromUser, updateProfile as updateUserProfile } from "@/utils/auth/authUtils";
 
+/**
+ * Hook to manage user profile data
+ */
 export const useAuthProfile = (user: User | null, initialized: boolean) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const { toast } = useToast();
 
-  // Fetch profile when user changes
-  useEffect(() => {
-    if (user && initialized) {
-      fetchProfile(user);
-    } else if (!user && initialized) {
-      setProfile(null);
-      
-      // Show sign out toast
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully",
-      });
-    }
-  }, [user, initialized, toast]);
-
-  // Fetch profile data from user metadata
-  const fetchProfile = async (currentUser: User) => {
+  /**
+   * Fetch profile data from user metadata
+   */
+  const fetchProfile = useCallback(async (currentUser: User) => {
     if (!currentUser) return null;
     
     try {
@@ -53,9 +43,12 @@ export const useAuthProfile = (user: User | null, initialized: boolean) => {
     } finally {
       setProfileLoading(false);
     }
-  };
+  }, [initialized, toast]);
 
-  const updateProfile = async (profileData: Partial<UserProfile>) => {
+  /**
+   * Update user profile data
+   */
+  const updateProfile = useCallback(async (profileData: Partial<UserProfile>) => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -74,14 +67,27 @@ export const useAuthProfile = (user: User | null, initialized: boolean) => {
       // Update local profile state
       setProfile(prev => prev ? { ...prev, ...profileData } : null);
       
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been updated successfully",
+      });
+      
     } catch (error: any) {
       console.error("Error updating profile:", error);
+      toast({
+        title: "Profile update failed",
+        description: error.message || "Unable to update your profile",
+        variant: "destructive",
+      });
     } finally {
       setProfileLoading(false);
     }
-  };
+  }, [user, toast]);
 
-  const refreshProfile = async () => {
+  /**
+   * Refresh the current user profile
+   */
+  const refreshProfile = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -97,7 +103,22 @@ export const useAuthProfile = (user: User | null, initialized: boolean) => {
     } finally {
       setProfileLoading(false);
     }
-  };
+  }, [user, fetchProfile, toast]);
+
+  // Fetch profile when user changes
+  useEffect(() => {
+    if (user && initialized) {
+      fetchProfile(user);
+    } else if (!user && initialized) {
+      setProfile(null);
+      
+      // Show sign out toast
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully",
+      });
+    }
+  }, [user, initialized, toast, fetchProfile]);
 
   return {
     profile,
