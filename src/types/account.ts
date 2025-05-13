@@ -1,4 +1,6 @@
 
+import { Asset as MarketAsset } from '@/hooks/market/types';
+
 export interface AccountMetrics {
   balance: number;
   equity: number;
@@ -21,21 +23,14 @@ export interface MetricItem {
   tooltip: string;
 }
 
-export interface Asset {
-  symbol: string;
-  name: string;
-  price: number;
+// Extend the MarketAsset with account-specific properties
+export interface Asset extends MarketAsset {
   amount: number;
   entryPrice: number;
-  value?: number;
-  change?: number;
-  pnl?: number;
-  pnlPercentage?: number;
-  change_percentage?: number;
-  market_type?: string;
-  volume?: string;
-  market_cap?: string;
-  last_updated?: string;
+  value: number;
+  change: number;
+  pnl: number;
+  pnlPercentage: number;
 }
 
 export interface ClosedPosition {

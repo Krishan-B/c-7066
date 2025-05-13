@@ -9,19 +9,6 @@ import ClosedPositionsTable from "@/components/portfolio/ClosedPositionsTable";
 import PositionFilter from "@/components/portfolio/PositionFilter";
 import { Asset as AccountAsset, ClosedPosition } from "@/types/account";
 
-// Define a local Asset interface that matches what PositionsTable expects
-interface Asset {
-  symbol: string;
-  name: string;
-  price: number;
-  amount: number;
-  entryPrice: number;
-  value?: number;
-  change?: number;
-  pnl?: number;
-  pnlPercentage?: number;
-}
-
 interface PositionsSectionProps {
   assets: AccountAsset[];
   closedPositions: ClosedPosition[];
@@ -36,18 +23,8 @@ const PositionsSection = ({
   const [filterSymbol, setFilterSymbol] = useState("");
   const [filterPnl, setFilterPnl] = useState("all");
 
-  // Convert assets to the expected format with explicit type definition
-  const formattedAssets: Asset[] = assets.map(asset => ({
-    symbol: asset.symbol,
-    name: asset.name,
-    price: asset.price,
-    amount: asset.amount || 0,
-    entryPrice: asset.entryPrice || 0, // Provide default value
-    value: asset.value,
-    change: asset.change,
-    pnl: asset.pnl,
-    pnlPercentage: asset.pnlPercentage
-  }));
+  // No need to transform assets anymore since they're already of the correct type
+  // and PositionsTable will now accept AccountAsset directly
 
   // Filter closed positions
   const filteredClosedPositions = closedPositions.filter(position => {
@@ -81,7 +58,7 @@ const PositionsSection = ({
           </CardHeader>
           <CardContent>
             <PositionsTable 
-              assets={formattedAssets}
+              assets={assets}
               onViewDetails={onViewDetails}
             />
           </CardContent>

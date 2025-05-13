@@ -4,18 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { ArrowUp, ArrowDown, Eye } from "lucide-react";
 import { formatCurrency, formatNumber } from "@/utils/formatUtils";
-
-interface Asset {
-  name: string;
-  symbol: string;
-  amount: number;
-  price: number;
-  entryPrice: number;
-  value: number;
-  change: number;
-  pnl: number;
-  pnlPercentage: number;
-}
+import { Asset } from "@/types/account";
 
 interface PositionsTableProps {
   assets: Asset[];

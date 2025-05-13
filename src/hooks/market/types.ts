@@ -9,6 +9,13 @@ export interface Asset {
   market_cap?: string;
   id?: string;
   last_updated?: string;
+  // Add the properties needed by PositionsTable
+  amount?: number;
+  entryPrice?: number;
+  value?: number;
+  change?: number;
+  pnl?: number;
+  pnlPercentage?: number;
 }
 
 export interface AssetDetails extends Asset {
