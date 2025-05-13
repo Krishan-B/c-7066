@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
-import { Asset, useMarketData } from "@/hooks/useMarketData";
+import { Asset, useMarketData } from "@/hooks/market";
 import { supabase } from "@/integrations/supabase/client";
 
 interface UseCombinedMarketDataOptions {
