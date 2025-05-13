@@ -1,13 +1,16 @@
 
 import { 
-  getStockQuote as getFinnhubStockQuote,
-  getCryptoQuote as getFinnhubCryptoQuote,
-  getForexQuote as getFinnhubForexQuote,
-  transformStockData as transformFinnhubStockData,
-  transformCryptoData as transformFinnhubCryptoData,
-  transformForexData as transformFinnhubForexData,
+  getStockQuote,
+  getCryptoQuote,
+  getForexQuote,
   hasFinnhubApiKey
-} from "@/utils/api/finnhub";
+} from "@/utils/api/finnhub/client";
+
+import {
+  transformStockData,
+  transformCryptoData,
+  transformForexData
+} from "@/utils/api/finnhub/transformers";
 
 import { Asset } from "../types";
 
@@ -52,11 +55,11 @@ export async function fetchFinnhubData(marketTypes: string[], symbols: Record<st
   try {
     // Fetch data for each symbol based on market type
     for (const marketType of marketTypes) {
-      if (marketType === 'Stock') {
+      if (marketType === 'Stock' || marketType === 'Stocks') {
         for (const symbol of symbols[marketType]) {
-          const response = await getFinnhubStockQuote(symbol);
+          const response = await getStockQuote(symbol);
           if (response && isValidFinnhubQuote(response)) {
-            const transformedData = transformFinnhubStockData(response, symbol);
+            const transformedData = transformStockData(response, symbol);
             if (transformedData) {
               marketData.push(transformedData);
             }
@@ -68,9 +71,9 @@ export async function fetchFinnhubData(marketTypes: string[], symbols: Record<st
       else if (marketType === 'Forex') {
         for (const pair of symbols[marketType]) {
           const [fromCurrency, toCurrency] = pair.split('/');
-          const response = await getFinnhubForexQuote(fromCurrency, toCurrency);
+          const response = await getForexQuote(fromCurrency, toCurrency);
           if (response && isValidFinnhubQuote(response)) {
-            const transformedData = transformFinnhubForexData(response, fromCurrency, toCurrency);
+            const transformedData = transformForexData(response, fromCurrency, toCurrency);
             if (transformedData) {
               marketData.push(transformedData);
             }
@@ -81,9 +84,9 @@ export async function fetchFinnhubData(marketTypes: string[], symbols: Record<st
       }
       else if (marketType === 'Crypto') {
         for (const symbol of symbols[marketType]) {
-          const response = await getFinnhubCryptoQuote(symbol);
+          const response = await getCryptoQuote(symbol);
           if (response && isValidFinnhubQuote(response)) {
-            const transformedData = transformFinnhubCryptoData(response, symbol);
+            const transformedData = transformCryptoData(response, symbol);
             if (transformedData) {
               marketData.push(transformedData);
             }

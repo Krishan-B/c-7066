@@ -56,7 +56,15 @@ export const useTradeManagement = () => {
       
       if (error) throw error;
       
-      setOpenPositions(data || []);
+      // Type coercion for database results
+      const typedData = data?.map(item => ({
+        ...item,
+        trade_type: item.trade_type as 'buy' | 'sell',
+        order_type: item.order_type as 'market' | 'entry',
+        status: item.status as 'open' | 'pending' | 'closed' | 'cancelled'
+      })) || [];
+      
+      setOpenPositions(typedData);
     } catch (error) {
       console.error('Error fetching open positions:', error);
       toast.error('Failed to load open positions');
@@ -79,7 +87,15 @@ export const useTradeManagement = () => {
       
       if (error) throw error;
       
-      setPendingOrders(data || []);
+      // Type coercion for database results
+      const typedData = data?.map(item => ({
+        ...item,
+        trade_type: item.trade_type as 'buy' | 'sell',
+        order_type: item.order_type as 'market' | 'entry',
+        status: item.status as 'open' | 'pending' | 'closed' | 'cancelled'
+      })) || [];
+      
+      setPendingOrders(typedData);
     } catch (error) {
       console.error('Error fetching pending orders:', error);
       toast.error('Failed to load pending orders');
@@ -102,7 +118,15 @@ export const useTradeManagement = () => {
       
       if (error) throw error;
       
-      setClosedTrades(data || []);
+      // Type coercion for database results
+      const typedData = data?.map(item => ({
+        ...item,
+        trade_type: item.trade_type as 'buy' | 'sell',
+        order_type: item.order_type as 'market' | 'entry',
+        status: item.status as 'open' | 'pending' | 'closed' | 'cancelled'
+      })) || [];
+      
+      setClosedTrades(typedData);
     } catch (error) {
       console.error('Error fetching closed trades:', error);
       toast.error('Failed to load trade history');
@@ -152,7 +176,7 @@ export const useTradeManagement = () => {
         { event: '*', schema: 'public', table: 'user_trades' },
         payload => {
           // Refresh relevant data based on the updated record
-          const record = payload.new as Trade;
+          const record = payload.new as any;
           
           if (record.status === 'open') {
             fetchOpenPositions();

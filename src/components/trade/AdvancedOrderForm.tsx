@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { 
@@ -26,7 +25,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Info, Minus, Plus } from "lucide-react";
 import { Asset } from "@/hooks/useMarketData";
-import { calculateRequiredMargin, getLeverageForAssetType } from "@/utils/leverageUtils";
+import { calculateMarginRequired, getLeverageForAssetType } from "@/utils/leverageUtils";
 
 export interface AdvancedOrderFormValues {
   orderType: "market" | "entry";

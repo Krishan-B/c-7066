@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { calculateMarginRequired, LEVERAGE_MAP } from '@/utils/leverageUtils';
 import { formatCurrency } from '@/utils/formatUtils';
 
@@ -20,7 +20,12 @@ export interface PnLResult {
   isProfit: boolean;
 }
 
-export const useTradeCalculations = () => {
+export const useTradeCalculations = (
+  unitsStr?: string,
+  currentPrice?: number,
+  assetClass?: string,
+  availableFunds?: number
+) => {
   const [calculations, setCalculations] = useState<{
     marginRequired: number;
     leverage: number;
@@ -93,10 +98,53 @@ export const useTradeCalculations = () => {
     return availableFunds >= marginRequired;
   }, []);
 
+  // Process the input units string to a number
+  const parsedUnits = useMemo(() => {
+    if (!unitsStr) return 0;
+    const parsed = parseFloat(unitsStr);
+    return isNaN(parsed) ? 0 : parsed;
+  }, [unitsStr]);
+
+  // Calculate position value, margin required, etc. when inputs change
+  const tradeValues = useMemo(() => {
+    if (!currentPrice || !assetClass || parsedUnits === 0) {
+      return {
+        positionValue: 0,
+        leverage: 1,
+        marginRequired: 0,
+        fee: 0,
+        total: 0,
+        canAfford: false
+      };
+    }
+
+    const positionValue = currentPrice * parsedUnits;
+    const leverage = LEVERAGE_MAP[assetClass] || 1;
+    const marginRequired = positionValue / leverage;
+    const fee = marginRequired * 0.001; // 0.1% fee
+    const total = marginRequired + fee;
+    const canAfford = availableFunds ? availableFunds >= marginRequired : false;
+
+    return {
+      positionValue,
+      leverage,
+      marginRequired,
+      fee,
+      total,
+      canAfford
+    };
+  }, [currentPrice, assetClass, parsedUnits, availableFunds]);
+
   return {
     calculations,
     calculatePnL,
     calculateMargin,
     validateTradeSize,
+    parsedUnits,
+    leverage: tradeValues.leverage,
+    requiredFunds: tradeValues.marginRequired,
+    fee: tradeValues.fee,
+    total: tradeValues.total,
+    canAfford: tradeValues.canAfford
   };
 };

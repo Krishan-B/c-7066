@@ -38,11 +38,9 @@ export const useAccountMetrics = () => {
           realizedPL: data.realized_pnl || 0,
           availableFunds: data.available_funds || 0,
           exposure: 0, // This we'll need to calculate from positions
-          bonus: 0 // Not implemented yet
+          bonus: 0, // Not implemented yet
+          buyingPower: (data.available_funds || 0) * 20 // Default to stocks leverage (20x)
         };
-        
-        // Calculate buying power based on leverages
-        accountMetrics.buyingPower = accountMetrics.availableFunds * 20; // Default to stocks leverage
         
         setMetrics(accountMetrics);
       }

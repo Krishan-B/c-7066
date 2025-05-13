@@ -27,6 +27,18 @@ export const calculateMarginRequired = (
 };
 
 /**
+ * Get leverage value for a specific asset type
+ */
+export const getLeverageForAssetType = (assetType: string): number => {
+  return LEVERAGE_MAP[assetType] || 1;
+};
+
+/**
+ * Calculate required margin for a position (alias for calculateMarginRequired)
+ */
+export const calculateRequiredMargin = calculateMarginRequired;
+
+/**
  * Calculate default take profit level based on asset class (for buy positions)
  */
 export const calculateDefaultTakeProfit = (

@@ -58,16 +58,9 @@ const TradeForm = ({
   // Filter assets based on selected category
   const filteredAssets = marketData?.filter(a => a.market_type === assetCategory) || [];
   
-  // Calculate trade values using our custom hook
-  const {
-    parsedUnits,
-    leverage,
-    requiredFunds,
-    fee,
-    total,
-    canAfford
-  } = useTradeCalculations(units, currentPrice, assetCategory, availableFunds);
-
+  // Use the trade calculations hook with proper parameters
+  const tradeCalculations = useTradeCalculations(units, currentPrice, assetCategory, availableFunds);
+  
   const handleAssetCategoryChange = (value: string) => {
     setAssetCategory(value);
     
@@ -80,7 +73,7 @@ const TradeForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(units, orderType, [leverage]);
+    onSubmit(units, orderType, [tradeCalculations.leverage]);
   };
 
   return (
@@ -106,8 +99,8 @@ const TradeForm = ({
         units={units}
         setUnits={setUnits}
         isExecuting={isExecuting}
-        requiredFunds={requiredFunds}
-        canAfford={canAfford}
+        requiredFunds={tradeCalculations.requiredFunds}
+        canAfford={tradeCalculations.canAfford}
         availableFunds={availableFunds}
       />
       
@@ -146,9 +139,9 @@ const TradeForm = ({
       {/* Trade Summary */}
       <TradeSummary
         currentPrice={currentPrice}
-        parsedAmount={requiredFunds}
-        fee={fee}
-        total={total}
+        parsedAmount={tradeCalculations.requiredFunds}
+        fee={tradeCalculations.fee}
+        total={tradeCalculations.total}
         isLoading={isLoading}
       />
       
@@ -158,8 +151,8 @@ const TradeForm = ({
         selectedAsset={selectedAsset}
         isExecuting={isExecuting}
         marketIsOpen={marketIsOpen}
-        parsedUnits={parsedUnits}
-        canAfford={canAfford}
+        parsedUnits={tradeCalculations.parsedUnits}
+        canAfford={tradeCalculations.canAfford}
         buyPrice={buyPrice}
         sellPrice={sellPrice}
       />

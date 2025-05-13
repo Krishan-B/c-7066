@@ -1,6 +1,21 @@
 
 import { getMarketData } from './client';
 
+export async function getStockQuote(symbol: string) {
+  const data = await getMarketData([symbol], 'Stocks');
+  return data[0]?.quote;
+}
+
+export async function getCryptoQuote(symbol: string) {
+  const data = await getMarketData([symbol], 'Crypto');
+  return data[0]?.quote;
+}
+
+export async function getForexQuote(fromCurrency: string, toCurrency: string) {
+  const data = await getMarketData([`${fromCurrency}_${toCurrency}`], 'Forex');
+  return data[0]?.quote;
+}
+
 export const fetchStocksData = async (symbols: string[] = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META']) => {
   return await getMarketData(symbols, 'Stocks');
 };

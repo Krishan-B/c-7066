@@ -1,106 +1,134 @@
 
-import { Asset } from '@/hooks/market/types';
+/**
+ * Finnhub API client
+ */
+const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
+let FINNHUB_API_KEY: string | undefined;
 
-const FINNHUB_API_KEY = 'sandbox_cb7s9c2ad3ifqkei5hd0';
-const BASE_URL = 'https://finnhub.io/api/v1';
-
-interface StockSymbol {
-  currency: string;
-  description: string;
-  displaySymbol: string;
-  figi: string;
-  isin: string | null;
-  mic: string;
-  symbol: string;
-  type: string;
+/**
+ * Set the Finnhub API key
+ * @param apiKey The API key
+ */
+export function setFinnhubApiKey(apiKey: string) {
+  FINNHUB_API_KEY = apiKey;
 }
 
-interface FinnhubQuote {
-  c: number; // Current price
-  d: number; // Change
+/**
+ * Get the Finnhub API key
+ */
+export function getFinnhubApiKey(): string | undefined {
+  return FINNHUB_API_KEY;
+}
+
+/**
+ * Check if the Finnhub API key is set
+ */
+export function hasFinnhubApiKey(): boolean {
+  return !!FINNHUB_API_KEY;
+}
+
+/**
+ * Make a request to the Finnhub API
+ * @param endpoint The API endpoint
+ * @param params Additional query parameters
+ * @returns Response data
+ */
+async function makeRequest<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
+  if (!FINNHUB_API_KEY) {
+    throw new Error('Finnhub API key is not set');
+  }
+
+  const queryParams = new URLSearchParams(params);
+  queryParams.append('token', FINNHUB_API_KEY);
+
+  const url = `${FINNHUB_BASE_URL}${endpoint}?${queryParams.toString()}`;
+  
+  try {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Finnhub API error (${response.status}): ${errorText}`);
+    }
+    
+    return response.json() as Promise<T>;
+  } catch (error) {
+    console.error('Finnhub API request failed:', error);
+    throw error;
+  }
+}
+
+// Interface for Finnhub quote response
+export interface FinnhubQuote {
+  c: number;  // Current price
+  d: number;  // Change
   dp: number; // Percent change
-  h: number; // High price of the day
-  l: number; // Low price of the day
-  o: number; // Open price of the day
+  h: number;  // High price of the day
+  l: number;  // Low price of the day
+  o: number;  // Open price of the day
   pc: number; // Previous close price
-  t: number; // Timestamp
+  t: number;  // Timestamp
 }
 
-export const getSymbolsList = async (exchange = 'US'): Promise<StockSymbol[]> => {
-  try {
-    const response = await fetch(
-      `${BASE_URL}/stock/symbol?exchange=${exchange}&token=${FINNHUB_API_KEY}`
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch symbols: ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching symbols:', error);
-    return [];
-  }
-};
+/**
+ * Get a stock quote
+ * @param symbol Stock symbol
+ */
+export async function getStockQuote(symbol: string): Promise<FinnhubQuote> {
+  return makeRequest<FinnhubQuote>('/quote', { symbol });
+}
 
-export const getQuote = async (symbol: string): Promise<FinnhubQuote | null> => {
-  try {
-    const response = await fetch(
-      `${BASE_URL}/quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch quote: ${response.status}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error(`Error fetching quote for ${symbol}:`, error);
-    return null;
-  }
-};
+/**
+ * Get a crypto quote
+ * @param symbol Crypto symbol
+ */
+export async function getCryptoQuote(symbol: string): Promise<FinnhubQuote> {
+  return makeRequest<FinnhubQuote>('/quote', { symbol });
+}
 
-export const getMarketData = async (symbols: string[], marketType: string): Promise<Asset[]> => {
-  try {
-    const quotes = await Promise.all(
-      symbols.map(async (symbol) => {
-        const quote = await getQuote(symbol);
-        return { symbol, quote };
-      })
-    );
-    
-    // Transform quotes to our Asset format
-    return quotes
-      .filter((item) => item.quote !== null)
-      .map((item) => {
-        const quote = item.quote!;
-        const formattedVolume = formatVolume(quote.c * 1000000); // Mock volume
-        
-        return {
-          name: item.symbol,
-          symbol: item.symbol,
-          price: quote.c,
-          change_percentage: quote.dp,
-          volume: formattedVolume,
-          market_type: marketType,
-          // Additional fields from the quote
-          last_updated: new Date().toISOString()
-        };
+/**
+ * Get a forex quote
+ * @param fromCurrency From currency
+ * @param toCurrency To currency
+ */
+export async function getForexQuote(fromCurrency: string, toCurrency: string): Promise<FinnhubQuote> {
+  return makeRequest<FinnhubQuote>('/forex/rates', { base: fromCurrency });
+}
+
+/**
+ * Fetch market data for multiple symbols
+ * @param symbols Array of symbols to fetch
+ * @param assetType Type of asset (Stocks, Crypto, etc.)
+ */
+export async function getMarketData(symbols: string[], assetType: string) {
+  console.log(`Fetching ${assetType} data for symbols:`, symbols);
+  
+  const results = [];
+  
+  for (const symbol of symbols) {
+    try {
+      let quote: FinnhubQuote;
+      
+      if (assetType === 'Stocks') {
+        quote = await getStockQuote(symbol);
+      } else if (assetType === 'Crypto') {
+        quote = await getCryptoQuote(symbol);
+      } else if (assetType === 'Forex') {
+        const [fromCurrency, toCurrency] = symbol.split('_');
+        quote = await getForexQuote(fromCurrency, toCurrency);
+      } else {
+        quote = await getStockQuote(symbol);
+      }
+      
+      results.push({
+        symbol,
+        assetType,
+        quote
       });
-  } catch (error) {
-    console.error('Error in getMarketData:', error);
-    return [];
+    } catch (error) {
+      console.error(`Error fetching data for ${symbol}:`, error);
+    }
   }
-};
-
-function formatVolume(volume: number): string {
-  if (volume >= 1000000000) {
-    return `${(volume / 1000000000).toFixed(1)}B`;
-  } else if (volume >= 1000000) {
-    return `${(volume / 1000000).toFixed(1)}M`;
-  } else if (volume >= 1000) {
-    return `${(volume / 1000).toFixed(1)}K`;
-  } else {
-    return volume.toString();
-  }
+  
+  return results;
 }
