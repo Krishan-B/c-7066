@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -81,12 +80,9 @@ const HeroSection = () => {
             <img 
               src="/trading-dashboard.svg" 
               alt="Trading Dashboard" 
-              className="absolute inset-0 w-full h-full object-cover brightness-125 contrast-110"
-              style={{
-                filter: theme === 'dark' ? 'brightness(1.4) contrast(1.1)' : 'brightness(1.2) contrast(1.05)'
-              }}
+              className="absolute inset-0 w-full h-full object-cover brightness-110 contrast-105"
               onError={(e) => {
-                e.currentTarget.src = 'https://placehold.co/600x400/141413/8989DE?text=Trading+Dashboard';
+                e.currentTarget.src = 'https://placehold.co/600x400/333333/8989DE?text=Trading+Dashboard';
               }}
             />
             
