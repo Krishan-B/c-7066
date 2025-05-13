@@ -7,12 +7,12 @@ import { Plus } from "lucide-react";
 import PositionsTable from "@/components/portfolio/PositionsTable";
 import ClosedPositionsTable from "@/components/portfolio/ClosedPositionsTable";
 import PositionFilter from "@/components/portfolio/PositionFilter";
-import { Asset as AccountAsset, ClosedPosition } from "@/types/account";
+import { Asset, ClosedPosition } from "@/types/account";
 
 interface PositionsSectionProps {
-  assets: AccountAsset[];
+  assets: Asset[];
   closedPositions: ClosedPosition[];
-  onViewDetails: (symbol: string) => void;
+  onViewDetails: (asset: Asset) => void; // Changed from (symbol: string) to (asset: Asset)
 }
 
 const PositionsSection = ({ 
@@ -22,9 +22,6 @@ const PositionsSection = ({
 }: PositionsSectionProps) => {
   const [filterSymbol, setFilterSymbol] = useState("");
   const [filterPnl, setFilterPnl] = useState("all");
-
-  // No need to transform assets anymore since they're already of the correct type
-  // and PositionsTable will now accept AccountAsset directly
 
   // Filter closed positions
   const filteredClosedPositions = closedPositions.filter(position => {

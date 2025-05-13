@@ -8,7 +8,7 @@ import { Asset } from "@/types/account";
 
 interface PositionsTableProps {
   assets: Asset[];
-  onViewDetails: (symbol: string) => void;
+  onViewDetails: (asset: Asset) => void; // Changed from (symbol: string) to (asset: Asset)
 }
 
 const PositionsTable = ({ assets, onViewDetails }: PositionsTableProps) => {
@@ -49,7 +49,7 @@ const PositionsTable = ({ assets, onViewDetails }: PositionsTableProps) => {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  onClick={() => onViewDetails(asset.symbol)}
+                  onClick={() => onViewDetails(asset)}
                 >
                   <Eye className="h-4 w-4" />
                 </Button>
