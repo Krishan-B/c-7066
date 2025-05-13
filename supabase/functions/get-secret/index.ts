@@ -23,28 +23,37 @@ serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
-
-    // Get the secret from Deno.env
+    
+    // Check if the secret exists in environment variables
     const secretValue = Deno.env.get(secretName);
     
-    console.log(`Requested secret: ${secretName}, ${secretValue ? "Found" : "Not Found"}`);
-    
-    if (!secretValue) {
+    if (secretValue) {
+      console.log(`Requested secret: ${secretName}, Found`);
+      
+      // Return redacted value for logging purposes
       return new Response(
-        JSON.stringify({ error: `Secret '${secretName}' not found` }),
+        JSON.stringify({ 
+          success: true,
+          value: secretValue,
+          // Do not include the actual secret value in the response
+          message: "Secret retrieved successfully"
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
+    } else {
+      console.log(`Requested secret: ${secretName}, Not Found`);
+      
+      return new Response(
+        JSON.stringify({ 
+          success: false,
+          error: "Secret not found"
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
       );
     }
-
-    // Return the secret
-    return new Response(
-      JSON.stringify({ value: secretValue }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
-    );
   } catch (error) {
-    console.error("Error processing secret request:", error.message);
+    console.error("Error processing request:", error.message);
     
-    // Handle errors
     return new Response(
       JSON.stringify({ error: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }

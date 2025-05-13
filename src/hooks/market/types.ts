@@ -1,12 +1,22 @@
 
 export interface Asset {
-  id?: string;
-  name: string;
   symbol: string;
+  name: string;
   price: number;
   change_percentage: number;
-  volume: string;
-  market_cap?: string;
   market_type: string;
+  volume: string;
   last_updated?: string;
+}
+
+export interface AssetDetails extends Asset {
+  open?: number;
+  high?: number;
+  low?: number;
+  close?: number;
+  description?: string;
+  currency?: string;
+  exchange?: string;
+  marketCap?: string;
+  sector?: string;
 }

@@ -1,130 +1,113 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { OrderResult } from "../types";
-import { calculateMarginRequired } from "../leverageUtils";
-import { removeFromPortfolio } from "../portfolioService";
+import { TradeResult, TradeStatus } from "../types";
 
 /**
- * Closes an open position
- * @param tradeId ID of the trade to close
- * @param closePrice Price at which to close the position
+ * Close an open position
  */
-export const closePosition = async (
-  tradeId: string,
+export async function closePosition(
+  tradeId: string, 
   closePrice: number
-): Promise<OrderResult> => {
+): Promise<TradeResult> {
   try {
-    // Get trade details
-    const { data: tradeData, error: tradeError } = await supabase
-      .from('user_trades')
-      .select('*')
+    // Fetch the trade first to get details
+    const { data: trade, error: fetchError } = await supabase
+      .from('trades')
+      .select()
       .eq('id', tradeId)
       .single();
-    
-    if (tradeError) {
-      throw new Error(`Failed to get trade data: ${tradeError.message}`);
+      
+    if (fetchError) {
+      throw new Error(`Failed to fetch trade: ${fetchError.message}`);
     }
     
-    // Calculate P&L
-    const pnl = tradeData.trade_type === 'buy'
-      ? (closePrice - tradeData.price_per_unit) * tradeData.units
-      : (tradeData.price_per_unit - closePrice) * tradeData.units;
+    if (trade.status !== 'open') {
+      throw new Error(`Cannot close position with status: ${trade.status}`);
+    }
     
-    // Update trade to closed status
-    const { error: updateError } = await supabase
-      .from('user_trades')
+    // Calculate profit/loss
+    const openPrice = trade.price_per_unit;
+    const units = trade.units;
+    const direction = trade.direction;
+    
+    let pnl = 0;
+    if (direction === 'buy') {
+      // For buy positions, profit = (closePrice - openPrice) * units
+      pnl = (closePrice - openPrice) * units;
+    } else {
+      // For sell positions, profit = (openPrice - closePrice) * units
+      pnl = (openPrice - closePrice) * units;
+    }
+    
+    // Update the trade record
+    const { data, error } = await supabase
+      .from('trades')
       .update({
         status: 'closed',
-        closed_at: new Date().toISOString(),
+        close_price: closePrice,
+        close_date: new Date().toISOString(),
         pnl: pnl
       })
-      .eq('id', tradeId);
-    
-    if (updateError) {
-      throw new Error(`Failed to close position: ${updateError.message}`);
-    }
-    
-    // Calculate margin that was used for this position
-    const marginRequired = calculateMarginRequired(
-      tradeData.market_type,
-      tradeData.total_amount
-    );
-    
-    // Get user's account
-    const { data: accountData, error: accountError } = await supabase
-      .from('user_account')
-      .select('*')
+      .eq('id', tradeId)
+      .select()
       .single();
-    
-    if (accountError) {
-      throw new Error(`Failed to get account data: ${accountError.message}`);
+      
+    if (error) {
+      throw new Error(`Failed to close position: ${error.message}`);
     }
-    
-    // Update user account - release margin and update P&L and balance
-    // Use cash_balance instead of balance
-    const { error: accountUpdateError } = await supabase
-      .from('user_account')
-      .update({
-        used_margin: accountData.used_margin - marginRequired,
-        available_funds: accountData.available_funds + marginRequired + pnl,
-        realized_pnl: accountData.realized_pnl + pnl,
-        cash_balance: accountData.cash_balance + pnl,
-        last_updated: new Date().toISOString()
-      })
-      .eq('id', accountData.id);
-    
-    if (accountUpdateError) {
-      throw new Error(`Failed to update account: ${accountUpdateError.message}`);
-    }
-    
-    // Update portfolio
-    await removeFromPortfolio(tradeData);
     
     return {
       success: true,
-      tradeId: tradeId,
-      message: `Position closed with P&L: ${pnl.toFixed(2)}`
+      tradeId: data.id,
+      message: `Successfully closed position with profit/loss of ${pnl.toFixed(2)}`,
+      status: 'closed' as TradeStatus
     };
+    
   } catch (error) {
-    console.error('Error closing position:', error);
+    console.error("Close position error:", error);
+    
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Unknown error occurred'
+      message: error instanceof Error ? error.message : "Unknown error occurred",
+      status: 'failed' as TradeStatus
     };
   }
-};
+}
 
 /**
- * Cancels a pending order
- * @param tradeId ID of the order to cancel
+ * Cancel a pending order
  */
-export const cancelPendingOrder = async (
-  tradeId: string
-): Promise<OrderResult> => {
+export async function cancelOrder(orderId: string): Promise<TradeResult> {
   try {
-    const { error } = await supabase
-      .from('user_trades')
+    // Update the order status
+    const { data, error } = await supabase
+      .from('trades')
       .update({
         status: 'cancelled',
-        closed_at: new Date().toISOString()
+        close_date: new Date().toISOString()
       })
-      .eq('id', tradeId)
-      .eq('status', 'pending');
-    
+      .eq('id', orderId)
+      .select()
+      .single();
+      
     if (error) {
       throw new Error(`Failed to cancel order: ${error.message}`);
     }
     
     return {
       success: true,
-      tradeId: tradeId,
-      message: 'Order cancelled successfully'
+      tradeId: data.id,
+      message: `Successfully cancelled order`,
+      status: 'cancelled' as TradeStatus
     };
+    
   } catch (error) {
-    console.error('Error cancelling order:', error);
+    console.error("Cancel order error:", error);
+    
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Unknown error occurred'
+      message: error instanceof Error ? error.message : "Unknown error occurred",
+      status: 'failed' as TradeStatus
     };
   }
-};
+}

@@ -1,30 +1,36 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
+
+interface UsePriceMovementResult {
+  buyPrice: number;
+  sellPrice: number;
+}
 
 /**
- * Hook to simulate real-time price movement based on a current price
- * 
- * @param {number} currentPrice - The base price to simulate movement around
- * @returns {{ buyPrice: number, sellPrice: number }} - The simulated buy and sell prices
+ * Hook to simulate slight price movements for buy and sell prices
+ * In production, this would use real market data
  */
-export function usePriceMovement(currentPrice: number) {
-  const [buyPrice, setBuyPrice] = useState(currentPrice * 1.001);
-  const [sellPrice, setSellPrice] = useState(currentPrice * 0.999);
+export function usePriceMovement(basePrice: number): UsePriceMovementResult {
+  const [buyPrice, setBuyPrice] = useState(basePrice * 1.001); // Slight markup for buy
+  const [sellPrice, setSellPrice] = useState(basePrice * 0.999); // Slight discount for sell
   
-  // Update buy/sell prices when current price changes
   useEffect(() => {
-    setBuyPrice(currentPrice * 1.001);
-    setSellPrice(currentPrice * 0.999);
+    // Update base prices when the provided price changes
+    setBuyPrice(basePrice * 1.001);
+    setSellPrice(basePrice * 0.999);
     
-    // Simulate real-time price movement
+    // Simulate price fluctuation with an interval
     const interval = setInterval(() => {
-      const random = Math.random() * 0.002 - 0.001;
-      setBuyPrice(prev => prev * (1 + random));
-      setSellPrice(prev => prev * (1 + random));
-    }, 2000);
+      // Small random fluctuation (±0.1%)
+      const buyFluctuation = 1 + (Math.random() * 0.002 - 0.001);
+      const sellFluctuation = 1 + (Math.random() * 0.002 - 0.001);
+      
+      setBuyPrice(prevPrice => prevPrice * buyFluctuation);
+      setSellPrice(prevPrice => prevPrice * sellFluctuation);
+    }, 1000); // Update every second
     
     return () => clearInterval(interval);
-  }, [currentPrice]);
+  }, [basePrice]);
   
   return { buyPrice, sellPrice };
 }

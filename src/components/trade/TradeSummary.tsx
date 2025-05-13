@@ -1,50 +1,79 @@
 
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+
 interface TradeSummaryProps {
-  currentPrice?: number;
-  parsedAmount?: number;
-  fee?: number;
-  total?: number;
+  currentPrice: number;
+  parsedAmount: number;
+  fee: number;
+  total: number;
   isLoading?: boolean;
   positionValue?: number;
   marginRequirement?: number;
   totalCost?: number;
 }
 
-export const TradeSummary = ({ 
-  currentPrice, 
-  parsedAmount, 
-  fee, 
-  total, 
-  isLoading,
+export const TradeSummary: React.FC<TradeSummaryProps> = ({
+  currentPrice,
+  parsedAmount,
+  fee,
+  total,
+  isLoading = false,
   positionValue,
   marginRequirement,
   totalCost
-}: TradeSummaryProps) => {
-  // Calculate values based on either prop pattern
-  const displayPrice = currentPrice || 0;
-  const displayAmount = parsedAmount || positionValue || 0;
-  const displayFee = fee || 0;
-  const displayTotal = total || totalCost || 0;
-  const displayIsLoading = isLoading || false;
-  
+}) => {
+  // Use either direct props or calculated props
+  const displayPositionValue = positionValue ?? parsedAmount;
+  const displayMarginRequirement = marginRequirement ?? parsedAmount;
+  const displayTotalCost = totalCost ?? total;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2 p-4 border rounded-md">
+        <div className="flex justify-between">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+        <div className="flex justify-between">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+        <Separator className="my-2" />
+        <div className="flex justify-between">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-5 w-20" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mb-4 space-y-1">
-      <div className="flex justify-between">
-        <span className="text-xs text-muted-foreground">Est. Price</span>
-        <span className="text-xs">${displayIsLoading ? "Loading..." : displayPrice.toLocaleString()}</span>
+    <div className="space-y-2 p-4 border rounded-md bg-muted/20">
+      <h4 className="font-medium mb-2">Trade Summary</h4>
+      
+      <div className="space-y-1 text-sm">
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Position Value</span>
+          <span>${displayPositionValue.toFixed(2)}</span>
+        </div>
+        
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Margin Requirement</span>
+          <span>${displayMarginRequirement.toFixed(2)}</span>
+        </div>
+        
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Trading Fee</span>
+          <span>${fee.toFixed(2)}</span>
+        </div>
       </div>
-      <div className="flex justify-between">
-        <span className="text-xs text-muted-foreground">Amount</span>
-        <span className="text-xs">${displayAmount.toFixed(2)}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-xs text-muted-foreground">Fee (0.1%)</span>
-        <span className="text-xs">${displayFee.toFixed(2)}</span>
-      </div>
-      <div className="border-t border-secondary/40 my-1 pt-1"></div>
-      <div className="flex justify-between">
-        <span className="text-xs text-muted-foreground">Total</span>
-        <span className="text-xs font-medium">${displayTotal.toFixed(2)}</span>
+      
+      <Separator className="my-2" />
+      
+      <div className="flex justify-between font-medium">
+        <span>Total Cost</span>
+        <span>${displayTotalCost.toFixed(2)}</span>
       </div>
     </div>
   );

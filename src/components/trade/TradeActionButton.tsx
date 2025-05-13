@@ -1,53 +1,63 @@
 
 import { Button } from "@/components/ui/button";
+import { ArrowUp, ArrowDown, AlertTriangle } from "lucide-react";
 
 interface TradeActionButtonProps {
   action: "buy" | "sell";
-  price?: number;
+  price: number;
   onClick: () => void;
-  disabled: boolean;
-  selectedAsset?: string;
-  isExecuting?: boolean;
-  marketIsOpen?: boolean;
-  parsedUnits?: number;
+  disabled?: boolean;
+  selectedAsset: string;
+  marketIsOpen: boolean;
+  parsedUnits: number;
   canAfford?: boolean;
   buyPrice?: number;
   sellPrice?: number;
 }
 
-export const TradeActionButton = ({
+export const TradeActionButton: React.FC<TradeActionButtonProps> = ({
   action,
   price,
   onClick,
-  disabled,
-  selectedAsset = "",
-  isExecuting = false,
-  marketIsOpen = true,
-  parsedUnits = 0,
+  disabled = false,
+  selectedAsset,
+  marketIsOpen,
+  parsedUnits,
   canAfford = true,
   buyPrice,
   sellPrice
-}: TradeActionButtonProps) => {
-  const buttonColor = action === "buy" ? "bg-success hover:bg-success/90" : "bg-warning hover:bg-warning/90";
-  const buttonText = isExecuting ? "Processing..." : action === "buy" ? "Buy" : "Sell";
-  const displayPrice = price !== undefined ? price : (action === "buy" ? buyPrice : sellPrice);
+}) => {
+  // Use provided price or fall back to action-specific price
+  const displayPrice = action === "buy" 
+    ? (buyPrice ?? price)
+    : (sellPrice ?? price);
+  
+  const isBuyDisabled = disabled || !marketIsOpen || !canAfford || parsedUnits <= 0;
+  const isSellDisabled = disabled || !marketIsOpen || parsedUnits <= 0;
   
   return (
-    <div>
-      {displayPrice !== undefined && (
-        <div className="mb-1">
-          <span className="text-sm font-medium">{action === "buy" ? "Buy" : "Sell"} Price: </span>
-          <span className="text-sm font-bold">${displayPrice?.toFixed(4)}</span>
+    <Button
+      className={`w-full ${
+        action === "buy" 
+          ? "bg-success text-white hover:bg-success/90" 
+          : "bg-warning text-white hover:bg-warning/90"
+      }`}
+      onClick={onClick}
+      disabled={action === "buy" ? isBuyDisabled : isSellDisabled}
+    >
+      <div className="flex flex-col items-center w-full">
+        <div className="flex items-center gap-1">
+          {action === "buy" ? (
+            <ArrowUp className="h-4 w-4" />
+          ) : (
+            <ArrowDown className="h-4 w-4" />
+          )}
+          <span className="font-medium">
+            {action === "buy" ? "Buy" : "Sell"} {selectedAsset}
+          </span>
         </div>
-      )}
-      <Button
-        type="submit"
-        className={`w-full text-white ${buttonColor}`}
-        onClick={onClick}
-        disabled={disabled}
-      >
-        {buttonText} {selectedAsset}
-      </Button>
-    </div>
+        <div className="text-sm mt-1">${displayPrice.toFixed(2)}</div>
+      </div>
+    </Button>
   );
 };

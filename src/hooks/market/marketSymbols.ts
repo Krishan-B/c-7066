@@ -1,12 +1,35 @@
 
-export const getSymbolsForMarketType = (marketTypes: string[]): Record<string, string[]> => {
-  const symbols: Record<string, string[]> = {
-    'Stock': ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NFLX', 'DIS', 'INTC', 'AMD'],
-    'Forex': ['EUR/USD', 'USD/JPY', 'GBP/USD', 'USD/CAD', 'AUD/USD', 'USD/CHF', 'EUR/GBP', 'EUR/JPY'],
-    'Crypto': ['BTC', 'ETH', 'XRP', 'LTC', 'SOL', 'ADA', 'DOT', 'DOGE', 'AVAX', 'LINK'],
-    'Index': ['SPY', 'QQQ', 'DIA', 'IWM', 'VTI'], // Alpha Vantage requires premium for some indices
-    'Commodity': ['GLD', 'SLV', 'USO', 'UNG', 'DBC'] // For commodities we use ETFs as proxy
-  };
-  
-  return symbols;
+interface MarketSymbols {
+  [marketType: string]: string[];
+}
+
+// Define default symbols for each market type
+const defaultSymbols: MarketSymbols = {
+  'Crypto': ['BTCUSD', 'ETHUSD', 'ADAUSD', 'SOLUSD', 'DOTUSD'],
+  'Stock': ['AAPL', 'MSFT', 'TSLA', 'AMZN', 'GOOGL'],
+  'Forex': ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD'],
+  'Index': ['SPX500', 'NASDAQ', 'DJI', 'UK100', 'JP225'],
+  'Commodities': ['XAUUSD', 'XAGUSD', 'USOIL', 'NATGAS', 'COPPER']
 };
+
+/**
+ * Get symbols for specified market types
+ */
+export function getSymbolsForMarketType(marketTypes: string[]): MarketSymbols {
+  const result: MarketSymbols = {};
+  
+  marketTypes.forEach(type => {
+    if (defaultSymbols[type]) {
+      result[type] = defaultSymbols[type];
+    }
+  });
+  
+  return result;
+}
+
+/**
+ * Get all available symbols across all market types
+ */
+export function getAllMarketSymbols(): string[] {
+  return Object.values(defaultSymbols).flat();
+}

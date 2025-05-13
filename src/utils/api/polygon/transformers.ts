@@ -1,168 +1,123 @@
 
-import { Asset } from '@/hooks/market/types';
-import { 
-  PolygonStockQuote, 
-  PolygonCryptoQuote, 
-  PolygonForexQuote 
-} from './endpoints';
+import { Asset } from '@/hooks/market';
 
 /**
- * Transform Polygon stock data to our app's Asset format
+ * Transform Polygon ticker data to Asset format
  */
-export function transformStockData(data: PolygonStockQuote): Asset | null {
-  if (!data.results || data.results.length === 0) {
+export function transformTickerToAsset(tickerData: any, priceData: any = null): Asset | null {
+  if (!tickerData || !tickerData.results) {
     return null;
   }
-
-  const result = data.results[0];
-  const previousClose = result.c;
-  const previousDay = result.o;
-  const change = previousDay > 0 ? ((previousClose - previousDay) / previousDay) * 100 : 0;
   
-  return {
-    symbol: data.ticker,
-    name: data.ticker, // We don't get the full name from this endpoint
-    price: previousClose,
-    change_percentage: parseFloat(change.toFixed(2)),
-    volume: formatVolume(result.v),
-    market_type: 'Stock',
-    last_updated: new Date().toISOString()
-  };
-}
-
-/**
- * Transform Polygon crypto data to our app's Asset format
- */
-export function transformCryptoData(data: PolygonCryptoQuote): Asset | null {
-  if (!data.results || data.results.length === 0) {
-    return null;
-  }
-
-  const result = data.results[0];
-  const currentPrice = result.c;
-  const openPrice = result.o;
-  const change = openPrice > 0 ? ((currentPrice - openPrice) / openPrice) * 100 : 0;
+  const ticker = tickerData.results;
   
-  // Remove the X: prefix if present
-  const symbol = data.ticker.startsWith('X:') ? data.ticker.substring(2) : data.ticker;
-  
-  return {
-    symbol: symbol,
-    name: getCryptoName(symbol),
-    price: currentPrice,
-    change_percentage: parseFloat(change.toFixed(2)),
-    volume: formatVolume(result.v),
-    market_type: 'Crypto',
-    last_updated: new Date().toISOString()
-  };
-}
-
-/**
- * Transform Polygon forex data to our app's Asset format
- */
-export function transformForexData(data: PolygonForexQuote): Asset | null {
-  if (!data.results || data.results.length === 0) {
-    return null;
-  }
-
-  const result = data.results[0];
-  const currentPrice = result.c;
-  const openPrice = result.o;
-  const change = openPrice > 0 ? ((currentPrice - openPrice) / openPrice) * 100 : 0;
-  
-  // Remove the C: prefix and extract currency pairs
-  const symbol = data.ticker.startsWith('C:') ? data.ticker.substring(2) : data.ticker;
-  const from = symbol.substring(0, 3);
-  const to = symbol.substring(3);
-  
-  return {
-    symbol: `${from}/${to}`,
-    name: `${from}/${to}`,
-    price: currentPrice,
-    change_percentage: parseFloat(change.toFixed(2)),
-    volume: formatVolume(result.v),
-    market_type: 'Forex',
-    last_updated: new Date().toISOString()
-  };
-}
-
-/**
- * Transform WebSocket real-time data
- * This handles different asset types based on the symbol pattern
- */
-export function transformWebSocketData(data: any): Asset | null {
-  if (!data || !data.sym || !data.c) return null;
-  
-  const symbol = data.sym;
-  const currentPrice = data.c;
-  const volume = data.v || 0;
-  const openPrice = data.o || currentPrice;
-  
-  // Calculate change percentage
-  const change = openPrice > 0 ? ((currentPrice - openPrice) / openPrice) * 100 : 0;
-  
-  // Determine market type based on symbol patterns
+  // Determine market type
   let marketType = 'Stock';
-  let name = symbol;
   
-  if (symbol.includes('USD') && symbol.length <= 6) {
+  if (ticker.type === 'CS') {
+    marketType = 'Stock';
+  } else if (ticker.market === 'crypto') {
     marketType = 'Crypto';
-    name = getCryptoName(symbol);
-  } else if (symbol.length === 6 && 
-            ['EUR', 'USD', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'NZD'].some(
-              currency => symbol.includes(currency))) {
+  } else if (ticker.market === 'fx') {
     marketType = 'Forex';
-    const from = symbol.substring(0, 3);
-    const to = symbol.substring(3);
-    name = `${from}/${to}`;
-  } else if (['SPX', 'NDX', 'DJI', 'US500', 'FTSE', 'DAX'].some(index => symbol.includes(index))) {
+  } else if (ticker.type === 'ETF') {
+    marketType = 'ETF';
+  } else if (ticker.market === 'index') {
     marketType = 'Index';
-  } else if (['GC', 'SI', 'CL', 'NG', 'XAUUSD', 'XAGUSD'].some(commodity => symbol.includes(commodity))) {
-    marketType = 'Commodity';
   }
   
+  // Get price from price data or use placeholder
+  const price = priceData?.results?.c || priceData?.results?.last?.price || 0;
+  const previousClose = priceData?.results?.pc || 0;
+  const changePercentage = previousClose ? ((price - previousClose) / previousClose) * 100 : 0;
+  
+  // Format volume
+  const volume = priceData?.results?.v || 0;
+  const formattedVolume = volume > 1000000000
+    ? `${(volume / 1000000000).toFixed(1)}B`
+    : volume > 1000000
+      ? `${(volume / 1000000).toFixed(1)}M`
+      : volume > 1000
+        ? `${(volume / 1000).toFixed(1)}K`
+        : volume.toString();
+  
   return {
-    symbol: symbol,
-    name: name,
-    price: currentPrice,
-    change_percentage: parseFloat(change.toFixed(2)),
-    volume: formatVolume(volume),
+    symbol: ticker.ticker,
+    name: ticker.name || ticker.ticker,
+    price: price,
+    change_percentage: changePercentage,
     market_type: marketType,
+    volume: formattedVolume,
     last_updated: new Date().toISOString()
   };
 }
 
 /**
- * Format volume for display
+ * Transform Polygon quote data to Asset format
  */
-function formatVolume(volume: number): string {
-  if (volume >= 1e9) {
-    return `${(volume / 1e9).toFixed(1)}B`;
-  } else if (volume >= 1e6) {
-    return `${(volume / 1e6).toFixed(1)}M`;
-  } else if (volume >= 1e3) {
-    return `${(volume / 1e3).toFixed(1)}K`;
-  } else {
-    return volume.toString();
+export function transformQuoteToAsset(symbol: string, name: string, quoteData: any): Asset | null {
+  if (!quoteData || !quoteData.results) {
+    return null;
   }
+  
+  const quote = quoteData.results;
+  
+  // Determine market type based on symbol pattern
+  let marketType = 'Stock';
+  
+  if (symbol.includes('USD')) {
+    marketType = 'Crypto';
+  } else if (symbol.includes('/')) {
+    marketType = 'Forex';
+  } else if (symbol.startsWith('^')) {
+    marketType = 'Index';
+  }
+  
+  // Calculate mid price
+  const price = (quote.ap + quote.bp) / 2;
+  
+  // We don't have previous close in quotes, so we can't calculate change
+  const changePercentage = 0;
+  
+  return {
+    symbol,
+    name,
+    price,
+    change_percentage: changePercentage,
+    market_type: marketType,
+    volume: 'N/A',
+    last_updated: new Date().toISOString()
+  };
 }
 
 /**
- * Get crypto name from symbol
+ * Transform Polygon trade data to Asset format
  */
-function getCryptoName(symbol: string): string {
-  // Simple mapping for common cryptocurrencies
-  const cryptoNames: Record<string, string> = {
-    'BTCUSD': 'Bitcoin',
-    'ETHUSD': 'Ethereum',
-    'LTCUSD': 'Litecoin',
-    'XRPUSD': 'Ripple',
-    'BCHUSD': 'Bitcoin Cash',
-    'ADAUSD': 'Cardano',
-    'DOTUSD': 'Polkadot',
-    'SOLUSD': 'Solana',
-    'LINKUSD': 'Chainlink',
-  };
+export function transformTradeToAsset(symbol: string, name: string, tradeData: any): Asset | null {
+  if (!tradeData || !tradeData.results) {
+    return null;
+  }
   
-  return cryptoNames[symbol] || symbol;
+  const trade = tradeData.results;
+  
+  // Determine market type based on symbol pattern
+  let marketType = 'Stock';
+  
+  if (symbol.includes('USD')) {
+    marketType = 'Crypto';
+  } else if (symbol.includes('/')) {
+    marketType = 'Forex';
+  } else if (symbol.startsWith('^')) {
+    marketType = 'Index';
+  }
+  
+  return {
+    symbol,
+    name,
+    price: trade.p,
+    change_percentage: 0, // We don't have previous close in trades
+    market_type: marketType,
+    volume: trade.s ? trade.s.toString() : 'N/A',
+    last_updated: new Date().toISOString()
+  };
 }

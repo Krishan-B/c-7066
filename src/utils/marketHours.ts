@@ -1,88 +1,56 @@
 
-// Market hours utility to determine if markets are open
-
-interface MarketHoursConfig {
-  openTime: number; // Hour in UTC (0-23)
-  closeTime: number; // Hour in UTC (0-23)
-  isOpen24Hours: boolean;
-  openDays: number[]; // Days of week when market is open (0 = Sunday, 6 = Saturday)
+/**
+ * Check if a specific market is currently open
+ * This is a simplified implementation and should be replaced with actual market hours logic
+ */
+export function isMarketOpen(marketType: string): boolean {
+  // Current time in UTC
+  const now = new Date();
+  const utcHour = now.getUTCHours();
+  const utcDay = now.getUTCDay(); // 0 = Sunday, 1 = Monday, etc.
+  
+  // Weekend check for certain markets
+  const isWeekend = utcDay === 0 || utcDay === 6; // Sunday or Saturday
+  
+  switch (marketType.toLowerCase()) {
+    case 'crypto':
+      // Crypto markets are always open
+      return true;
+    case 'forex':
+      // Forex is open 24/5 (closed on weekends)
+      return !isWeekend;
+    case 'stocks':
+      // US stock markets: 9:30 AM - 4:00 PM ET (14:30 - 21:00 UTC)
+      // Only open on weekdays
+      return !isWeekend && utcHour >= 14 && utcHour < 21;
+    case 'indices':
+      // Most major indices follow stock market hours
+      return !isWeekend && utcHour >= 14 && utcHour < 21;
+    case 'commodities':
+      // Commodities markets have complex hours, simplified for demo
+      return !isWeekend && utcHour >= 14 && utcHour < 21;
+    default:
+      // Default to closed if market type unknown
+      return false;
+  }
 }
 
-export const marketConfig: Record<string, MarketHoursConfig> = {
-  "Crypto": {
-    openTime: 0,
-    closeTime: 24,
-    isOpen24Hours: true,
-    openDays: [0, 1, 2, 3, 4, 5, 6] // Open every day
-  },
-  "Forex": {
-    openTime: 22, // Sunday 10 PM UTC
-    closeTime: 21, // Friday 9 PM UTC
-    isOpen24Hours: false,
-    openDays: [0, 1, 2, 3, 4, 5] // Sunday to Friday
-  },
-  "Stock": {
-    openTime: 13, // 9 AM EST = 1 PM UTC
-    closeTime: 20, // 4 PM EST = 8 PM UTC
-    isOpen24Hours: false,
-    openDays: [1, 2, 3, 4, 5] // Monday to Friday
-  },
-  "Index": {
-    openTime: 13, // 9 AM EST = 1 PM UTC
-    closeTime: 20, // 4 PM EST = 8 PM UTC
-    isOpen24Hours: false,
-    openDays: [1, 2, 3, 4, 5] // Monday to Friday
-  },
-  "Commodity": {
-    openTime: 14, // 10 AM EST = 2 PM UTC
-    closeTime: 21, // 5 PM EST = 9 PM UTC
-    isOpen24Hours: false,
-    openDays: [1, 2, 3, 4, 5] // Monday to Friday
+/**
+ * Get a message about market hours based on market type
+ */
+export function getMarketHoursMessage(marketType: string): string {
+  switch (marketType.toLowerCase()) {
+    case 'crypto':
+      return 'Cryptocurrency markets are open 24/7, 365 days a year.';
+    case 'forex':
+      return 'Forex markets are open 24 hours from Sunday 5 PM ET to Friday 5 PM ET.';
+    case 'stocks':
+      return 'Stock markets are generally open from 9:30 AM to 4:00 PM ET, Monday through Friday.';
+    case 'indices':
+      return 'Index markets typically follow stock market hours: 9:30 AM to 4:00 PM ET, Monday through Friday.';
+    case 'commodities':
+      return 'Commodities markets have various trading hours depending on the exchange and specific commodity.';
+    default:
+      return 'Please check the trading hours for this market type.';
   }
-};
-
-export const isMarketOpen = (marketType: string): boolean => {
-  // Default to closed if market type is unknown
-  if (!marketConfig[marketType]) {
-    console.warn(`Unknown market type: ${marketType}`);
-    return false;
-  }
-  
-  const config = marketConfig[marketType];
-  
-  // 24/7 markets are always open
-  if (config.isOpen24Hours) {
-    return true;
-  }
-  
-  const now = new Date();
-  const currentDay = now.getUTCDay(); // 0-6 (Sunday-Saturday)
-  const currentHour = now.getUTCHours(); // 0-23
-  
-  // Check if current day is a trading day
-  if (!config.openDays.includes(currentDay)) {
-    return false;
-  }
-  
-  // Check if current hour is within trading hours
-  return currentHour >= config.openTime && currentHour < config.closeTime;
-};
-
-export const getMarketHoursMessage = (marketType: string): string => {
-  if (!marketConfig[marketType]) {
-    return "Trading hours information unavailable";
-  }
-  
-  const config = marketConfig[marketType];
-  
-  if (config.isOpen24Hours) {
-    return "This market trades 24/7, every day of the week.";
-  }
-  
-  const days = config.openDays.map(day => {
-    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    return dayNames[day];
-  }).join(", ");
-  
-  return `${marketType} markets trade from ${config.openTime}:00 to ${config.closeTime}:00 UTC on ${days}.`;
-};
+}

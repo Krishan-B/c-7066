@@ -1,86 +1,96 @@
 
-/**
- * Polygon.io API client
- */
+import { supabase } from '@/integrations/supabase/client';
 
-const POLYGON_BASE_URL = 'https://api.polygon.io';
-let POLYGON_API_KEY: string | undefined;
+// Base URL for Polygon.io API
+const POLYGON_API_BASE_URL = 'https://api.polygon.io';
 
 /**
- * Set the Polygon.io API key
- * @param apiKey The API key
+ * Get the API key from Supabase Edge Function
  */
-export function setPolygonApiKey(apiKey: string) {
-  POLYGON_API_KEY = apiKey;
+export async function getPolygonApiKey(): Promise<string | null> {
+  try {
+    const { data, error } = await supabase.functions.invoke('get-secret', {
+      body: { secretName: 'POLYGON_API_KEY' }
+    });
+    
+    if (error) {
+      console.error('Error fetching Polygon API key:', error);
+      return null;
+    }
+    
+    return data?.value || null;
+  } catch (error) {
+    console.error('Error in getPolygonApiKey:', error);
+    return null;
+  }
 }
 
 /**
- * Get the Polygon.io API key
+ * Check if the Polygon API key is available
  */
-export function getPolygonApiKey(): string | undefined {
-  return POLYGON_API_KEY;
-}
-
-/**
- * Check if the Polygon.io API key is set
- */
-export function hasPolygonApiKey(): boolean {
-  return !!POLYGON_API_KEY;
-}
-
-interface PolygonRequestOptions {
-  endpoint: string;
-  params?: Record<string, string | number | boolean>;
+export async function hasPolygonApiKey(): Promise<boolean> {
+  const key = await getPolygonApiKey();
+  return !!key;
 }
 
 /**
  * Make a request to the Polygon.io API
- * @param options Request options
- * @returns Response data
  */
-export async function fetchPolygonData<T>(options: PolygonRequestOptions): Promise<T> {
-  if (!POLYGON_API_KEY) {
-    throw new Error('Polygon API key is not set');
-  }
-
-  const { endpoint, params = {} } = options;
-  
-  // Append API key to params
-  const queryParams = new URLSearchParams();
-  queryParams.append('apiKey', POLYGON_API_KEY);
-  
-  // Add additional params
-  Object.entries(params).forEach(([key, value]) => {
-    queryParams.append(key, value.toString());
-  });
-  
-  const url = `${POLYGON_BASE_URL}${endpoint}?${queryParams.toString()}`;
-  
+export async function polygonRequest<T>(
+  endpoint: string,
+  params: Record<string, any> = {}
+): Promise<T> {
   try {
-    const response = await fetch(url);
+    const apiKey = await getPolygonApiKey();
+    
+    if (!apiKey) {
+      throw new Error('Polygon API key not found');
+    }
+    
+    // Build URL with query parameters
+    const url = new URL(`${POLYGON_API_BASE_URL}${endpoint}`);
+    
+    // Add API key to params
+    params.apiKey = apiKey;
+    
+    // Add query parameters
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        url.searchParams.append(key, value.toString());
+      }
+    });
+    
+    // Make the request
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Polygon API error (${response.status}): ${errorText}`);
     }
     
-    return response.json() as Promise<T>;
+    return await response.json() as T;
   } catch (error) {
-    console.error('Polygon API request failed:', error);
+    console.error('Error in polygonRequest:', error);
     throw error;
   }
 }
 
-// Export WebSocket functionality
-export { 
-  initPolygonWebSocket,
-  closePolygonWebSocket,
-  setPolygonWebSocketApiKey,
-  subscribeToSymbols,
-  unsubscribeFromSymbols,
-  onPolygonEvent,
-  offPolygonEvent,
-  addMessageHandler,
-  removeMessageHandler,
-  processPolygonMessage
-} from './websocket';
+/**
+ * Helper function for simplified requests
+ */
+export async function getPolygonData<T>(
+  endpoint: string,
+  params: Record<string, any> = {}
+): Promise<T | null> {
+  try {
+    return await polygonRequest<T>(endpoint, params);
+  } catch (error) {
+    console.error(`Error fetching data from ${endpoint}:`, error);
+    return null;
+  }
+}

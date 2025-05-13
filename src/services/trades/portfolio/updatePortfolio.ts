@@ -1,72 +1,75 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { TradeParams } from "../types";
+import { PortfolioUpdateParams, PortfolioUpdateResult } from "../types";
 
 /**
- * Updates the user's portfolio after executing a trade
+ * Update user's portfolio
  */
-export async function updatePortfolio(tradeParams: TradeParams): Promise<void> {
+export async function updatePortfolio(params: PortfolioUpdateParams): Promise<PortfolioUpdateResult> {
   try {
-    // Check if we already have this asset in the portfolio
-    const { data: portfolioData, error: portfolioError } = await supabase
+    const { userId, assetId, amount, price, direction } = params;
+    
+    // Get existing portfolio entry
+    const { data: existingEntry } = await supabase
       .from('user_portfolio')
-      .select('*')
-      .eq('asset_symbol', tradeParams.assetSymbol)
+      .select()
+      .eq('user_id', userId)
+      .eq('asset_id', assetId)
       .single();
     
-    if (portfolioError && portfolioError.code !== 'PGRST116') {
-      throw new Error(`Portfolio query failed: ${portfolioError.message}`);
+    let result;
+    
+    if (existingEntry) {
+      // Update existing entry
+      const currentAmount = existingEntry.amount;
+      const newAmount = direction === 'buy' 
+        ? currentAmount + amount 
+        : currentAmount - amount;
+      
+      // Calculate average price
+      const avgPrice = direction === 'buy'
+        ? ((currentAmount * existingEntry.avg_price) + (amount * price)) / (currentAmount + amount)
+        : existingEntry.avg_price;
+      
+      result = await supabase
+        .from('user_portfolio')
+        .update({
+          amount: newAmount,
+          avg_price: avgPrice,
+          last_updated: new Date().toISOString()
+        })
+        .eq('id', existingEntry.id)
+        .select();
+    } else {
+      // Create new entry
+      result = await supabase
+        .from('user_portfolio')
+        .insert({
+          user_id: userId,
+          asset_id: assetId,
+          amount: amount,
+          avg_price: price,
+          last_updated: new Date().toISOString()
+        })
+        .select();
     }
     
-    if (!portfolioData) {
-      await createPortfolioEntry(tradeParams);
-    } else {
-      await updatePortfolioEntry(portfolioData, tradeParams);
+    if (result.error) {
+      throw new Error(`Failed to update portfolio: ${result.error.message}`);
     }
+    
+    return {
+      success: true,
+      portfolioId: result.data[0].id,
+      message: `Successfully updated portfolio for ${assetId}`
+    };
+    
   } catch (error) {
-    console.error('Error updating portfolio:', error);
-    // We don't want to fail the whole operation if portfolio update fails
-    toast.error('Error updating portfolio. Please check your portfolio data.');
+    console.error("Portfolio update error:", error);
+    
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error occurred"
+    };
   }
-}
-
-/**
- * Creates a new portfolio entry for an asset
- */
-async function createPortfolioEntry(tradeParams: TradeParams): Promise<void> {
-  await supabase
-    .from('user_portfolio')
-    .insert({
-      asset_symbol: tradeParams.assetSymbol,
-      asset_name: tradeParams.assetName,
-      market_type: tradeParams.marketType,
-      units: tradeParams.units,
-      average_price: tradeParams.pricePerUnit,
-      current_price: tradeParams.pricePerUnit,
-      total_value: tradeParams.units * tradeParams.pricePerUnit,
-      pnl: 0,
-      pnl_percentage: 0,
-    });
-}
-
-/**
- * Updates an existing portfolio entry with new trade data
- */
-async function updatePortfolioEntry(portfolioData: any, tradeParams: TradeParams): Promise<void> {
-  const totalUnits = portfolioData.units + tradeParams.units;
-  const totalCost = (portfolioData.average_price * portfolioData.units) + 
-                    (tradeParams.pricePerUnit * tradeParams.units);
-  const newAvgPrice = totalCost / totalUnits;
-  
-  await supabase
-    .from('user_portfolio')
-    .update({
-      units: totalUnits,
-      average_price: newAvgPrice,
-      current_price: tradeParams.pricePerUnit,
-      total_value: totalUnits * tradeParams.pricePerUnit,
-      last_updated: new Date().toISOString()
-    })
-    .eq('id', portfolioData.id);
 }
