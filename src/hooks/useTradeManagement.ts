@@ -1,33 +1,14 @@
 
 import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { closePosition, cancelPendingOrder } from '@/services/tradeService';
-import { toast } from "sonner";
+import { Trade, TradeManagement } from './trades/types';
+import { fetchTradesByStatus, closeTradePosition, cancelTradeOrder } from './trades/tradeAPI';
+import { useTradeSubscription } from './trades/useTradeSubscription';
 
-export interface Trade {
-  id: string;
-  asset_symbol: string;
-  asset_name: string;
-  market_type: string;
-  units: number;
-  price_per_unit: number;
-  total_amount: number;
-  trade_type: 'buy' | 'sell';
-  order_type: 'market' | 'entry';
-  status: 'open' | 'pending' | 'closed' | 'cancelled';
-  stop_loss: number | null;
-  take_profit: number | null;
-  expiration_date: string | null;
-  created_at: string;
-  executed_at: string | null;
-  closed_at: string | null;
-  pnl: number | null;
-  current_price?: number;
-  current_pnl?: number;
-}
-
-export const useTradeManagement = () => {
+/**
+ * Hook for managing user trade operations
+ */
+export const useTradeManagement = (): TradeManagement => {
   const [openPositions, setOpenPositions] = useState<Trade[]>([]);
   const [pendingOrders, setPendingOrders] = useState<Trade[]>([]);
   const [closedTrades, setClosedTrades] = useState<Trade[]>([]);
@@ -40,6 +21,7 @@ export const useTradeManagement = () => {
     pending: true,
     closed: true,
   });
+  
   const { user } = useAuth();
 
   const fetchOpenPositions = useCallback(async () => {
@@ -47,27 +29,8 @@ export const useTradeManagement = () => {
     
     try {
       setLoading(prev => ({ ...prev, open: true }));
-      
-      const { data, error } = await supabase
-        .from('user_trades')
-        .select('*')
-        .eq('status', 'open')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      // Type coercion for database results
-      const typedData = data?.map(item => ({
-        ...item,
-        trade_type: item.trade_type as 'buy' | 'sell',
-        order_type: item.order_type as 'market' | 'entry',
-        status: item.status as 'open' | 'pending' | 'closed' | 'cancelled'
-      })) || [];
-      
-      setOpenPositions(typedData);
-    } catch (error) {
-      console.error('Error fetching open positions:', error);
-      toast.error('Failed to load open positions');
+      const trades = await fetchTradesByStatus('open');
+      setOpenPositions(trades);
     } finally {
       setLoading(prev => ({ ...prev, open: false }));
     }
@@ -78,27 +41,8 @@ export const useTradeManagement = () => {
     
     try {
       setLoading(prev => ({ ...prev, pending: true }));
-      
-      const { data, error } = await supabase
-        .from('user_trades')
-        .select('*')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      // Type coercion for database results
-      const typedData = data?.map(item => ({
-        ...item,
-        trade_type: item.trade_type as 'buy' | 'sell',
-        order_type: item.order_type as 'market' | 'entry',
-        status: item.status as 'open' | 'pending' | 'closed' | 'cancelled'
-      })) || [];
-      
-      setPendingOrders(typedData);
-    } catch (error) {
-      console.error('Error fetching pending orders:', error);
-      toast.error('Failed to load pending orders');
+      const trades = await fetchTradesByStatus('pending');
+      setPendingOrders(trades);
     } finally {
       setLoading(prev => ({ ...prev, pending: false }));
     }
@@ -109,95 +53,62 @@ export const useTradeManagement = () => {
     
     try {
       setLoading(prev => ({ ...prev, closed: true }));
-      
-      const { data, error } = await supabase
-        .from('user_trades')
-        .select('*')
-        .in('status', ['closed', 'cancelled'])
-        .order('closed_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      // Type coercion for database results
-      const typedData = data?.map(item => ({
-        ...item,
-        trade_type: item.trade_type as 'buy' | 'sell',
-        order_type: item.order_type as 'market' | 'entry',
-        status: item.status as 'open' | 'pending' | 'closed' | 'cancelled'
-      })) || [];
-      
-      setClosedTrades(typedData);
-    } catch (error) {
-      console.error('Error fetching closed trades:', error);
-      toast.error('Failed to load trade history');
+      const trades = await fetchTradesByStatus(['closed', 'cancelled']);
+      setClosedTrades(trades);
     } finally {
       setLoading(prev => ({ ...prev, closed: false }));
     }
   }, [user]);
 
-  const handleClosePosition = useCallback(async (
+  const handleTradeUpdate = useCallback((status: string) => {
+    // Refresh relevant data based on the status
+    if (status === 'open') {
+      fetchOpenPositions();
+    } else if (status === 'pending') {
+      fetchPendingOrders();
+    } else {
+      fetchClosedTrades();
+    }
+  }, [fetchOpenPositions, fetchPendingOrders, fetchClosedTrades]);
+
+  // Set up real-time subscription for trade updates
+  useTradeSubscription(user?.id, handleTradeUpdate);
+
+  // Initial data fetch
+  useEffect(() => {
+    if (user) {
+      fetchOpenPositions();
+      fetchPendingOrders();
+      fetchClosedTrades();
+    }
+  }, [user, fetchOpenPositions, fetchPendingOrders, fetchClosedTrades]);
+
+  // Handle closing a position
+  const closePosition = useCallback(async (
     tradeId: string,
     currentPrice: number
   ) => {
-    const result = await closePosition(tradeId, currentPrice);
+    const result = await closeTradePosition(tradeId, currentPrice);
     
     if (result.success) {
-      toast.success(result.message);
       fetchOpenPositions();
       fetchClosedTrades();
-    } else {
-      toast.error(result.message);
     }
     
     return result;
   }, [fetchOpenPositions, fetchClosedTrades]);
 
-  const handleCancelOrder = useCallback(async (tradeId: string) => {
-    const result = await cancelPendingOrder(tradeId);
+  // Handle canceling an order
+  const cancelOrder = useCallback(async (tradeId: string) => {
+    const result = await cancelTradeOrder(tradeId);
     
     if (result.success) {
-      toast.success(result.message);
       fetchPendingOrders();
       fetchClosedTrades();
-    } else {
-      toast.error(result.message);
     }
     
     return result;
   }, [fetchPendingOrders, fetchClosedTrades]);
-
-  // Set up listeners for real-time updates
-  useEffect(() => {
-    if (!user) return;
-    
-    const tradesChannel = supabase
-      .channel('user_trades_changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'user_trades' },
-        payload => {
-          // Refresh relevant data based on the updated record
-          const record = payload.new as any;
-          
-          if (record.status === 'open') {
-            fetchOpenPositions();
-          } else if (record.status === 'pending') {
-            fetchPendingOrders();
-          } else {
-            fetchClosedTrades();
-          }
-        })
-      .subscribe();
-    
-    // Initial data fetch
-    fetchOpenPositions();
-    fetchPendingOrders();
-    fetchClosedTrades();
-    
-    // Cleanup subscription
-    return () => {
-      tradesChannel.unsubscribe();
-    };
-  }, [user, fetchOpenPositions, fetchPendingOrders, fetchClosedTrades]);
 
   return {
     openPositions,
@@ -207,7 +118,10 @@ export const useTradeManagement = () => {
     fetchOpenPositions,
     fetchPendingOrders,
     fetchClosedTrades,
-    closePosition: handleClosePosition,
-    cancelOrder: handleCancelOrder
+    closePosition,
+    cancelOrder
   };
 };
+
+// Re-export the Trade type for backwards compatibility
+export type { Trade } from './trades/types';
