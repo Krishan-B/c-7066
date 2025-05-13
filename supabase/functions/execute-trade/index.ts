@@ -22,6 +22,32 @@ interface TradeResult {
   message: string;
 }
 
+interface UserAccount {
+  id: string;
+  cash_balance: number;
+  equity: number;
+  used_margin: number;
+  available_funds: number;
+  realized_pnl?: number;
+  unrealized_pnl?: number;
+  last_updated?: string;
+}
+
+interface Portfolio {
+  id?: string;
+  user_id?: string;
+  asset_symbol: string;
+  asset_name: string;
+  market_type: string;
+  units: number;
+  average_price: number;
+  current_price: number;
+  total_value: number;
+  pnl: number;
+  pnl_percentage: number;
+  last_updated?: string;
+}
+
 // Define leverage map
 const LEVERAGE_MAP: Record<string, number> = {
   'Stocks': 20,
@@ -37,71 +63,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Handle requests
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+/**
+ * Calculate margin required for a position
+ */
+function calculateMarginRequired(marketType: string, totalAmount: number): number {
+  const leverage = LEVERAGE_MAP[marketType] || 1;
+  return totalAmount / leverage;
+}
 
-  try {
-    // Get Supabase client
-    const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
-    const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Get auth user
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'No authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Get client and user
-    const { data: { user }, error: userError } = await supabase.auth.getUser(authHeader.split(' ')[1]);
-    if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid token or user not found' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Parse request
-    const tradeRequest: TradeRequest = await req.json();
-    
-    // Validate request
-    if (!validateTradeRequest(tradeRequest)) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid trade parameters' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Process based on order type
-    let result: TradeResult;
-    
-    if (tradeRequest.orderType === 'market') {
-      result = await executeMarketOrder(supabase, user.id, tradeRequest);
-    } else {
-      result = await executeEntryOrder(supabase, user.id, tradeRequest);
-    }
-
-    return new Response(
-      JSON.stringify(result),
-      { status: result.success ? 200 : 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  } catch (error) {
-    console.error('Error processing trade:', error);
-    return new Response(
-      JSON.stringify({ success: false, message: error.message || 'Unknown error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  }
-});
-
-// Helper functions
+/**
+ * Validate the trade request parameters
+ */
 function validateTradeRequest(request: TradeRequest): boolean {
   return !!(
     request.assetSymbol &&
@@ -114,19 +86,36 @@ function validateTradeRequest(request: TradeRequest): boolean {
   );
 }
 
-function calculateMarginRequired(marketType: string, totalAmount: number): number {
-  const leverage = LEVERAGE_MAP[marketType] || 1;
-  return totalAmount / leverage;
+/**
+ * Get Supabase client
+ */
+function getSupabaseClient() {
+  const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
+  const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
-async function executeMarketOrder(supabase: any, userId: string, params: TradeRequest): Promise<TradeResult> {
-  // Calculate total amount
-  const totalAmount = params.units * params.pricePerUnit;
+/**
+ * Get user from auth token
+ */
+async function getUserFromToken(supabase: any, authHeader: string | null): Promise<{ user: any; error: any }> {
+  if (!authHeader) {
+    return { user: null, error: 'No authorization header' };
+  }
   
-  // Calculate required margin
-  const marginRequired = calculateMarginRequired(params.marketType, totalAmount);
+  const { data: { user }, error } = await supabase.auth.getUser(authHeader.split(' ')[1]);
   
-  // Get user's account
+  if (error || !user) {
+    return { user: null, error: 'Invalid token or user not found' };
+  }
+  
+  return { user, error: null };
+}
+
+/**
+ * Get user account data
+ */
+async function getUserAccount(supabase: any, userId: string): Promise<{ account: UserAccount | null; error: any }> {
   const { data: accountData, error: accountError } = await supabase
     .from('user_account')
     .select('*')
@@ -134,102 +123,144 @@ async function executeMarketOrder(supabase: any, userId: string, params: TradeRe
     .single();
   
   if (accountError) {
-    throw new Error(`Failed to get account data: ${accountError.message}`);
+    return { account: null, error: `Failed to get account data: ${accountError.message}` };
   }
   
-  // Check if user has enough funds
-  if (accountData.available_funds < marginRequired) {
+  return { account: accountData, error: null };
+}
+
+/**
+ * Execute a market order
+ */
+async function executeMarketOrder(supabase: any, userId: string, params: TradeRequest): Promise<TradeResult> {
+  try {
+    // Calculate total amount
+    const totalAmount = params.units * params.pricePerUnit;
+    
+    // Calculate required margin
+    const marginRequired = calculateMarginRequired(params.marketType, totalAmount);
+    
+    // Get user's account
+    const { account, error: accountError } = await getUserAccount(supabase, userId);
+    
+    if (accountError) {
+      throw new Error(accountError);
+    }
+    
+    // Check if user has enough funds
+    if (account!.available_funds < marginRequired) {
+      return {
+        success: false,
+        message: `Insufficient funds. Required: ${marginRequired.toFixed(2)}, Available: ${account!.available_funds.toFixed(2)}`
+      };
+    }
+    
+    // Create the trade record
+    const { data: tradeData, error: tradeError } = await supabase
+      .from('user_trades')
+      .insert({
+        user_id: userId,
+        asset_symbol: params.assetSymbol,
+        asset_name: params.assetName,
+        market_type: params.marketType,
+        units: params.units,
+        price_per_unit: params.pricePerUnit,
+        total_amount: totalAmount,
+        trade_type: params.tradeType,
+        order_type: params.orderType,
+        status: 'open',
+        stop_loss: params.stopLoss || null,
+        take_profit: params.takeProfit || null,
+        executed_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+    
+    if (tradeError) {
+      throw new Error(`Failed to create trade: ${tradeError.message}`);
+    }
+    
+    // Update user account metrics
+    const { error: updateError } = await supabase
+      .from('user_account')
+      .update({
+        used_margin: account!.used_margin + marginRequired,
+        available_funds: account!.available_funds - marginRequired,
+        last_updated: new Date().toISOString()
+      })
+      .eq('id', userId);
+    
+    if (updateError) {
+      throw new Error(`Failed to update account: ${updateError.message}`);
+    }
+    
+    // Update or create portfolio entry
+    await updatePortfolio(supabase, userId, params);
+    
+    return {
+      success: true,
+      tradeId: tradeData.id,
+      message: 'Trade executed successfully'
+    };
+  } catch (error) {
+    console.error('Error processing market order:', error);
     return {
       success: false,
-      message: `Insufficient funds. Required: ${marginRequired.toFixed(2)}, Available: ${accountData.available_funds.toFixed(2)}`
+      message: error instanceof Error ? error.message : 'Unknown error'
     };
   }
-  
-  // Create the trade record
-  const { data: tradeData, error: tradeError } = await supabase
-    .from('user_trades')
-    .insert({
-      user_id: userId,
-      asset_symbol: params.assetSymbol,
-      asset_name: params.assetName,
-      market_type: params.marketType,
-      units: params.units,
-      price_per_unit: params.pricePerUnit,
-      total_amount: totalAmount,
-      trade_type: params.tradeType,
-      order_type: params.orderType,
-      status: 'open',
-      stop_loss: params.stopLoss || null,
-      take_profit: params.takeProfit || null,
-      executed_at: new Date().toISOString()
-    })
-    .select()
-    .single();
-  
-  if (tradeError) {
-    throw new Error(`Failed to create trade: ${tradeError.message}`);
-  }
-  
-  // Update user account metrics
-  const { error: updateError } = await supabase
-    .from('user_account')
-    .update({
-      used_margin: accountData.used_margin + marginRequired,
-      available_funds: accountData.available_funds - marginRequired,
-      last_updated: new Date().toISOString()
-    })
-    .eq('id', userId);
-  
-  if (updateError) {
-    throw new Error(`Failed to update account: ${updateError.message}`);
-  }
-  
-  // Update or create portfolio entry
-  await updatePortfolio(supabase, userId, params);
-  
-  return {
-    success: true,
-    tradeId: tradeData.id,
-    message: 'Trade executed successfully'
-  };
 }
 
+/**
+ * Execute an entry order (pending)
+ */
 async function executeEntryOrder(supabase: any, userId: string, params: TradeRequest): Promise<TradeResult> {
-  // For entry orders, we validate but don't check funds until execution
-  const totalAmount = params.units * params.pricePerUnit;
-  
-  // Create the trade record as a pending order
-  const { data: tradeData, error: tradeError } = await supabase
-    .from('user_trades')
-    .insert({
-      user_id: userId,
-      asset_symbol: params.assetSymbol,
-      asset_name: params.assetName,
-      market_type: params.marketType,
-      units: params.units,
-      price_per_unit: params.pricePerUnit,
-      total_amount: totalAmount,
-      trade_type: params.tradeType,
-      order_type: 'entry',
-      status: 'pending',
-      stop_loss: params.stopLoss || null,
-      take_profit: params.takeProfit || null,
-      expiration_date: params.expirationDate || null
-    })
-    .select()
-    .single();
-  
-  if (tradeError) {
-    throw new Error(`Failed to create entry order: ${tradeError.message}`);
+  try {
+    // For entry orders, we validate but don't check funds until execution
+    const totalAmount = params.units * params.pricePerUnit;
+    
+    // Create the trade record as a pending order
+    const { data: tradeData, error: tradeError } = await supabase
+      .from('user_trades')
+      .insert({
+        user_id: userId,
+        asset_symbol: params.assetSymbol,
+        asset_name: params.assetName,
+        market_type: params.marketType,
+        units: params.units,
+        price_per_unit: params.pricePerUnit,
+        total_amount: totalAmount,
+        trade_type: params.tradeType,
+        order_type: 'entry',
+        status: 'pending',
+        stop_loss: params.stopLoss || null,
+        take_profit: params.takeProfit || null,
+        expiration_date: params.expirationDate || null
+      })
+      .select()
+      .single();
+    
+    if (tradeError) {
+      throw new Error(`Failed to create entry order: ${tradeError.message}`);
+    }
+    
+    return {
+      success: true,
+      tradeId: tradeData.id,
+      message: 'Entry order placed successfully'
+    };
+  } catch (error) {
+    console.error('Error placing entry order:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
-  
-  return {
-    success: true,
-    tradeId: tradeData.id,
-    message: 'Entry order placed successfully'
-  };
 }
 
+/**
+ * Update portfolio with new trade position
+ */
 async function updatePortfolio(supabase: any, userId: string, params: TradeRequest): Promise<void> {
   try {
     // Check if we already have this asset in the portfolio
@@ -283,3 +314,58 @@ async function updatePortfolio(supabase: any, userId: string, params: TradeReque
     // We don't want to fail the whole operation if portfolio update fails
   }
 }
+
+// Main request handler
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    // Initialize Supabase client
+    const supabase = getSupabaseClient();
+
+    // Get auth user
+    const authHeader = req.headers.get('Authorization');
+    const { user, error: userError } = await getUserFromToken(supabase, authHeader);
+    
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: userError || 'User authentication failed' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Parse request
+    const tradeRequest: TradeRequest = await req.json();
+    
+    // Validate request
+    if (!validateTradeRequest(tradeRequest)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid trade parameters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Process based on order type
+    let result: TradeResult;
+    
+    if (tradeRequest.orderType === 'market') {
+      result = await executeMarketOrder(supabase, user.id, tradeRequest);
+    } else {
+      result = await executeEntryOrder(supabase, user.id, tradeRequest);
+    }
+
+    return new Response(
+      JSON.stringify(result),
+      { status: result.success ? 200 : 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Error processing trade:', error);
+    return new Response(
+      JSON.stringify({ success: false, message: error.message || 'Unknown error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
