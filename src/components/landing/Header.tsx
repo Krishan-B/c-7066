@@ -16,7 +16,7 @@ const Header = () => {
       transition={{ duration: 0.3 }}
       className="border-b border-secondary/40 sticky top-0 z-50 bg-background shadow-sm"
     >
-      <div className="container flex items-center justify-between py-4">
+      <div className="container flex items-center justify-between py-3">
         <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
           <LineChart className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold ml-2 text-foreground">TradePro</h1>

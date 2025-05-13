@@ -11,7 +11,7 @@ const HeroSection: React.FC = () => {
   const { theme } = useTheme();
 
   return (
-    <section className="py-16 md:py-24 container overflow-hidden">
+    <section className="py-10 md:py-16 container overflow-hidden">
       <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12">
         <motion.div 
           className="flex-1 space-y-6 md:space-y-8" 
@@ -28,11 +28,6 @@ const HeroSection: React.FC = () => {
             delay: 0.2
           }}
         >
-          <div className="inline-flex items-center px-3 py-1 text-sm bg-primary/10 text-primary rounded-full">
-            <span className="animate-pulse-subtle">●</span>
-            <span className="ml-2">Trading made simple - Start today</span>
-          </div>
-          
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
             Trade <span className="text-primary">Smarter</span>
             <br />
