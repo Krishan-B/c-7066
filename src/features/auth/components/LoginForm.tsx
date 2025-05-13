@@ -1,13 +1,12 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { cleanupAuthState } from "@/utils/auth";
-import PasswordResetDialog from "./PasswordResetDialog";
 import { validateSignIn } from "../utils/validation";
+import { signInWithEmail } from "@/utils/auth/authUtils";
+import PasswordResetDialog from "./PasswordResetDialog";
 
-// Import our new components
+// Import our components
 import EmailField from "./login/EmailField";
 import PasswordField from "./login/PasswordField";
 import RememberMeCheckbox from "./login/RememberMeCheckbox";
@@ -40,47 +39,21 @@ const LoginForm = () => {
     try {
       setLoading(true);
       
-      // Clean up any existing auth state
-      cleanupAuthState();
+      const { session, error } = await signInWithEmail(email, password);
       
-      // First attempt to sign out globally in case there's an existing session
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (error) {
-        // Ignore errors during cleanup
+      if (error) {
+        setFormError(error.message);
+        return;
       }
       
-      console.log("Attempting to sign in with:", { email });
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
-      
-      console.log("Login successful:", data);
-      
-      // Instead of displaying a toast here, let AuthProvider handle it
-      // and navigate programmatically instead of forcing a page reload
-      navigate("/dashboard", { replace: true });
+      if (session) {
+        // Navigate programmatically instead of forcing a page reload
+        navigate("/dashboard", { replace: true });
+      }
       
     } catch (error: any) {
+      setFormError("Unexpected error occurred");
       console.error("Login error:", error);
-      let errorMessage = "Invalid email or password";
-      if (error.message) {
-        if (error.message.includes("rate")) {
-          errorMessage = "Too many login attempts. Please try again later";
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      setFormError(errorMessage);
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }

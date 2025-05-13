@@ -1,11 +1,11 @@
 
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail } from "lucide-react";
+import { resetPassword } from "@/utils/auth/authUtils";
 import {
   Dialog,
   DialogContent,
@@ -36,23 +36,16 @@ const PasswordResetDialog = ({ open, onOpenChange }: PasswordResetDialogProps) =
       });
       return;
     }
+    
     try {
       setLoading(true);
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/auth?tab=updatePassword`
-      });
+      const { error } = await resetPassword(resetEmail);
+      
       if (error) throw error;
+      
       setResetEmailSent(true);
-      toast({
-        title: "Reset link sent",
-        description: "Check your email for password reset instructions"
-      });
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to send reset link",
-        variant: "destructive"
-      });
+      // Error is handled by the resetPassword function
     } finally {
       setLoading(false);
     }

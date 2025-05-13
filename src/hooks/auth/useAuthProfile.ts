@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { UserProfile } from "@/features/profile/types";
-import { extractProfileFromUser, updateUserProfile, getCurrentUser } from "@/utils/auth";
+import { extractProfileFromUser, updateProfile as updateUserProfile } from "@/utils/auth/authUtils";
 
 export const useAuthProfile = (user: User | null, initialized: boolean) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -67,22 +67,15 @@ export const useAuthProfile = (user: User | null, initialized: boolean) => {
 
     try {
       setProfileLoading(true);
-      await updateUserProfile(profileData);
+      const { error } = await updateUserProfile(profileData);
+      
+      if (error) throw error;
       
       // Update local profile state
       setProfile(prev => prev ? { ...prev, ...profileData } : null);
       
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully",
-      });
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      toast({
-        title: "Update failed",
-        description: error.message || "There was a problem updating your profile",
-        variant: "destructive",
-      });
     } finally {
       setProfileLoading(false);
     }
@@ -93,10 +86,7 @@ export const useAuthProfile = (user: User | null, initialized: boolean) => {
     
     try {
       setProfileLoading(true);
-      const { user: currentUser } = await getCurrentUser();
-      if (currentUser) {
-        await fetchProfile(currentUser);
-      }
+      await fetchProfile(user);
     } catch (error) {
       console.error("Error refreshing profile:", error);
       toast({

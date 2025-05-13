@@ -1,13 +1,12 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateSignUp } from "../utils/validation";
 import { usePasswordStrength } from "../hooks/usePasswordStrength";
-import { cleanupAuthState } from "@/utils/auth";
+import { signUpWithEmail } from "@/utils/auth/authUtils";
 
-// Import our new components
+// Import our components
 import PersonalInfoFields from "./register/PersonalInfoFields";
 import CountrySelector from "./register/CountrySelector";
 import PhoneInput from "./register/PhoneInput";
@@ -65,36 +64,19 @@ const RegisterForm = () => {
     try {
       setLoading(true);
       
-      // Clean up any existing auth state
-      cleanupAuthState();
-      
-      // First attempt to sign out globally in case there's an existing session
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (error) {
-        // Ignore errors during cleanup
-      }
-      
       const formattedPhoneNumber = phoneNumber ? `${countryCode}${phoneNumber}` : '';
       
-      console.log("Attempting to sign up with:", { email });
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            country: country,
-            phone_number: formattedPhoneNumber
-          }
-        }
+      const { error } = await signUpWithEmail(email, password, {
+        first_name: firstName,
+        last_name: lastName,
+        country: country,
+        phone_number: formattedPhoneNumber
       });
       
-      if (error) throw error;
-      
-      console.log("Signup successful:", data);
+      if (error) {
+        setFormError(error.message);
+        return;
+      }
       
       toast({
         title: "Account created successfully",
@@ -105,23 +87,8 @@ const RegisterForm = () => {
       navigate("/auth");
       
     } catch (error: any) {
+      setFormError("Unexpected error occurred");
       console.error("Signup error:", error);
-      let errorMessage = "An error occurred during sign up";
-      
-      if (error.message) {
-        if (error.message.includes("email")) {
-          errorMessage = "This email is already in use";
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      
-      setFormError(errorMessage);
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }
