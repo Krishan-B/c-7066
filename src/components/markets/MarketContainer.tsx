@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Asset } from "@/hooks/market";
@@ -61,7 +62,7 @@ const MarketContainer = ({
             </Badge>
             
             {realtimeEnabled && (
-              <Badge variant="success" className="flex items-center gap-1">
+              <Badge variant="default" className="flex items-center gap-1 bg-green-500 hover:bg-green-600">
                 <Wifi className="h-3 w-3" />
                 <span>Real-time</span>
               </Badge>
