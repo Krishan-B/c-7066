@@ -19,7 +19,7 @@ const Header = () => {
       <div className="container flex items-center justify-between py-4">
         <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
           <LineChart className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold ml-2 text-primary">TradePro</h1>
+          <h1 className="text-2xl font-bold ml-2 text-foreground">TradePro</h1>
         </div>
         
         <nav className="hidden md:flex items-center gap-6">
