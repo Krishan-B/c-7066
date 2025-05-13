@@ -70,3 +70,17 @@ export async function fetchPolygonData<T>(options: PolygonRequestOptions): Promi
     throw error;
   }
 }
+
+// Export WebSocket functionality
+export { 
+  initPolygonWebSocket,
+  closePolygonWebSocket,
+  setPolygonWebSocketApiKey,
+  subscribeToSymbols,
+  unsubscribeFromSymbols,
+  onPolygonEvent,
+  offPolygonEvent,
+  addMessageHandler,
+  removeMessageHandler,
+  processPolygonMessage
+} from './websocket';

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Asset } from "@/hooks/market";
@@ -10,6 +9,7 @@ import MarketChartSection from "@/components/markets/MarketChartSection";
 import MarketOrderForm from "@/components/markets/MarketOrderForm";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import { Badge } from "@/components/ui/badge";
+import { Wifi } from "lucide-react";
 
 interface MarketContainerProps {
   marketData: Asset[];
@@ -18,6 +18,7 @@ interface MarketContainerProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   dataSource?: string;
+  realtimeEnabled?: boolean;
 }
 
 const MarketContainer = ({ 
@@ -26,7 +27,8 @@ const MarketContainer = ({
   error, 
   activeTab, 
   onTabChange,
-  dataSource = "Simulated"
+  dataSource = "Simulated",
+  realtimeEnabled = false
 }: MarketContainerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAsset, setSelectedAsset] = useState<Asset>({
@@ -53,9 +55,18 @@ const MarketContainer = ({
             marketIsOpen={marketIsOpen}
           />
           
-          <Badge variant={dataSource === "Alpha Vantage" || dataSource === "Polygon.io" || dataSource === "Finnhub.io" ? "default" : "outline"} className="ml-2">
-            {dataSource} Data
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={dataSource === "Alpha Vantage" || dataSource === "Polygon.io" || dataSource === "Finnhub.io" ? "default" : "outline"} className="ml-2">
+              {dataSource} Data
+            </Badge>
+            
+            {realtimeEnabled && (
+              <Badge variant="success" className="flex items-center gap-1">
+                <Wifi className="h-3 w-3" />
+                <span>Real-time</span>
+              </Badge>
+            )}
+          </div>
         </div>
         
         {/* Market search and table section */}

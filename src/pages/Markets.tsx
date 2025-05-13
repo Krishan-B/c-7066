@@ -7,11 +7,13 @@ import { fetchAlphaVantageData } from "@/utils/api/alphaVantage";
 import { supabase } from "@/integrations/supabase/client";
 import { hasPolygonApiKey } from "@/utils/api/polygon";
 import { hasFinnhubApiKey } from "@/utils/api/finnhub";
+import { usePolygonWebSocket } from "@/hooks/market/usePolygonWebSocket";
+import { getSymbolsForMarketType } from "@/hooks/market/marketSymbols";
 
 const Markets = () => {
   // Use the combined market data hook with a 1-minute refetch interval for more real-time market data
   const [activeTab, setActiveTab] = useState("Crypto");
-  const { marketData, isLoading, error, updateMarketTypes } = useCombinedMarketData(
+  const { marketData, isLoading, error, updateMarketTypes, updateMarketData } = useCombinedMarketData(
     [activeTab], // Start with active tab data
     { refetchInterval: 1000 * 60 } // Refresh every minute
   );
@@ -21,6 +23,41 @@ const Markets = () => {
   const [polygonAvailable, setPolygonAvailable] = useState(false);
   const [finnhubAvailable, setFinnhubAvailable] = useState(false);
   const [dataSource, setDataSource] = useState("Simulated");
+  const [realtimeEnabled, setRealtimeEnabled] = useState(false);
+  
+  // Get symbols for the active tab
+  const symbols = activeTab ? getSymbolsForMarketType([activeTab])[activeTab] || [] : [];
+  
+  // Initialize WebSocket connection
+  const { 
+    isConnected, 
+    lastUpdate,
+    error: wsError 
+  } = usePolygonWebSocket({ 
+    symbols: realtimeEnabled ? symbols : [],
+    autoConnect: realtimeEnabled
+  });
+  
+  // Handle real-time updates
+  useEffect(() => {
+    if (lastUpdate) {
+      // Update the market data with real-time update
+      updateMarketData((prevData) => {
+        return prevData.map(item => {
+          if (item.symbol === lastUpdate.symbol) {
+            return {
+              ...item,
+              price: lastUpdate.price,
+              change_percentage: lastUpdate.change_percentage,
+              volume: lastUpdate.volume,
+              last_updated: new Date().toISOString()
+            };
+          }
+          return item;
+        });
+      });
+    }
+  }, [lastUpdate, updateMarketData]);
   
   // Check API availability on component mount
   useEffect(() => {
@@ -34,6 +71,7 @@ const Markets = () => {
         if (polygonSecret?.value) {
           setPolygonAvailable(true);
           setDataSource("Polygon.io");
+          setRealtimeEnabled(true);
           
           toast({
             title: "Polygon.io API Connected",
@@ -105,6 +143,24 @@ const Markets = () => {
     updateMarketTypes([tab]);
   };
   
+  // Show WebSocket connection status
+  useEffect(() => {
+    if (realtimeEnabled) {
+      if (isConnected) {
+        toast({
+          title: "Real-time Updates Active",
+          description: "You are receiving live market data updates",
+        });
+      } else if (wsError) {
+        toast({
+          title: "WebSocket Connection Error",
+          description: wsError.message,
+          variant: "destructive"
+        });
+      }
+    }
+  }, [isConnected, wsError, realtimeEnabled, toast]);
+  
   return (
     <MarketContainer 
       marketData={marketData}
@@ -113,6 +169,7 @@ const Markets = () => {
       activeTab={activeTab}
       onTabChange={handleTabChange}
       dataSource={dataSource}
+      realtimeEnabled={isConnected && realtimeEnabled}
     />
   );
 };

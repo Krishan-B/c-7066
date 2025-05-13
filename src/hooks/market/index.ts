@@ -5,3 +5,4 @@ export * from './types';
 export * from './fetchMarketData';
 export * from './marketSymbols';
 export * from './api';
+export * from './usePolygonWebSocket';
