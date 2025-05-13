@@ -32,7 +32,7 @@ export const usePortfolioData = () => {
     cashBalance: analytics?.cash_balance || 0,
     lockedFunds: analytics?.locked_funds || 0,
     
-    // Transform top holdings into assets format with better error handling
+    // Transform top holdings into assets format with all required properties
     assets: analytics?.top_holdings?.map(holding => ({
       name: holding.name,
       symbol: holding.symbol,
@@ -42,7 +42,14 @@ export const usePortfolioData = () => {
       value: holding.value,
       change: holding.change_percent,
       pnl: holding.pnl || (holding.value * (holding.change_percent / 100)),
-      pnlPercentage: holding.change_percent
+      pnlPercentage: holding.change_percent,
+      // Add the required properties that were missing
+      change_percentage: holding.change_percent,
+      market_type: "stock", // Default market type if not available
+      volume: "N/A", // Default volume if not available
+      market_cap: undefined,
+      id: undefined,
+      last_updated: undefined
     })) || [],
     
     // Transform recent trades into closed positions format with validation
