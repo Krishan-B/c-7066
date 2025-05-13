@@ -153,6 +153,7 @@ const TradeForm = ({
       {/* Trade Action Button */}
       <TradeActionButton
         action={action}
+        price={currentPrice}  // Add the missing price prop
         selectedAsset={selectedAsset}
         isExecuting={isExecuting}
         marketIsOpen={marketIsOpen}

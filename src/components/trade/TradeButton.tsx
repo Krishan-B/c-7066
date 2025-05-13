@@ -1,25 +1,42 @@
 
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useTradePanelContext } from "./TradePanelProvider";
+import { Button, ButtonProps } from "@/components/ui/button";
+import { TradePanelContext } from "./TradePanelProvider";
+import { useContext } from "react";
 
-interface TradeButtonProps {
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
-  size?: "default" | "sm" | "lg" | "icon";
+export interface TradeButtonProps {
+  size?: "sm" | "default" | "lg";
+  variant?: "default" | "outline" | "destructive" | "secondary";
+  label?: string;  // Make label a valid prop
+  className?: string;
+  onOpen?: () => void;
 }
 
-export function TradeButton({ variant = "default", size = "default" }: TradeButtonProps) {
-  const { openTradePanel } = useTradePanelContext();
-  
+export const TradeButton = ({
+  size = "default",
+  variant = "default",
+  label = "Trade",
+  className = "",
+  onOpen
+}: TradeButtonProps) => {
+  const { setOpen } = useContext(TradePanelContext);
+
+  const handleClick = () => {
+    setOpen(true);
+    if (onOpen) {
+      onOpen();
+    }
+  };
+
   return (
     <Button
-      onClick={openTradePanel}
-      variant={variant}
       size={size}
-      className="flex items-center gap-2"
+      variant={variant}
+      onClick={handleClick}
+      className={className}
     >
-      <Plus className="h-4 w-4" />
-      <span>New Trade</span>
+      {label}
     </Button>
   );
-}
+};
+
+export default TradeButton;

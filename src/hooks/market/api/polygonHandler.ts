@@ -1,125 +1,119 @@
 
-import { 
-  getLastQuote,
-  getLastTrade,
-  getTickerDetails,
-  getPreviousClose,
-  transformTickerToAsset,
-  transformQuoteToAsset,
-  transformStockData,
-  transformCryptoData,
-  transformForexData,
-  hasPolygonApiKey
-} from "@/utils/api/polygon";
-
 import { Asset } from "../types";
+import { supabase } from '@/integrations/supabase/client';
+import { getLastQuote, getLastTrade, getDailyOHLC } from "@/utils/api/polygon";
+import { transformTickerToAsset, transformQuoteToAsset } from "@/utils/api/polygon/transformers";
 
-// Wrapper functions to match the expected function signatures
-export async function getStockQuote(symbol: string): Promise<any> {
+const fetchPolygonData = async (endpoint: string): Promise<any> => {
   try {
-    const tickerDetails = await getTickerDetails(symbol);
-    const lastQuoteData = await getLastQuote(symbol);
-    const previousCloseData = await getPreviousClose(symbol);
+    const { data, error } = await supabase.functions.invoke('get-polygon-data', {
+      body: { endpoint }
+    });
     
-    return {
-      results: {
-        ticker: symbol,
-        name: tickerDetails?.results?.name || symbol,
-        last: lastQuoteData?.results,
-        todaysChange: previousCloseData?.results?.c 
-          ? (lastQuoteData?.results?.ap - previousCloseData?.results?.c) / previousCloseData?.results?.c * 100
-          : 0
-      }
-    };
+    if (error) throw new Error(`Polygon API error: ${error.message}`);
+    return data;
   } catch (error) {
-    console.error(`Error getting stock quote for ${symbol}:`, error);
-    return null;
+    console.error(`Error fetching Polygon data from ${endpoint}:`, error);
+    throw error;
   }
-}
+};
 
-export async function getCryptoQuote(symbol: string): Promise<any> {
+// Fetch stock data from Polygon API
+export const fetchStockData = async (symbols: string[]): Promise<Asset[]> => {
   try {
-    const tickerDetails = await getTickerDetails(symbol);
-    const lastTradeData = await getLastTrade(symbol);
+    const assets: Asset[] = [];
     
-    return {
-      results: {
-        ticker: symbol,
-        name: tickerDetails?.results?.name || symbol,
-        last: lastTradeData?.results,
-        todaysChange: 0 // We don't have previous close for crypto in this simple implementation
-      }
-    };
-  } catch (error) {
-    console.error(`Error getting crypto quote for ${symbol}:`, error);
-    return null;
-  }
-}
-
-export async function getForexQuote(fromCurrency: string, toCurrency: string): Promise<any> {
-  try {
-    // Construct the forex pair symbol
-    const symbol = `C:${fromCurrency}${toCurrency}`;
-    const lastQuoteData = await getLastQuote(symbol);
-    
-    return {
-      results: {
-        ticker: `${fromCurrency}/${toCurrency}`,
-        name: `${fromCurrency}/${toCurrency}`,
-        last: lastQuoteData?.results,
-        todaysChange: 0 // We don't have previous close for forex in this simple implementation
-      }
-    };
-  } catch (error) {
-    console.error(`Error getting forex quote for ${fromCurrency}/${toCurrency}:`, error);
-    return null;
-  }
-}
-
-export async function fetchPolygonData(marketTypes: string[], symbols: Record<string, string[]>): Promise<Asset[]> {
-  if (!hasPolygonApiKey()) {
-    throw new Error("Polygon API key not available");
-  }
-  
-  console.log('Fetching data from Polygon.io');
-  const marketData: Asset[] = [];
-  
-  try {
-    // Fetch data for each symbol based on market type
-    for (const marketType of marketTypes) {
-      if (marketType === 'Stock') {
-        for (const symbol of symbols[marketType]) {
-          const data = await getStockQuote(symbol);
-          const transformedData = transformStockData(data);
-          if (transformedData) {
-            marketData.push(transformedData);
-          }
-        }
-      } 
-      else if (marketType === 'Forex') {
-        for (const pair of symbols[marketType]) {
-          const [fromCurrency, toCurrency] = pair.split('/');
-          const data = await getForexQuote(fromCurrency, toCurrency);
-          const transformedData = transformForexData(data);
-          if (transformedData) {
-            marketData.push(transformedData);
-          }
-        }
-      }
-      else if (marketType === 'Crypto') {
-        for (const symbol of symbols[marketType]) {
-          const data = await getCryptoQuote(symbol);
-          const transformedData = transformCryptoData(data);
-          if (transformedData) {
-            marketData.push(transformedData);
-          }
+    for (const symbol of symbols) {
+      // Fetch last quote for the stock
+      const quoteData = await fetchPolygonData(`/v2/last/nbbo/${symbol}`);
+      
+      if (quoteData && quoteData.results) {
+        const lastQuote = quoteData.results;
+        const tradeData = await fetchPolygonData(`/v2/last/trade/${symbol}`);
+        const lastTrade = tradeData?.results || null;
+        
+        // Get previous day data for change calculation
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        const fromDate = yesterday.toISOString().split('T')[0];
+        const toDate = today.toISOString().split('T')[0];
+        
+        const dailyData = await fetchPolygonData(`/v2/aggs/ticker/${symbol}/range/1/day/${fromDate}/${toDate}`);
+        
+        // Create asset from combined data
+        const asset = transformTickerToAsset({
+          ticker: symbol,
+          lastQuote,
+          lastTrade,
+          todaysChange: dailyData?.results?.[0]?.c || 0,
+          volume: dailyData?.results?.[0]?.v || 0
+        });
+        
+        if (asset) {
+          assets.push(asset);
         }
       }
     }
     
-    return marketData;
+    return assets;
   } catch (error) {
-    console.error('Polygon.io error:', error);
-    throw error;
+    console.error('Error fetching stock data from Polygon:', error);
+    return [];
   }
-}
+};
+
+// Fetch crypto data from Polygon API
+export const fetchCryptoData = async (symbols: string[]): Promise<Asset[]> => {
+  try {
+    const assets: Asset[] = [];
+    
+    for (const symbol of symbols) {
+      // Format symbol for crypto (e.g., BTC-USD)
+      const cryptoSymbol = symbol.includes('-') ? symbol : `${symbol}-USD`;
+      
+      // Fetch last quote for the crypto
+      const quoteData = await fetchPolygonData(`/v2/last/crypto/${cryptoSymbol}`);
+      
+      if (quoteData && quoteData.results) {
+        const asset = transformQuoteToAsset(quoteData.results, symbol);
+        if (asset) {
+          assets.push(asset);
+        }
+      }
+    }
+    
+    return assets;
+  } catch (error) {
+    console.error('Error fetching crypto data from Polygon:', error);
+    return [];
+  }
+};
+
+// Fetch forex data from Polygon API
+export const fetchForexData = async (symbols: string[]): Promise<Asset[]> => {
+  try {
+    const assets: Asset[] = [];
+    
+    for (const symbol of symbols) {
+      // Format symbol for forex (e.g., EUR/USD)
+      const forexSymbol = symbol.includes('/') ? symbol : `${symbol.substring(0, 3)}/${symbol.substring(3, 6)}`;
+      
+      // Fetch last quote for the forex pair
+      const quoteData = await fetchPolygonData(`/v2/last/currency/${forexSymbol}`);
+      
+      if (quoteData && quoteData.results) {
+        const asset = transformQuoteToAsset(quoteData.results, symbol);
+        if (asset) {
+          assets.push(asset);
+        }
+      }
+    }
+    
+    return assets;
+  } catch (error) {
+    console.error('Error fetching forex data from Polygon:', error);
+    return [];
+  }
+};

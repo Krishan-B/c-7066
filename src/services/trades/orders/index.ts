@@ -1,11 +1,11 @@
 
 import { executeMarketOrder } from './marketOrders';
-import { executeEntryOrder } from './entryOrders';
+import { placeEntryOrder } from './entryOrders';
 import { closePosition, cancelPendingOrder } from './positionManagement';
 
 export {
   executeMarketOrder,
-  executeEntryOrder,
+  placeEntryOrder,
   closePosition,
   cancelPendingOrder
 };

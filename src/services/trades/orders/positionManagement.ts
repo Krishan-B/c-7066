@@ -1,132 +1,165 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { updatePortfolio } from "../portfolio";
+import { TradeResult, TradeStatus } from "../types";
 
 /**
  * Close an open position
+ * @param tradeId ID of the trade to close
+ * @param currentPrice Current market price
  */
 export async function closePosition(
   tradeId: string,
   currentPrice: number
-): Promise<{ success: boolean; message: string }> {
+): Promise<TradeResult> {
   try {
-    // Get the trade details
-    const { data: trade, error: tradeError } = await supabase
-      .from("user_trades")
-      .select("*")
-      .eq("id", tradeId)
+    // Get the trade to close
+    const { data: trade, error: fetchError } = await supabase
+      .from('user_trades')
+      .select('*')
+      .eq('id', tradeId)
+      .eq('status', 'open')
       .single();
-
-    if (tradeError || !trade) {
-      return { success: false, message: `Error fetching trade: ${tradeError?.message || "Trade not found"}` };
+      
+    if (fetchError || !trade) {
+      throw new Error(`Failed to fetch trade: ${fetchError?.message || 'Trade not found'}`);
     }
-
-    // Check if the trade is already closed
-    if (trade.status !== "open") {
-      return { success: false, message: `Trade is not open (current status: ${trade.status})` };
-    }
-
+    
     // Calculate profit/loss
-    const pnl = trade.trade_type === "buy"
-      ? (currentPrice - trade.price_per_unit) * trade.units
-      : (trade.price_per_unit - currentPrice) * trade.units;
-
-    // Update the trade status
-    const { error: updateError } = await supabase
-      .from("user_trades")
+    const openPrice = trade.price_per_unit;
+    const units = trade.units;
+    const direction = trade.trade_type;
+    
+    let pnl = 0;
+    if (direction === 'buy') {
+      pnl = (currentPrice - openPrice) * units;
+    } else {
+      pnl = (openPrice - currentPrice) * units;
+    }
+    
+    // Update trade record
+    const { data, error } = await supabase
+      .from('user_trades')
       .update({
-        status: "closed",
+        status: 'closed',
         closed_at: new Date().toISOString(),
-        pnl: pnl,
-        current_price: currentPrice
+        current_price: currentPrice, // Final price
+        pnl: pnl
       })
-      .eq("id", tradeId);
-
-    if (updateError) {
-      return { success: false, message: `Error updating trade: ${updateError.message}` };
+      .eq('id', tradeId)
+      .select()
+      .single();
+      
+    if (error) {
+      throw new Error(`Failed to close position: ${error.message}`);
     }
-
-    // Update the user's portfolio
-    const portfolioUpdateResult = await updatePortfolio(
-      trade.user_id,
-      trade.asset_symbol,
-      trade.market_type,
-      currentPrice,
-      pnl,
-      false
-    );
-
-    if (!portfolioUpdateResult.success) {
-      return { success: false, message: portfolioUpdateResult.message };
-    }
-
+    
+    // Update user's account balance
+    // In a real app, this would likely be handled by a database trigger or transaction
+    // For simplicity, we'll just update the balance here
+    await updateUserBalance(trade.user_id, pnl);
+    
     return {
       success: true,
-      message: `Position closed successfully with ${pnl > 0 ? "profit" : "loss"} of $${Math.abs(pnl).toFixed(2)}`
+      tradeId,
+      message: `Successfully closed position with ${pnl >= 0 ? 'profit' : 'loss'} of ${Math.abs(pnl).toFixed(2)}`,
+      status: 'closed' as TradeStatus
     };
+    
   } catch (error) {
-    console.error("Error closing position:", error);
-    return { success: false, message: `An unexpected error occurred: ${error}` };
+    console.error("Position closing error:", error);
+    
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error occurred",
+      status: 'failed' as TradeStatus
+    };
   }
 }
 
 /**
  * Cancel a pending order
+ * @param tradeId ID of the order to cancel
  */
-export async function cancelPendingOrder(
-  tradeId: string
-): Promise<{ success: boolean; message: string }> {
+export async function cancelPendingOrder(tradeId: string): Promise<TradeResult> {
   try {
-    // Get the trade details
-    const { data: trade, error: tradeError } = await supabase
-      .from("user_trades")
-      .select("*")
-      .eq("id", tradeId)
+    // Get the order to cancel
+    const { data: trade, error: fetchError } = await supabase
+      .from('user_trades')
+      .select('*')
+      .eq('id', tradeId)
+      .eq('status', 'pending')
       .single();
-
-    if (tradeError || !trade) {
-      return { success: false, message: `Error fetching trade: ${tradeError?.message || "Trade not found"}` };
+      
+    if (fetchError || !trade) {
+      throw new Error(`Failed to fetch order: ${fetchError?.message || 'Order not found'}`);
     }
-
-    // Check if the trade is pending
-    if (trade.status !== "pending") {
-      return { success: false, message: `Trade is not pending (current status: ${trade.status})` };
-    }
-
-    // Update the trade status
-    const { error: updateError } = await supabase
-      .from("user_trades")
+    
+    // Update order record
+    const { error } = await supabase
+      .from('user_trades')
       .update({
-        status: "cancelled",
+        status: 'cancelled',
         closed_at: new Date().toISOString()
       })
-      .eq("id", tradeId);
-
-    if (updateError) {
-      return { success: false, message: `Error cancelling order: ${updateError.message}` };
+      .eq('id', tradeId);
+      
+    if (error) {
+      throw new Error(`Failed to cancel order: ${error.message}`);
     }
-
-    // Release the funds back to the user account
-    const { error: accountError } = await supabase
-      .from("user_account")
-      .update({
-        available_funds: supabase.rpc("calculate_available_funds_increase", {
-          amount: trade.total_amount
-        })
-      })
-      .eq("id", trade.user_id);
-
-    if (accountError) {
-      console.error("Error updating account funds:", accountError);
-      // Still consider it successful since the order was cancelled
-    }
-
+    
     return {
       success: true,
-      message: `Order cancelled successfully`
+      tradeId,
+      message: `Successfully cancelled order for ${trade.units} units of ${trade.asset_symbol}`,
+      status: 'cancelled' as TradeStatus
     };
+    
   } catch (error) {
-    console.error("Error cancelling order:", error);
-    return { success: false, message: `An unexpected error occurred: ${error}` };
+    console.error("Order cancellation error:", error);
+    
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error occurred",
+      status: 'failed' as TradeStatus
+    };
+  }
+}
+
+/**
+ * Update user account balance after closing a position
+ */
+async function updateUserBalance(userId: string, pnl: number): Promise<void> {
+  try {
+    // Get current balance
+    const { data: account, error: fetchError } = await supabase
+      .from('user_account')
+      .select('*')
+      .eq('id', userId)
+      .single();
+      
+    if (fetchError || !account) {
+      console.error(`Failed to fetch user account: ${fetchError?.message || 'Account not found'}`);
+      return;
+    }
+    
+    // Calculate new balance and realized P&L
+    const newBalance = account.cash_balance + pnl;
+    const newRealizedPnl = account.realized_pnl + pnl;
+    
+    // Update account
+    const { error } = await supabase
+      .from('user_account')
+      .update({
+        cash_balance: newBalance,
+        realized_pnl: newRealizedPnl,
+        last_updated: new Date().toISOString()
+      })
+      .eq('id', userId);
+      
+    if (error) {
+      console.error(`Failed to update user balance: ${error.message}`);
+    }
+  } catch (error) {
+    console.error("Error updating user balance:", error);
   }
 }

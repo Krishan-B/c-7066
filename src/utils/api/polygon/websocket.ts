@@ -1,227 +1,208 @@
 
-// Polygon.io WebSocket Implementation for Real-time Market Data
-let ws: WebSocket | null = null;
-let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-let reconnectAttempts = 0;
-let apiKey: string = '';
-const MAX_RECONNECT_ATTEMPTS = 5;
-const RECONNECT_DELAY = 3000; // 3 seconds
+import { Asset } from "@/hooks/market/types";
 
-// Event handlers
-const eventHandlers: Record<string, Function[]> = {
-  'open': [],
-  'message': [],
-  'close': [],
-  'error': []
+let webSocket: WebSocket | null = null;
+let apiKey: string | null = null;
+const eventHandlers: Record<string, Array<(data: any) => void>> = {
+  message: [],
+  open: [],
+  close: [],
+  error: []
 };
+const subscribedSymbols: Set<string> = new Set();
 
-// State
-let isConnected = false;
-let lastErrorMessage: string | null = null;
-let subscribedSymbols: string[] = [];
-
-/**
- * Set the API key for the WebSocket connection
- */
 export function setPolygonWebSocketApiKey(key: string): void {
   apiKey = key;
 }
 
-/**
- * Initialize the WebSocket connection to Polygon.io
- */
 export function initPolygonWebSocket(): boolean {
-  if (!apiKey) {
-    console.error('Polygon API key is required for WebSocket connection');
-    return false;
+  if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+    return true;
   }
-  
+
   try {
-    // Close existing connection if any
-    if (ws) {
-      ws.close();
+    if (!apiKey) {
+      console.error("Polygon WebSocket API key not set");
+      return false;
     }
-    
-    // Create new WebSocket connection
-    ws = new WebSocket(`wss://socket.polygon.io/stocks`);
-    
-    ws.onopen = () => {
-      console.info('Polygon.io WebSocket connected');
-      isConnected = true;
-      reconnectAttempts = 0;
-      
-      // Authenticate with API key
-      if (ws) {
-        ws.send(JSON.stringify({ action: 'auth', params: apiKey }));
-      }
-      
-      // Re-subscribe to previously subscribed symbols
-      if (subscribedSymbols.length > 0) {
-        subscribeToSymbols(subscribedSymbols);
-      }
-      
-      // Call registered open handlers
-      eventHandlers['open'].forEach(handler => handler());
-    };
-    
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
+
+    webSocket = new WebSocket(`wss://socket.polygon.io/stocks`);
+
+    webSocket.onopen = () => {
+      if (webSocket) {
+        // Authenticate with the API key
+        webSocket.send(JSON.stringify({ action: "auth", params: apiKey }));
         
-        // Handle authentication response
-        if (data[0] && data[0].ev === 'status' && data[0].status === 'auth_success') {
-          console.info('Authentication successful with Polygon.io WebSocket');
+        // Re-subscribe to any previously subscribed symbols
+        if (subscribedSymbols.size > 0) {
+          webSocket.send(JSON.stringify({
+            action: "subscribe",
+            params: Array.from(subscribedSymbols).join(",")
+          }));
         }
         
-        // Call registered message handlers
-        eventHandlers['message'].forEach(handler => handler(data));
+        // Trigger all open event handlers
+        eventHandlers.open.forEach(handler => handler({}));
+      }
+    };
+
+    webSocket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        // Trigger all message event handlers
+        eventHandlers.message.forEach(handler => handler(data));
       } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+        console.error("Error parsing WebSocket message:", error);
       }
     };
-    
-    ws.onclose = (event) => {
-      console.info('Polygon.io WebSocket disconnected', event.code);
-      isConnected = false;
-      
-      // Call registered close handlers
-      eventHandlers['close'].forEach(handler => handler(event));
-      
-      // Attempt to reconnect
-      if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-        console.info('Attempting to reconnect to Polygon.io WebSocket...');
-        reconnectTimer = setTimeout(() => {
-          reconnectAttempts++;
-          initPolygonWebSocket();
-        }, RECONNECT_DELAY);
-      } else {
-        console.error(`Failed to reconnect after ${MAX_RECONNECT_ATTEMPTS} attempts`);
-      }
+
+    webSocket.onclose = (event) => {
+      // Trigger all close event handlers
+      eventHandlers.close.forEach(handler => handler(event));
+      // Clear the WebSocket reference
+      webSocket = null;
     };
-    
-    ws.onerror = (error) => {
-      console.error('Polygon.io WebSocket error:', error);
-      lastErrorMessage = error.toString();
-      
-      // Call registered error handlers
-      eventHandlers['error'].forEach(handler => handler(error));
+
+    webSocket.onerror = (error) => {
+      // Trigger all error event handlers
+      eventHandlers.error.forEach(handler => handler(error));
+      console.error("WebSocket error:", error);
     };
-    
+
     return true;
   } catch (error) {
-    console.error('Error initializing Polygon.io WebSocket:', error);
+    console.error("Error initializing WebSocket:", error);
     return false;
   }
 }
 
-/**
- * Close the WebSocket connection
- */
 export function closePolygonWebSocket(): void {
-  if (reconnectTimer) {
-    clearTimeout(reconnectTimer);
-    reconnectTimer = null;
+  if (webSocket) {
+    webSocket.close();
+    webSocket = null;
   }
-  
-  if (ws) {
-    ws.close();
-    ws = null;
-  }
-  
-  isConnected = false;
-  subscribedSymbols = [];
 }
 
-/**
- * Subscribe to a list of symbols for real-time updates
- */
 export function subscribeToSymbols(symbols: string[]): boolean {
-  if (!ws || !isConnected) {
-    console.warn('WebSocket not connected. Symbols will be subscribed when connection is established.');
-    subscribedSymbols = [...new Set([...subscribedSymbols, ...symbols])];
+  if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
+    symbols.forEach(symbol => subscribedSymbols.add(symbol));
     return false;
   }
-  
+
   try {
-    const subscription = {
-      action: 'subscribe',
-      params: symbols.map(symbol => `T.${symbol}`)
-    };
+    symbols.forEach(symbol => subscribedSymbols.add(symbol));
     
-    ws.send(JSON.stringify(subscription));
-    subscribedSymbols = [...new Set([...subscribedSymbols, ...symbols])];
+    webSocket.send(JSON.stringify({
+      action: "subscribe",
+      params: symbols.join(",")
+    }));
+    
     return true;
   } catch (error) {
-    console.error('Error subscribing to symbols:', error);
+    console.error("Error subscribing to symbols:", error);
     return false;
   }
 }
 
-/**
- * Unsubscribe from a list of symbols
- */
 export function unsubscribeFromSymbols(symbols: string[]): boolean {
-  if (!ws || !isConnected) {
+  if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
+    symbols.forEach(symbol => subscribedSymbols.delete(symbol));
     return false;
   }
-  
+
   try {
-    const unsubscription = {
-      action: 'unsubscribe',
-      params: symbols.map(symbol => `T.${symbol}`)
-    };
+    symbols.forEach(symbol => subscribedSymbols.delete(symbol));
     
-    ws.send(JSON.stringify(unsubscription));
-    subscribedSymbols = subscribedSymbols.filter(s => !symbols.includes(s));
+    webSocket.send(JSON.stringify({
+      action: "unsubscribe",
+      params: symbols.join(",")
+    }));
+    
     return true;
   } catch (error) {
-    console.error('Error unsubscribing from symbols:', error);
+    console.error("Error unsubscribing from symbols:", error);
     return false;
   }
 }
 
-/**
- * Register an event handler
- */
-export function onPolygonEvent(event: 'open' | 'message' | 'close' | 'error', handler: Function): void {
-  if (eventHandlers[event]) {
-    eventHandlers[event].push(handler);
+export function onPolygonEvent(event: string, handler: (data: any) => void): void {
+  if (!eventHandlers[event]) {
+    eventHandlers[event] = [];
   }
+  
+  eventHandlers[event].push(handler);
 }
 
-/**
- * Remove an event handler
- */
-export function offPolygonEvent(event: 'open' | 'message' | 'close' | 'error', handler: Function): void {
+export function offPolygonEvent(event: string, handler: (data: any) => void): void {
   if (eventHandlers[event]) {
     eventHandlers[event] = eventHandlers[event].filter(h => h !== handler);
   }
 }
 
-/**
- * Process a Polygon.io message and convert it to an Asset object
- */
-export function processPolygonMessage(data: any): any {
-  // Process trade message
-  if (data && Array.isArray(data) && data[0] && data[0].ev === 'T') {
-    const trade = data[0];
-    
+export function processPolygonMessage(data: any): Asset | null {
+  if (!Array.isArray(data) || data.length === 0) {
+    return null;
+  }
+  
+  // Polygon sends arrays of events, find a trade or quote event
+  const tradeEvent = data.find(msg => msg.ev === "T");
+  const quoteEvent = data.find(msg => msg.ev === "Q");
+  
+  if (tradeEvent) {
     return {
-      symbol: trade.sym,
-      price: trade.p,
-      volume: trade.s,
-      timestamp: trade.t,
-      exchange: trade.x,
-      // Add more fields as needed
+      symbol: tradeEvent.sym,
+      name: tradeEvent.sym,
+      price: tradeEvent.p,
+      change_percentage: 0, // Real-time updates don't include this
+      market_type: getMarketType(tradeEvent.sym),
+      volume: formatVolume(tradeEvent.v || 0),
+      last_updated: new Date().toISOString()
+    };
+  } else if (quoteEvent) {
+    return {
+      symbol: quoteEvent.sym,
+      name: quoteEvent.sym,
+      price: (quoteEvent.bp + quoteEvent.ap) / 2, // Midpoint price
+      change_percentage: 0, // Real-time updates don't include this
+      market_type: getMarketType(quoteEvent.sym),
+      volume: formatVolume(quoteEvent.v || 0),
+      last_updated: new Date().toISOString()
     };
   }
   
   return null;
 }
 
-/**
- * Get WebSocket connection state
- */
-export function getPolygonWebSocketState(): { isConnected: boolean; lastError: string | null } {
-  return { isConnected, lastError: lastErrorMessage };
+function getMarketType(symbol: string): string {
+  if (symbol.includes("USD") || symbol.includes("BTC") || symbol.includes("ETH")) {
+    return "Crypto";
+  } else if (
+    symbol.includes("/") ||
+    /[A-Z]{3}[A-Z]{3}/.test(symbol) ||
+    symbol.endsWith("USD")
+  ) {
+    return "Forex";
+  } else if (symbol.startsWith("^") || symbol.includes("INDEX")) {
+    return "Index";
+  } else if (
+    symbol.includes("OIL") ||
+    symbol.includes("GOLD") ||
+    symbol.includes("SILVER")
+  ) {
+    return "Commodity";
+  }
+  
+  return "Stock";
+}
+
+function formatVolume(volume: number): string {
+  if (volume >= 1e9) {
+    return (volume / 1e9).toFixed(2) + "B";
+  } else if (volume >= 1e6) {
+    return (volume / 1e6).toFixed(2) + "M";
+  } else if (volume >= 1e3) {
+    return (volume / 1e3).toFixed(2) + "K";
+  }
+  
+  return volume.toString();
 }

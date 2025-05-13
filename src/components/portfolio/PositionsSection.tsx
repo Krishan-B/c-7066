@@ -7,10 +7,23 @@ import { Plus } from "lucide-react";
 import PositionsTable from "@/components/portfolio/PositionsTable";
 import ClosedPositionsTable from "@/components/portfolio/ClosedPositionsTable";
 import PositionFilter from "@/components/portfolio/PositionFilter";
-import { Asset, ClosedPosition } from "@/types/account";
+import { Asset as AccountAsset, ClosedPosition } from "@/types/account";
+
+// Use a local interface that matches exactly what PositionsTable expects
+interface Asset {
+  symbol: string;
+  name: string;
+  price: number;
+  amount: number;  // Required, not optional
+  entryPrice?: number;
+  value?: number;
+  change?: number;
+  pnl?: number;
+  pnlPercentage?: number;
+}
 
 interface PositionsSectionProps {
-  assets: Asset[];
+  assets: AccountAsset[];
   closedPositions: ClosedPosition[];
   onViewDetails: (symbol: string) => void;
 }
@@ -22,6 +35,19 @@ const PositionsSection = ({
 }: PositionsSectionProps) => {
   const [filterSymbol, setFilterSymbol] = useState("");
   const [filterPnl, setFilterPnl] = useState("all");
+
+  // Convert assets to the expected format
+  const formattedAssets: Asset[] = assets.map(asset => ({
+    symbol: asset.symbol,
+    name: asset.name,
+    price: asset.price,
+    amount: asset.amount || 0,  // Ensure amount is always provided, even if it's 0
+    entryPrice: asset.entryPrice,
+    value: asset.value,
+    change: asset.change,
+    pnl: asset.pnl,
+    pnlPercentage: asset.pnlPercentage
+  }));
 
   // Filter closed positions
   const filteredClosedPositions = closedPositions.filter(position => {
@@ -55,7 +81,7 @@ const PositionsSection = ({
           </CardHeader>
           <CardContent>
             <PositionsTable 
-              assets={assets}
+              assets={formattedAssets}
               onViewDetails={onViewDetails}
             />
           </CardContent>

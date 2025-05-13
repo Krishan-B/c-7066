@@ -4,7 +4,7 @@ import { ArrowUp, ArrowDown, AlertTriangle } from "lucide-react";
 
 interface TradeActionButtonProps {
   action: "buy" | "sell";
-  price: number;
+  price: number;  // Required price prop
   onClick: () => void;
   disabled?: boolean;
   selectedAsset: string;

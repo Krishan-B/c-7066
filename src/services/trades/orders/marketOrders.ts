@@ -24,20 +24,20 @@ export async function executeMarketOrder(params: MarketOrderParams): Promise<Tra
     // Calculate trade value
     const tradeValue = units * currentPrice;
     
-    // Insert trade record
+    // Insert trade record - use user_trades table instead of trades
     const { data, error } = await supabase
-      .from('trades')
+      .from('user_trades')
       .insert({
         user_id: userId,
         asset_symbol: symbol,
-        direction,
+        trade_type: direction, // Using trade_type instead of direction
         order_type: 'market',
         units,
         price_per_unit: currentPrice,
         status: 'open',
         stop_loss: stopLoss,
         take_profit: takeProfit,
-        trade_value: tradeValue
+        total_amount: tradeValue
       })
       .select()
       .single();

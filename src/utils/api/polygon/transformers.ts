@@ -1,150 +1,80 @@
 
-import { Asset } from '@/hooks/market';
+import { Asset } from "@/hooks/market/types";
 
 /**
- * Transform Polygon ticker data to Asset format
+ * Transform ticker details to Asset format
  */
-export function transformTickerToAsset(tickerData: any, priceData: any = null): Asset | null {
-  if (!tickerData || !tickerData.results) {
-    return null;
-  }
+export function transformTickerToAsset(ticker: any): Asset | null {
+  if (!ticker) return null;
   
-  const ticker = tickerData.results;
-  
-  // Determine market type
-  let marketType = 'Stock';
-  
-  if (ticker.type === 'CS') {
-    marketType = 'Stock';
-  } else if (ticker.market === 'crypto') {
-    marketType = 'Crypto';
-  } else if (ticker.market === 'fx') {
-    marketType = 'Forex';
-  } else if (ticker.type === 'ETF') {
-    marketType = 'ETF';
-  } else if (ticker.market === 'index') {
-    marketType = 'Index';
-  }
-  
-  // Get price from price data or use placeholder
-  const price = priceData?.results?.c || priceData?.results?.last?.price || 0;
-  const previousClose = priceData?.results?.pc || 0;
-  const changePercentage = previousClose ? ((price - previousClose) / previousClose) * 100 : 0;
-  
-  // Format volume
-  const volume = priceData?.results?.v || 0;
-  const formattedVolume = volume > 1000000000
-    ? `${(volume / 1000000000).toFixed(1)}B`
-    : volume > 1000000
-      ? `${(volume / 1000000).toFixed(1)}M`
-      : volume > 1000
-        ? `${(volume / 1000).toFixed(1)}K`
-        : volume.toString();
-  
-  return {
-    symbol: ticker.ticker,
-    name: ticker.name || ticker.ticker,
-    price: price,
-    change_percentage: changePercentage,
-    market_type: marketType,
-    volume: formattedVolume,
-    last_updated: new Date().toISOString()
-  };
-}
-
-/**
- * Transform Stock data
- */
-export function transformStockData(data: any): Asset | null {
-  if (!data || !data.results) {
-    return null;
-  }
-  
-  return {
-    symbol: data.results.ticker || data.results.symbol,
-    name: data.results.name || data.results.ticker || data.results.symbol,
-    price: data.results.last?.price || data.results.lastTrade?.p || 0,
-    change_percentage: data.results.todaysChange || 0,
-    market_type: 'Stock',
-    volume: data.results.volume ? `${(data.results.volume / 1000000).toFixed(1)}M` : 'N/A',
-    last_updated: new Date().toISOString()
-  };
-}
-
-/**
- * Transform Crypto data
- */
-export function transformCryptoData(data: any): Asset | null {
-  if (!data || !data.results) {
-    return null;
-  }
-  
-  return {
-    symbol: data.results.ticker || data.results.symbol,
-    name: data.results.name || data.results.ticker || data.results.symbol,
-    price: data.results.last?.price || data.results.lastTrade?.p || 0,
-    change_percentage: data.results.todaysChange || 0,
-    market_type: 'Crypto',
-    volume: data.results.volume ? `${(data.results.volume / 1000000).toFixed(1)}M` : 'N/A',
-    last_updated: new Date().toISOString()
-  };
-}
-
-/**
- * Transform Forex data
- */
-export function transformForexData(data: any): Asset | null {
-  if (!data || !data.results) {
-    return null;
-  }
-  
-  return {
-    symbol: data.results.ticker || data.results.symbol,
-    name: data.results.name || data.results.ticker || data.results.symbol,
-    price: data.results.last?.price || data.results.lastTrade?.p || 0,
-    change_percentage: data.results.todaysChange || 0,
-    market_type: 'Forex',
-    volume: data.results.volume ? `${(data.results.volume / 1000000).toFixed(1)}M` : 'N/A',
-    last_updated: new Date().toISOString()
-  };
-}
-
-/**
- * Process WebSocket message to Asset format
- */
-export function processPolygonMessage(message: any): Asset | null {
   try {
-    // Skip non-trade messages or messages without price data
-    if (!message || !message.data || message.data.length === 0) {
-      return null;
-    }
-    
-    const data = message.data[0];
-    
-    // Skip if no symbol or price
-    if (!data.sym || !data.p) {
-      return null;
-    }
-    
-    // Extract market type from symbol if possible
-    let marketType = 'Stock';
-    if (data.sym.includes('-')) {
-      marketType = 'Crypto';
-    } else if (data.sym.includes('/')) {
-      marketType = 'Forex';
-    }
-    
     return {
-      symbol: data.sym,
-      name: data.sym, // WebSocket doesn't provide names
-      price: data.p,
-      change_percentage: 0, // WebSocket doesn't provide change
-      market_type: marketType,
-      volume: data.v ? data.v.toString() : 'N/A',
+      symbol: ticker.ticker || ticker.symbol,
+      name: ticker.name || ticker.ticker || ticker.symbol,
+      price: parseFloat(ticker.lastTrade?.p || ticker.lastQuote?.p || ticker.price || 0),
+      change_percentage: ticker.todaysChange || ticker.changePercent || 0,
+      market_type: getMarketType(ticker.ticker || ticker.symbol),
+      volume: formatVolume(ticker.volume || ticker.v || 0),
       last_updated: new Date().toISOString()
     };
-  } catch (error) {
-    console.error('Error processing Polygon message:', error);
+  } catch (e) {
+    console.error('Error transforming ticker to asset:', e);
     return null;
   }
+}
+
+/**
+ * Transform quote to Asset format
+ */
+export function transformQuoteToAsset(quote: any, symbol: string): Asset | null {
+  if (!quote) return null;
+  
+  try {
+    return {
+      symbol,
+      name: symbol,
+      price: parseFloat(quote.c || quote.lastTrade?.p || 0),
+      change_percentage: quote.dp || 0,
+      market_type: getMarketType(symbol),
+      volume: formatVolume(quote.v || 0),
+      last_updated: new Date().toISOString()
+    };
+  } catch (e) {
+    console.error('Error transforming quote to asset:', e);
+    return null;
+  }
+}
+
+/**
+ * Determine market type based on symbol
+ */
+function getMarketType(symbol: string): string {
+  if (!symbol) return 'Stock';
+  
+  if (symbol.includes('USD') || symbol.includes('BTC') || symbol.includes('ETH')) {
+    return 'Crypto';
+  } else if (symbol.includes('/') || symbol.endsWith('USD') || /[A-Z]{3}[A-Z]{3}/.test(symbol)) {
+    return 'Forex';
+  } else if (symbol.startsWith('^') || symbol.includes('INDEX')) {
+    return 'Index';
+  } else if (symbol.includes('OIL') || symbol.includes('GOLD') || symbol.includes('SILVER')) {
+    return 'Commodity';
+  }
+  
+  return 'Stock';
+}
+
+/**
+ * Format volume for display
+ */
+function formatVolume(volume: number): string {
+  if (volume >= 1e9) {
+    return (volume / 1e9).toFixed(2) + 'B';
+  } else if (volume >= 1e6) {
+    return (volume / 1e6).toFixed(2) + 'M';
+  } else if (volume >= 1e3) {
+    return (volume / 1e3).toFixed(2) + 'K';
+  }
+  
+  return volume.toString();
 }

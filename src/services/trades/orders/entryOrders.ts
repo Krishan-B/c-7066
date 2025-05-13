@@ -20,13 +20,13 @@ export async function placeEntryOrder(params: EntryOrderParams): Promise<TradeRe
       userId 
     } = params;
     
-    // Insert pending order record
+    // Insert pending order record - use user_trades table instead of trades
     const { data, error } = await supabase
-      .from('trades')
+      .from('user_trades')
       .insert({
         user_id: userId,
         asset_symbol: symbol,
-        direction,
+        trade_type: direction,  // Using trade_type instead of direction
         order_type: 'entry',
         units,
         price_per_unit: entryPrice,
@@ -60,3 +60,6 @@ export async function placeEntryOrder(params: EntryOrderParams): Promise<TradeRe
     };
   }
 }
+
+// Alias for backwards compatibility
+export const executeEntryOrder = placeEntryOrder;

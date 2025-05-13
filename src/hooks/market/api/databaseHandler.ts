@@ -41,7 +41,7 @@ export async function updateMarketDataInDatabase(assets: Asset[]): Promise<void>
           price: asset.price,
           change_percentage: asset.change_percentage,
           volume: asset.volume,
-          market_cap: asset.market_cap || 'N/A',
+          market_cap: asset.market_cap || 'N/A',  // Use optional chaining for market_cap
           market_type: asset.market_type,
           last_updated: new Date().toISOString(),
         }, { onConflict: 'symbol' });
