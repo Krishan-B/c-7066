@@ -1,54 +1,77 @@
 
 /**
- * Fixed leverage ratios for different asset types
+ * Leverage mapping by asset class
+ * - Stocks: 20:1 (5% margin)
+ * - Indices: 50:1 (2% margin)
+ * - Commodities: 50:1 (2% margin)
+ * - Forex: 100:1 (1% margin)
+ * - Crypto: 50:1 (2% margin)
  */
-export const FIXED_LEVERAGE = {
-  Stocks: 20, // 20:1 (5% margin)
-  Indices: 50, // 50:1 (2% margin)
-  Commodities: 50, // 50:1 (2% margin)
-  Forex: 100, // 100:1 (1% margin)
-  Crypto: 50 // 50:1 (2% margin)
+export const LEVERAGE_MAP: Record<string, number> = {
+  'Stocks': 20,    // 5% margin
+  'Indices': 50,   // 2% margin
+  'Commodities': 50, // 2% margin
+  'Forex': 100,    // 1% margin
+  'Crypto': 50     // 2% margin
 };
 
 /**
- * Get the fixed leverage ratio for a specific asset type
- * @param marketType The type of market (Stocks, Indices, Commodities, Forex, Crypto)
- * @returns The fixed leverage ratio for the asset type
+ * Calculate margin required for a position based on asset class
  */
-export const getLeverageForAssetType = (marketType: string): number => {
-  // Normalize the market type to match our keys
-  const normalizedType = marketType === 'Cryptocurrency' ? 'Crypto' : marketType;
-  
-  return FIXED_LEVERAGE[normalizedType as keyof typeof FIXED_LEVERAGE] || 10; // Default to 10:1 if not found
-};
-
-/**
- * Calculate required margin based on position size and asset type
- * @param positionValue The total value of the position
- * @param marketType The type of market (Stocks, Indices, etc.)
- * @returns The required margin
- */
-export const calculateRequiredMargin = (positionValue: number, marketType: string): number => {
-  const leverage = getLeverageForAssetType(marketType);
+export const calculateMarginRequired = (
+  assetClass: string,
+  positionValue: number
+): number => {
+  const leverage = LEVERAGE_MAP[assetClass] || 1;
   return positionValue / leverage;
 };
 
 /**
- * Calculate maximum position size based on available margin and asset type
- * @param availableMargin The margin available to the user
- * @param marketType The type of market (Stocks, Indices, etc.)
- * @returns The maximum position size possible
+ * Calculate default take profit level based on asset class (for buy positions)
  */
-export const calculateMaxPositionSize = (availableMargin: number, marketType: string): number => {
-  const leverage = getLeverageForAssetType(marketType);
-  return availableMargin * leverage;
+export const calculateDefaultTakeProfit = (
+  currentPrice: number,
+  assetClass: string,
+  direction: 'buy' | 'sell'
+): number => {
+  const tpFactors: Record<string, number> = {
+    'Stocks': 0.05,      // 5% default TP
+    'Indices': 0.03,     // 3% default TP
+    'Commodities': 0.04, // 4% default TP
+    'Forex': 0.02,       // 2% default TP
+    'Crypto': 0.08       // 8% default TP
+  };
+  
+  const factor = tpFactors[assetClass] || 0.03;
+  
+  // For buy positions, TP is above entry price
+  // For sell positions, TP is below entry price
+  return direction === 'buy' 
+    ? currentPrice * (1 + factor) 
+    : currentPrice * (1 - factor);
 };
 
 /**
- * Format the leverage ratio as a string (e.g., "20:1")
- * @param leverage The leverage value
- * @returns Formatted leverage string
+ * Calculate default stop loss level based on asset class
  */
-export const formatLeverageRatio = (leverage: number): string => {
-  return `${leverage}:1`;
+export const calculateDefaultStopLoss = (
+  currentPrice: number,
+  assetClass: string,
+  direction: 'buy' | 'sell'
+): number => {
+  const slFactors: Record<string, number> = {
+    'Stocks': 0.03,      // 3% default SL
+    'Indices': 0.02,     // 2% default SL
+    'Commodities': 0.03, // 3% default SL
+    'Forex': 0.01,       // 1% default SL
+    'Crypto': 0.05       // 5% default SL
+  };
+  
+  const factor = slFactors[assetClass] || 0.02;
+  
+  // For buy positions, SL is below entry price
+  // For sell positions, SL is above entry price
+  return direction === 'buy' 
+    ? currentPrice * (1 - factor) 
+    : currentPrice * (1 + factor);
 };
