@@ -14,7 +14,7 @@ export async function removeFromPortfolio(params: PortfolioRemoveParams): Promis
       .from('user_portfolio')
       .delete()
       .eq('user_id', userId)
-      .eq('asset_id', assetId);
+      .eq('asset_symbol', assetId); // Changed from asset_id to asset_symbol to match the database schema
     
     if (error) {
       throw new Error(`Failed to remove asset from portfolio: ${error.message}`);
