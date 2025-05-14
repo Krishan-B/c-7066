@@ -77,8 +77,15 @@ export function isMarketOpen(marketType: string): boolean {
 
 /**
  * Get a message about market hours based on market type
+ * Added safety check to handle undefined market type
  */
-export function getMarketHoursMessage(marketType: string): string {
+export function getMarketHoursMessage(marketType: string | undefined): string {
+  // Safety check for undefined or null marketType
+  if (!marketType) {
+    return "Please select a valid market type to view trading hours.";
+  }
+  
+  // Now it's safe to call toLowerCase() on marketType
   switch (marketType.toLowerCase()) {
     case 'crypto':
       return 'Cryptocurrency markets are open 24/7, 365 days a year.';
@@ -94,6 +101,6 @@ export function getMarketHoursMessage(marketType: string): string {
     case 'commodities':
       return 'Commodities markets have various trading hours depending on the exchange and specific commodity.';
     default:
-      return 'Please check the trading hours for this market type.';
+      return `Trading hours for "${marketType}" market are currently not available.`;
   }
 }

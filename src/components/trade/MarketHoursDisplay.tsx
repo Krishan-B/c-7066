@@ -13,7 +13,8 @@ interface MarketHoursDisplayProps {
 }
 
 const MarketHoursDisplay = ({ marketType, isOpen, className, showDetails = false }: MarketHoursDisplayProps) => {
-  const config = marketConfig[marketType];
+  // Get market configuration or undefined if not found
+  const config = marketType ? marketConfig[marketType] : undefined;
   
   // Helper function to format UTC hours to AM/PM
   const formatHour = (hour: number): string => {
