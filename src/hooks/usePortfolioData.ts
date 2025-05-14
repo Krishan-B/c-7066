@@ -1,15 +1,9 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Asset, PortfolioData } from "@/types/account";
+import { Asset, PortfolioData, PerformanceData } from "@/types/account";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-
-// Define interface for performance data point
-interface PerformanceDataPoint {
-  date: string;
-  value: number;
-}
 
 export function usePortfolioData() {
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
@@ -149,8 +143,8 @@ export function usePortfolioData() {
   }
   
   // Helper function to generate mock performance data based on timeframe
-  function getPerformanceData(timeframe: string): PerformanceDataPoint[] {
-    const data: PerformanceDataPoint[] = [];
+  function getPerformanceData(timeframe: string): PerformanceData[] {
+    const data: PerformanceData[] = [];
     const points = timeframe === '1m' ? 30 : 
                   timeframe === '3m' ? 90 : 
                   timeframe === '6m' ? 180 : 

@@ -66,7 +66,7 @@ export interface PortfolioData {
   dayChange?: number;
   dayChangePercentage?: number;
   assets: Asset[];
-  closedPositions?: any[];
+  closedPositions?: ClosedPosition[];
   allocationData?: AllocationData[];
   performanceData?: PerformanceData[];
   performance?: {
