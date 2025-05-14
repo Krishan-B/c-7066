@@ -58,7 +58,7 @@ export const TradeMainContent = ({
   setOrderRate,
 }: TradeMainContentProps) => {
   // Use the combined market data hook for the selected category
-  const { marketData, isLoading, refetch } = useCombinedMarketData(
+  const { marketData, isLoading, refreshData } = useCombinedMarketData(
     [assetCategory], 
     { refetchInterval: 1000 * 10 }
   );
@@ -82,11 +82,11 @@ export const TradeMainContent = ({
   // Auto-refresh price every second for simulated real-time updates
   useEffect(() => {
     const intervalId = setInterval(() => {
-      refetch();
+      refreshData(); // Changed from refetch to refreshData
     }, 1000);
     
     return () => clearInterval(intervalId);
-  }, [refetch]);
+  }, [refreshData]);
   
   // Get the fixed leverage for the selected asset type
   const fixedLeverage = getLeverageForAssetType(assetCategory);
