@@ -46,3 +46,6 @@ redirect_uri = ""
 [functions]
 [functions.execute-trade]
 verify_jwt = true
+
+[functions.market-data-service]
+verify_jwt = false

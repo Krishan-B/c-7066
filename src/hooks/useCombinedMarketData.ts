@@ -4,17 +4,24 @@ import { useMarketData, Asset } from "@/hooks/market";
 import { usePolygonWebSocket } from "@/hooks/market/usePolygonWebSocket";
 import { getSymbolsForMarketType } from "@/hooks/market/marketSymbols";
 import { toast } from "@/hooks/use-toast";
+import { useMarketDataService } from "@/hooks/market/useMarketDataService";
 
 interface UseCombinedMarketDataOptions {
   refetchInterval?: number;
   enableRealtime?: boolean;
+  useExternalApis?: boolean;
 }
 
 export const useCombinedMarketData = (
   initialMarketTypes: string[] = [], 
   options: UseCombinedMarketDataOptions = {}
 ) => {
-  const { refetchInterval, enableRealtime = true } = options;
+  const { 
+    refetchInterval, 
+    enableRealtime = true, 
+    useExternalApis = true  // New option to control whether to use external APIs
+  } = options;
+  
   const [marketTypes, setMarketTypes] = useState<string[]>(initialMarketTypes);
   
   // Get symbols for all market types
@@ -34,43 +41,94 @@ export const useCombinedMarketData = (
     autoConnect: enableRealtime
   });
   
-  // Use the market data hook
+  // Use the regular market data hook for fallback
   const { 
-    marketData, 
-    isLoading, 
-    error, 
-    refetch,
-    updateMarketData: baseUpdateMarketData
+    marketData: simulatedData, 
+    isLoading: isSimulatedLoading, 
+    error: simulatedError, 
+    refetch: refetchSimulated,
+    updateMarketData: updateSimulatedData
   } = useMarketData(marketTypes, { refetchInterval });
+
+  // Use the market data service hook if external APIs are enabled
+  const {
+    marketData: serviceData,
+    isLoading: isServiceLoading,
+    error: serviceError,
+    refreshData: refreshServiceData,
+    updateParams: updateServiceParams
+  } = useMarketDataService({
+    initialMarketTypes: marketTypes.length > 0 ? marketTypes[0] : 'Crypto',
+    initialSymbols: symbols,
+    refetchInterval: refetchInterval,
+    enabled: useExternalApis && marketTypes.length > 0
+  });
+
+  // Combine data from both sources, with preference for service data
+  const marketData = useExternalApis && serviceData.length > 0 
+    ? serviceData 
+    : simulatedData;
+  
+  const isLoading = useExternalApis 
+    ? isServiceLoading 
+    : isSimulatedLoading;
+  
+  const error = useExternalApis 
+    ? serviceError 
+    : simulatedError;
 
   // Function to update market types
   const updateMarketTypes = useCallback((types: string[]) => {
     setMarketTypes(types);
-  }, []);
+    
+    // Also update service params if we're using external APIs
+    if (useExternalApis) {
+      // Get symbols for the first market type
+      const newSymbols = types.length > 0 
+        ? getSymbolsForMarketType([types[0]])[types[0]] || []
+        : [];
+      
+      updateServiceParams(
+        types.length > 0 ? types[0] : undefined,
+        newSymbols
+      );
+    }
+  }, [useExternalApis, updateServiceParams]);
 
-  // Forward the updateMarketData function
-  const updateMarketData = useCallback(baseUpdateMarketData, [baseUpdateMarketData]);
-  
+  // Function to refresh data
+  const refreshData = useCallback(() => {
+    if (useExternalApis) {
+      return refreshServiceData(true);
+    } else {
+      return refetchSimulated();
+    }
+  }, [useExternalApis, refreshServiceData, refetchSimulated]);
+
   // Handle real-time updates from WebSocket
   useEffect(() => {
     if (lastUpdate && enableRealtime) {
-      // Update the market data with real-time update
-      updateMarketData((prevData) => {
-        return prevData.map(item => {
-          if (item.symbol === lastUpdate.symbol) {
-            return {
-              ...item,
-              price: lastUpdate.price,
-              change_percentage: lastUpdate.change_percentage,
-              volume: lastUpdate.volume,
-              last_updated: new Date().toISOString()
-            };
-          }
-          return item;
+      // Update the appropriate data source
+      if (useExternalApis) {
+        // We need to update the serviceData directly through the cache
+        refreshServiceData();
+      } else {
+        updateSimulatedData((prevData) => {
+          return prevData.map(item => {
+            if (item.symbol === lastUpdate.symbol) {
+              return {
+                ...item,
+                price: lastUpdate.price,
+                change_percentage: lastUpdate.change_percentage,
+                volume: lastUpdate.volume,
+                last_updated: new Date().toISOString()
+              };
+            }
+            return item;
+          });
         });
-      });
+      }
     }
-  }, [lastUpdate, updateMarketData, enableRealtime]);
+  }, [lastUpdate, updateSimulatedData, enableRealtime, useExternalApis, refreshServiceData]);
   
   // Update WebSocket subscriptions when symbols change
   useEffect(() => {
@@ -94,10 +152,10 @@ export const useCombinedMarketData = (
     marketData,
     isLoading,
     error,
-    refetch,
+    refreshData,
     updateMarketTypes,
-    updateMarketData,
     realtimeEnabled: isConnected && enableRealtime,
-    realtimeConnect: connect
+    realtimeConnect: connect,
+    dataSource: useExternalApis ? "External APIs" : "Simulated"
   };
 };
