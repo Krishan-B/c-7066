@@ -19,7 +19,7 @@ export const useCombinedMarketData = (
   const { 
     refetchInterval, 
     enableRealtime = true, 
-    useExternalApis = true  // New option to control whether to use external APIs
+    useExternalApis = true
   } = options;
   
   const [marketTypes, setMarketTypes] = useState<string[]>(initialMarketTypes);
@@ -58,7 +58,9 @@ export const useCombinedMarketData = (
     refreshData: refreshServiceData,
     updateParams: updateServiceParams
   } = useMarketDataService({
-    initialMarketTypes: marketTypes.length > 0 ? marketTypes[0] : 'Crypto',
+    // Fix: Change initialMarketTypes (plural) to initialMarketType (singular)
+    // and pass the first market type in the array, or 'Crypto' as default
+    initialMarketType: marketTypes.length > 0 ? marketTypes[0] : 'Crypto',
     initialSymbols: symbols,
     refetchInterval: refetchInterval,
     enabled: useExternalApis && marketTypes.length > 0
@@ -146,7 +148,7 @@ export const useCombinedMarketData = (
         variant: "destructive"
       });
     }
-  }, [wsError, enableRealtime, toast]);
+  }, [wsError, enableRealtime]);
   
   return {
     marketData,
