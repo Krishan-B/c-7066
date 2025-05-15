@@ -60,15 +60,15 @@ export const createMockFn = <T extends (...args: any[]) => any>(
 };
 
 // Extended renderHook function to include waitFor functionality
-export const renderHook: any = (hook: any, options?: any) => {
-  let result: any = { current: undefined };
+export const renderHook = <TResult, TProps>(hook: (props: TProps) => TResult, options?: any) => {
+  let result: { current: TResult } = { current: undefined as unknown as TResult };
   
-  function TestComponent() {
-    result.current = hook();
+  function TestComponent(props: TProps) {
+    result.current = hook(props);
     return null;
   }
   
-  const utils = render(<TestComponent />, options);
+  const utils = render(React.createElement(TestComponent, options?.initialProps));
   
   // Add waitFor functionality to the result
   return {
@@ -77,8 +77,8 @@ export const renderHook: any = (hook: any, options?: any) => {
     waitFor: async (callback: () => boolean | void) => {
       return rtlWaitFor(callback);
     },
-    rerender: () => {
-      utils.rerender(<TestComponent />);
+    rerender: (newProps?: TProps) => {
+      utils.rerender(React.createElement(TestComponent, newProps));
     },
   };
 };
