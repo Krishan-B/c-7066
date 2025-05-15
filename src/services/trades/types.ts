@@ -1,4 +1,3 @@
-
 // Trade direction
 export type TradeDirection = 'buy' | 'sell';
 
@@ -17,19 +16,29 @@ export interface TradeBase {
 }
 
 // Parameters for market orders (immediate execution)
-export interface MarketOrderParams extends TradeBase {
+export interface MarketOrderParams {
+  symbol: string;
+  direction: 'buy' | 'sell';
+  units: number;
   currentPrice: number;
   stopLoss?: number;
   takeProfit?: number;
+  userId: string;
+  assetCategory?: string;
 }
 
 // Parameters for entry orders (execution at specified price)
-export interface EntryOrderParams extends TradeBase {
-  entryPrice: number;
+export interface EntryOrderParams {
+  symbol: string;
+  direction: 'buy' | 'sell';
+  units: number;
   currentPrice: number;
+  entryPrice: number;
   stopLoss?: number;
   takeProfit?: number;
   expiration?: string;
+  userId: string;
+  assetCategory?: string;
 }
 
 // Result of trade operations
