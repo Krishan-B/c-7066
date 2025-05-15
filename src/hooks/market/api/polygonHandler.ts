@@ -1,7 +1,6 @@
-
 import { Asset } from "../types";
 import { supabase } from '@/integrations/supabase/client';
-import { getLastQuote, getLastTrade, getDailyOHLC } from "@/utils/api/polygon";
+import { getLastQuote, getLastTrade, getDailyOHLC } from "@/utils/api/polygon/endpoints";
 import { transformTickerToAsset } from "@/utils/api/polygon/transformers";
 
 const fetchPolygonData = async (endpoint: string): Promise<any> => {
