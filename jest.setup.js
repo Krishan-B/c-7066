@@ -31,4 +31,19 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // This is important for extending Jest's expect
-expect.extend(require('@testing-library/jest-dom').matchers);
+import { toBeInTheDocument, toHaveClass, toBeDisabled, toBeChecked, toBeVisible, 
+  toBeEmptyDOMElement, toBeRequired, toHaveAttribute, toHaveTextContent, toHaveValue } from '@testing-library/jest-dom/matchers';
+
+// Extend Jest matchers explicitly
+expect.extend({
+  toBeInTheDocument,
+  toHaveClass,
+  toBeDisabled,
+  toBeChecked,
+  toBeVisible,
+  toBeEmptyDOMElement,
+  toBeRequired,
+  toHaveAttribute,
+  toHaveTextContent,
+  toHaveValue
+});

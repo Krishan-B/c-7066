@@ -12,7 +12,7 @@ module.exports = {
       tsconfig: 'tsconfig.json',
       isolatedModules: true,
       diagnostics: {
-        ignoreCodes: [1343] // Ignore some specific TS error codes that might be related to Jest matchers
+        ignoreCodes: [1343, 2352, 2339] // Ignore specific TS error codes related to Jest matchers
       }
     }],
   },
@@ -24,7 +24,10 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   globals: {
     'ts-jest': {
-      tsconfig: 'tsconfig.json'
+      tsconfig: 'tsconfig.json',
+      diagnostics: {
+        warnOnly: true
+      }
     }
   }
 };

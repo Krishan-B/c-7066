@@ -48,7 +48,7 @@ describe('useTradeExecution', () => {
 
     const { executeMarketOrder } = require('@/services/trades/orders/marketOrders');
     expect(executeMarketOrder).toHaveBeenCalledTimes(1);
-    expect(tradeResult.success).toBe(true);
+    expect(tradeResult?.success).toBe(true);
   });
   
   test('should place entry order', async () => {
@@ -69,6 +69,6 @@ describe('useTradeExecution', () => {
 
     const { placeEntryOrder } = require('@/services/trades/orders/entryOrders');
     expect(placeEntryOrder).toHaveBeenCalledTimes(1);
-    expect(tradeResult.success).toBe(true);
+    expect(tradeResult?.success).toBe(true);
   });
 });
