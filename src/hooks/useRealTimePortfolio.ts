@@ -45,7 +45,7 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
         
         if (status === 'SUBSCRIBED') {
           toast.success('Real-time portfolio updates activated');
-        } else if (status === 'SUBSCRIPTION_ERROR') {
+        } else if (status === 'CHANNEL_ERROR') {
           toast.error('Error subscribing to real-time portfolio updates');
         }
       });
@@ -63,8 +63,11 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
         payload => {
           console.log('Trade update received:', payload);
           // Only refetch on meaningful status changes
-          if (payload.new && ['executed', 'closed', 'cancelled', 'liquidated'].includes(payload.new.status)) {
-            refetch();
+          if (payload.new && typeof payload.new === 'object' && 'status' in payload.new) {
+            const newStatus = payload.new.status;
+            if (['executed', 'closed', 'cancelled', 'liquidated'].includes(newStatus)) {
+              refetch();
+            }
           }
         }
       )
@@ -82,27 +85,32 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
         },
         payload => {
           console.log('Account update received:', payload);
-          if (payload.new) {
-            // Check margin level and update status
-            const marginLevel = payload.new.equity / (payload.new.used_margin || 1) * 100;
-            const newRiskLevel = getRiskLevel(marginLevel);
+          if (payload.new && typeof payload.new === 'object') {
+            // Check if payload has the properties we need
+            const newData = payload.new as Record<string, any>;
             
-            if (newRiskLevel !== marginLevelStatus) {
-              setMarginLevelStatus(newRiskLevel);
+            if ('equity' in newData && 'used_margin' in newData) {
+              // Check margin level and update status
+              const marginLevel = newData.equity / (newData.used_margin || 1) * 100;
+              const newRiskLevel = getRiskLevel(marginLevel);
               
-              // Show appropriate notifications based on risk level
-              if (newRiskLevel === 'warning') {
-                toast.warning('Margin level warning: approaching margin call threshold');
-              } else if (newRiskLevel === 'danger') {
-                toast.error('Margin call alert: add funds to avoid liquidation');
-              } else if (newRiskLevel === 'critical') {
-                toast.error('Critical alert: positions at risk of immediate liquidation', {
-                  duration: 10000
-                });
+              if (newRiskLevel !== marginLevelStatus) {
+                setMarginLevelStatus(newRiskLevel);
+                
+                // Show appropriate notifications based on risk level
+                if (newRiskLevel === 'warning') {
+                  toast.warning('Margin level warning: approaching margin call threshold');
+                } else if (newRiskLevel === 'danger') {
+                  toast.error('Margin call alert: add funds to avoid liquidation');
+                } else if (newRiskLevel === 'critical') {
+                  toast.error('Critical alert: positions at risk of immediate liquidation', {
+                    duration: 10000
+                  });
+                }
               }
+              
+              refetch();
             }
-            
-            refetch();
           }
         }
       )

@@ -12,7 +12,7 @@ import { Asset, ClosedPosition } from "@/types/account";
 interface PositionsSectionProps {
   assets: Asset[];
   closedPositions: ClosedPosition[];
-  onViewDetails: (asset: Asset) => void; // Changed from (symbol: string) to (asset: Asset)
+  onViewDetails: (asset: Asset) => void;
 }
 
 const PositionsSection = ({ 

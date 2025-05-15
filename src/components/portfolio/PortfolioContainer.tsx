@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 // Import components
 import PortfolioSummary from "@/components/portfolio/PortfolioSummary";
@@ -17,6 +18,7 @@ import RiskManagementPanel from "@/components/portfolio/RiskManagementPanel";
 
 // Import the real-time portfolio hook
 import { useRealTimePortfolio } from "@/hooks/useRealTimePortfolio";
+import { Asset } from "@/types/account";
 
 const PortfolioContainer = () => {
   const { user } = useAuth();
@@ -32,6 +34,24 @@ const PortfolioContainer = () => {
     refreshPortfolio,
     marginLevelStatus
   } = useRealTimePortfolio();
+
+  // Portfolio action handlers
+  const handleExportReport = () => {
+    toast.success("Portfolio report exported successfully");
+    console.log("Exporting portfolio report");
+  };
+
+  const handleTaxEvents = () => {
+    toast.info("Tax events feature will be available soon");
+    console.log("Showing tax events");
+  };
+
+  const handleViewDetails = (asset: Asset) => {
+    console.log("Viewing details for asset:", asset);
+    // Implementation for viewing asset details
+    // This could navigate to an asset detail page in the future
+    toast.info(`Viewing details for ${asset.name}`);
+  };
 
   if (!user) {
     return (
@@ -155,6 +175,8 @@ const PortfolioContainer = () => {
               lockedFunds={lockedFunds}
               totalPnL={totalPnL || 0}
               totalPnLPercentage={totalPnLPercentage || 0}
+              onExport={handleExportReport}
+              onTaxEvents={handleTaxEvents}
             />
           </div>
           
@@ -180,6 +202,7 @@ const PortfolioContainer = () => {
             <PositionsSection 
               assets={assets} 
               closedPositions={closedPositions || []}
+              onViewDetails={handleViewDetails}
             />
           </div>
           
