@@ -2,6 +2,7 @@
 import { renderHook } from '@/utils/test-utils';
 import { useTradeExecution } from '../useTradeExecution';
 import { act } from 'react-dom/test-utils';
+import { jest, expect, describe, test, beforeEach } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('@/services/trades/orders/marketOrders', () => ({

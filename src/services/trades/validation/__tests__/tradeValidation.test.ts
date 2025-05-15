@@ -6,6 +6,7 @@ import {
   TradeValidationErrorType
 } from '../tradeValidation';
 import { toast } from 'sonner';
+import { jest, expect, describe, test, beforeEach } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('sonner', () => ({

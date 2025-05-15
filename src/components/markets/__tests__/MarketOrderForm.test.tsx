@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen } from '@/utils/test-utils';
 import userEvent from '@testing-library/user-event';
 import MarketOrderForm from '../MarketOrderForm';
+import { jest, expect, describe, test, beforeEach } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('@/hooks/useMarketData', () => ({
@@ -76,7 +77,4 @@ describe('MarketOrderForm', () => {
     // Expect component to reflect the change (implementation dependent)
     expect(screen.getByText(`Trade ${newAsset.name}`)).toBeInTheDocument();
   });
-  
-  // More detailed tests would require mocking the AdvancedOrderForm component
-  // or implementing a more complex test setup
 });

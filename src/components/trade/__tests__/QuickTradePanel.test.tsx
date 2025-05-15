@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen } from '@/utils/test-utils';
 import userEvent from '@testing-library/user-event';
 import QuickTradePanel from '../QuickTradePanel';
+import { jest, expect, describe, test, beforeEach } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('@/hooks/use-toast', () => ({

@@ -33,7 +33,7 @@ const customRender = (
 export * from '@testing-library/react';
 export { customRender as render };
 
-// Mock implementations
+// Explicitly declare Jest mocking utilities for TypeScript
 export const mockAuthHook = (isAuthenticated = true) => {
   jest.mock('@/hooks/useAuth', () => ({
     useAuth: () => ({
@@ -44,4 +44,11 @@ export const mockAuthHook = (isAuthenticated = true) => {
       signOut: jest.fn(),
     }),
   }));
+};
+
+// Helper to create mock functions with type safety
+export const createMockFn = <T extends (...args: any[]) => any>(
+  implementation?: T
+): jest.MockedFunction<T> => {
+  return jest.fn(implementation) as jest.MockedFunction<T>;
 };

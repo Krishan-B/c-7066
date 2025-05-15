@@ -1,6 +1,7 @@
 
 import { renderHook, act } from '@/utils/test-utils';
 import { useTradeManagement } from '../useTradeManagement';
+import { jest, expect, describe, test, beforeEach } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('@/hooks/useAuth', () => ({

@@ -2,6 +2,9 @@
 // Add jest-dom matchers
 import '@testing-library/jest-dom';
 
+// Explicitly declare global Jest types
+import type { jest } from '@jest/globals';
+
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

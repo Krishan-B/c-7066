@@ -2,6 +2,7 @@
 import React from 'react';
 import { render, screen } from '@/utils/test-utils';
 import RiskManagementPanel from '../RiskManagementPanel';
+import { jest, expect, describe, test } from '@jest/globals';
 
 describe('RiskManagementPanel', () => {
   test('renders with safe status', () => {
