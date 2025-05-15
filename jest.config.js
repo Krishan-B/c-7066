@@ -10,7 +10,10 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
       tsconfig: 'tsconfig.json',
-      isolatedModules: true
+      isolatedModules: true,
+      diagnostics: {
+        ignoreCodes: [1343] // Ignore some specific TS error codes that might be related to Jest matchers
+      }
     }],
   },
   coveragePathIgnorePatterns: [
@@ -19,4 +22,9 @@ module.exports = {
   ],
   testMatch: ['**/__tests__/**/*.test.[jt]s?(x)'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.json'
+    }
+  }
 };

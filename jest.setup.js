@@ -2,8 +2,18 @@
 // Add jest-dom matchers
 import '@testing-library/jest-dom';
 
-// Explicitly declare global Jest types
-import { jest } from '@jest/globals';
+// Global mocks
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
+global.IntersectionObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
 
 // Setup window.matchMedia mock
 Object.defineProperty(window, 'matchMedia', {
@@ -20,19 +30,5 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// Setup ResizeObserver mock
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-}));
-
-// Setup IntersectionObserver mock
-global.IntersectionObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-}));
-
-// Ensure testing-library matchers are globally available
-expect.extend(require('@testing-library/jest-dom/matchers'));
+// This is important for extending Jest's expect
+expect.extend(require('@testing-library/jest-dom').matchers);
