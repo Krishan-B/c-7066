@@ -55,8 +55,8 @@ export const mockAuthHook = (isAuthenticated = true) => {
 // Helper to create mock functions with type safety
 export const createMockFn = <T extends (...args: any[]) => any>(
   implementation?: T
-) => {
-  return jest.fn(implementation);
+): jest.MockedFunction<T> => {
+  return jest.fn(implementation) as jest.MockedFunction<T>;
 };
 
 // Extended renderHook function to include waitFor functionality
