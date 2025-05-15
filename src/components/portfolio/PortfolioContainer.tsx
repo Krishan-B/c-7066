@@ -13,9 +13,10 @@ import PortfolioMetricsCards from "@/components/portfolio/PortfolioMetricsCards"
 import PerformanceChart from "@/components/portfolio/PerformanceChart";
 import PositionsSection from "@/components/portfolio/PositionsSection";
 import PortfolioSideSection from "@/components/portfolio/PortfolioSideSection";
+import RiskManagementPanel from "@/components/portfolio/RiskManagementPanel";
 
-// Import the new portfolio hook
-import { usePortfolio } from "@/hooks/portfolio/usePortfolio";
+// Import the real-time portfolio hook
+import { useRealTimePortfolio } from "@/hooks/useRealTimePortfolio";
 
 const PortfolioContainer = () => {
   const { user } = useAuth();
@@ -25,12 +26,12 @@ const PortfolioContainer = () => {
     portfolioData,
     timeframe, 
     setTimeframe, 
-    activeTrades,
     isLoading,
     error,
-    refetch,
-    actions
-  } = usePortfolio();
+    isSubscribed,
+    refreshPortfolio,
+    marginLevelStatus
+  } = useRealTimePortfolio();
 
   if (!user) {
     return (
@@ -82,7 +83,7 @@ const PortfolioContainer = () => {
               This could be due to network connectivity issues or a temporary server problem.
             </p>
             <div className="flex gap-4">
-              <Button onClick={() => refetch()} className="gap-2">
+              <Button onClick={() => refreshPortfolio()} className="gap-2">
                 <RefreshCw className="h-4 w-4" />
                 Retry
               </Button>
@@ -108,35 +109,64 @@ const PortfolioContainer = () => {
     performanceData = []
   } = portfolioData;
 
+  // Calculate margin level for risk management
+  const equity = cashBalance + totalValue; 
+  const marginLevel = lockedFunds > 0 ? (equity / lockedFunds) * 100 : 100;
+
   return (
     <div className="min-h-screen bg-background">
       <div className="p-6 max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-2">Portfolio</h1>
-          <p className="text-muted-foreground">
-            Track and manage your investments
-          </p>
+        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold mb-2">Portfolio</h1>
+            <p className="text-muted-foreground">
+              Track and manage your investments
+              {isSubscribed && <span className="ml-2 text-xs text-green-500 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">Live updates</span>}
+            </p>
+          </div>
+          
+          <div className="flex mt-4 md:mt-0">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={refreshPortfolio} 
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Portfolio Summary */}
         <PortfolioSummary 
-          balance={cashBalance + lockedFunds}
-          equity={cashBalance + lockedFunds + totalValue}
-          activeTrades={activeTrades}
+          balance={cashBalance}
+          equity={equity}
+          activeTrades={assets.length}
           pnl={totalPnL || 0}
           pnlPercentage={totalPnLPercentage || 0}
         />
 
-        {/* Portfolio Metrics Cards */}
-        <PortfolioMetricsCards 
-          totalValue={totalValue}
-          cashBalance={cashBalance}
-          lockedFunds={lockedFunds}
-          totalPnL={totalPnL || 0}
-          totalPnLPercentage={totalPnLPercentage || 0}
-          onExport={actions.handleExportReport}
-          onTaxEvents={actions.handleTaxEvents}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="lg:col-span-2">
+            <PortfolioMetricsCards 
+              totalValue={totalValue}
+              cashBalance={cashBalance}
+              lockedFunds={lockedFunds}
+              totalPnL={totalPnL || 0}
+              totalPnLPercentage={totalPnLPercentage || 0}
+            />
+          </div>
+          
+          <div className="lg:col-span-1">
+            <RiskManagementPanel 
+              marginLevel={marginLevel}
+              equity={equity}
+              usedMargin={lockedFunds}
+              marginStatus={marginLevelStatus}
+            />
+          </div>
+        </div>
 
         {/* Performance Chart */}
         <PerformanceChart 
@@ -149,8 +179,7 @@ const PortfolioContainer = () => {
           <div className="lg:col-span-3">
             <PositionsSection 
               assets={assets} 
-              closedPositions={closedPositions || []} 
-              onViewDetails={actions.handleViewDetails}
+              closedPositions={closedPositions || []}
             />
           </div>
           

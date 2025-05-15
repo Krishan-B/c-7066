@@ -19,6 +19,39 @@ export function calculateMarginRequired(marketType: string, totalAmount: number)
 }
 
 /**
+ * Calculate liquidation price for a position
+ */
+export function calculateLiquidationPrice(
+  tradeType: 'buy' | 'sell',
+  entryPrice: number,
+  units: number,
+  marketType: string,
+  marginLevel: number = 0.2 // Default 20% margin level for liquidation
+): number {
+  const leverage = LEVERAGE_MAP[marketType] || 1;
+  const marginUsed = (entryPrice * units) / leverage;
+  const liquidationThreshold = marginUsed * marginLevel;
+  
+  if (tradeType === 'buy') {
+    // For long positions, price needs to go down to hit liquidation
+    const priceDrop = liquidationThreshold / units;
+    return Math.max(0, entryPrice - priceDrop);
+  } else {
+    // For short positions, price needs to go up to hit liquidation
+    const priceIncrease = liquidationThreshold / units;
+    return entryPrice + priceIncrease;
+  }
+}
+
+/**
+ * Calculate margin level percentage
+ */
+export function calculateMarginLevel(equity: number, usedMargin: number): number {
+  if (usedMargin <= 0) return 100;
+  return (equity / usedMargin) * 100;
+}
+
+/**
  * Validate the trade request parameters
  */
 export function validateTradeRequest(request: TradeRequest): boolean {
