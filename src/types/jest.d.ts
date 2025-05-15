@@ -25,3 +25,11 @@ declare global {
     }
   }
 }
+
+// Augment the built-in expect interface
+declare namespace jest {
+  interface Expect extends global.Expect {}
+  interface InverseAsymmetricMatchers extends global.InverseAsymmetricMatchers {}
+  interface Matchers<R> extends global.Matchers<R> {}
+}
+

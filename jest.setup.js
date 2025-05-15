@@ -3,7 +3,7 @@
 import '@testing-library/jest-dom';
 
 // Explicitly declare global Jest types
-import type { jest } from '@jest/globals';
+import { jest } from '@jest/globals';
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -33,3 +33,4 @@ global.IntersectionObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
   disconnect: jest.fn(),
 }));
+

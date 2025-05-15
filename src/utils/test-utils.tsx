@@ -55,8 +55,7 @@ export const mockAuthHook = (isAuthenticated = true) => {
 export const createMockFn = <T extends (...args: any[]) => any>(
   implementation?: T
 ): jest.MockedFunction<T> => {
-  // Use type casting to resolve the type issue
-  return jest.fn(implementation) as unknown as jest.MockedFunction<T>;
+  return jest.fn(implementation) as jest.MockedFunction<T>;
 };
 
 // Extended renderHook function to include waitFor functionality
@@ -82,3 +81,4 @@ export const renderHook = <TResult, TProps>(hook: (props: TProps) => TResult, op
     },
   };
 };
+
