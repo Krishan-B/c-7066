@@ -11,6 +11,9 @@ const eventHandlers: Record<string, Array<(data: any) => void>> = {
 };
 const subscribedSymbols: Set<string> = new Set();
 
+// Queue for tracking pending subscriptions before WebSocket is connected
+let pendingSubscriptions: string[] = [];
+
 export function setPolygonWebSocketApiKey(key: string): void {
   apiKey = key;
 }
@@ -30,15 +33,16 @@ export function initPolygonWebSocket(): boolean {
 
     webSocket.onopen = () => {
       if (webSocket) {
+        console.log('Polygon WebSocket connected');
+        
         // Authenticate with the API key
         webSocket.send(JSON.stringify({ action: "auth", params: apiKey }));
         
-        // Re-subscribe to any previously subscribed symbols
-        if (subscribedSymbols.size > 0) {
-          webSocket.send(JSON.stringify({
-            action: "subscribe",
-            params: Array.from(subscribedSymbols).join(",")
-          }));
+        // Handle any pending subscriptions that came in before the connection was ready
+        if (pendingSubscriptions.length > 0) {
+          console.log(`Processing ${pendingSubscriptions.length} pending subscriptions`);
+          subscribeToSymbols(pendingSubscriptions);
+          pendingSubscriptions = [];
         }
         
         // Trigger all open event handlers
@@ -49,6 +53,12 @@ export function initPolygonWebSocket(): boolean {
     webSocket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        
+        // Check for authentication response
+        if (data[0] && data[0].ev === 'status') {
+          console.log('Polygon status message:', data[0].message);
+        }
+        
         // Trigger all message event handlers
         eventHandlers.message.forEach(handler => handler(data));
       } catch (error) {
@@ -57,6 +67,7 @@ export function initPolygonWebSocket(): boolean {
     };
 
     webSocket.onclose = (event) => {
+      console.log('Polygon WebSocket closed', event.code, event.reason);
       // Trigger all close event handlers
       eventHandlers.close.forEach(handler => handler(event));
       // Clear the WebSocket reference
@@ -64,9 +75,9 @@ export function initPolygonWebSocket(): boolean {
     };
 
     webSocket.onerror = (error) => {
+      console.error("WebSocket error:", error);
       // Trigger all error event handlers
       eventHandlers.error.forEach(handler => handler(error));
-      console.error("WebSocket error:", error);
     };
 
     return true;
@@ -84,13 +95,18 @@ export function closePolygonWebSocket(): void {
 }
 
 export function subscribeToSymbols(symbols: string[]): boolean {
+  // Add symbols to tracking set
+  symbols.forEach(symbol => subscribedSymbols.add(symbol));
+
+  // If connection is not ready, queue them for later
   if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
-    symbols.forEach(symbol => subscribedSymbols.add(symbol));
+    console.log(`WebSocket not ready, queuing ${symbols.length} symbols for later subscription`);
+    pendingSubscriptions = [...new Set([...pendingSubscriptions, ...symbols])];
     return false;
   }
 
   try {
-    symbols.forEach(symbol => subscribedSymbols.add(symbol));
+    console.log(`Subscribing to ${symbols.length} symbols`);
     
     webSocket.send(JSON.stringify({
       action: "subscribe",
@@ -105,13 +121,17 @@ export function subscribeToSymbols(symbols: string[]): boolean {
 }
 
 export function unsubscribeFromSymbols(symbols: string[]): boolean {
+  symbols.forEach(symbol => subscribedSymbols.delete(symbol));
+  
+  // Remove from pending subscriptions if not yet connected
+  pendingSubscriptions = pendingSubscriptions.filter(s => !symbols.includes(s));
+  
   if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
-    symbols.forEach(symbol => subscribedSymbols.delete(symbol));
     return false;
   }
 
   try {
-    symbols.forEach(symbol => subscribedSymbols.delete(symbol));
+    console.log(`Unsubscribing from ${symbols.length} symbols`);
     
     webSocket.send(JSON.stringify({
       action: "unsubscribe",

@@ -4,6 +4,7 @@ import { executeMarketOrder } from "@/services/trades/orders/marketOrders";
 import { placeEntryOrder } from "@/services/trades/orders/entryOrders";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { calculateMarginRequired } from "@/services/trades/accountService";
 
 interface TradeParams {
   symbol: string;
@@ -31,6 +32,12 @@ export function useTradeExecution() {
     setIsExecuting(true);
 
     try {
+      // Calculate the total amount and required margin
+      const totalAmount = params.units * (params.orderType === "market" ? params.currentPrice : params.entryPrice || params.currentPrice);
+      const marginRequired = calculateMarginRequired(params.assetCategory, totalAmount);
+      
+      console.log(`Trade execution: ${params.direction} ${params.units} ${params.symbol} at ${params.currentPrice}, margin required: ${marginRequired}`);
+      
       let result;
 
       if (params.orderType === "market") {

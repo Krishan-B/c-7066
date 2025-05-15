@@ -7,7 +7,7 @@ import {
   getSupabaseClient, 
   getUserFromToken 
 } from './utils.ts';
-import { executeMarketOrder, executeEntryOrder } from './orders.ts';
+import { executeMarketOrder, executeEntryOrder, closePosition, cancelOrder } from './orders.ts';
 
 // Main request handler
 serve(async (req) => {
@@ -30,9 +30,62 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-
+    
     // Parse request
-    const tradeRequest: TradeRequest = await req.json();
+    const body = await req.json();
+    
+    // Handle different action types
+    if (body.action === 'close_position') {
+      // Handle close position action
+      const { tradeId, currentPrice } = body;
+      
+      if (!tradeId || !currentPrice) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid parameters for closing position' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      const result = await closePosition(supabase, user.id, tradeId, currentPrice);
+      
+      return new Response(
+        JSON.stringify(result),
+        { status: result.success ? 200 : 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (body.action === 'cancel_order') {
+      // Handle cancel order action
+      const { tradeId } = body;
+      
+      if (!tradeId) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid parameters for cancelling order' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      const result = await cancelOrder(supabase, user.id, tradeId);
+      
+      return new Response(
+        JSON.stringify(result),
+        { status: result.success ? 200 : 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Default action: execute trade
+    const tradeRequest: TradeRequest = {
+      assetSymbol: body.assetSymbol,
+      assetName: body.assetName,
+      marketType: body.marketType,
+      units: body.units,
+      pricePerUnit: body.pricePerUnit,
+      tradeType: body.tradeType,
+      orderType: body.orderType,
+      stopLoss: body.stopLoss,
+      takeProfit: body.takeProfit,
+      expirationDate: body.expirationDate
+    };
     
     // Validate request
     if (!validateTradeRequest(tradeRequest)) {
