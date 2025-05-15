@@ -17,8 +17,8 @@ jest.mock('@/hooks/trades/tradeAPI', () => ({
     if (Array.isArray(status) && status.includes('closed')) return Promise.resolve([{ id: 'closed-1' }]);
     return Promise.resolve([]);
   }),
-  closeTradePosition: jest.fn().mockResolvedValue({ success: true }),
-  cancelTradeOrder: jest.fn().mockResolvedValue({ success: true })
+  closeTradePosition: jest.fn().mockImplementation(() => Promise.resolve({ success: true })),
+  cancelTradeOrder: jest.fn().mockImplementation(() => Promise.resolve({ success: true }))
 }));
 
 jest.mock('@/hooks/trades/useTradeSubscription', () => ({

@@ -5,7 +5,7 @@ import '@testing-library/jest-dom';
 // Explicitly declare global Jest types
 import { jest } from '@jest/globals';
 
-// Mock matchMedia
+// Setup window.matchMedia mock
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation(query => ({
@@ -20,16 +20,19 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// Mock Resize Observer
+// Setup ResizeObserver mock
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
 }));
 
-// Mock Intersection Observer
+// Setup IntersectionObserver mock
 global.IntersectionObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
 }));
+
+// Ensure testing-library matchers are globally available
+expect.extend(require('@testing-library/jest-dom/matchers'));

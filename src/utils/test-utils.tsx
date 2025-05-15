@@ -3,7 +3,7 @@ import React, { ReactElement } from 'react';
 import { render, RenderOptions, waitFor as rtlWaitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import '@testing-library/jest-dom'; // Import the jest-dom matchers
+import '@testing-library/jest-dom';
 
 // Create a custom render method that includes providers
 const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
