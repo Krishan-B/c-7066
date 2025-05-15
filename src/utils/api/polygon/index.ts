@@ -1,9 +1,8 @@
 
 // Re-export all polygon websocket functions
-export * from './websocket.ts';
+export * from './websocket';
 
 // Re-export client and endpoint functions
-export * from './client.ts';
-export * from './endpoints.ts';
-export * from './transformers.ts';
-
+export * from './client';
+export * from './endpoints';
+export * from './transformers';
