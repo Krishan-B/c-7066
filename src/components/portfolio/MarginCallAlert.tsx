@@ -27,7 +27,7 @@ const MarginCallAlert = ({
     switch (riskStatus) {
       case 'critical':
         return {
-          variant: 'destructive',
+          variant: 'destructive' as const,
           icon: <XCircle className="h-5 w-5" />,
           title: 'Critical Margin Level',
           description: `Your margin level is critically low at ${marginLevel.toFixed(2)}%. Your positions are at risk of immediate liquidation.`,
@@ -44,7 +44,7 @@ const MarginCallAlert = ({
       case 'warning':
       default:
         return {
-          variant: 'warning' as const,
+          variant: 'default' as const,
           icon: <AlertTriangle className="h-5 w-5" />,
           title: 'Low Margin Level',
           description: `Your margin level is getting low at ${marginLevel.toFixed(2)}%. Consider adding funds to maintain your positions safely.`,

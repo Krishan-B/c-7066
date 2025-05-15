@@ -8,7 +8,7 @@ import PositionsTable from "@/components/portfolio/PositionsTable";
 import ClosedPositionsTable from "@/components/portfolio/ClosedPositionsTable";
 import PositionFilter from "@/components/portfolio/PositionFilter";
 import { Asset, ClosedPosition } from "@/types/account";
-import { useTradePanel } from "@/components/trade/TradePanelProvider";
+import { useTradePanelContext } from "@/components/trade/TradePanelProvider";
 import { toast } from "sonner";
 
 interface PositionsSectionProps {
@@ -24,7 +24,7 @@ const PositionsSection = ({
 }: PositionsSectionProps) => {
   const [filterSymbol, setFilterSymbol] = useState<string>("");
   const [filterPnl, setFilterPnl] = useState<string>("all");
-  const { openPanel } = useTradePanel();
+  const { openTradePanel } = useTradePanelContext();
 
   // Filter closed positions
   const filteredClosedPositions = closedPositions.filter(position => {
@@ -43,8 +43,8 @@ const PositionsSection = ({
   });
 
   const handleAddPosition = () => {
-    if (openPanel) {
-      openPanel();
+    if (openTradePanel) {
+      openTradePanel();
     } else {
       toast.error("Trade panel is not available");
     }

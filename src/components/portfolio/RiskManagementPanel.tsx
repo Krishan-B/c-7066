@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { InfoCircle, AlertTriangle, AlertOctagon } from "lucide-react";
+import { Info, AlertTriangle, AlertOctagon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -84,7 +84,7 @@ const RiskManagementPanel = ({
       case 'warning':
         return <AlertTriangle className="h-5 w-5" />;
       default:
-        return <InfoCircle className="h-5 w-5" />;
+        return <Info className="h-5 w-5" />;
     }
   };
 

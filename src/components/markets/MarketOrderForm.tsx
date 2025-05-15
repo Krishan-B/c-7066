@@ -44,7 +44,7 @@ const MarketOrderForm = ({ selectedAsset }: MarketOrderFormProps) => {
   const { executeTrade, isExecuting } = useTradeExecution();
   
   // Check if market is open
-  const marketIsOpen = isMarketOpen(assetCategory);
+  const marketOpenStatus = isMarketOpen(assetCategory);
   
   // Handle order submission with validation
   const handleOrderSubmit = async (values: AdvancedOrderFormValues, action: "buy" | "sell") => {
@@ -69,7 +69,7 @@ const MarketOrderForm = ({ selectedAsset }: MarketOrderFormProps) => {
       orderType: values.orderType,
       entryPrice,
       availableFunds,
-      marketOpen: values.orderType === 'entry' ? true : marketIsOpen
+      marketOpen: values.orderType === 'entry' ? true : marketOpenStatus
     });
     
     if (!isValid) {
@@ -134,7 +134,6 @@ const MarketOrderForm = ({ selectedAsset }: MarketOrderFormProps) => {
             onAssetCategoryChange={setAssetCategory}
             marketData={marketData}
             isLoading={isLoading || isExecuting}
-            marketIsOpen={marketIsOpen}
           />
         </CardContent>
       </Card>
