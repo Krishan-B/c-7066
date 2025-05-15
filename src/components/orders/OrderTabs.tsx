@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { AccountMetrics } from "@/types/account";
 import { Trade } from "@/hooks/useTradeManagement";
 import { OrderTabsProps } from "./OrderTabs.d";
+import { useTradeExecution } from "@/hooks/useTradeExecution";
+import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 
 const OrderTabs: React.FC<OrderTabsProps> = ({ 
   activeTab, 
@@ -23,21 +25,95 @@ const OrderTabs: React.FC<OrderTabsProps> = ({
   accountMetrics
 }) => {
   const [selectedSymbol, setSelectedSymbol] = useState("BTCUSD");
-  const [currentPrice, setCurrentPrice] = useState(67432.21);
+  const [assetCategory, setAssetCategory] = useState("Crypto");
+  
+  // Fetch real-time market data
+  const { marketData, isLoading: isLoadingMarketData } = useCombinedMarketData(
+    [assetCategory], 
+    { refetchInterval: 30000 } // 30 seconds
+  );
+  
+  // Get current price for selected symbol
+  const currentAsset = marketData.find(asset => asset.symbol === selectedSymbol);
+  const currentPrice = currentAsset?.price || 67432.21;
+  
+  // Use our trade execution hook
+  const { executeTrade, isExecuting } = useTradeExecution();
 
   // Handle order submission
-  const handleOrderSubmit = (values: AdvancedOrderFormValues, action: "buy" | "sell") => {
+  const handleOrderSubmit = async (values: AdvancedOrderFormValues, action: "buy" | "sell") => {
     console.log('Order values:', values, 'Action:', action);
     
-    // In a real app, this would submit the order to an API
-    const orderTypeDisplay = values.orderType === "market" ? "Market" : "Entry";
+    // Parse the units as a number
+    const units = parseFloat(values.units) || 0;
     
-    toast.success(
-      `${orderTypeDisplay} ${action.toUpperCase()} order for ${selectedSymbol} created successfully`, 
-      { 
-        description: `Order type: ${orderTypeDisplay}, Stop Loss: ${values.stopLoss ? 'Yes' : 'No'}, Take Profit: ${values.takeProfit ? 'Yes' : 'No'}` 
+    // Don't allow trades with 0 or negative units
+    if (units <= 0) {
+      toast.error("Please enter a valid number of units");
+      return;
+    }
+    
+    // Calculate entry price for entry orders
+    let entryPrice;
+    if (values.orderType === "entry") {
+      entryPrice = parseFloat(values.orderRate || "0");
+      if (!entryPrice || entryPrice <= 0) {
+        toast.error("Please enter a valid entry price");
+        return;
       }
-    );
+    }
+    
+    // Calculate stop loss and take profit prices if enabled
+    let stopLoss;
+    let takeProfit;
+    
+    if (values.stopLoss && values.stopLossRate) {
+      stopLoss = parseFloat(values.stopLossRate);
+    }
+    
+    if (values.takeProfit && values.takeProfitRate) {
+      takeProfit = parseFloat(values.takeProfitRate);
+    }
+    
+    // Calculate expiration date for entry orders
+    let expiration;
+    if (values.orderType === "entry" && values.expirationDate && 
+        values.expirationDay && values.expirationMonth && values.expirationYear) {
+      const day = parseInt(values.expirationDay);
+      const month = parseInt(values.expirationMonth) - 1; // JS months are 0-indexed
+      const year = parseInt(values.expirationYear);
+      expiration = new Date(year, month, day).toISOString();
+    }
+    
+    // Execute the trade
+    await executeTrade({
+      symbol: selectedSymbol,
+      assetCategory: values.assetCategory || assetCategory,
+      direction: action,
+      orderType: values.orderType,
+      units: units,
+      currentPrice: currentPrice,
+      entryPrice,
+      stopLoss,
+      takeProfit,
+      expiration
+    });
+  };
+  
+  // Handle symbol change
+  const handleSymbolChange = (symbol: string) => {
+    setSelectedSymbol(symbol);
+  };
+  
+  // Handle asset category change
+  const handleAssetCategoryChange = (category: string) => {
+    setAssetCategory(category);
+    
+    // Select the first asset in this category
+    const assetsInCategory = marketData.filter(asset => asset.market_type === category);
+    if (assetsInCategory.length > 0) {
+      setSelectedSymbol(assetsInCategory[0].symbol);
+    }
   };
 
   return (
@@ -70,6 +146,11 @@ const OrderTabs: React.FC<OrderTabsProps> = ({
             currentPrice={currentPrice}
             symbol={selectedSymbol}
             onOrderSubmit={handleOrderSubmit}
+            availableFunds={accountMetrics?.availableFunds || 0}
+            assetCategory={assetCategory}
+            onAssetCategoryChange={handleAssetCategoryChange}
+            marketData={marketData}
+            isLoading={isLoadingMarketData || isExecuting}
           />
         </div>
       </TabsContent>

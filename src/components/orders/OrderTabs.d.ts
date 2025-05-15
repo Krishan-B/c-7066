@@ -1,6 +1,6 @@
 
-import { AccountMetrics } from "@/types/account";
 import { Trade } from "@/hooks/useTradeManagement";
+import { AccountMetrics } from "@/types/account";
 
 export interface OrderTabsProps {
   activeTab: string;
@@ -13,7 +13,7 @@ export interface OrderTabsProps {
     pending: boolean;
     closed: boolean;
   };
-  onClosePosition: (tradeId: string, currentPrice: number) => Promise<any>;
-  onCancelOrder: (tradeId: string) => Promise<any>;
-  accountMetrics: AccountMetrics;
+  onClosePosition: (tradeId: string, currentPrice: number) => Promise<void>;
+  onCancelOrder: (tradeId: string) => Promise<void>;
+  accountMetrics: AccountMetrics | null;
 }

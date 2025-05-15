@@ -1,68 +1,52 @@
 
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { MarketOrderParams, TradeResult, TradeStatus } from "../types";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from "sonner";
+import { TradeResult, MarketOrderParams } from '../types';
 
 /**
- * Execute a market order (immediate execution)
+ * Execute a market order through the Supabase edge function
  */
 export async function executeMarketOrder(params: MarketOrderParams): Promise<TradeResult> {
   try {
-    const { 
-      symbol, 
-      direction, 
-      units, 
-      currentPrice,
-      stopLoss,
-      takeProfit,
-      userId 
-    } = params;
+    console.log('Executing market order:', params);
     
-    // Get asset name for the symbol (in a real app would come from a lookup)
-    const assetName = symbol.split('-')[0] || symbol;
-    const marketType = symbol.includes('USD') ? 'Crypto' : 'Stocks';
+    const { data, error } = await supabase.functions.invoke('execute-trade', {
+      body: {
+        assetSymbol: params.symbol,
+        assetName: params.symbol.replace('USD', ''), // Simplified - in production, pass the full name
+        marketType: params.assetCategory || 'Crypto',
+        units: params.units,
+        pricePerUnit: params.currentPrice,
+        tradeType: params.direction,
+        orderType: 'market',
+        stopLoss: params.stopLoss,
+        takeProfit: params.takeProfit
+      }
+    });
     
-    // Calculate trade value
-    const tradeValue = units * currentPrice;
-    
-    // Insert trade record - use user_trades table instead of trades
-    const { data, error } = await supabase
-      .from('user_trades')
-      .insert({
-        user_id: userId,
-        asset_symbol: symbol,
-        asset_name: assetName,
-        market_type: marketType,
-        trade_type: direction, // Using trade_type instead of direction
-        order_type: 'market',
-        units: units,
-        price_per_unit: currentPrice,
-        total_amount: tradeValue,
-        status: 'open',
-        stop_loss: stopLoss,
-        take_profit: takeProfit
-      })
-      .select()
-      .single();
-      
     if (error) {
-      throw new Error(`Failed to execute market order: ${error.message}`);
+      console.error('Error executing market order:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to execute trade',
+        status: 'failed'
+      };
     }
+    
+    console.log('Market order executed successfully:', data);
     
     return {
       success: true,
-      tradeId: data.id,
-      message: `Successfully executed ${direction} order for ${units} units of ${symbol} at ${currentPrice}`,
-      status: 'open' as TradeStatus
+      tradeId: data.tradeId,
+      message: data.message || 'Trade executed successfully',
+      status: 'open'
     };
-    
   } catch (error) {
-    console.error("Market order execution error:", error);
-    
+    console.error('Exception executing market order:', error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-      status: 'failed' as TradeStatus
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      status: 'failed'
     };
   }
 }

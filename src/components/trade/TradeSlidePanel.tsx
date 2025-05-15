@@ -5,6 +5,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/comp
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
+import { useTradeExecution } from "@/hooks/useTradeExecution";
+import { useAccountMetrics } from "@/hooks/useAccountMetrics";
 
 // Import refactored components
 import { TradeMainContent } from "./TradeMainContent";
@@ -29,17 +31,29 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   const [orderType, setOrderType] = useState<"market" | "entry">("market");
   const [units, setUnits] = useState("0.01");
   const [tradeAction, setTradeAction] = useState<"buy" | "sell">("buy");
-  const [isExecuting, setIsExecuting] = useState(false);
   const [hasStopLoss, setHasStopLoss] = useState(false);
   const [hasTakeProfit, setHasTakeProfit] = useState(false);
   const [hasExpirationDate, setHasExpirationDate] = useState(false);
   const [orderRate, setOrderRate] = useState("");
+  const [stopLossRate, setStopLossRate] = useState("");
+  const [takeProfitRate, setTakeProfitRate] = useState("");
+  const [expirationDate, setExpirationDate] = useState<string | undefined>();
   
   // Fetch market data for asset selection
   const { marketData } = useCombinedMarketData(
     [assetCategory], 
     { refetchInterval: 1000 * 30 }
   );
+  
+  // Get real account metrics 
+  const { metrics, refreshMetrics } = useAccountMetrics();
+  const availableFunds = metrics?.availableFunds || 10000;
+  
+  // Use our trade execution hook
+  const { executeTrade, isExecuting } = useTradeExecution();
+  
+  // Get the current price of the selected asset
+  const currentAssetPrice = marketData.find(asset => asset.symbol === selectedAsset.symbol)?.price || 0;
   
   // Handle asset category change
   const handleAssetCategoryChange = (category: string) => {
@@ -70,40 +84,69 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   
   // Handle order execution
   const handleExecuteTrade = async (action: "buy" | "sell") => {
-    setIsExecuting(true);
     setTradeAction(action);
     
-    try {
-      // Simulate network delay for trade execution (0.5 - 1.5 seconds)
-      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
-      
-      // Create order object based on order type
-      const orderDetails = {
-        asset: selectedAsset.symbol,
-        action: action,
-        orderType: orderType,
-        stopLoss: hasStopLoss,
-        takeProfit: hasTakeProfit,
-        expiration: hasExpirationDate && orderType === "entry",
-      };
-      
-      // Display different success message based on order type
-      if (orderType === "market") {
+    // Parse the units as a number
+    const parsedUnits = parseFloat(units) || 0;
+    
+    // Don't allow trades with 0 or negative units
+    if (parsedUnits <= 0) {
+      toast({
+        title: "Invalid Units",
+        description: "Please enter a valid number of units",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Calculate entry price for entry orders
+    let entryPrice;
+    if (orderType === "entry") {
+      entryPrice = parseFloat(orderRate);
+      if (!entryPrice || entryPrice <= 0) {
         toast({
-          title: `Position Opened: ${action.toUpperCase()} ${selectedAsset.symbol}`,
-          description: `${action.toUpperCase()} order executed successfully.`,
-          variant: action === "buy" ? "default" : "destructive",
+          title: "Invalid Entry Price",
+          description: "Please enter a valid entry price",
+          variant: "destructive",
         });
-      } else {
-        toast({
-          title: `Entry Order Placed: ${action.toUpperCase()} ${selectedAsset.symbol}`,
-          description: `${action.toUpperCase()} entry order at $${orderRate} has been placed.`,
-          variant: "default",
-        });
+        return;
       }
+    }
+    
+    // Calculate stop loss and take profit prices if enabled
+    let stopLoss;
+    let takeProfit;
+    
+    if (hasStopLoss && stopLossRate) {
+      stopLoss = parseFloat(stopLossRate);
+    }
+    
+    if (hasTakeProfit && takeProfitRate) {
+      takeProfit = parseFloat(takeProfitRate);
+    }
+    
+    try {
+      // Execute the trade
+      const result = await executeTrade({
+        symbol: selectedAsset.symbol,
+        assetCategory: assetCategory,
+        direction: action,
+        orderType: orderType,
+        units: parsedUnits,
+        currentPrice: currentAssetPrice,
+        entryPrice,
+        stopLoss,
+        takeProfit,
+        expiration: expirationDate
+      });
       
-      // Close the panel after successful execution
-      setTimeout(() => onOpenChange(false), 1500);
+      if (result.success) {
+        // Refresh account metrics after successful trade
+        refreshMetrics();
+        
+        // Close the panel after successful execution
+        setTimeout(() => onOpenChange(false), 1500);
+      }
       
     } catch (error) {
       console.error("Trade execution error:", error);
@@ -112,8 +155,6 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
         description: "There was an error executing your trade. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsExecuting(false);
     }
   };
 
@@ -150,6 +191,11 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
             setHasExpirationDate={setHasExpirationDate}
             orderRate={orderRate}
             setOrderRate={setOrderRate}
+            stopLossRate={stopLossRate}
+            setStopLossRate={setStopLossRate}
+            takeProfitRate={takeProfitRate}
+            setTakeProfitRate={setTakeProfitRate}
+            setExpirationDate={setExpirationDate}
           />
           
           {/* Trade panel footer with execute buttons */}
@@ -159,7 +205,7 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
             tradeAction={tradeAction}
             selectedAsset={selectedAsset}
             orderType={orderType}
-            canAfford={true} // This will be calculated in TradeMainContent
+            canAfford={availableFunds >= parseFloat(units) * currentAssetPrice}
             parsedUnits={parseFloat(units) || 0}
           />
         </div>

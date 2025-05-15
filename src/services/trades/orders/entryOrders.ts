@@ -1,71 +1,53 @@
 
-import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { EntryOrderParams, TradeResult, TradeStatus } from "../types";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from "sonner";
+import { TradeResult, EntryOrderParams } from '../types';
 
 /**
- * Place an entry order (execution at specified price)
+ * Place an entry order (limit/stop) through the Supabase edge function
  */
 export async function placeEntryOrder(params: EntryOrderParams): Promise<TradeResult> {
   try {
-    const { 
-      symbol, 
-      direction, 
-      units, 
-      entryPrice,
-      currentPrice,
-      stopLoss,
-      takeProfit,
-      expiration,
-      userId 
-    } = params;
+    console.log('Placing entry order:', params);
     
-    // Get asset name for the symbol (in a real app would come from a lookup)
-    const assetName = symbol.split('-')[0] || symbol;
-    const marketType = symbol.includes('USD') ? 'Crypto' : 'Stocks';
+    const { data, error } = await supabase.functions.invoke('execute-trade', {
+      body: {
+        assetSymbol: params.symbol,
+        assetName: params.symbol.replace('USD', ''), // Simplified - in production, pass the full name
+        marketType: params.assetCategory || 'Crypto',
+        units: params.units,
+        pricePerUnit: params.entryPrice,
+        tradeType: params.direction,
+        orderType: 'entry',
+        stopLoss: params.stopLoss,
+        takeProfit: params.takeProfit,
+        expirationDate: params.expiration
+      }
+    });
     
-    // Insert pending order record - use user_trades table instead of trades
-    const { data, error } = await supabase
-      .from('user_trades')
-      .insert({
-        user_id: userId,
-        asset_symbol: symbol,
-        asset_name: assetName,
-        market_type: marketType,
-        trade_type: direction,  // Using trade_type instead of direction
-        order_type: 'entry',
-        units: units,
-        price_per_unit: entryPrice,
-        total_amount: units * entryPrice,
-        status: 'pending',
-        stop_loss: stopLoss,
-        take_profit: takeProfit,
-        expiration_date: expiration
-      })
-      .select()
-      .single();
-      
     if (error) {
-      throw new Error(`Failed to place entry order: ${error.message}`);
+      console.error('Error placing entry order:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to place entry order',
+        status: 'failed'
+      };
     }
+    
+    console.log('Entry order placed successfully:', data);
     
     return {
       success: true,
-      tradeId: data.id,
-      message: `Successfully placed ${direction} entry order for ${units} units of ${symbol} at ${entryPrice}`,
-      status: 'pending' as TradeStatus
+      tradeId: data.tradeId,
+      message: data.message || 'Entry order placed successfully',
+      status: 'pending'
     };
-    
   } catch (error) {
-    console.error("Entry order placement error:", error);
-    
+    console.error('Exception placing entry order:', error);
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-      status: 'failed' as TradeStatus
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      status: 'failed'
     };
   }
 }
-
-// Alias for backwards compatibility
-export const executeEntryOrder = placeEntryOrder;

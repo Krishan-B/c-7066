@@ -1,42 +1,60 @@
 
-import { useState, useEffect } from "react";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger 
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { CalendarIcon, CalendarOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Asset } from "@/hooks/market";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
-import { TradeSlidePanelAssetSelection } from "./TradeSlidePanelAssetSelection";
-import { TradeSlidePanelPriceActions } from "./TradeSlidePanelPriceActions";
-import { TradeSlidePanelUnitsInput } from "./TradeSlidePanelUnitsInput";
-import { TradeSlidePanelOrderTypeSelector } from "./TradeSlidePanelOrderTypeSelector";
-import { TradeSlidePanelEntryRate } from "./TradeSlidePanelEntryRate";
-import { TradeSlidePanelOptionCheckbox } from "./TradeSlidePanelOptionCheckbox";
-import { TradeSlidePanelSummary } from "./TradeSlidePanelSummary";
-import { StopLossCheckbox } from "./StopLossCheckbox";
-import { TakeProfitCheckbox } from "./TakeProfitCheckbox";
-import { isMarketOpen } from "@/utils/marketHours";
-import { getLeverageForAssetType } from "@/utils/leverageUtils";
-import { mockAccountMetrics } from "@/utils/metricUtils";
+import { useTradeCalculations } from "@/hooks/useTradeCalculations";
 
 interface TradeMainContentProps {
   assetCategory: string;
   onAssetCategoryChange: (category: string) => void;
-  selectedAsset: { name: string; symbol: string; market_type: string };
+  selectedAsset: {
+    name: string;
+    symbol: string;
+    market_type: string;
+  };
   onAssetSelect: (symbol: string) => void;
   orderType: "market" | "entry";
   setOrderType: (type: "market" | "entry") => void;
   units: string;
-  setUnits: (value: string) => void;
+  setUnits: (units: string) => void;
   onExecuteTrade: (action: "buy" | "sell") => void;
   isExecuting: boolean;
   tradeAction: "buy" | "sell";
   hasStopLoss: boolean;
-  setHasStopLoss: (value: boolean) => void;
+  setHasStopLoss: (has: boolean) => void;
   hasTakeProfit: boolean;
-  setHasTakeProfit: (value: boolean) => void;
+  setHasTakeProfit: (has: boolean) => void;
   hasExpirationDate: boolean;
-  setHasExpirationDate: (value: boolean) => void;
+  setHasExpirationDate: (has: boolean) => void;
   orderRate: string;
-  setOrderRate: (value: string) => void;
+  setOrderRate: (rate: string) => void;
+  stopLossRate?: string;
+  setStopLossRate?: (rate: string) => void;
+  takeProfitRate?: string;
+  setTakeProfitRate?: (rate: string) => void;
+  setExpirationDate?: (date: string | undefined) => void;
 }
 
-export const TradeMainContent = ({
+export function TradeMainContent({
   assetCategory,
   onAssetCategoryChange,
   selectedAsset,
@@ -45,9 +63,7 @@ export const TradeMainContent = ({
   setOrderType,
   units,
   setUnits,
-  onExecuteTrade,
   isExecuting,
-  tradeAction,
   hasStopLoss,
   setHasStopLoss,
   hasTakeProfit,
@@ -56,140 +72,297 @@ export const TradeMainContent = ({
   setHasExpirationDate,
   orderRate,
   setOrderRate,
-}: TradeMainContentProps) => {
-  // Use the combined market data hook for the selected category
-  const { marketData, isLoading, refreshData } = useCombinedMarketData(
+  stopLossRate = "",
+  setStopLossRate = () => {},
+  takeProfitRate = "",
+  setTakeProfitRate = () => {},
+  setExpirationDate = () => {},
+}: TradeMainContentProps) {
+  // Fetch market data for all categories
+  const { marketData, isLoading: isLoadingMarkets } = useCombinedMarketData(
     [assetCategory], 
-    { refetchInterval: 1000 * 10 }
+    { refetchInterval: 30000 }
   );
   
-  // Find current price in market data
-  const currentAssetData = marketData.find(item => item.symbol === selectedAsset.symbol);
-  const currentPrice = currentAssetData?.price || 0;
-  const buyPrice = currentPrice * 1.001; // Slight markup for buy
-  const sellPrice = currentPrice * 0.999; // Slight discount for sell
+  // Get current asset price
+  const currentAsset = marketData.find(asset => 
+    asset.symbol === selectedAsset.symbol
+  );
+  const currentPrice = currentAsset?.price || 0;
   
-  // Update order rate when current price changes
-  useEffect(() => {
-    if (currentPrice > 0) {
-      setOrderRate(currentPrice.toFixed(4));
+  // Filter assets based on selected category
+  const filteredAssets = marketData.filter(
+    asset => asset.market_type === assetCategory
+  );
+  
+  // Asset categories
+  const assetCategories = [
+    "Crypto", 
+    "Stocks", 
+    "Forex", 
+    "Indices", 
+    "Commodities"
+  ];
+  
+  // Calculate trade values
+  const { 
+    leverage, 
+    positionValue, 
+    requiredFunds 
+  } = useTradeCalculations(units, currentPrice, assetCategory, 10000);
+  
+  // Handle calendar date selection
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setExpirationDate(date.toISOString());
+    } else {
+      setExpirationDate(undefined);
     }
-  }, [currentPrice, setOrderRate]);
-  
-  // Check if market is open for the selected asset
-  const marketIsOpen = isMarketOpen(selectedAsset.market_type);
-  
-  // Auto-refresh price every second for simulated real-time updates
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      refreshData(); // Changed from refetch to refreshData
-    }, 1000);
-    
-    return () => clearInterval(intervalId);
-  }, [refreshData]);
-  
-  // Get the fixed leverage for the selected asset type
-  const fixedLeverage = getLeverageForAssetType(assetCategory);
-  
-  // Get user's available funds
-  const availableFunds = mockAccountMetrics.availableFunds;
-  
-  // Calculate required margin and estimated cost
-  const parsedUnits = parseFloat(units) || 0;
-  const positionValue = currentPrice * parsedUnits;
-  const marginRequirement = positionValue / fixedLeverage;
-  const fee = marginRequirement * 0.001; // 0.1% fee
-  const totalCost = marginRequirement + fee;
-  
-  // Check if user can afford the trade
-  const canAfford = availableFunds >= marginRequirement;
+  };
 
   return (
     <div className="space-y-4">
+      {/* Asset Category Selection */}
+      <div className="space-y-2">
+        <Label>Asset Category</Label>
+        <Select 
+          value={assetCategory} 
+          onValueChange={onAssetCategoryChange}
+          disabled={isExecuting}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            {assetCategories.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Asset Selection */}
-      <TradeSlidePanelAssetSelection 
-        assetCategory={assetCategory}
-        onAssetCategoryChange={onAssetCategoryChange}
-        selectedAsset={selectedAsset.symbol}
-        onAssetSelect={onAssetSelect}
-        isLoading={isLoading}
-        isExecuting={isExecuting}
-        marketData={marketData}
-      />
-      
-      {/* Real-time prices with Buy/Sell buttons */}
-      <TradeSlidePanelPriceActions
-        buyPrice={buyPrice}
-        sellPrice={sellPrice}
-        onExecuteTrade={onExecuteTrade}
-        isExecuting={isExecuting}
-        tradeAction={tradeAction}
-        marketIsOpen={marketIsOpen}
-        orderType={orderType}
-        canAfford={canAfford}
-        parsedUnits={parsedUnits}
-      />
-      
-      {/* Units Input */}
-      <TradeSlidePanelUnitsInput
-        units={units}
-        setUnits={setUnits}
-        isExecuting={isExecuting}
-        marginRequirement={marginRequirement}
-        canAfford={canAfford}
-        availableFunds={availableFunds}
-      />
-      
+      <div className="space-y-2">
+        <Label>Select Asset</Label>
+        <Select 
+          value={selectedAsset.symbol} 
+          onValueChange={onAssetSelect}
+          disabled={isExecuting || isLoadingMarkets}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select asset" />
+          </SelectTrigger>
+          <SelectContent>
+            {isLoadingMarkets ? (
+              <SelectItem value="loading">Loading assets...</SelectItem>
+            ) : filteredAssets.length === 0 ? (
+              <SelectItem value="none">No assets available</SelectItem>
+            ) : (
+              filteredAssets.map((asset) => (
+                <SelectItem key={asset.symbol} value={asset.symbol}>
+                  {asset.name} ({asset.symbol})
+                </SelectItem>
+              ))
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Current Price */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label>Current Price</Label>
+          <div className="text-xl font-medium">
+            ${currentPrice.toFixed(2)}
+          </div>
+        </div>
+        <div className="space-y-1">
+          <Label>Leverage</Label>
+          <div className="text-xl font-medium">
+            {leverage}x
+          </div>
+        </div>
+      </div>
+
       {/* Order Type Selection */}
-      <TradeSlidePanelOrderTypeSelector
-        orderType={orderType}
-        setOrderType={setOrderType}
-        isExecuting={isExecuting}
-      />
+      <div className="space-y-2">
+        <Label>Order Type</Label>
+        <div className="flex space-x-2">
+          <Button
+            type="button"
+            variant={orderType === "market" ? "default" : "outline"}
+            className="flex-1"
+            onClick={() => setOrderType("market")}
+            disabled={isExecuting}
+          >
+            Market Order
+          </Button>
+          <Button
+            type="button"
+            variant={orderType === "entry" ? "default" : "outline"}
+            className={`flex-1 ${orderType === "entry" ? "bg-orange-500 hover:bg-orange-600" : ""}`}
+            onClick={() => setOrderType("entry")}
+            disabled={isExecuting}
+          >
+            Entry Order
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {orderType === "market" 
+            ? "Execute immediately at the current market price" 
+            : "Set the price at which you want your order to be executed"}
+        </p>
+      </div>
 
-      {/* Entry Order Rate (only for entry orders) */}
-      {orderType === "entry" && (
-        <TradeSlidePanelEntryRate
-          orderRate={orderRate}
-          setOrderRate={setOrderRate}
-          currentPrice={currentPrice}
-          isExecuting={isExecuting}
-        />
-      )}
-      
-      {/* Stop Loss Checkbox */}
-      <StopLossCheckbox
-        hasStopLoss={hasStopLoss}
-        setHasStopLoss={setHasStopLoss}
-        isExecuting={isExecuting}
-      />
-
-      {/* Take Profit Checkbox */}
-      <TakeProfitCheckbox
-        hasTakeProfit={hasTakeProfit}
-        setHasTakeProfit={setHasTakeProfit}
-        isExecuting={isExecuting}
-      />
-
-      {/* Expiration Date Checkbox (only for entry orders) */}
-      {orderType === "entry" && (
-        <TradeSlidePanelOptionCheckbox
-          id="expirationDate"
-          label="Expiration Date"
-          checked={hasExpirationDate}
-          onCheckedChange={() => setHasExpirationDate(!hasExpirationDate)}
-          tooltip="Set a date when your entry order should expire if not executed."
+      {/* Unit Amount */}
+      <div className="space-y-2">
+        <Label htmlFor="units">Units</Label>
+        <Input
+          id="units"
+          type="number"
+          value={units}
+          onChange={(e) => setUnits(e.target.value)}
+          step="0.01"
+          min="0.01"
           disabled={isExecuting}
         />
+        <div className="text-xs text-muted-foreground">
+          <div>Position Value: ${positionValue.toFixed(2)}</div>
+          <div>Required Margin: ${requiredFunds.toFixed(2)}</div>
+        </div>
+      </div>
+
+      {/* Entry Price (for entry orders) */}
+      {orderType === "entry" && (
+        <div className="space-y-2">
+          <Label htmlFor="entry-price">Entry Price</Label>
+          <Input
+            id="entry-price"
+            type="number"
+            value={orderRate}
+            onChange={(e) => setOrderRate(e.target.value)}
+            placeholder={`Current: ${currentPrice.toFixed(2)}`}
+            step="0.01"
+            min="0.01"
+            disabled={isExecuting}
+          />
+          <p className="text-xs text-muted-foreground">
+            The price at which your order will be executed
+          </p>
+        </div>
       )}
-      
-      {/* Trade Summary */}
-      <TradeSlidePanelSummary
-        positionValue={positionValue}
-        marginRequirement={marginRequirement}
-        fee={fee}
-        totalCost={totalCost}
-      />
+
+      {/* Stop Loss */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="stop-loss">Stop Loss</Label>
+          <Switch
+            id="stop-loss"
+            checked={hasStopLoss}
+            onCheckedChange={setHasStopLoss}
+            disabled={isExecuting}
+          />
+        </div>
+        {hasStopLoss && (
+          <div className="pl-6 space-y-2 border-l-2 border-muted-foreground/20">
+            <Label htmlFor="stop-loss-price">Stop Loss Price</Label>
+            <Input
+              id="stop-loss-price"
+              type="number"
+              value={stopLossRate}
+              onChange={(e) => setStopLossRate(e.target.value)}
+              placeholder="Set price"
+              step="0.01"
+              min="0.01"
+              disabled={isExecuting}
+            />
+            <p className="text-xs text-muted-foreground">
+              Your position will be closed automatically if price reaches this level
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Take Profit */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="take-profit">Take Profit</Label>
+          <Switch
+            id="take-profit"
+            checked={hasTakeProfit}
+            onCheckedChange={setHasTakeProfit}
+            disabled={isExecuting}
+          />
+        </div>
+        {hasTakeProfit && (
+          <div className="pl-6 space-y-2 border-l-2 border-muted-foreground/20">
+            <Label htmlFor="take-profit-price">Take Profit Price</Label>
+            <Input
+              id="take-profit-price"
+              type="number"
+              value={takeProfitRate}
+              onChange={(e) => setTakeProfitRate(e.target.value)}
+              placeholder="Set price"
+              step="0.01"
+              min="0.01"
+              disabled={isExecuting}
+            />
+            <p className="text-xs text-muted-foreground">
+              Your position will be closed automatically when this price is reached
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Expiration Date (for entry orders) */}
+      {orderType === "entry" && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="expiration">Expiration Date</Label>
+            <Switch
+              id="expiration"
+              checked={hasExpirationDate}
+              onCheckedChange={setHasExpirationDate}
+              disabled={isExecuting}
+            />
+          </div>
+          {hasExpirationDate && (
+            <div className="pl-6 space-y-2 border-l-2 border-muted-foreground/20">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !setExpirationDate && "text-muted-foreground"
+                    )}
+                    disabled={isExecuting}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {setExpirationDate ? (
+                      format(new Date(), "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    onSelect={handleDateSelect}
+                    disabled={(date) => date < new Date()}
+                  />
+                </PopoverContent>
+              </Popover>
+              <p className="text-xs text-muted-foreground">
+                Order will be cancelled if not executed by this date
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
-};
+}
