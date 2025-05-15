@@ -8,6 +8,8 @@ import PositionsTable from "@/components/portfolio/PositionsTable";
 import ClosedPositionsTable from "@/components/portfolio/ClosedPositionsTable";
 import PositionFilter from "@/components/portfolio/PositionFilter";
 import { Asset, ClosedPosition } from "@/types/account";
+import { useTradePanel } from "@/components/trade/TradePanelProvider";
+import { toast } from "sonner";
 
 interface PositionsSectionProps {
   assets: Asset[];
@@ -20,12 +22,16 @@ const PositionsSection = ({
   closedPositions,
   onViewDetails 
 }: PositionsSectionProps) => {
-  const [filterSymbol, setFilterSymbol] = useState("");
-  const [filterPnl, setFilterPnl] = useState("all");
+  const [filterSymbol, setFilterSymbol] = useState<string>("");
+  const [filterPnl, setFilterPnl] = useState<string>("all");
+  const { openPanel } = useTradePanel();
 
   // Filter closed positions
   const filteredClosedPositions = closedPositions.filter(position => {
-    const symbolMatch = position.symbol.toLowerCase().includes(filterSymbol.toLowerCase());
+    // Safely check if symbol exists
+    const symbolMatch = position.symbol ? 
+      position.symbol.toLowerCase().includes(filterSymbol.toLowerCase()) : 
+      false;
     
     if (filterPnl === "profit") {
       return symbolMatch && position.pnl > 0;
@@ -35,6 +41,14 @@ const PositionsSection = ({
     
     return symbolMatch;
   });
+
+  const handleAddPosition = () => {
+    if (openPanel) {
+      openPanel();
+    } else {
+      toast.error("Trade panel is not available");
+    }
+  };
 
   return (
     <Tabs defaultValue="open" className="w-full">
@@ -48,16 +62,22 @@ const PositionsSection = ({
           <CardHeader>
             <CardTitle className="flex justify-between">
               <span>Open Positions</span>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleAddPosition}>
                 <Plus className="h-4 w-4 mr-2" /> Add Position
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <PositionsTable 
-              assets={assets}
-              onViewDetails={onViewDetails}
-            />
+            {assets.length > 0 ? (
+              <PositionsTable 
+                assets={assets}
+                onViewDetails={onViewDetails}
+              />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No open positions. Click "Add Position" to start trading.
+              </div>
+            )}
           </CardContent>
         </Card>
       </TabsContent>
@@ -75,7 +95,13 @@ const PositionsSection = ({
               onPnlChange={setFilterPnl}
             />
             
-            <ClosedPositionsTable positions={filteredClosedPositions} />
+            {filteredClosedPositions.length > 0 ? (
+              <ClosedPositionsTable positions={filteredClosedPositions} />
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No closed positions match your filter criteria.
+              </div>
+            )}
           </CardContent>
         </Card>
       </TabsContent>

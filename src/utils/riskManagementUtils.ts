@@ -1,122 +1,93 @@
 
-import { LEVERAGE_MAP } from "@/services/trades/leverageUtils";
-
 /**
- * Risk levels for margin calls and liquidations
- */
-export const RISK_LEVELS = {
-  SAFE: 'safe',          // > 100% margin level
-  WARNING: 'warning',    // 50-100% margin level
-  DANGER: 'danger',      // 20-50% margin level
-  CRITICAL: 'critical'   // < 20% margin level (imminent liquidation)
-};
-
-/**
- * Calculate liquidation price for a position based on margin level
- */
-export function calculateLiquidationPrice(
-  direction: 'buy' | 'sell',
-  entryPrice: number,
-  positionSize: number,
-  marketType: string,
-  marginLevel: number = 0.2 // Default 20% margin level for liquidation
-): number {
-  const leverage = LEVERAGE_MAP[marketType] || 1;
-  const marginUsed = (entryPrice * positionSize) / leverage;
-  const liquidationThreshold = marginUsed * marginLevel;
-  
-  if (direction === 'buy') {
-    // For long positions, price needs to go down to hit liquidation
-    const priceDrop = liquidationThreshold / positionSize;
-    return Math.max(0, entryPrice - priceDrop);
-  } else {
-    // For short positions, price needs to go up to hit liquidation
-    const priceIncrease = liquidationThreshold / positionSize;
-    return entryPrice + priceIncrease;
-  }
-}
-
-/**
- * Get risk level based on margin level percentage
+ * Calculate risk level based on margin level percentage
+ * @param marginLevel The current margin level percentage
+ * @returns Risk status: 'critical', 'danger', 'warning', or 'safe'
  */
 export function getRiskLevel(marginLevel: number): string {
-  if (marginLevel > 100) {
-    return RISK_LEVELS.SAFE;
-  } else if (marginLevel > 50) {
-    return RISK_LEVELS.WARNING;
-  } else if (marginLevel > 20) {
-    return RISK_LEVELS.DANGER;
-  } else {
-    return RISK_LEVELS.CRITICAL;
-  }
+  if (marginLevel < 50) return 'critical';
+  if (marginLevel < 80) return 'danger';
+  if (marginLevel < 120) return 'warning';
+  return 'safe';
 }
 
 /**
- * Calculate free margin available
+ * Calculate max drawdown percentage
+ * @param highestEquity Highest equity reached
+ * @param currentEquity Current equity value
+ * @returns Drawdown percentage
  */
-export function calculateFreeMargin(equity: number, usedMargin: number): number {
-  return Math.max(0, equity - usedMargin);
+export function calculateDrawdown(highestEquity: number, currentEquity: number): number {
+  if (highestEquity <= 0) return 0;
+  return ((highestEquity - currentEquity) / highestEquity) * 100;
 }
 
 /**
- * Calculate margin call threshold (returns the price at which a margin call would be triggered)
+ * Calculate risk-to-reward ratio for a trade
+ * @param entryPrice Entry price
+ * @param takeProfit Take profit level
+ * @param stopLoss Stop loss level
+ * @returns Risk-to-reward ratio (1:x format)
  */
-export function calculateMarginCallPrice(
-  direction: 'buy' | 'sell',
+export function calculateRiskRewardRatio(
   entryPrice: number,
-  positionSize: number,
-  marketType: string,
-  marginCallLevel: number = 0.5 // Default 50% margin level for margin call
-): number {
-  return calculateLiquidationPrice(
-    direction,
-    entryPrice,
-    positionSize,
-    marketType,
-    marginCallLevel
-  );
-}
-
-/**
- * Determine if a position needs liquidation based on current price
- */
-export function needsLiquidation(
-  direction: 'buy' | 'sell',
-  entryPrice: number,
-  currentPrice: number,
-  positionSize: number,
-  marketType: string,
-  marginLevel: number = 0.2
-): boolean {
-  const liquidationPrice = calculateLiquidationPrice(
-    direction,
-    entryPrice,
-    positionSize,
-    marketType,
-    marginLevel
-  );
+  takeProfit: number | null | undefined,
+  stopLoss: number | null | undefined
+): string {
+  if (!takeProfit || !stopLoss || entryPrice <= 0) return 'N/A';
   
-  if (direction === 'buy') {
-    return currentPrice <= liquidationPrice;
-  } else {
-    return currentPrice >= liquidationPrice;
-  }
+  const potentialProfit = Math.abs(takeProfit - entryPrice);
+  const potentialLoss = Math.abs(stopLoss - entryPrice);
+  
+  if (potentialLoss === 0) return 'N/A';
+  
+  const ratio = potentialProfit / potentialLoss;
+  return `1:${ratio.toFixed(2)}`;
 }
 
 /**
- * Format risk level for display
+ * Calculate value at risk (VaR) for a position
+ * @param positionValue Total position value
+ * @param volatility Asset volatility (decimal)
+ * @param confidenceLevel Confidence level (default 0.95 for 95%)
+ * @returns Value at risk
  */
-export function formatRiskLevel(level: string): { text: string; color: string } {
-  switch (level) {
-    case RISK_LEVELS.SAFE:
-      return { text: 'Safe', color: 'text-green-500' };
-    case RISK_LEVELS.WARNING:
-      return { text: 'Margin Call Warning', color: 'text-amber-500' };
-    case RISK_LEVELS.DANGER:
-      return { text: 'Margin Call', color: 'text-red-500' };
-    case RISK_LEVELS.CRITICAL:
-      return { text: 'Liquidation Risk', color: 'text-red-700 font-bold' };
-    default:
-      return { text: 'Unknown', color: 'text-gray-500' };
-  }
+export function calculateValueAtRisk(
+  positionValue: number,
+  volatility: number,
+  confidenceLevel: number = 0.95
+): number {
+  // Using parametric VaR with normal distribution assumption
+  // For 95% confidence, z-score is approximately 1.65
+  const zScore = confidenceLevel === 0.95 ? 1.65 : 2.33; // 2.33 for 99%
+  return positionValue * volatility * zScore;
+}
+
+/**
+ * Calculate recommended position size based on risk percentage
+ * @param accountBalance Total account balance
+ * @param riskPercentage Risk percentage willing to take (1-100)
+ * @param stopLossPercentage Stop loss percentage from entry
+ * @returns Recommended position size
+ */
+export function calculatePositionSize(
+  accountBalance: number,
+  riskPercentage: number,
+  stopLossPercentage: number
+): number {
+  if (stopLossPercentage <= 0) return 0;
+  
+  const riskAmount = accountBalance * (riskPercentage / 100);
+  return riskAmount / (stopLossPercentage / 100);
+}
+
+/**
+ * Calculate equity heat - percentage of account in use
+ * @param usedMargin Total margin used
+ * @param equity Total account equity
+ * @returns Percentage of account in use
+ */
+export function calculateEquityHeat(usedMargin: number, equity: number): number {
+  if (equity <= 0) return 0;
+  return (usedMargin / equity) * 100;
 }
