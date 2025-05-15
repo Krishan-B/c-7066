@@ -30,7 +30,7 @@ jest.mock('@/hooks/useAccountMetrics', () => ({
 
 jest.mock('@/hooks/useTradeExecution', () => ({
   useTradeExecution: jest.fn(() => ({
-    executeTrade: jest.fn().mockResolvedValue({ success: true }),
+    executeTrade: jest.fn().mockImplementation(() => Promise.resolve({ success: true })),
     isExecuting: false
   }))
 }));

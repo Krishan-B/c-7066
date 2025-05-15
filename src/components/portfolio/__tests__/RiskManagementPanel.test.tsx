@@ -71,7 +71,7 @@ describe('RiskManagementPanel', () => {
       />
     );
     
-    // Note: Full tooltip testing might require more complex user interaction testing
+    // Check that the tooltip trigger has the right class
     expect(screen.getByText('150.00%')).toHaveClass('underline');
   });
 });

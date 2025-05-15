@@ -23,6 +23,9 @@ declare global {
       toBeDisabled(): R;
       toBeChecked(): R;
       toBeVisible(): R;
+      toBeRequired(): R;
+      toHaveAttribute(attr: string, value?: string): R;
+      toHaveTextContent(content: string | RegExp): R;
     }
   }
 }

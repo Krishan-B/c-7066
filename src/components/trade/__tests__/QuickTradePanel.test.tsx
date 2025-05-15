@@ -18,8 +18,8 @@ jest.mock('@/utils/marketHours', () => ({
 
 jest.mock('@/hooks/usePriceMovement', () => ({
   usePriceMovement: jest.fn((price) => ({
-    buyPrice: price !== null && price !== undefined ? Number(price) * 1.001 : 50050,
-    sellPrice: price !== null && price !== undefined ? Number(price) * 0.999 : 49950
+    buyPrice: price !== null && price !== undefined ? Number(price) + 50 : 50050,
+    sellPrice: price !== null && price !== undefined ? Number(price) - 50 : 49950
   }))
 }));
 

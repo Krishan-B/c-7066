@@ -6,19 +6,19 @@ import { jest, expect, describe, test, beforeEach } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('@/services/trades/orders/marketOrders', () => ({
-  executeMarketOrder: jest.fn().mockResolvedValue({
+  executeMarketOrder: jest.fn().mockImplementation(() => Promise.resolve({
     success: true,
     message: 'Trade executed successfully',
     tradeId: 'mock-trade-id'
-  })
+  }))
 }));
 
 jest.mock('@/services/trades/orders/entryOrders', () => ({
-  placeEntryOrder: jest.fn().mockResolvedValue({
+  placeEntryOrder: jest.fn().mockImplementation(() => Promise.resolve({
     success: true,
     message: 'Entry order placed successfully',
     tradeId: 'mock-entry-order-id'
-  })
+  }))
 }));
 
 jest.mock('@/hooks/useAuth', () => ({
