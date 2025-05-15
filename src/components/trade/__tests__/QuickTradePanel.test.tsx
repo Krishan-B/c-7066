@@ -86,7 +86,6 @@ describe('QuickTradePanel', () => {
     const stopLossCheckbox = screen.getByRole('checkbox', { name: /Stop Loss/i });
     await userEvent.click(stopLossCheckbox);
     
-    // This test would need to be expanded based on the actual UI implementation
     expect(stopLossCheckbox).toBeChecked();
   });
   
@@ -96,7 +95,6 @@ describe('QuickTradePanel', () => {
     const takeProfitCheckbox = screen.getByRole('checkbox', { name: /Take Profit/i });
     await userEvent.click(takeProfitCheckbox);
     
-    // This test would need to be expanded based on the actual UI implementation
     expect(takeProfitCheckbox).toBeChecked();
   });
 });

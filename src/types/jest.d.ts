@@ -14,6 +14,7 @@ declare global {
   const afterEach: typeof jest.afterEach;
   const jest: typeof jest;
   
+  // Extend the matchers with testing-library matchers
   namespace jest {
     interface Matchers<R> {
       toBeInTheDocument(): R;
