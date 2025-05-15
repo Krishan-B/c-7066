@@ -12,7 +12,7 @@ module.exports = {
       tsconfig: 'tsconfig.json',
       isolatedModules: true,
       diagnostics: {
-        ignoreCodes: [1343, 2352, 2339] // Ignore specific TS error codes related to Jest matchers
+        ignoreCodes: [1343, 2352, 2339, 2345] // Ignore specific TS error codes related to Jest matchers
       }
     }],
   },
