@@ -7,7 +7,12 @@ import {
   getSupabaseClient, 
   getUserFromToken 
 } from './utils.ts';
-import { executeMarketOrder, executeEntryOrder, closePosition, cancelOrder } from './orders.ts';
+import { 
+  executeMarketOrder, 
+  executeEntryOrder, 
+  closePosition, 
+  cancelOrder 
+} from './orders.ts';
 
 // Main request handler
 serve(async (req) => {
