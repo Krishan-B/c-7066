@@ -38,19 +38,31 @@ export async function updatePortfolioPosition(
   currentPrice: number
 ): Promise<boolean> {
   try {
-    const { data, error } = await supabase
+    // Get the existing position first
+    const { data: position, error: fetchError } = await supabase
+      .from('user_portfolio')
+      .select('units, average_price')
+      .eq('user_id', userId)
+      .eq('asset_symbol', assetSymbol)
+      .single();
+      
+    if (fetchError) {
+      throw fetchError;
+    }
+    
+    // Calculate values directly rather than using RPC
+    const totalValue = position.units * currentPrice;
+    const pnl = position.units * (currentPrice - position.average_price);
+    const pnlPercentage = ((currentPrice - position.average_price) / position.average_price) * 100;
+    
+    // Now update the position with calculated values
+    const { error } = await supabase
       .from('user_portfolio')
       .update({
         current_price: currentPrice,
-        total_value: supabase.rpc('calculate_position_value', { 
-          units_param: null, // Use units from database record
-          price_param: currentPrice
-        }),
-        pnl: supabase.rpc('calculate_position_pnl', {
-          current_price_param: currentPrice,
-          average_price_param: null, // Use average_price from database record
-          units_param: null // Use units from database record
-        }),
+        total_value: totalValue,
+        pnl: pnl,
+        pnl_percentage: pnlPercentage,
         last_updated: new Date().toISOString()
       })
       .eq('user_id', userId)
