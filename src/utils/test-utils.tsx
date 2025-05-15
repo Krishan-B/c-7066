@@ -81,4 +81,3 @@ export const renderHook = <TResult, TProps>(hook: (props: TProps) => TResult, op
     },
   };
 };
-

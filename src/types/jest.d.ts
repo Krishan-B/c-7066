@@ -32,4 +32,3 @@ declare namespace jest {
   interface InverseAsymmetricMatchers extends global.InverseAsymmetricMatchers {}
   interface Matchers<R> extends global.Matchers<R> {}
 }
-

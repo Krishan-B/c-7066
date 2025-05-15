@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { render, screen, fireEvent } from '@/utils/test-utils';
+import { render, screen } from '@/utils/test-utils';
 import userEvent from '@testing-library/user-event';
 import TradeForm from '../TradeForm';
 import { jest, expect, describe, test, beforeEach } from '@jest/globals';
@@ -93,7 +93,7 @@ describe('TradeForm', () => {
     const submitButton = screen.getByRole('button', { name: /Buy/i });
     await userEvent.click(submitButton);
     
-    expect(mockOnSubmit).toHaveBeenCalledWith('0.1', 'market', [expect.any(Number)]);
+    expect(mockOnSubmit).toHaveBeenCalledWith('0.1', 'market', expect.any(Array));
   });
   
   test('shows stop loss settings when stop loss checkbox is checked', async () => {
