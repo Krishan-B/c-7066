@@ -1,6 +1,6 @@
 
 import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { render, RenderOptions, waitFor as rtlWaitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -31,6 +31,11 @@ const customRender = (
 
 // Re-export everything from testing-library
 export * from '@testing-library/react';
+
+// Explicitly export waitFor
+export { rtlWaitFor as waitFor };
+
+// Export the custom render method
 export { customRender as render };
 
 // Explicitly declare Jest mocking utilities for TypeScript
@@ -50,5 +55,30 @@ export const mockAuthHook = (isAuthenticated = true) => {
 export const createMockFn = <T extends (...args: any[]) => any>(
   implementation?: T
 ): jest.MockedFunction<T> => {
-  return jest.fn(implementation) as jest.MockedFunction<T>;
+  // Use type casting to resolve the type issue
+  return jest.fn(implementation) as unknown as jest.MockedFunction<T>;
+};
+
+// Extended renderHook function to include waitFor functionality
+export const renderHook: any = (hook: any, options?: any) => {
+  let result: any = { current: undefined };
+  
+  function TestComponent() {
+    result.current = hook();
+    return null;
+  }
+  
+  const utils = render(<TestComponent />, options);
+  
+  // Add waitFor functionality to the result
+  return {
+    ...utils,
+    result,
+    waitFor: async (callback: () => boolean | void) => {
+      return rtlWaitFor(callback);
+    },
+    rerender: () => {
+      utils.rerender(<TestComponent />);
+    },
+  };
 };

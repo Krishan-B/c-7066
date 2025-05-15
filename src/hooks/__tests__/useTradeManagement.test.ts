@@ -1,5 +1,5 @@
 
-import { renderHook, act } from '@/utils/test-utils';
+import { renderHook, act, waitFor } from '@/utils/test-utils';
 import { useTradeManagement } from '../useTradeManagement';
 import { jest, expect, describe, test, beforeEach } from '@jest/globals';
 
@@ -31,7 +31,7 @@ describe('useTradeManagement', () => {
   });
   
   test('should fetch trades on mount', async () => {
-    const { result, waitFor } = renderHook(() => useTradeManagement());
+    const { result } = renderHook(() => useTradeManagement());
     
     // Initial state should be empty
     expect(result.current.openPositions).toEqual([]);
@@ -45,7 +45,7 @@ describe('useTradeManagement', () => {
   });
   
   test('should close a position', async () => {
-    const { result, waitFor } = renderHook(() => useTradeManagement());
+    const { result } = renderHook(() => useTradeManagement());
     
     // Wait for initial data to load
     await waitFor(() => {
@@ -63,7 +63,7 @@ describe('useTradeManagement', () => {
   });
   
   test('should cancel an order', async () => {
-    const { result, waitFor } = renderHook(() => useTradeManagement());
+    const { result } = renderHook(() => useTradeManagement());
     
     // Wait for initial data to load
     await waitFor(() => {
