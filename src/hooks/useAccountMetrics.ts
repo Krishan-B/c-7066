@@ -20,12 +20,59 @@ export const useAccountMetrics = () => {
     try {
       setLoading(true);
       
+      // Check if the user has an account record
       const { data, error } = await supabase
         .from('user_account')
         .select('*')
+        .eq('id', user.id)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        // If the account doesn't exist yet, create one with default values
+        if (error.code === 'PGRST116') {
+          console.log('Account not found, creating default account for user', user.id);
+          
+          const defaultAccount = {
+            id: user.id,
+            cash_balance: 10000, // Default starting balance
+            equity: 10000,
+            used_margin: 0,
+            available_funds: 10000,
+            unrealized_pnl: 0,
+            realized_pnl: 0,
+            last_updated: new Date().toISOString()
+          };
+          
+          const { error: createError } = await supabase
+            .from('user_account')
+            .insert(defaultAccount);
+            
+          if (createError) {
+            throw createError;
+          }
+          
+          // Set the metrics based on the default account
+          setMetrics({
+            balance: defaultAccount.cash_balance,
+            equity: defaultAccount.equity,
+            unrealizedPL: defaultAccount.unrealized_pnl,
+            marginLevel: 0,
+            usedMargin: defaultAccount.used_margin,
+            realizedPL: defaultAccount.realized_pnl,
+            availableFunds: defaultAccount.available_funds,
+            exposure: 0,
+            bonus: 0,
+            buyingPower: defaultAccount.available_funds * 20, // Default leverage
+            openPositions: 0,
+            profitLoss: defaultAccount.unrealized_pnl
+          });
+          
+          setLoading(false);
+          return;
+        }
+        
+        throw error;
+      }
       
       if (data) {
         // Map database fields to our AccountMetrics type

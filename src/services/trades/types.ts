@@ -1,3 +1,4 @@
+
 // Trade direction
 export type TradeDirection = 'buy' | 'sell';
 

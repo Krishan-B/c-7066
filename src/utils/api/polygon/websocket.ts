@@ -1,228 +1,206 @@
 
-import { Asset } from "@/hooks/market/types";
+import { Socket as SocketType } from '@/utils/api/polygon/types';
+import { supabase } from '@/integrations/supabase/client';
 
-let webSocket: WebSocket | null = null;
-let apiKey: string | null = null;
-const eventHandlers: Record<string, Array<(data: any) => void>> = {
-  message: [],
-  open: [],
-  close: [],
-  error: []
-};
-const subscribedSymbols: Set<string> = new Set();
+// Polygon WebSocket URL
+const POLYGON_WS_URL = 'wss://socket.polygon.io';
 
-// Queue for tracking pending subscriptions before WebSocket is connected
-let pendingSubscriptions: string[] = [];
+class PolygonWebSocket {
+  private socket: WebSocket | null = null;
+  private apiKey: string | null = null;
+  private isConnected = false;
+  private isConnecting = false;
+  private reconnectAttempts = 0;
+  private maxReconnectAttempts = 5;
+  private reconnectDelay = 2000; // Start with 2 seconds
+  private subscribeQueue: string[][] = [];
+  private onMessageCallback: ((data: any) => void) | null = null;
 
-export function setPolygonWebSocketApiKey(key: string): void {
-  apiKey = key;
-}
-
-export function initPolygonWebSocket(): boolean {
-  if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-    return true;
-  }
-
-  try {
-    if (!apiKey) {
-      console.error("Polygon WebSocket API key not set");
-      return false;
+  // Initialize the WebSocket connection
+  public async connect(): Promise<void> {
+    if (this.isConnected || this.isConnecting) return;
+    
+    this.isConnecting = true;
+    
+    try {
+      // Get the API key from the edge function
+      const { data, error } = await supabase.functions.invoke('polygon-websocket', {
+        body: { action: 'init' }
+      });
+      
+      if (error || !data?.key) {
+        console.error('Failed to get Polygon API key:', error || 'No key returned');
+        this.isConnecting = false;
+        return;
+      }
+      
+      this.apiKey = data.key;
+      
+      // Create WebSocket connection
+      this.socket = new WebSocket(POLYGON_WS_URL);
+      
+      // Set up event handlers
+      this.socket.onopen = this.handleOpen.bind(this);
+      this.socket.onmessage = this.handleMessage.bind(this);
+      this.socket.onclose = this.handleClose.bind(this);
+      this.socket.onerror = this.handleError.bind(this);
+      
+      console.info('Polygon WebSocket connecting...');
+    } catch (error) {
+      console.error('Error initializing Polygon WebSocket:', error);
+      this.isConnecting = false;
     }
-
-    webSocket = new WebSocket(`wss://socket.polygon.io/stocks`);
-
-    webSocket.onopen = () => {
-      if (webSocket) {
-        console.log('Polygon WebSocket connected');
-        
-        // Authenticate with the API key
-        webSocket.send(JSON.stringify({ action: "auth", params: apiKey }));
-        
-        // Handle any pending subscriptions that came in before the connection was ready
-        if (pendingSubscriptions.length > 0) {
-          console.log(`Processing ${pendingSubscriptions.length} pending subscriptions`);
-          subscribeToSymbols(pendingSubscriptions);
-          pendingSubscriptions = [];
-        }
-        
-        // Trigger all open event handlers
-        eventHandlers.open.forEach(handler => handler({}));
+  }
+  
+  // Handle WebSocket open event
+  private handleOpen(event: Event): void {
+    console.info('Polygon WebSocket connected');
+    this.isConnected = true;
+    this.isConnecting = false;
+    this.reconnectAttempts = 0;
+    
+    // Authenticate after connection
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify({ action: 'auth', params: this.apiKey }));
+    } else {
+      console.warn('WebSocket not ready for authentication');
+    }
+    
+    // Process any queued subscriptions
+    this.processSubscriptionQueue();
+  }
+  
+  // Process the queued subscriptions
+  private processSubscriptionQueue(): void {
+    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+      console.info('WebSocket not ready for subscription processing');
+      return;
+    }
+    
+    // Process all queued subscriptions
+    while (this.subscribeQueue.length > 0) {
+      const symbols = this.subscribeQueue.shift();
+      if (symbols && symbols.length > 0) {
+        this.doSubscribe(symbols);
       }
-    };
-
-    webSocket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        
-        // Check for authentication response
-        if (data[0] && data[0].ev === 'status') {
-          console.log('Polygon status message:', data[0].message);
-        }
-        
-        // Trigger all message event handlers
-        eventHandlers.message.forEach(handler => handler(data));
-      } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
+    }
+  }
+  
+  // Handle WebSocket message event
+  private handleMessage(event: MessageEvent): void {
+    try {
+      const data = JSON.parse(event.data);
+      
+      // Log the first message (usually authentication response)
+      if (data.status === 'connected' || data.status === 'auth_success') {
+        console.info('Polygon status message:', data.status);
+      } else if (data.status === 'error') {
+        console.error('Polygon error:', data.message);
       }
-    };
-
-    webSocket.onclose = (event) => {
-      console.log('Polygon WebSocket closed', event.code, event.reason);
-      // Trigger all close event handlers
-      eventHandlers.close.forEach(handler => handler(event));
-      // Clear the WebSocket reference
-      webSocket = null;
-    };
-
-    webSocket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-      // Trigger all error event handlers
-      eventHandlers.error.forEach(handler => handler(error));
-    };
-
-    return true;
-  } catch (error) {
-    console.error("Error initializing WebSocket:", error);
-    return false;
+      
+      // Call the message callback if set
+      if (this.onMessageCallback) {
+        this.onMessageCallback(data);
+      }
+    } catch (error) {
+      console.error('Error handling WebSocket message:', error);
+    }
   }
-}
-
-export function closePolygonWebSocket(): void {
-  if (webSocket) {
-    webSocket.close();
-    webSocket = null;
-  }
-}
-
-export function subscribeToSymbols(symbols: string[]): boolean {
-  // Add symbols to tracking set
-  symbols.forEach(symbol => subscribedSymbols.add(symbol));
-
-  // If connection is not ready, queue them for later
-  if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
-    console.log(`WebSocket not ready, queuing ${symbols.length} symbols for later subscription`);
-    pendingSubscriptions = [...new Set([...pendingSubscriptions, ...symbols])];
-    return false;
-  }
-
-  try {
-    console.log(`Subscribing to ${symbols.length} symbols`);
+  
+  // Handle WebSocket close event
+  private handleClose(event: CloseEvent): void {
+    console.info(`Polygon WebSocket closed ${event.code} ${event.reason}`);
+    this.isConnected = false;
+    this.isConnecting = false;
     
-    webSocket.send(JSON.stringify({
-      action: "subscribe",
-      params: symbols.join(",")
-    }));
+    // Attempt to reconnect if not a clean close
+    if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
+      this.scheduleReconnect();
+    }
+  }
+  
+  // Handle WebSocket error event
+  private handleError(event: Event): void {
+    console.error('Polygon WebSocket error:', event);
+    // The socket will automatically trigger a close after an error
+  }
+  
+  // Schedule reconnection
+  private scheduleReconnect(): void {
+    this.reconnectAttempts++;
+    const delay = Math.min(30000, this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1));
     
-    return true;
-  } catch (error) {
-    console.error("Error subscribing to symbols:", error);
-    return false;
-  }
-}
-
-export function unsubscribeFromSymbols(symbols: string[]): boolean {
-  symbols.forEach(symbol => subscribedSymbols.delete(symbol));
-  
-  // Remove from pending subscriptions if not yet connected
-  pendingSubscriptions = pendingSubscriptions.filter(s => !symbols.includes(s));
-  
-  if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
-    return false;
-  }
-
-  try {
-    console.log(`Unsubscribing from ${symbols.length} symbols`);
+    console.info(`Scheduling reconnection in ${delay}ms (attempt ${this.reconnectAttempts})`);
     
-    webSocket.send(JSON.stringify({
-      action: "unsubscribe",
-      params: symbols.join(",")
-    }));
+    setTimeout(() => {
+      this.connect();
+    }, delay);
+  }
+  
+  // Subscribe to stock tickers
+  public subscribe(symbols: string[]): void {
+    if (!symbols || symbols.length === 0) return;
     
-    return true;
-  } catch (error) {
-    console.error("Error unsubscribing from symbols:", error);
-    return false;
+    console.info(`Subscribing to ${symbols.length} symbols`);
+    
+    if (this.isConnected && this.socket?.readyState === WebSocket.OPEN) {
+      this.doSubscribe(symbols);
+    } else {
+      console.info('WebSocket not ready, queuing subscription for later', symbols.length);
+      this.subscribeQueue.push(symbols);
+      // Attempt to connect if not already connecting or connected
+      if (!this.isConnected && !this.isConnecting) {
+        this.connect();
+      }
+    }
+  }
+  
+  // Perform actual subscription
+  private doSubscribe(symbols: string[]): void {
+    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+      console.warn('WebSocket not ready for subscription');
+      this.subscribeQueue.push(symbols);
+      return;
+    }
+    
+    try {
+      // Polygon format for subscription
+      const subMessage = JSON.stringify({
+        action: 'subscribe',
+        params: symbols.map(symbol => `T.${symbol}`)
+      });
+      
+      this.socket.send(subMessage);
+      console.info(`Subscription sent for ${symbols.length} symbols`);
+    } catch (error) {
+      console.error('Error subscribing to symbols:', error);
+      // Queue for retry
+      this.subscribeQueue.push(symbols);
+    }
+  }
+  
+  // Set callback for message handling
+  public onMessage(callback: (data: any) => void): void {
+    this.onMessageCallback = callback;
+  }
+  
+  // Close the WebSocket connection
+  public disconnect(): void {
+    if (this.socket) {
+      this.socket.close();
+      this.socket = null;
+    }
+    this.isConnected = false;
+    this.isConnecting = false;
+    this.subscribeQueue = [];
+    this.onMessageCallback = null;
+  }
+  
+  // Check if the WebSocket is connected
+  public get connected(): boolean {
+    return this.isConnected;
   }
 }
 
-export function onPolygonEvent(event: string, handler: (data: any) => void): void {
-  if (!eventHandlers[event]) {
-    eventHandlers[event] = [];
-  }
-  
-  eventHandlers[event].push(handler);
-}
-
-export function offPolygonEvent(event: string, handler: (data: any) => void): void {
-  if (eventHandlers[event]) {
-    eventHandlers[event] = eventHandlers[event].filter(h => h !== handler);
-  }
-}
-
-export function processPolygonMessage(data: any): Asset | null {
-  if (!Array.isArray(data) || data.length === 0) {
-    return null;
-  }
-  
-  // Polygon sends arrays of events, find a trade or quote event
-  const tradeEvent = data.find(msg => msg.ev === "T");
-  const quoteEvent = data.find(msg => msg.ev === "Q");
-  
-  if (tradeEvent) {
-    return {
-      symbol: tradeEvent.sym,
-      name: tradeEvent.sym,
-      price: tradeEvent.p,
-      change_percentage: 0, // Real-time updates don't include this
-      market_type: getMarketType(tradeEvent.sym),
-      volume: formatVolume(tradeEvent.v || 0),
-      last_updated: new Date().toISOString()
-    };
-  } else if (quoteEvent) {
-    return {
-      symbol: quoteEvent.sym,
-      name: quoteEvent.sym,
-      price: (quoteEvent.bp + quoteEvent.ap) / 2, // Midpoint price
-      change_percentage: 0, // Real-time updates don't include this
-      market_type: getMarketType(quoteEvent.sym),
-      volume: formatVolume(quoteEvent.v || 0),
-      last_updated: new Date().toISOString()
-    };
-  }
-  
-  return null;
-}
-
-function getMarketType(symbol: string): string {
-  if (symbol.includes("USD") || symbol.includes("BTC") || symbol.includes("ETH")) {
-    return "Crypto";
-  } else if (
-    symbol.includes("/") ||
-    /[A-Z]{3}[A-Z]{3}/.test(symbol) ||
-    symbol.endsWith("USD")
-  ) {
-    return "Forex";
-  } else if (symbol.startsWith("^") || symbol.includes("INDEX")) {
-    return "Index";
-  } else if (
-    symbol.includes("OIL") ||
-    symbol.includes("GOLD") ||
-    symbol.includes("SILVER")
-  ) {
-    return "Commodity";
-  }
-  
-  return "Stock";
-}
-
-function formatVolume(volume: number): string {
-  if (volume >= 1e9) {
-    return (volume / 1e9).toFixed(2) + "B";
-  } else if (volume >= 1e6) {
-    return (volume / 1e6).toFixed(2) + "M";
-  } else if (volume >= 1e3) {
-    return (volume / 1e3).toFixed(2) + "K";
-  }
-  
-  return volume.toString();
-}
+// Create and export a singleton instance
+export const polygonWebSocket = new PolygonWebSocket();
