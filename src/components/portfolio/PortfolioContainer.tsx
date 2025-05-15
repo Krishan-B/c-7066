@@ -7,13 +7,15 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-// Import components and hook
+// Import components
 import PortfolioSummary from "@/components/portfolio/PortfolioSummary";
 import PortfolioMetricsCards from "@/components/portfolio/PortfolioMetricsCards";
 import PerformanceChart from "@/components/portfolio/PerformanceChart";
 import PositionsSection from "@/components/portfolio/PositionsSection";
 import PortfolioSideSection from "@/components/portfolio/PortfolioSideSection";
-import { usePortfolioData } from "@/hooks/usePortfolioData";
+
+// Import the new portfolio hook
+import { usePortfolio } from "@/hooks/portfolio/usePortfolio";
 
 const PortfolioContainer = () => {
   const { user } = useAuth();
@@ -28,7 +30,7 @@ const PortfolioContainer = () => {
     error,
     refetch,
     actions
-  } = usePortfolioData();
+  } = usePortfolio();
 
   if (!user) {
     return (
