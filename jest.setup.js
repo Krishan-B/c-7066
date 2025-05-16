@@ -30,6 +30,5 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// Properly set up jest-dom matchers
-import * as jestDom from '@testing-library/jest-dom';
-expect.extend(jestDom);
+// Extend Jest matchers with jest-dom
+expect.extend(require('@testing-library/jest-dom').matchers);
