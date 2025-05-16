@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from "react";
 import { Separator } from "@/components/ui/separator";
-import { Asset } from "@/hooks/market";
+import { Asset, MarketType } from "@/hooks/market/types";
 import { isMarketOpen } from "@/utils/marketHours";
 import MarketHeader from "@/components/markets/MarketHeader";
 import MarketSearch from "@/components/markets/MarketSearch";
@@ -40,7 +40,7 @@ const MarketContainer = ({
     symbol: "BTCUSD",
     price: 67432.21,
     change_percentage: 2.4,
-    market_type: "Crypto",
+    market_type: "Crypto" as MarketType, // Cast as MarketType
     volume: "14.2B"
   });
 
@@ -48,6 +48,14 @@ const MarketContainer = ({
   
   // Check if the selected market is open
   const marketIsOpen = selectedAsset ? isMarketOpen(selectedAsset.market_type) : false;
+
+  // Create a handler function to properly handle the asset selection
+  const handleAssetSelection = (asset: Asset) => {
+    setSelectedAsset({
+      ...asset,
+      market_type: asset.market_type as MarketType
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,7 +104,7 @@ const MarketContainer = ({
               isLoading={isLoading}
               error={error}
               searchTerm={searchTerm}
-              onSelectAsset={setSelectedAsset}
+              onSelectAsset={handleAssetSelection}  // Use our new handler function
               containerRef={chartSectionRef}
             />
           </div>
