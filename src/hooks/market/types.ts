@@ -1,10 +1,12 @@
 
+export type MarketType = 'Stock' | 'Crypto' | 'Forex';
+
 export interface Asset {
   symbol: string;
   name: string;
   price: number;
   change_percentage: number;
-  market_type: string;
+  market_type: MarketType;
   volume: string;
   market_cap?: string;
   id?: string;

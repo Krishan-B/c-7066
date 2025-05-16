@@ -1,4 +1,7 @@
 
+// Asset categories
+export type AssetCategory = 'Crypto' | 'Forex' | 'Stocks';
+
 // Trade direction
 export type TradeDirection = 'buy' | 'sell';
 
@@ -6,7 +9,7 @@ export type TradeDirection = 'buy' | 'sell';
 export type OrderType = 'market' | 'entry';
 
 // Trade status
-export type TradeStatus = 'open' | 'pending' | 'closed' | 'cancelled' | 'failed';
+export type TradeStatus = 'open' | 'pending' | 'closed' | 'cancelled' | 'failed' | 'rejected' | 'filled';
 
 // Basic trade data
 export interface TradeBase {
@@ -25,7 +28,7 @@ export interface MarketOrderParams {
   stopLoss?: number;
   takeProfit?: number;
   userId: string;
-  assetCategory?: string;
+  assetCategory: AssetCategory;
 }
 
 // Parameters for entry orders (execution at specified price)
@@ -39,7 +42,7 @@ export interface EntryOrderParams {
   takeProfit?: number;
   expiration?: string;
   userId: string;
-  assetCategory?: string;
+  assetCategory: AssetCategory;
 }
 
 // Result of trade operations
@@ -48,6 +51,9 @@ export interface TradeResult {
   tradeId?: string;
   message: string;
   status: TradeStatus;
+  filledUnits?: number;
+  averagePrice?: number;
+  slippage?: number;
 }
 
 // Portfolio update parameters

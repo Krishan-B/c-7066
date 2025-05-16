@@ -20,6 +20,7 @@ interface TradeParams {
   stopLoss?: number;
   takeProfit?: number;
   expiration?: string;
+  isPaperTrade?: boolean;
 }
 
 interface TradeResult {
@@ -28,7 +29,7 @@ interface TradeResult {
   tradeId?: string;
 }
 
-export function useTradeExecution() {
+export function useTradeExecution(isPaperTrading: boolean = false) {
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const { user } = useAuth();
 
