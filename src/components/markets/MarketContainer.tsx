@@ -11,6 +11,7 @@ import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Asset, MarketType } from "@/hooks/market/types";
 
 interface MarketContainerProps {
   marketData: LocalAsset[];
@@ -23,15 +24,11 @@ interface MarketContainerProps {
   onRefresh?: () => void;
 }
 
-// Type assertion to make LocalAsset compatible with the expected Asset type
-// This avoids changing all references throughout the codebase
-type MarketType = string;
-
-// Helper function to ensure type safety
-const asAssetType = (asset: LocalAsset) => {
+// Helper function to convert LocalAsset to Asset
+const asAssetType = (asset: LocalAsset): Asset => {
   return {
     ...asset,
-    market_type: asset.market_type as MarketType
+    market_type: asset.market_type as unknown as MarketType
   };
 };
 
