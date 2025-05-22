@@ -9,7 +9,7 @@ export interface Asset {
   name: string;
   price: number;
   change24h: number;
-  change_percentage?: number; // Add this field for compatibility
+  change_percentage: number; // Make sure this is required, not optional
   market_type: MarketType;
   volume: number | string;
   marketCap?: number | string;

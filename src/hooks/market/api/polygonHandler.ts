@@ -6,6 +6,8 @@ import { Asset, MarketType } from '../types';
 export const fetchPolygonData = async (symbol: string, type: MarketType): Promise<Asset | null> => {
   console.log(`Fetching data from Polygon API for ${symbol} (${type})`);
   
+  const changeValue = (Math.random() * 10) - 5;
+  
   // In a real implementation, this would make an API call to Polygon
   // For now, return mock data
   return {
@@ -13,8 +15,8 @@ export const fetchPolygonData = async (symbol: string, type: MarketType): Promis
     symbol: symbol,
     name: `${symbol} Asset`,
     price: 100 + Math.random() * 10,
-    change24h: (Math.random() * 10) - 5,
-    change_percentage: (Math.random() * 10) - 5, // Add this for compatibility
+    change24h: changeValue,
+    change_percentage: changeValue, // Ensure this is always provided
     market_type: type,
     volume: 1000000 + Math.random() * 5000000
   };

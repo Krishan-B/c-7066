@@ -14,9 +14,9 @@ interface Asset {
   symbol: string;
   price: number;
   change_percentage: number;
-  volume: string;
+  volume: string | number;
   market_type: string;
-  market_cap?: string;
+  market_cap?: string | number;
 }
 
 interface WatchlistTableProps {
@@ -48,7 +48,11 @@ const WatchlistTable = ({ onAssetSelect }: WatchlistTableProps) => {
           {watchlist.map((asset) => (
             <WatchlistTableRow 
               key={asset.symbol} 
-              asset={asset}
+              asset={{
+                ...asset,
+                change_percentage: asset.change_percentage ?? asset.change24h ?? 0, // Ensure change_percentage is always a number
+                volume: asset.volume?.toString() ?? "0" // Ensure volume is always string or number
+              }}
               onSelect={onAssetSelect}
             />
           ))}

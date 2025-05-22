@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { KYCFormData, KYCStatus, KYCDocument } from "../types/kyc";
+import { KYCFormData, KYCStatus, KYCDocument, KYCVerification } from "../types/kyc";
 
 /**
  * KYC verification service
