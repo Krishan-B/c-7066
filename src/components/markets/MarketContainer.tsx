@@ -27,7 +27,9 @@ interface MarketContainerProps {
 // Helper function to convert LocalAsset to Asset
 const asAssetType = (asset: LocalAsset): Asset => {
   return {
+    id: asset.symbol, // Generate an id from the symbol
     ...asset,
+    change24h: asset.change_percentage, // Map change_percentage to change24h
     market_type: asset.market_type as unknown as MarketType
   };
 };

@@ -1,37 +1,10 @@
 
-export type KYCStatus = 'pending' | 'submitted' | 'verified' | 'rejected';
+// Define the KYC types
+export type KYCStatus = 'pending' | 'approved' | 'rejected' | 'incomplete';
 
 export interface KYCDocument {
-  id?: string;
-  type: 'passport' | 'national_id' | 'drivers_license';
-  status?: KYCStatus;
-  documentUrl?: string;
-  verificationNotes?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  file?: File; // Added for form upload handling
-}
-
-export interface KYCVerification {
-  userId: string;
-  status: KYCStatus;
-  level: 1 | 2 | 3;
-  documents: KYCDocument[];
-  personalInfo: {
-    dateOfBirth: string;
-    nationality: string;
-    residenceAddress: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
-  employmentInfo?: {
-    occupation: string;
-    employer: string;
-    annualIncome: string;
-  };
-  createdAt: string;
-  updatedAt: string;
+  type: 'passport' | 'national_id' | 'drivers_license' | 'utility_bill' | 'bank_statement';
+  file: File;
 }
 
 export interface KYCFormData {
@@ -48,8 +21,15 @@ export interface KYCFormData {
     employer: string;
     annualIncome: string;
   };
-  documents: {
-    type: KYCDocument['type'];
-    file: File;
-  }[];
+  documents: KYCDocument[];
+}
+
+export interface KYCVerification {
+  id: string;
+  userId: string;
+  status: KYCStatus;
+  createdAt: string;
+  updatedAt: string;
+  reviewedAt?: string;
+  reviewerNotes?: string;
 }

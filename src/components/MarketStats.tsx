@@ -25,6 +25,11 @@ const MarketStats = () => {
         : price.toLocaleString(undefined, { maximumFractionDigits: 0 });
   };
   
+  // Helper function to get change percentage from asset
+  const getChangePercentage = (asset: any) => {
+    return asset.change_percentage !== undefined ? asset.change_percentage : asset.change24h;
+  };
+  
   // Find specific assets in our data
   const btcAsset = cryptoData.find(asset => asset.symbol === 'BTCUSD' || asset.symbol === 'BTC/USD' || asset.symbol === 'BTC');
   const ethAsset = cryptoData.find(asset => asset.symbol === 'ETHUSD' || asset.symbol === 'ETH/USD' || asset.symbol === 'ETH');
@@ -51,7 +56,7 @@ const MarketStats = () => {
           {isLoading ? (
             <Skeleton className="w-4 h-4" />
           ) : (
-            btc.change_percentage >= 0 ? 
+            getChangePercentage(btc) >= 0 ? 
             <TrendingUpIcon className="w-4 h-4 text-success" /> : 
             <TrendingDownIcon className="w-4 h-4 text-warning" />
           )}
@@ -64,11 +69,11 @@ const MarketStats = () => {
         {isLoading ? (
           <Skeleton className="h-4 w-12 mt-1" />
         ) : (
-          <span className={`text-xs flex items-center gap-1 ${btc.change_percentage >= 0 ? 'text-success' : 'text-warning'}`}>
-            {btc.change_percentage >= 0 ? 
+          <span className={`text-xs flex items-center gap-1 ${getChangePercentage(btc) >= 0 ? 'text-success' : 'text-warning'}`}>
+            {getChangePercentage(btc) >= 0 ? 
               <ArrowUpIcon className="w-3 h-3" /> : 
               <ArrowDownIcon className="w-3 h-3" />}
-            {Math.abs(btc.change_percentage).toFixed(2)}%
+            {Math.abs(getChangePercentage(btc)).toFixed(2)}%
           </span>
         )}
       </div>
@@ -80,7 +85,7 @@ const MarketStats = () => {
           {isLoading ? (
             <Skeleton className="w-4 h-4" />
           ) : (
-            eth.change_percentage >= 0 ? 
+            getChangePercentage(eth) >= 0 ? 
             <TrendingUpIcon className="w-4 h-4 text-success" /> : 
             <TrendingDownIcon className="w-4 h-4 text-warning" />
           )}
@@ -93,11 +98,11 @@ const MarketStats = () => {
         {isLoading ? (
           <Skeleton className="h-4 w-12 mt-1" />
         ) : (
-          <span className={`text-xs flex items-center gap-1 ${eth.change_percentage >= 0 ? 'text-success' : 'text-warning'}`}>
-            {eth.change_percentage >= 0 ? 
+          <span className={`text-xs flex items-center gap-1 ${getChangePercentage(eth) >= 0 ? 'text-success' : 'text-warning'}`}>
+            {getChangePercentage(eth) >= 0 ? 
               <ArrowUpIcon className="w-3 h-3" /> : 
               <ArrowDownIcon className="w-3 h-3" />}
-            {Math.abs(eth.change_percentage).toFixed(2)}%
+            {Math.abs(getChangePercentage(eth)).toFixed(2)}%
           </span>
         )}
       </div>
@@ -109,7 +114,7 @@ const MarketStats = () => {
           {isLoading ? (
             <Skeleton className="w-4 h-4" />
           ) : (
-            spy.change_percentage >= 0 ? 
+            getChangePercentage(spy) >= 0 ? 
             <TrendingUpIcon className="w-4 h-4 text-success" /> : 
             <TrendingDownIcon className="w-4 h-4 text-warning" />
           )}
@@ -122,11 +127,11 @@ const MarketStats = () => {
         {isLoading ? (
           <Skeleton className="h-4 w-12 mt-1" />
         ) : (
-          <span className={`text-xs flex items-center gap-1 ${spy.change_percentage >= 0 ? 'text-success' : 'text-warning'}`}>
-            {spy.change_percentage >= 0 ? 
+          <span className={`text-xs flex items-center gap-1 ${getChangePercentage(spy) >= 0 ? 'text-success' : 'text-warning'}`}>
+            {getChangePercentage(spy) >= 0 ? 
               <ArrowUpIcon className="w-3 h-3" /> : 
               <ArrowDownIcon className="w-3 h-3" />}
-            {Math.abs(spy.change_percentage).toFixed(2)}%
+            {Math.abs(getChangePercentage(spy)).toFixed(2)}%
           </span>
         )}
       </div>
@@ -138,7 +143,7 @@ const MarketStats = () => {
           {isLoading ? (
             <Skeleton className="w-4 h-4" />
           ) : (
-            gold.change_percentage >= 0 ? 
+            getChangePercentage(gold) >= 0 ? 
             <TrendingUpIcon className="w-4 h-4 text-success" /> : 
             <TrendingDownIcon className="w-4 h-4 text-warning" />
           )}
@@ -151,11 +156,11 @@ const MarketStats = () => {
         {isLoading ? (
           <Skeleton className="h-4 w-12 mt-1" />
         ) : (
-          <span className={`text-xs flex items-center gap-1 ${gold.change_percentage >= 0 ? 'text-success' : 'text-warning'}`}>
-            {gold.change_percentage >= 0 ? 
+          <span className={`text-xs flex items-center gap-1 ${getChangePercentage(gold) >= 0 ? 'text-success' : 'text-warning'}`}>
+            {getChangePercentage(gold) >= 0 ? 
               <ArrowUpIcon className="w-3 h-3" /> : 
               <ArrowDownIcon className="w-3 h-3" />}
-            {Math.abs(gold.change_percentage).toFixed(2)}%
+            {Math.abs(getChangePercentage(gold)).toFixed(2)}%
           </span>
         )}
       </div>
@@ -167,7 +172,7 @@ const MarketStats = () => {
           {isLoading ? (
             <Skeleton className="w-4 h-4" />
           ) : (
-            eurUsd.change_percentage >= 0 ? 
+            getChangePercentage(eurUsd) >= 0 ? 
             <TrendingUpIcon className="w-4 h-4 text-success" /> : 
             <TrendingDownIcon className="w-4 h-4 text-warning" />
           )}
@@ -180,11 +185,11 @@ const MarketStats = () => {
         {isLoading ? (
           <Skeleton className="h-4 w-12 mt-1" />
         ) : (
-          <span className={`text-xs flex items-center gap-1 ${eurUsd.change_percentage >= 0 ? 'text-success' : 'text-warning'}`}>
-            {eurUsd.change_percentage >= 0 ? 
+          <span className={`text-xs flex items-center gap-1 ${getChangePercentage(eurUsd) >= 0 ? 'text-success' : 'text-warning'}`}>
+            {getChangePercentage(eurUsd) >= 0 ? 
               <ArrowUpIcon className="w-3 h-3" /> : 
               <ArrowDownIcon className="w-3 h-3" />}
-            {Math.abs(eurUsd.change_percentage).toFixed(2)}%
+            {Math.abs(getChangePercentage(eurUsd)).toFixed(2)}%
           </span>
         )}
       </div>

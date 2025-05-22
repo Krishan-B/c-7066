@@ -15,6 +15,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'Bitcoin',
       price: 60000 + Math.random() * 5000,
       change24h: (Math.random() * 10) - 5,
+      change_percentage: (Math.random() * 10) - 5, // Add this for compatibility
       market_type: 'Crypto',
       volume: 25000000000
     },
@@ -24,6 +25,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'Ethereum',
       price: 3000 + Math.random() * 300,
       change24h: (Math.random() * 8) - 4,
+      change_percentage: (Math.random() * 8) - 4, // Add this for compatibility
       market_type: 'Crypto',
       volume: 15000000000
     },
@@ -35,6 +37,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'S&P 500',
       price: 4700 + Math.random() * 50,
       change24h: (Math.random() * 2) - 1,
+      change_percentage: (Math.random() * 2) - 1, // Add this for compatibility
       market_type: 'Indices',
       volume: 3500000000
     },
@@ -44,6 +47,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'NASDAQ',
       price: 15000 + Math.random() * 200,
       change24h: (Math.random() * 2) - 1,
+      change_percentage: (Math.random() * 2) - 1, // Add this for compatibility
       market_type: 'Indices',
       volume: 2800000000
     },
@@ -53,6 +57,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'Dow Jones',
       price: 34500 + Math.random() * 300,
       change24h: (Math.random() * 1.5) - 0.75,
+      change_percentage: (Math.random() * 1.5) - 0.75, // Add this for compatibility
       market_type: 'Indices',
       volume: 1200000000
     },
@@ -64,6 +69,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'Gold',
       price: 1900 + Math.random() * 50,
       change24h: (Math.random() * 2) - 1,
+      change_percentage: (Math.random() * 2) - 1, // Add this for compatibility
       market_type: 'Commodities',
       volume: 5000000000
     },
@@ -73,6 +79,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'Silver',
       price: 24 + Math.random() * 2,
       change24h: (Math.random() * 3) - 1.5,
+      change_percentage: (Math.random() * 3) - 1.5, // Add this for compatibility
       market_type: 'Commodities',
       volume: 3000000000
     },
@@ -84,6 +91,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'Euro/US Dollar',
       price: 1.1 + Math.random() * 0.02,
       change24h: (Math.random() * 0.6) - 0.3,
+      change_percentage: (Math.random() * 0.6) - 0.3, // Add this for compatibility
       market_type: 'Forex',
       volume: 120000000000
     },
@@ -93,6 +101,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'British Pound/US Dollar',
       price: 1.35 + Math.random() * 0.02,
       change24h: (Math.random() * 0.8) - 0.4,
+      change_percentage: (Math.random() * 0.8) - 0.4, // Add this for compatibility
       market_type: 'Forex',
       volume: 80000000000
     },
@@ -102,6 +111,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'US Dollar/Japanese Yen',
       price: 110 + Math.random() * 1,
       change24h: (Math.random() * 0.7) - 0.35,
+      change_percentage: (Math.random() * 0.7) - 0.35, // Add this for compatibility
       market_type: 'Forex',
       volume: 90000000000
     },
@@ -113,6 +123,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'Apple Inc.',
       price: 150 + Math.random() * 10,
       change24h: (Math.random() * 4) - 2,
+      change_percentage: (Math.random() * 4) - 2, // Add this for compatibility
       market_type: 'Stocks',
       volume: 90000000
     },
@@ -122,6 +133,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'Microsoft Corporation',
       price: 290 + Math.random() * 15,
       change24h: (Math.random() * 3) - 1.5,
+      change_percentage: (Math.random() * 3) - 1.5, // Add this for compatibility
       market_type: 'Stocks',
       volume: 25000000
     },
@@ -131,6 +143,7 @@ export const fetchMarketData = async (): Promise<Asset[]> => {
       name: 'Alphabet Inc.',
       price: 2800 + Math.random() * 50,
       change24h: (Math.random() * 3) - 1.5,
+      change_percentage: (Math.random() * 3) - 1.5, // Add this for compatibility
       market_type: 'Stocks',
       volume: 18000000
     }

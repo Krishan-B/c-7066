@@ -1,5 +1,4 @@
 
-// Here we would need to fix the useTradeExecution test mocks and types
 import { renderHook, act } from '@testing-library/react';
 import { useTradeExecution } from '../useTradeExecution';
 import * as mockData from '../../utils/testUtils';
@@ -48,8 +47,9 @@ describe('useTradeExecution', () => {
   test('should handle trade execution error', async () => {
     const mockError = new Error('Trade execution failed');
     
-    jest.spyOn(require('../../services/tradeService'), 'executeTrade')
-      .mockRejectedValueOnce(mockError);
+    // Type assertion to access the mocked module
+    const tradeService = require('../../services/tradeService') as jest.Mocked<typeof import('../../services/tradeService')>;
+    tradeService.executeTrade.mockRejectedValueOnce(mockError);
     
     const { result } = renderHook(() => useTradeExecution());
     
