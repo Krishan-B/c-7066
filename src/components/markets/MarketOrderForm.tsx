@@ -1,9 +1,7 @@
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdvancedOrderForm, AdvancedOrderFormValues } from "@/components/trade/AdvancedOrderForm";
-import { toast } from "sonner";
-import { useMarketData } from "@/hooks/useMarketData";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import { useAccountMetrics } from "@/hooks/useAccountMetrics";
 import { useTradeExecution } from "@/hooks/useTradeExecution";
