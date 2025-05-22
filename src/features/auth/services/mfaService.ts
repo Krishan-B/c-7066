@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -5,7 +6,7 @@ export class MFAService {
   /**
    * Enroll a user in MFA
    */
-  static async enrollMFA(userId: string) {
+  static async enrollMFA() {
     try {
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: 'totp'
@@ -31,12 +32,20 @@ export class MFAService {
     try {
       const { data, error } = await supabase.auth.mfa.challenge({
         factorId: 'totp',
-        code
+        challenge_id: '' // Use empty string as fallback
       });
 
       if (error) throw error;
 
-      return { verified: data.verified, error: null };
+      const verifyResponse = await supabase.auth.mfa.verify({
+        factorId: 'totp',
+        challenge_id: data.id,
+        code
+      });
+
+      if (verifyResponse.error) throw verifyResponse.error;
+
+      return { verified: true, error: null };
     } catch (error: any) {
       console.error('MFA verification error:', error);
       return { verified: false, error };
@@ -48,8 +57,17 @@ export class MFAService {
    */
   static async verifyMFALogin(code: string) {
     try {
+      const factors = await supabase.auth.mfa.listFactors();
+      if (factors.error) throw factors.error;
+      
+      const totpFactor = factors.data.totp[0];
+      
+      if (!totpFactor) {
+        throw new Error('No TOTP factor found');
+      }
+      
       const { data, error } = await supabase.auth.mfa.verify({
-        factorId: 'totp',
+        factorId: totpFactor.id,
         code
       });
 

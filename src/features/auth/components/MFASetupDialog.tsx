@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -28,12 +29,18 @@ export const MFASetupDialog = ({ open, onOpenChange, userId, onSetupComplete }: 
     setError('');
 
     try {
-      const { qrCode: newQrCode, secret: newSecret, error: setupError } = await MFAService.enrollMFA(userId);
+      const { qrCode: newQrCode, secret: newSecret, error: setupError } = await MFAService.enrollMFA();
 
       if (setupError) throw setupError;
 
-      setQrCode(newQrCode);
-      setSecret(newSecret);
+      if (newQrCode) {
+        setQrCode(newQrCode);
+      }
+      
+      if (newSecret) {
+        setSecret(newSecret);
+      }
+      
       setStep('verify');
     } catch (err: any) {
       setError(err.message || 'Failed to start MFA setup');
@@ -107,11 +114,13 @@ export const MFASetupDialog = ({ open, onOpenChange, userId, onSetupComplete }: 
         ) : (
           <div className="space-y-4">
             <div className="flex flex-col items-center space-y-4">
-              <img
-                src={qrCode}
-                alt="QR Code for MFA setup"
-                className="w-48 h-48"
-              />
+              {qrCode && (
+                <img
+                  src={qrCode}
+                  alt="QR Code for MFA setup"
+                  className="w-48 h-48"
+                />
+              )}
               <p className="text-sm text-muted-foreground text-center">
                 Scan this QR code with your authenticator app, or manually enter the
                 following code:

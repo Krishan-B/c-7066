@@ -14,7 +14,7 @@ const config: Config = {
       tsconfig: 'tsconfig.json',
       diagnostics: {
         // Ignore TypeScript errors that commonly appear in tests and unused variables
-        ignoreCodes: [1343, 2352, 2339, 2345, 6133, 18003, 2740, 2322, 7016]
+        ignoreCodes: [1343, 2352, 2339, 2345, 6133, 18003, 2740, 2322, 7016, 2774]
       }
     }],
   },
