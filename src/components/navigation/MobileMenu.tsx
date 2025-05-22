@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { useAuth } from '@/hooks/useAuth'
 import { useNavigate } from "react-router-dom"
@@ -12,6 +13,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetClose,
 } from "@/components/ui/sheet"
 import MobileNavItem from "./MobileNavItem"
 
