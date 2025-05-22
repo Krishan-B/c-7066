@@ -43,12 +43,6 @@ const MobileMenu = ({ onMenuToggle }: MobileMenuProps) => {
     }
   };
 
-  // Navigate to portfolio when a metric is clicked
-  const handleMetricClick = () => {
-    navigate("/portfolio");
-    setOpen(false);
-  };
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>

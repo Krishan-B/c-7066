@@ -1,8 +1,8 @@
+
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import { useTradeExecution } from "@/hooks/useTradeExecution";
 import { useAccountMetrics } from "@/hooks/useAccountMetrics";
