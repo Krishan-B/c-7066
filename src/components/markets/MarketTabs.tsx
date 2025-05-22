@@ -2,10 +2,10 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarketList from "./MarketList";
-import { Asset, MarketType } from "@/hooks/market/types";
+import { MarketType } from "@/hooks/market/types";
 
 // Create a local Asset type that matches the one from MarketList component
-interface LocalAsset {
+export interface LocalAsset {
   name: string;
   symbol: string;
   price: number;

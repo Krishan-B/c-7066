@@ -1,20 +1,20 @@
 
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Separator } from "@/components/ui/separator";
-import { Asset, MarketType } from "@/hooks/market/types";
 import { isMarketOpen } from "@/utils/marketHours";
 import MarketHeader from "@/components/markets/MarketHeader";
 import MarketSearch from "@/components/markets/MarketSearch";
-import MarketTabs from "@/components/markets/MarketTabs";
+import MarketTabs, { LocalAsset } from "@/components/markets/MarketTabs";
 import MarketChartSection from "@/components/markets/MarketChartSection";
 import MarketOrderForm from "@/components/markets/MarketOrderForm";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MarketType } from "@/hooks/market/types";
 
 interface MarketContainerProps {
-  marketData: Asset[];
+  marketData: LocalAsset[];
   isLoading: boolean;
   error: Error | null;
   activeTab: string;
@@ -35,12 +35,12 @@ const MarketContainer = ({
   onRefresh
 }: MarketContainerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedAsset, setSelectedAsset] = useState<Asset>({
+  const [selectedAsset, setSelectedAsset] = useState<LocalAsset>({
     name: "Bitcoin",
     symbol: "BTCUSD",
     price: 67432.21,
     change_percentage: 2.4,
-    market_type: "Crypto" as MarketType, // Cast as MarketType
+    market_type: "Crypto",
     volume: "14.2B"
   });
 
@@ -50,11 +50,8 @@ const MarketContainer = ({
   const marketIsOpen = selectedAsset ? isMarketOpen(selectedAsset.market_type) : false;
 
   // Create a handler function to properly handle the asset selection
-  const handleAssetSelection = (asset: Asset) => {
-    setSelectedAsset({
-      ...asset,
-      market_type: asset.market_type as MarketType
-    });
+  const handleAssetSelection = (asset: LocalAsset) => {
+    setSelectedAsset(asset);
   };
 
   return (
@@ -124,7 +121,7 @@ const MarketContainer = ({
         
         {/* News section */}
         <div className="mt-6">
-          <EnhancedNewsWidget marketType={selectedAsset.market_type} />
+          <EnhancedNewsWidget marketType={selectedAsset.market_type as MarketType} />
         </div>
       </div>
     </div>

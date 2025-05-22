@@ -1,3 +1,4 @@
+
 declare module 'react-ts-tradingview-widgets' {
   import * as React from 'react';
 
@@ -15,6 +16,8 @@ declare module 'react-ts-tradingview-widgets' {
     details?: boolean;
     hotlist?: boolean;
     calendar?: boolean;
+    enable_publishing?: boolean;
+    hide_top_toolbar?: boolean;
     width?: string | number;
     height?: string | number;
     container_id?: string;

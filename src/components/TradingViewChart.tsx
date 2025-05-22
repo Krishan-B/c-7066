@@ -23,8 +23,6 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
         theme="dark"
         interval={interval}
         range={range}
-        timezone="exchange"
-        style="1"
         autosize
         allow_symbol_change={true}
         save_image={true}
@@ -36,6 +34,5 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
     </div>
   );
 };
-
 
 export default TradingViewChart;

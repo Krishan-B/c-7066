@@ -2,6 +2,7 @@
 import { render, screen } from '@/utils/test-utils';
 import MarketOrderForm from '../MarketOrderForm';
 import { jest, expect, describe, test, beforeEach } from '@jest/globals';
+import '@testing-library/jest-dom'; // Add this import
 
 // Mock dependencies
 jest.mock('@/hooks/useMarketData', () => ({
@@ -62,8 +63,8 @@ describe('MarketOrderForm', () => {
   test('renders the component with the correct title', () => {
     render(<MarketOrderForm selectedAsset={mockSelectedAsset} />);
     
-    const titleElement = screen.getByText(`Trade ${mockSelectedAsset.name}`);
-    expect(titleElement).toBeInTheDocument();
+    // Get the element and assert it exists
+    expect(screen.getByText(`Trade ${mockSelectedAsset.name}`)).toBeInTheDocument();
   });
   
   test('updates asset category when selected asset changes', () => {
@@ -74,7 +75,6 @@ describe('MarketOrderForm', () => {
     rerender(<MarketOrderForm selectedAsset={newAsset} />);
     
     // Expect component to reflect the change
-    const newTitleElement = screen.getByText(`Trade ${newAsset.name}`);
-    expect(newTitleElement).toBeInTheDocument();
+    expect(screen.getByText(`Trade ${newAsset.name}`)).toBeInTheDocument();
   });
 });
