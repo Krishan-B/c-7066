@@ -1,6 +1,5 @@
 
 import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, TrendingDownIcon } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useMarketData } from "@/hooks/market";
 import { Skeleton } from "@/components/ui/skeleton";
 

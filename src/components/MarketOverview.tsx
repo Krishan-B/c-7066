@@ -5,7 +5,7 @@ import {
   ChartContainer,
   ChartTooltipContent
 } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, TooltipProps } from "recharts";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 const MarketOverview = () => {
@@ -23,8 +23,10 @@ const MarketOverview = () => {
   const dayChangePercentage = 2.6;
   const isPositive = dayChange > 0;
 
-  const renderTooltipContent = (props: { active?: boolean; payload?: Array<{ value: number; name: string }> }) => {
-    if (!props.active || !props.payload || !props.payload.length) {
+  // Updated to match the expected type signature
+  const renderTooltipContent = (props: TooltipProps<number, string>) => {
+    const { active, payload } = props;
+    if (!active || !payload || !payload.length) {
       return null;
     }
     
@@ -32,7 +34,7 @@ const MarketOverview = () => {
       <ChartTooltipContent
         {...props}
         indicator="dot"
-        formatter={(value, name) => (
+        formatter={(value: any, name: any) => (
           <div className="flex items-center justify-between gap-2">
             <span>{name}</span>
             <span className="font-medium">{value}%</span>

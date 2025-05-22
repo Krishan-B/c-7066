@@ -1,3 +1,4 @@
+
 import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 
 const CryptoChart = () => {
@@ -10,7 +11,6 @@ const CryptoChart = () => {
         <AdvancedRealTimeChart
           symbol="BINANCE:BTCUSDT"
           theme="dark"
-          locale="en"
           autosize
           hide_side_toolbar={false}
           allow_symbol_change={true}

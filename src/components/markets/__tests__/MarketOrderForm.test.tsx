@@ -1,7 +1,5 @@
 
-import React from 'react';
 import { render, screen } from '@/utils/test-utils';
-import userEvent from '@testing-library/user-event';
 import MarketOrderForm from '../MarketOrderForm';
 import { jest, expect, describe, test, beforeEach } from '@jest/globals';
 
@@ -64,7 +62,8 @@ describe('MarketOrderForm', () => {
   test('renders the component with the correct title', () => {
     render(<MarketOrderForm selectedAsset={mockSelectedAsset} />);
     
-    expect(screen.getByText(`Trade ${mockSelectedAsset.name}`)).toBeInTheDocument();
+    const titleElement = screen.getByText(`Trade ${mockSelectedAsset.name}`);
+    expect(titleElement).toBeInTheDocument();
   });
   
   test('updates asset category when selected asset changes', () => {
@@ -74,7 +73,8 @@ describe('MarketOrderForm', () => {
     const newAsset = { ...mockSelectedAsset, market_type: 'Forex', name: 'EUR/USD' };
     rerender(<MarketOrderForm selectedAsset={newAsset} />);
     
-    // Expect component to reflect the change (implementation dependent)
-    expect(screen.getByText(`Trade ${newAsset.name}`)).toBeInTheDocument();
+    // Expect component to reflect the change
+    const newTitleElement = screen.getByText(`Trade ${newAsset.name}`);
+    expect(newTitleElement).toBeInTheDocument();
   });
 });
