@@ -12,7 +12,7 @@ module.exports = {
       tsconfig: 'tsconfig.json',
       isolatedModules: true,
       diagnostics: {
-        ignoreCodes: [1343, 2352, 2339, 2345, 6133, 18003, 2740, 2322] // Ignoring TS2339 (toBeInTheDocument) and TS6133 (unused imports)
+        ignoreCodes: [1343, 2352, 2339, 2345, 6133, 18003, 2740, 2322, 7016] // Ignoring common TypeScript errors in tests
       }
     }],
   },

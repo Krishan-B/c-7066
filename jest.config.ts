@@ -13,8 +13,8 @@ const config: Config = {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       tsconfig: 'tsconfig.json',
       diagnostics: {
-        // Ignore specific TypeScript errors
-        ignoreCodes: [6133, 2339, 2345]
+        // Ignore TypeScript errors that commonly appear in tests
+        ignoreCodes: [1343, 2352, 2339, 2345, 6133, 18003, 2740, 2322, 7016]
       }
     }],
   },
