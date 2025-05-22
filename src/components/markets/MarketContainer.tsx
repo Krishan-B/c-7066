@@ -59,7 +59,7 @@ const MarketContainer = ({
         {/* Market header section */}
         <div className="flex items-center justify-between mb-4">
           <MarketHeader 
-            selectedAsset={selectedAsset as any}
+            selectedAsset={selectedAsset}
             marketIsOpen={marketIsOpen}
           />
           
@@ -111,16 +111,16 @@ const MarketContainer = ({
         {/* Chart and details section */}
         <MarketChartSection 
           chartSectionRef={chartSectionRef}
-          selectedAsset={selectedAsset as any}
+          selectedAsset={selectedAsset}
           marketIsOpen={marketIsOpen}
         />
 
         {/* Advanced Order Form Card for trading */}
-        <MarketOrderForm selectedAsset={selectedAsset as any} />
+        <MarketOrderForm selectedAsset={selectedAsset} />
         
         {/* News section */}
         <div className="mt-6">
-          <EnhancedNewsWidget marketType={selectedAsset.market_type as any} />
+          <EnhancedNewsWidget marketType={selectedAsset.market_type} />
         </div>
       </div>
     </div>

@@ -53,7 +53,9 @@ describe('MarketOrderForm', () => {
     name: 'Bitcoin',
     symbol: 'BTCUSD',
     price: 50000,
-    market_type: 'Crypto'
+    market_type: 'Crypto',
+    change_percentage: 1.5,
+    volume: "$1.2B"
   };
   
   beforeEach(() => {
@@ -71,7 +73,13 @@ describe('MarketOrderForm', () => {
     const { rerender } = render(<MarketOrderForm selectedAsset={mockSelectedAsset} />);
     
     // Rerender with different asset type
-    const newAsset = { ...mockSelectedAsset, market_type: 'Forex', name: 'EUR/USD' };
+    const newAsset = { 
+      ...mockSelectedAsset, 
+      market_type: 'Forex', 
+      name: 'EUR/USD',
+      change_percentage: 0.5,
+      volume: "$500M"
+    };
     rerender(<MarketOrderForm selectedAsset={newAsset} />);
     
     // Expect component to reflect the change
