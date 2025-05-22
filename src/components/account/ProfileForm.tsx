@@ -15,7 +15,13 @@ export function ProfileForm() {
     },
   });
 
-  const onSubmit = (values: any) => {
+  interface ProfileFormValues {
+    fullName: string;
+    email: string;
+    phone: string;
+  }
+
+  const onSubmit = (values: ProfileFormValues) => {
     toast({
       title: "Profile updated",
       description: "Your profile information has been updated",

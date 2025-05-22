@@ -23,7 +23,7 @@ const MarketOverview = () => {
   const dayChangePercentage = 2.6;
   const isPositive = dayChange > 0;
 
-  const renderTooltipContent = (props: any) => {
+  const renderTooltipContent = (props: { active?: boolean; payload?: Array<{ value: number; name: string }> }) => {
     if (!props.active || !props.payload || !props.payload.length) {
       return null;
     }

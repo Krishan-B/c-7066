@@ -38,7 +38,7 @@ export const usePortfolio = () => {
     if (apiError && !stateError) {
       setError(apiError instanceof Error ? apiError : new Error(String(apiError)));
     }
-  }, [data, apiLoading, apiError]);
+  }, [data, apiLoading, apiError, setActiveTrades, setError, setLoading, setPortfolioData, stateError]);
 
   return {
     portfolioData,

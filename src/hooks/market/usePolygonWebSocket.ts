@@ -131,8 +131,9 @@ export function usePolygonWebSocket(options: UsePolygonWebSocketOptions = {}): U
     setIsConnected(false);
   };
   
-  const handleError = (err: any) => {
-    setError(err instanceof Error ? err : new Error('WebSocket error occurred'));
+  const handleError = (err: Error | Event) => {
+    console.error('WebSocket error:', err);
+    setError(new Error(err instanceof Error ? err.message : 'WebSocket connection error'));
   };
   
   // Set up event listeners

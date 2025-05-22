@@ -1,0 +1,9 @@
+10016	INFO		# Cookie No HttpOnly Flag
+10020	INFO		# X-Frame-Options Header
+10021	INFO		# X-Content-Type-Options Header
+10034	INFO		# Heartbleed OpenSSL Vulnerability
+10040	INFO		# Secure Pages Include Mixed Content
+10096	INFO		# Timestamp Disclosure
+10098	INFO		# Cross-Domain Misconfiguration
+40025	INFO		# Proxy Disclosure
+90022	INFO		# Application Error Disclosure

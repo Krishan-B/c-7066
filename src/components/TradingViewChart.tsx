@@ -1,24 +1,41 @@
 
-import React from 'react';
+import * as React from 'react';
+import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
+
+type Interval = string;
+type Range = string;
 
 interface TradingViewChartProps {
   symbol?: string;
+  interval?: Interval;
+  range?: Range;
 }
 
-const TradingViewChart: React.FC<TradingViewChartProps> = ({ symbol = "BINANCE:BTCUSDT" }) => {
+const TradingViewChart: React.FC<TradingViewChartProps> = ({
+  symbol = "BINANCE:BTCUSDT",
+  interval = "D",
+  range
+}) => {
   return (
     <div className="h-[500px] w-full relative z-10">
-      <div id="tradingview_chart" className="h-full w-full" />
-      <div className="w-full h-full absolute top-0 left-0">
-        {/* We're using the TradingView widget directly here */}
-        <iframe
-          title="Trading Chart"
-          src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_chart&symbol=${symbol}&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en&utm_source=&utm_medium=widget&utm_campaign=chart`}
-          style={{ width: '100%', height: '100%' }}
-        />
-      </div>
+      <AdvancedRealTimeChart
+        symbol={symbol}
+        theme="dark"
+        interval={interval}
+        range={range}
+        timezone="exchange"
+        style="1"
+        autosize
+        allow_symbol_change={true}
+        save_image={true}
+        hide_side_toolbar={false}
+        details={true}
+        hotlist={true}
+        calendar={true}
+      />
     </div>
   );
 };
+
 
 export default TradingViewChart;

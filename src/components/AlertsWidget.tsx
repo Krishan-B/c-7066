@@ -49,7 +49,7 @@ const AlertsWidget = () => {
   
   useEffect(() => {
     fetchAlerts();
-  }, []);
+  }, [toast]);
   
   const getAlertIcon = (type: string) => {
     switch (type) {
