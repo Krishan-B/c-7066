@@ -39,7 +39,7 @@ export { customRender as render };
 
 // Explicitly declare Jest mocking utilities for TypeScript
 export const mockAuthHook = (isAuthenticated = true) => {
-  jest.mock('@/hooks/useAuth', () => ({
+  return jest.fn(() => ({
     useAuth: () => ({
       user: isAuthenticated ? { id: 'test-user-id', email: 'test@example.com' } : null,
       loading: false,
