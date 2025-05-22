@@ -1,13 +1,15 @@
+
 export type KYCStatus = 'pending' | 'submitted' | 'verified' | 'rejected';
 
 export interface KYCDocument {
-  id: string;
+  id?: string;
   type: 'passport' | 'national_id' | 'drivers_license';
-  status: KYCStatus;
+  status?: KYCStatus;
   documentUrl?: string;
   verificationNotes?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+  file?: File; // Added for form upload handling
 }
 
 export interface KYCVerification {

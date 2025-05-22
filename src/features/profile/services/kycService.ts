@@ -1,12 +1,11 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { KYCDocument, KYCRequestStatus, KYCVerificationData } from "../types/kyc";
+import { KYCFormData, KYCStatus } from "../types/kyc";
 
 /**
- * Mock KYC verification service
- * This is a placeholder implementation that doesn't interact with a real KYC table
+ * KYC verification service
  */
-export async function submitKYCVerification(userId: string, data: KYCVerificationData) {
+export async function submitKYCVerification(userId: string, data: KYCFormData) {
   console.log("Submitting KYC verification for user:", userId);
   console.log("KYC Data:", data);
   
@@ -15,7 +14,7 @@ export async function submitKYCVerification(userId: string, data: KYCVerificatio
   return {
     success: true,
     id: "mock-verification-id",
-    status: "pending" as KYCRequestStatus,
+    status: "pending" as KYCStatus,
     createdAt: new Date().toISOString()
   };
 }
@@ -23,11 +22,11 @@ export async function submitKYCVerification(userId: string, data: KYCVerificatio
 export async function getKYCStatus(userId: string) {
   console.log("Fetching KYC status for user:", userId);
   
-  // In a real implementation, this would fetch from the kyc_verifications table
+  // In a real implementation, this would fetch from a kyc_verifications table
   // For now, return mock status
   return {
     success: true,
-    status: "pending" as KYCRequestStatus,
+    status: "pending" as KYCStatus,
     updatedAt: new Date().toISOString()
   };
 }
@@ -56,3 +55,10 @@ export async function uploadKYCDocument(userId: string, documentType: string, fi
     };
   }
 }
+
+// Export service object for component usage
+export const KYCService = {
+  submitVerification: submitKYCVerification,
+  getStatus: getKYCStatus,
+  uploadDocument: uploadKYCDocument
+};

@@ -13,7 +13,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetClose,
 } from "@/components/ui/sheet"
 import MobileNavItem from "./MobileNavItem"
 

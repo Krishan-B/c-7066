@@ -141,10 +141,10 @@ const KYCVerificationForm = () => {
     setError('');
 
     try {
-      const { data, error } = await KYCService.submitVerification(user.id, formData);
+      const result = await KYCService.submitVerification(user.id, formData);
 
-      if (error) {
-        throw error;
+      if (!result.success) {
+        throw new Error('Failed to submit KYC verification');
       }
 
       toast({
