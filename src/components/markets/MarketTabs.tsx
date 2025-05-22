@@ -2,7 +2,6 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarketList from "./MarketList";
-import { MarketType } from "@/hooks/market/types";
 
 // Create a local Asset type that matches the requirements
 export interface LocalAsset {

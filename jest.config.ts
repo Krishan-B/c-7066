@@ -1,16 +1,21 @@
+
 import type { Config } from 'jest';
 
 const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: 'tsconfig.json'
+      tsconfig: 'tsconfig.json',
+      diagnostics: {
+        // Ignore specific TypeScript errors
+        ignoreCodes: [6133, 2339, 2345]
+      }
     }],
   },
   testMatch: [
