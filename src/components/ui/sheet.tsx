@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
@@ -27,9 +28,13 @@ const SheetOverlay = React.forwardRef<
 ))
 SheetOverlay.displayName = DialogPrimitive.Overlay.displayName
 
+interface SheetContentProps extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
+  side?: "top" | "right" | "bottom" | "left"
+}
+
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+  SheetContentProps
 >(({ className, side = "right", ...props }, ref) => (
   <DialogPrimitive.Portal>
     <DialogPrimitive.Content

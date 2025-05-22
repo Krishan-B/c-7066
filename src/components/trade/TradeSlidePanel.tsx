@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
@@ -18,7 +17,6 @@ interface TradeSlidePanelProps {
 }
 
 export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
-  const { user } = useAuth();
   const { toast } = useToast();
   
   // State variables
