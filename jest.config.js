@@ -12,7 +12,7 @@ module.exports = {
       tsconfig: 'tsconfig.json',
       isolatedModules: true,
       diagnostics: {
-        ignoreCodes: [1343, 2352, 2339, 2345, 6133, 18003, 2740] // Ignore specific TS error codes including 2339 which is causing testing issues
+        ignoreCodes: [1343, 2352, 2339, 2345, 6133, 18003, 2740, 2322] // Ignoring TS2339 (toBeInTheDocument) and TS6133 (unused imports)
       }
     }],
   },

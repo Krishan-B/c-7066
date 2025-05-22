@@ -2,16 +2,16 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarketList from "./MarketList";
-import { Asset } from "@/hooks/useMarketData";
+import { MarketType } from "@/hooks/market/types";
 
-// Create a local Asset type that matches the one from MarketList component
+// Create a local Asset type that matches the requirements
 export interface LocalAsset {
   name: string;
   symbol: string;
   price: number;
-  market_type: string;
+  market_type: string; // Keep as string to be more flexible
   change_percentage: number;
-  volume: string; // Make this required, not optional
+  volume: string;
 }
 
 interface MarketTabsProps {

@@ -40,5 +40,7 @@ Object.defineProperty(window, 'ResizeObserver', {
   value: MockResizeObserver,
 });
 
-// Explicitly extend Jest matchers
-expect.extend(require('@testing-library/jest-dom/matchers'));
+// Explicitly extend Jest matchers with testing-library matchers
+import { expect } from '@jest/globals';
+import * as matchers from '@testing-library/jest-dom/matchers';
+expect.extend(matchers);

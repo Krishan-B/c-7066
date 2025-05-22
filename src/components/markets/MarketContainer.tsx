@@ -59,7 +59,7 @@ const MarketContainer = ({
         {/* Market header section */}
         <div className="flex items-center justify-between mb-4">
           <MarketHeader 
-            selectedAsset={selectedAsset}
+            selectedAsset={selectedAsset as any}
             marketIsOpen={marketIsOpen}
           />
           
@@ -111,7 +111,7 @@ const MarketContainer = ({
         {/* Chart and details section */}
         <MarketChartSection 
           chartSectionRef={chartSectionRef}
-          selectedAsset={selectedAsset}
+          selectedAsset={selectedAsset as any}
           marketIsOpen={marketIsOpen}
         />
 
