@@ -11,7 +11,6 @@ import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MarketType } from "@/hooks/market/types";
 
 interface MarketContainerProps {
   marketData: LocalAsset[];
@@ -60,7 +59,7 @@ const MarketContainer = ({
         {/* Market header section */}
         <div className="flex items-center justify-between mb-4">
           <MarketHeader 
-            selectedAsset={selectedAsset}
+            selectedAsset={selectedAsset as any}
             marketIsOpen={marketIsOpen}
           />
           
@@ -101,7 +100,7 @@ const MarketContainer = ({
               isLoading={isLoading}
               error={error}
               searchTerm={searchTerm}
-              onSelectAsset={handleAssetSelection}  // Use our new handler function
+              onSelectAsset={handleAssetSelection}
               containerRef={chartSectionRef}
             />
           </div>
@@ -112,16 +111,16 @@ const MarketContainer = ({
         {/* Chart and details section */}
         <MarketChartSection 
           chartSectionRef={chartSectionRef}
-          selectedAsset={selectedAsset}
+          selectedAsset={selectedAsset as any}
           marketIsOpen={marketIsOpen}
         />
 
         {/* Advanced Order Form Card for trading */}
-        <MarketOrderForm selectedAsset={selectedAsset} />
+        <MarketOrderForm selectedAsset={selectedAsset as any} />
         
         {/* News section */}
         <div className="mt-6">
-          <EnhancedNewsWidget marketType={selectedAsset.market_type as MarketType} />
+          <EnhancedNewsWidget marketType={selectedAsset.market_type as any} />
         </div>
       </div>
     </div>

@@ -1,8 +1,8 @@
 
-import React from 'react';
 import { render, screen } from '@/utils/test-utils';
 import RiskManagementPanel from '../RiskManagementPanel';
 import { jest, expect, describe, test } from '@jest/globals';
+import '@testing-library/jest-dom';
 
 describe('RiskManagementPanel', () => {
   test('renders with safe status', () => {
@@ -61,7 +61,7 @@ describe('RiskManagementPanel', () => {
     expect(screen.getByText('IMMEDIATE ACTION REQUIRED:')).toBeInTheDocument();
   });
 
-  test('tooltip appears with correct content', async () => {
+  test('tooltip appears with correct content', () => {
     render(
       <RiskManagementPanel 
         marginLevel={150} 

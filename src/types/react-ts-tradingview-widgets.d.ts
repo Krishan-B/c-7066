@@ -21,6 +21,7 @@ declare module 'react-ts-tradingview-widgets' {
     width?: string | number;
     height?: string | number;
     container_id?: string;
+    toolbar_bg?: string;
   }
 
   export class AdvancedRealTimeChart extends React.Component<AdvancedRealTimeChartProps> {}

@@ -22,7 +22,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({
         symbol={symbol}
         theme="dark"
         interval={interval}
-        range={range}
+        range={range as any}
         autosize
         allow_symbol_change={true}
         save_image={true}

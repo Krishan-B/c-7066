@@ -32,6 +32,7 @@ const customRender = (
 
 // Re-export everything from testing-library
 export * from '@testing-library/react';
+export * from '@testing-library/jest-dom';
 export { customRender as render };
 
 // Explicitly export waitFor

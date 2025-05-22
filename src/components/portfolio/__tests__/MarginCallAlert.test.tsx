@@ -1,9 +1,9 @@
 
-import React from 'react';
 import { render, screen } from '@/utils/test-utils';
 import userEvent from '@testing-library/user-event';
 import MarginCallAlert from '../MarginCallAlert';
 import { jest, expect, describe, test, beforeEach } from '@jest/globals';
+import '@testing-library/jest-dom';
 
 describe('MarginCallAlert', () => {
   const mockDismiss = jest.fn();

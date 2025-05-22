@@ -2,7 +2,7 @@
 import { render, screen } from '@/utils/test-utils';
 import MarketOrderForm from '../MarketOrderForm';
 import { jest, expect, describe, test, beforeEach } from '@jest/globals';
-import '@testing-library/jest-dom'; // Add this import
+import '@testing-library/jest-dom';
 
 // Mock dependencies
 jest.mock('@/hooks/useMarketData', () => ({
