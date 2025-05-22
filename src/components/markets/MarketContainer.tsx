@@ -23,6 +23,18 @@ interface MarketContainerProps {
   onRefresh?: () => void;
 }
 
+// Type assertion to make LocalAsset compatible with the expected Asset type
+// This avoids changing all references throughout the codebase
+type MarketType = string;
+
+// Helper function to ensure type safety
+const asAssetType = (asset: LocalAsset) => {
+  return {
+    ...asset,
+    market_type: asset.market_type as MarketType
+  };
+};
+
 const MarketContainer = ({ 
   marketData, 
   isLoading, 
@@ -59,7 +71,7 @@ const MarketContainer = ({
         {/* Market header section */}
         <div className="flex items-center justify-between mb-4">
           <MarketHeader 
-            selectedAsset={selectedAsset}
+            selectedAsset={asAssetType(selectedAsset)}
             marketIsOpen={marketIsOpen}
           />
           
@@ -111,7 +123,7 @@ const MarketContainer = ({
         {/* Chart and details section */}
         <MarketChartSection 
           chartSectionRef={chartSectionRef}
-          selectedAsset={selectedAsset}
+          selectedAsset={asAssetType(selectedAsset)}
           marketIsOpen={marketIsOpen}
         />
 

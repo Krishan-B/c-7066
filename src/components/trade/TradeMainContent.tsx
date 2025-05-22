@@ -1,4 +1,3 @@
-
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -336,12 +335,12 @@ export function TradeMainContent({
                     variant={"outline"}
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !setExpirationDate && "text-muted-foreground"
+                      typeof setExpirationDate !== "function" && "text-muted-foreground"
                     )}
                     disabled={isExecuting}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {setExpirationDate ? (
+                    {typeof setExpirationDate === "function" ? (
                       format(new Date(), "PPP")
                     ) : (
                       <span>Pick a date</span>
