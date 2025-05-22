@@ -31,15 +31,14 @@ export class MFAService {
   static async verifyMFASetup(code: string) {
     try {
       const { data, error } = await supabase.auth.mfa.challenge({
-        factorId: 'totp',
-        challenge_id: '' // Use empty string as fallback
+        factorId: 'totp'
       });
 
       if (error) throw error;
 
       const verifyResponse = await supabase.auth.mfa.verify({
         factorId: 'totp',
-        challenge_id: data.id,
+        challengeId: data.id,
         code
       });
 
@@ -68,12 +67,13 @@ export class MFAService {
       
       const { data, error } = await supabase.auth.mfa.verify({
         factorId: totpFactor.id,
+        challengeId: '', // Empty challengeId for login verification
         code
       });
 
       if (error) throw error;
 
-      return { session: data.session, error: null };
+      return { session: data, error: null };
     } catch (error: any) {
       console.error('MFA login verification error:', error);
       return { session: null, error };

@@ -10,11 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 interface MFASetupDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  userId: string;
   onSetupComplete: () => void;
 }
 
-export const MFASetupDialog = ({ open, onOpenChange, userId, onSetupComplete }: MFASetupDialogProps) => {
+export const MFASetupDialog = ({ open, onOpenChange, onSetupComplete }: MFASetupDialogProps) => {
   const [step, setStep] = useState<'initial' | 'verify'>('initial');
   const [qrCode, setQrCode] = useState<string>('');
   const [secret, setSecret] = useState<string>('');
