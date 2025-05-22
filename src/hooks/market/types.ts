@@ -1,33 +1,23 @@
 
-export type MarketType = 'Stock' | 'Crypto' | 'Forex';
+// Update types file to include all necessary market types
+
+export type MarketType = 'Crypto' | 'Forex' | 'Stocks' | 'Index' | 'Indices' | 'Commodities';
 
 export interface Asset {
+  id: string;
   symbol: string;
   name: string;
   price: number;
-  change_percentage: number;
+  change24h: number;
   market_type: MarketType;
-  volume: string;
-  market_cap?: string;
-  id?: string;
-  last_updated?: string;
-  // Add the properties needed by PositionsTable
-  amount?: number;
-  entryPrice?: number;
-  value?: number;
-  change?: number;
-  pnl?: number;
-  pnlPercentage?: number;
+  volume: number;
+  marketCap?: number;
+  high24h?: number;
+  low24h?: number;
+  supply?: number;
 }
 
-export interface AssetDetails extends Asset {
-  open?: number;
-  high?: number;
-  low?: number;
-  close?: number;
-  description?: string;
-  currency?: string;
-  exchange?: string;
-  marketCap?: string;
-  sector?: string;
+export interface MarketData {
+  assets: Asset[];
+  lastUpdated: string;
 }

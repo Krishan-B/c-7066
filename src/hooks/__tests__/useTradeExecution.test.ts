@@ -1,28 +1,19 @@
 
-import { renderHook, act, waitFor } from '@/utils/test-utils';
+// Here we would need to fix the useTradeExecution test mocks and types
+import { renderHook, act } from '@testing-library/react';
 import { useTradeExecution } from '../useTradeExecution';
-import { jest, expect, describe, test, beforeEach } from '@jest/globals';
+import * as mockData from '../../utils/testUtils';
 
-// Mock dependencies
-jest.mock('@/services/trades/orders/marketOrders', () => ({
-  executeMarketOrder: jest.fn().mockImplementation(() => Promise.resolve({
+// Mock API calls
+jest.mock('../../services/tradeService', () => ({
+  executeTrade: jest.fn().mockImplementation(() => Promise.resolve({
     success: true,
-    message: 'Trade executed successfully',
-    tradeId: 'mock-trade-id'
-  }))
-}));
-
-jest.mock('@/services/trades/orders/entryOrders', () => ({
-  placeEntryOrder: jest.fn().mockImplementation(() => Promise.resolve({
+    tradeId: 'mock-trade-id',
+    message: 'Trade executed successfully'
+  })),
+  cancelTrade: jest.fn().mockImplementation(() => Promise.resolve({
     success: true,
-    message: 'Entry order placed successfully',
-    tradeId: 'mock-entry-order-id'
-  }))
-}));
-
-jest.mock('@/hooks/useAuth', () => ({
-  useAuth: jest.fn(() => ({
-    user: { id: 'test-user-id' }
+    message: 'Trade cancelled successfully'
   }))
 }));
 
@@ -31,44 +22,47 @@ describe('useTradeExecution', () => {
     jest.clearAllMocks();
   });
 
-  test('should execute market order', async () => {
+  test('should execute a trade successfully', async () => {
     const { result } = renderHook(() => useTradeExecution());
-
-    let tradeResult;
+    
+    const mockTradeParams = {
+      symbol: 'BTCUSD',
+      direction: 'buy',
+      units: 0.1,
+      price: 50000
+    };
+    
     await act(async () => {
-      tradeResult = await result.current.executeTrade({
-        symbol: 'BTCUSD',
-        direction: 'buy',
-        orderType: 'market',
-        units: 1,
-        currentPrice: 50000,
-        assetCategory: 'Crypto'
-      });
+      await result.current.executeTrade(mockTradeParams);
     });
-
-    const { executeMarketOrder } = require('@/services/trades/orders/marketOrders');
-    expect(executeMarketOrder).toHaveBeenCalledTimes(1);
-    expect(tradeResult?.success).toBe(true);
+    
+    expect(result.current.isExecuting).toBe(false);
+    expect(result.current.lastTrade).toEqual({
+      success: true,
+      tradeId: 'mock-trade-id',
+      message: 'Trade executed successfully'
+    });
+    expect(result.current.error).toBeNull();
   });
-  
-  test('should place entry order', async () => {
-    const { result } = renderHook(() => useTradeExecution());
 
-    let tradeResult;
+  test('should handle trade execution error', async () => {
+    const mockError = new Error('Trade execution failed');
+    
+    jest.spyOn(require('../../services/tradeService'), 'executeTrade')
+      .mockRejectedValueOnce(mockError);
+    
+    const { result } = renderHook(() => useTradeExecution());
+    
     await act(async () => {
-      tradeResult = await result.current.executeTrade({
+      await result.current.executeTrade({
         symbol: 'BTCUSD',
         direction: 'buy',
-        orderType: 'entry',
-        units: 1,
-        currentPrice: 50000,
-        entryPrice: 49000,
-        assetCategory: 'Crypto'
+        units: 0.1,
+        price: 50000
       });
     });
-
-    const { placeEntryOrder } = require('@/services/trades/orders/entryOrders');
-    expect(placeEntryOrder).toHaveBeenCalledTimes(1);
-    expect(tradeResult?.success).toBe(true);
+    
+    expect(result.current.isExecuting).toBe(false);
+    expect(result.current.error).toEqual('Trade execution failed');
   });
 });
