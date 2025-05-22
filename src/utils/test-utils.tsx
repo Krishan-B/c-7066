@@ -32,12 +32,10 @@ const customRender = (
 
 // Re-export everything from testing-library
 export * from '@testing-library/react';
+export { customRender as render };
 
 // Explicitly export waitFor
 export { rtlWaitFor as waitFor };
-
-// Export the custom render method
-export { customRender as render };
 
 // Explicitly declare Jest mocking utilities for TypeScript
 export const mockAuthHook = (isAuthenticated = true) => {

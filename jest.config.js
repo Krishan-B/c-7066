@@ -12,7 +12,7 @@ module.exports = {
       tsconfig: 'tsconfig.json',
       isolatedModules: true,
       diagnostics: {
-        ignoreCodes: [1343, 2352, 2339, 2345, 6133, 18003, 2740] // Add 2740 to ignore specific TS error codes
+        ignoreCodes: [1343, 2352, 2339, 2345, 6133, 18003, 2740] // Ignore specific TS error codes including 2339 which is causing our issues
       }
     }],
   },

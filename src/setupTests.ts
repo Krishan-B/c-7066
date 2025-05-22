@@ -1,3 +1,4 @@
+
 import '@testing-library/jest-dom';
 
 // Mock window.matchMedia
@@ -38,3 +39,6 @@ Object.defineProperty(window, 'ResizeObserver', {
   writable: true,
   value: MockResizeObserver,
 });
+
+// Explicitly extend Jest matchers
+expect.extend(require('@testing-library/jest-dom/matchers'));
