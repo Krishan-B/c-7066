@@ -23,5 +23,6 @@ export default defineConfig(({ mode }) => ({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    types: ['jest', '@testing-library/jest-dom'],
   },
 }));

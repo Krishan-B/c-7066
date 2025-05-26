@@ -2,6 +2,8 @@
 /**
  * @jest-environment jsdom
  */
+/// <reference types="jest" />
+
 import { renderHook } from '@testing-library/react';
 import { useTradeExecution, TradeParams } from '../useTradeExecution';
 
