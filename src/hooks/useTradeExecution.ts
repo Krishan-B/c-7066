@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { calculateMarginRequired } from "@/services/trades/accountService";
 
-interface TradeParams {
+export interface TradeParams {
   symbol: string;
   assetCategory: string;
   direction: "buy" | "sell";
