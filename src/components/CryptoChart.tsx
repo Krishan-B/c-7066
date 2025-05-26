@@ -1,4 +1,4 @@
-import TradingViewWidget from 'react-tradingview-widget';
+import { TradingViewWidget } from 'react-ts-tradingview-widgets';
 
 const CryptoChart = () => {
   return (
@@ -19,7 +19,6 @@ const CryptoChart = () => {
           enable_publishing={false}
           hide_top_toolbar={false}
           save_image={false}
-          container_id="tradingview_chart"
         />
       </div>
     </div>
