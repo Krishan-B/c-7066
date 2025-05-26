@@ -3,7 +3,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
-import { Asset } from "@/hooks/market/types";
+import { Asset } from "@/hooks/useMarketData";
 import { getMarketHoursMessage } from "@/utils/marketHours";
 import { Separator } from "@/components/ui/separator";
 
@@ -18,11 +18,6 @@ const MarketChartSection: React.FC<MarketChartSectionProps> = ({
   selectedAsset,
   marketIsOpen
 }) => {
-  // Get the change percentage (from either property)
-  const changePercentage = selectedAsset.change_percentage !== undefined 
-    ? selectedAsset.change_percentage 
-    : selectedAsset.change24h;
-
   return (
     <div ref={chartSectionRef}>
       <div className="flex items-center gap-4 mb-4">
@@ -57,8 +52,8 @@ const MarketChartSection: React.FC<MarketChartSectionProps> = ({
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground mb-1">24h Change</div>
-                  <div className={`font-semibold ${changePercentage >= 0 ? 'text-success' : 'text-warning'}`}>
-                    {changePercentage >= 0 ? "+" : ""}{changePercentage.toFixed(2)}%
+                  <div className={`font-semibold ${selectedAsset.change_percentage >= 0 ? 'text-success' : 'text-warning'}`}>
+                    {selectedAsset.change_percentage >= 0 ? "+" : ""}{selectedAsset.change_percentage.toFixed(2)}%
                   </div>
                 </div>
                 <div>

@@ -11,7 +11,6 @@ import {
   setPolygonWebSocketApiKey
 } from '@/utils/api/polygon';
 import { Asset } from './types';
-import { isValidMarketHours } from '@/utils/market/marketHours';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UsePolygonWebSocketOptions {
@@ -79,40 +78,12 @@ export function usePolygonWebSocket(options: UsePolygonWebSocketOptions = {}): U
     closePolygonWebSocket();
   };
   
-  // Handle messages with price validation
+  // Handle messages
   const handleMessage = (data: any) => {
-    try {
-      setLastMessage(data);
-      const asset = processPolygonMessage(data);
-      
-      if (asset) {
-        // Validate price against previous price
-        const priceChange = lastUpdate ? Math.abs((asset.price - lastUpdate.price) / lastUpdate.price) : 0;
-        
-        // Enhanced validation with detailed error handling
-        if (priceChange > 0.1) { // 10% threshold for suspicious price changes
-          const error = new Error(`Suspicious price change detected for ${asset.symbol}: ${(priceChange * 100).toFixed(2)}%`);
-          console.warn(error.message);
-          setError(error);
-          return;
-        }
-        
-        // Market hours validation with detailed error handling
-        if (!isValidMarketHours(asset.market_type)) {
-          const error = new Error(`Market ${asset.market_type} is currently closed. Trading hours validation failed.`);
-          console.warn(error.message);
-          setError(error);
-          return;
-        }
-
-        // Clear any previous errors if validation passes
-        setError(null);
-        setLastUpdate(asset);
-      }
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to process market data update');
-      console.error(error.message);
-      setError(error);
+    setLastMessage(data);
+    const asset = processPolygonMessage(data);
+    if (asset) {
+      setLastUpdate(asset);
     }
   };
   
@@ -131,9 +102,8 @@ export function usePolygonWebSocket(options: UsePolygonWebSocketOptions = {}): U
     setIsConnected(false);
   };
   
-  const handleError = (err: Error | Event) => {
-    console.error('WebSocket error:', err);
-    setError(new Error(err instanceof Error ? err.message : 'WebSocket connection error'));
+  const handleError = (err: any) => {
+    setError(err instanceof Error ? err : new Error('WebSocket error occurred'));
   };
   
   // Set up event listeners

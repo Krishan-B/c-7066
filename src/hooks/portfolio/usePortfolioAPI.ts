@@ -8,35 +8,7 @@ interface PortfolioApiResult {
   data: PortfolioData | null;
   isLoading: boolean;
   error: Error | null;
-  refetch: () => Promise<{ data: PortfolioData | null }>;
-}
-
-interface PortfolioAnalytics {
-  top_holdings: Array<{
-    symbol: string;
-    market_type: string;
-    quantity: number;
-    value: number;
-    pnl: number;
-  }>;
-  recent_trades: Array<{
-    symbol: string;
-    market_type: string;
-    entry_price: number;
-    exit_price: number;
-    quantity: number;
-    pnl: number;
-    closed_at: string;
-  }>;
-  performance: {
-    total_value: number;
-    total_pnl: number;
-    daily_pnl: number;
-    monthly_returns: Array<{
-      month: string;
-      return: number;
-    }>;
-  };
+  refetch: () => Promise<any>;
 }
 
 export const usePortfolioAPI = (timeframe: string): PortfolioApiResult => {
@@ -84,7 +56,7 @@ export const usePortfolioAPI = (timeframe: string): PortfolioApiResult => {
 };
 
 // Helper function to process raw API data
-function processPortfolioData(analytics: PortfolioAnalytics, timeframe: string): PortfolioData {
+function processPortfolioData(analytics: any, timeframe: string): PortfolioData {
   return {
     totalValue: analytics?.total_value || 0,
     cashBalance: analytics?.cash_balance || 0,
@@ -95,7 +67,7 @@ function processPortfolioData(analytics: PortfolioAnalytics, timeframe: string):
     dayChangePercentage: analytics?.daily_change_percent || 0,
     
     // Transform top holdings into assets format
-    assets: analytics.top_holdings.map(holding => ({
+    assets: analytics?.top_holdings?.map((holding: any) => ({
       name: holding.name,
       symbol: holding.symbol,
       amount: holding.units || holding.quantity || 0,
@@ -114,7 +86,7 @@ function processPortfolioData(analytics: PortfolioAnalytics, timeframe: string):
     })) || [],
     
     // Transform recent trades into closed positions format
-    closedPositions: analytics.recent_trades.map(trade => ({
+    closedPositions: analytics?.recent_trades?.map((trade: any) => ({
       id: trade.id,
       symbol: trade.asset_symbol || trade.symbol,
       name: trade.asset_name || trade.name,

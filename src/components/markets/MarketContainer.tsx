@@ -1,20 +1,20 @@
 
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Separator } from "@/components/ui/separator";
+import { Asset } from "@/hooks/market";
 import { isMarketOpen } from "@/utils/marketHours";
 import MarketHeader from "@/components/markets/MarketHeader";
 import MarketSearch from "@/components/markets/MarketSearch";
-import MarketTabs, { LocalAsset } from "@/components/markets/MarketTabs";
+import MarketTabs from "@/components/markets/MarketTabs";
 import MarketChartSection from "@/components/markets/MarketChartSection";
 import MarketOrderForm from "@/components/markets/MarketOrderForm";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Asset, MarketType } from "@/hooks/market/types";
 
 interface MarketContainerProps {
-  marketData: LocalAsset[];
+  marketData: Asset[];
   isLoading: boolean;
   error: Error | null;
   activeTab: string;
@@ -23,16 +23,6 @@ interface MarketContainerProps {
   realtimeEnabled?: boolean;
   onRefresh?: () => void;
 }
-
-// Helper function to convert LocalAsset to Asset
-const asAssetType = (asset: LocalAsset): Asset => {
-  return {
-    id: asset.symbol, // Generate an id from the symbol
-    ...asset,
-    change24h: asset.change_percentage, // Map change_percentage to change24h
-    market_type: asset.market_type as unknown as MarketType
-  };
-};
 
 const MarketContainer = ({ 
   marketData, 
@@ -45,7 +35,7 @@ const MarketContainer = ({
   onRefresh
 }: MarketContainerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedAsset, setSelectedAsset] = useState<LocalAsset>({
+  const [selectedAsset, setSelectedAsset] = useState<Asset>({
     name: "Bitcoin",
     symbol: "BTCUSD",
     price: 67432.21,
@@ -59,18 +49,13 @@ const MarketContainer = ({
   // Check if the selected market is open
   const marketIsOpen = selectedAsset ? isMarketOpen(selectedAsset.market_type) : false;
 
-  // Create a handler function to properly handle the asset selection
-  const handleAssetSelection = (asset: LocalAsset) => {
-    setSelectedAsset(asset);
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
         {/* Market header section */}
         <div className="flex items-center justify-between mb-4">
           <MarketHeader 
-            selectedAsset={asAssetType(selectedAsset)}
+            selectedAsset={selectedAsset}
             marketIsOpen={marketIsOpen}
           />
           
@@ -111,7 +96,7 @@ const MarketContainer = ({
               isLoading={isLoading}
               error={error}
               searchTerm={searchTerm}
-              onSelectAsset={handleAssetSelection}
+              onSelectAsset={setSelectedAsset}
               containerRef={chartSectionRef}
             />
           </div>
@@ -122,7 +107,7 @@ const MarketContainer = ({
         {/* Chart and details section */}
         <MarketChartSection 
           chartSectionRef={chartSectionRef}
-          selectedAsset={asAssetType(selectedAsset)}
+          selectedAsset={selectedAsset}
           marketIsOpen={marketIsOpen}
         />
 

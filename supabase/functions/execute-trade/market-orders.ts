@@ -11,8 +11,6 @@ export async function executeMarketOrder(
   userId: string, 
   params: TradeRequest
 ): Promise<TradeResult> {
-  // Determine if this is a paper trade
-  const isPaperTrade = params.isPaperTrade || false;
   try {
     // Calculate total amount
     const totalAmount = params.units * params.pricePerUnit;
@@ -27,12 +25,8 @@ export async function executeMarketOrder(
       throw new Error(accountError);
     }
     
-    // Check if user has enough funds based on account type
-    const availableFunds = isPaperTrade
-      ? (account!.paper_trading_available_funds || 0)
-      : account!.available_funds;
-      
-    if (availableFunds < marginRequired) {
+    // Check if user has enough funds
+    if (account!.available_funds < marginRequired) {
       return {
         success: false,
         message: `Insufficient funds. Required: ${marginRequired.toFixed(2)}, Available: ${account!.available_funds.toFixed(2)}`
@@ -64,24 +58,10 @@ export async function executeMarketOrder(
       throw new Error(`Failed to create trade: ${tradeError.message}`);
     }
     
-    // Update user account metrics based on account type
-    const updateFields = isPaperTrade ? {
-      paper_trading_used_margin: (account!.paper_trading_used_margin || 0) + marginRequired,
-      paper_trading_available_funds: (account!.paper_trading_available_funds || 0) - marginRequired,
-      paper_trading_unrealized_pnl: account!.paper_trading_unrealized_pnl || 0,
-      paper_trading_equity: (account!.paper_trading_balance || 0) + (account!.paper_trading_unrealized_pnl || 0),
-      last_updated: new Date().toISOString()
-    } : {
-      used_margin: account!.used_margin + marginRequired,
-      available_funds: account!.available_funds - marginRequired,
-      unrealized_pnl: account!.unrealized_pnl || 0,
-      equity: account!.cash_balance + (account!.unrealized_pnl || 0),
-      last_updated: new Date().toISOString()
-    };
-
+    // Update user account metrics
     const { error: updateError } = await supabase
       .from('user_account')
-      .update(updateFields
+      .update({
         used_margin: account!.used_margin + marginRequired,
         available_funds: account!.available_funds - marginRequired,
         unrealized_pnl: account!.unrealized_pnl || 0, // Ensure this field exists

@@ -28,13 +28,7 @@ export function PasswordForm() {
     },
   });
 
-  interface PasswordFormValues {
-    currentPassword: string;
-    newPassword: string;
-    confirmPassword: string;
-  }
-
-  const onSubmit = (values: PasswordFormValues) => {
+  const onSubmit = (values: any) => {
     // Validate password strength
     if (!meetsMinimumRequirements) {
       toast({

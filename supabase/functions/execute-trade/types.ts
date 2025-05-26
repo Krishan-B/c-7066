@@ -11,7 +11,6 @@ export interface TradeRequest {
   stopLoss?: number | null;
   takeProfit?: number | null;
   expirationDate?: string | null;
-  isPaperTrade?: boolean;
 }
 
 export interface TradeResult {
@@ -29,12 +28,6 @@ export interface UserAccount {
   realized_pnl?: number;
   unrealized_pnl?: number;
   last_updated?: string;
-  paper_trading_balance?: number;
-  paper_trading_equity?: number;
-  paper_trading_used_margin?: number;
-  paper_trading_available_funds?: number;
-  paper_trading_realized_pnl?: number;
-  paper_trading_unrealized_pnl?: number;
 }
 
 export interface Portfolio {

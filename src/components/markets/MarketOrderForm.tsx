@@ -1,77 +1,57 @@
 
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdvancedOrderForm, AdvancedOrderFormValues } from "@/components/trade/AdvancedOrderForm";
+import { toast } from "sonner";
+import { useMarketData, Asset } from "@/hooks/useMarketData";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import { useAccountMetrics } from "@/hooks/useAccountMetrics";
 import { useTradeExecution } from "@/hooks/useTradeExecution";
-import { validateTradeWithErrorHandling } from "@/services/trades/validation/tradeValidation";
-import { isMarketOpen } from "@/utils/marketHours";
-import { useAuth } from "@/hooks/useAuth";
 
 interface MarketOrderFormProps {
   selectedAsset: {
     name: string;
     symbol: string;
     price: number;
-    market_type?: string;
   };
 }
 
 const MarketOrderForm = ({ selectedAsset }: MarketOrderFormProps) => {
-  const [assetCategory, setAssetCategory] = useState<string>(selectedAsset.market_type || "Crypto");
-  const { user } = useAuth();
-  
-  // Update asset category when selected asset changes
-  useEffect(() => {
-    if (selectedAsset.market_type) {
-      setAssetCategory(selectedAsset.market_type);
-    }
-  }, [selectedAsset]);
+  const [assetCategory, setAssetCategory] = useState<string>("Crypto");
   
   // Fetch market data for the selected category
   const { marketData, isLoading } = useCombinedMarketData([assetCategory], {
     refetchInterval: 60000 // Refresh every minute
   });
   
-  // Use real account metrics
+  // Use real account metrics instead of mock data
   const { metrics, refreshMetrics } = useAccountMetrics();
   const availableFunds = metrics?.availableFunds || 10000;
   
-  // Use our enhanced trade execution hook
+  // Use our new trade execution hook
   const { executeTrade, isExecuting } = useTradeExecution();
   
-  // Check if market is open
-  const marketOpenStatus = isMarketOpen(assetCategory);
-  
-  // Handle order submission with validation
+  // Handle order submission
   const handleOrderSubmit = async (values: AdvancedOrderFormValues, action: "buy" | "sell") => {
     console.log('Order values:', values, 'Action:', action);
     
     // Parse the units as a number
     const units = parseFloat(values.units) || 0;
     
+    // Don't allow trades with 0 or negative units
+    if (units <= 0) {
+      toast.error("Please enter a valid number of units");
+      return;
+    }
+    
     // Calculate entry price for entry orders
     let entryPrice;
     if (values.orderType === "entry") {
       entryPrice = parseFloat(values.orderRate || "0");
-    }
-    
-    // Validate the trade
-    const isValid = validateTradeWithErrorHandling({
-      userId: user?.id,
-      symbol: selectedAsset.symbol,
-      units,
-      price: selectedAsset.price,
-      direction: action,
-      orderType: values.orderType,
-      entryPrice,
-      availableFunds,
-      marketOpen: values.orderType === 'entry' ? true : marketOpenStatus
-    });
-    
-    if (!isValid) {
-      return;
+      if (!entryPrice || entryPrice <= 0) {
+        toast.error("Please enter a valid entry price");
+        return;
+      }
     }
     
     // Calculate stop loss and take profit prices if enabled

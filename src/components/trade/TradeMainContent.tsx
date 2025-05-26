@@ -16,9 +16,10 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, CalendarOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Asset } from "@/hooks/market";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import { useTradeCalculations } from "@/hooks/useTradeCalculations";
 
@@ -335,12 +336,12 @@ export function TradeMainContent({
                     variant={"outline"}
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      typeof setExpirationDate !== "function" && "text-muted-foreground"
+                      !setExpirationDate && "text-muted-foreground"
                     )}
                     disabled={isExecuting}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {typeof setExpirationDate === "function" ? (
+                    {setExpirationDate ? (
                       format(new Date(), "PPP")
                     ) : (
                       <span>Pick a date</span>

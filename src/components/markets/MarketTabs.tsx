@@ -3,24 +3,25 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarketList from "./MarketList";
 
-// Create a local Asset type that matches the requirements
-export interface LocalAsset {
+interface Asset {
+  id?: string;
   name: string;
   symbol: string;
   price: number;
-  market_type: string; // Keep as string to be more flexible
   change_percentage: number;
   volume: string;
+  market_cap?: string;
+  market_type: string;
 }
 
 interface MarketTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  marketData: LocalAsset[];
+  marketData: Asset[];
   isLoading: boolean;
   error: Error | null;
   searchTerm: string;
-  onSelectAsset: (asset: LocalAsset) => void;
+  onSelectAsset: (asset: Asset) => void;
   containerRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -41,7 +42,7 @@ const MarketTabs = ({
   );
   
   // Handle asset selection with auto-scroll
-  const handleAssetSelect = (asset: LocalAsset) => {
+  const handleAssetSelect = (asset: Asset) => {
     onSelectAsset(asset);
     // Scroll to the chart section smoothly
     if (containerRef?.current) {

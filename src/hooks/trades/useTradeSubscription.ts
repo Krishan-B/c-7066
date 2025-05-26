@@ -1,66 +1,33 @@
 
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from "sonner";
 
 /**
- * Hook to subscribe to real-time trade updates from Supabase
- * @param userId User ID to filter trade updates
- * @param onUpdate Callback function to handle trade updates
+ * Hook to handle Supabase real-time subscription for trade updates
  */
 export const useTradeSubscription = (
-  userId?: string,
-  onUpdate?: (status: string) => void
+  userId: string | undefined,
+  onTradeUpdate: (status: string) => void
 ) => {
   useEffect(() => {
     if (!userId) return;
     
-    const tradeChannel = supabase
-      .channel('trade-updates')
+    const tradesChannel = supabase
+      .channel('user_trades_changes')
       .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'user_trades',
-          filter: `user_id=eq.${userId}`
-        },
-        (payload) => {
-          if (payload.new && typeof payload.new === 'object') {
-            const newData = payload.new as Record<string, any>;
-            const status = newData.status as string;
-            const symbol = newData.asset_symbol as string;
-            
-            // Handle different status updates
-            if (status) {
-              if (status === 'executed') {
-                toast.success(`Trade for ${symbol} executed successfully`);
-              } else if (status === 'closed') {
-                toast.info(`Position for ${symbol} has been closed`);
-              } else if (status === 'cancelled') {
-                toast.info(`Order for ${symbol} has been cancelled`);
-              } else if (status === 'liquidated') {
-                toast.error(`Position for ${symbol} has been liquidated`);
-              }
-              
-              // Call the update handler if provided
-              if (onUpdate) {
-                onUpdate(status);
-              }
-            }
+        { event: '*', schema: 'public', table: 'user_trades' },
+        payload => {
+          // Refresh relevant data based on the updated record's status
+          const record = payload.new as any;
+          if (record && record.status) {
+            onTradeUpdate(record.status);
           }
-        }
-      )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('Subscribed to trade updates');
-        } else if (status === 'CHANNEL_ERROR') {
-          console.error('Error subscribing to trade updates');
-        }
-      });
+        })
+      .subscribe();
     
-    // Clean up subscription on unmount
+    // Cleanup subscription
     return () => {
-      supabase.removeChannel(tradeChannel);
+      tradesChannel.unsubscribe();
     };
-  }, [userId, onUpdate]);
+  }, [userId, onTradeUpdate]);
 };

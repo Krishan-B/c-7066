@@ -26,33 +26,22 @@ export function useMarketDataService(options: UseMarketDataServiceOptions = {}) 
   const [marketType, setMarketType] = useState<string>(initialMarketType);
   const [symbols, setSymbols] = useState<string[]>(initialSymbols);
 
-  interface MarketDataResponse {
-  data: Asset[];
-  source: string;
-}
-
-interface MarketDataError {
-  message: string;
-  status: number;
-}
-
-const fetchMarketData = async ({ marketType, symbols }: { marketType: string, symbols: string[] }): Promise<Asset[]> => {
+  const fetchMarketData = async ({ marketType, symbols }: { marketType: string, symbols: string[] }): Promise<Asset[]> => {
     try {
       console.log(`Fetching ${marketType} data for symbols: ${symbols.join(', ')}`);
       
-      const { data, error } = await supabase.functions.invoke<MarketDataResponse>('market-data-service', {
+      const { data, error } = await supabase.functions.invoke('market-data-service', {
         body: { marketType, symbols }
       });
       
       if (error) {
-        const marketError = error as MarketDataError;
-        console.error('Error fetching market data:', marketError);
+        console.error('Error fetching market data:', error);
         toast({
           title: 'Error',
-          description: `Failed to fetch market data: ${marketError.message}`,
+          description: `Failed to fetch market data: ${error.message}`,
           variant: 'destructive'
         });
-        throw marketError;
+        throw error;
       }
       
       if (!data?.data || !Array.isArray(data.data)) {

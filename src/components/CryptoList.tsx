@@ -3,18 +3,7 @@ import { ArrowUpIcon, ArrowDownIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 
-interface CryptoData {
-  id: string;
-  name: string;
-  symbol: string;
-  current_price: number;
-  price_change_percentage_24h: number;
-  market_cap: number;
-  total_volume: number;
-  image: string;
-}
-
-const fetchCryptoData = async (): Promise<CryptoData[]> => {
+const fetchCryptoData = async () => {
   const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false');
   if (!response.ok) {
     throw new Error('Network response was not ok');
@@ -78,7 +67,7 @@ const CryptoList = () => {
             </tr>
           </thead>
           <tbody>
-            {cryptos?.map((crypto: CryptoData, index: number) => (
+            {cryptos?.map((crypto, index) => (
               <tr key={crypto.id} className="border-t border-secondary/40 hover:bg-secondary/20">
                 <td className="py-3 pl-1 text-xs text-muted-foreground">{index + 1}</td>
                 <td className="py-3">

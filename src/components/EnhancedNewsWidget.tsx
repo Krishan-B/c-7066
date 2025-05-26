@@ -56,7 +56,7 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
   
   useEffect(() => {
     fetchNews();
-  }, [marketType, toast]);
+  }, [marketType]);
   
   const formatTime = (timestamp: string) => {
     const now = new Date();

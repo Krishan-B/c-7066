@@ -2,45 +2,25 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 import { TradeResult, MarketOrderParams } from '../types';
-import { matchOrder } from './orderMatching';
 
 /**
- * Execute a market order with enhanced matching logic, market hours validation,
- * and risk checks
+ * Execute a market order through the Supabase edge function
  */
 export async function executeMarketOrder(params: MarketOrderParams): Promise<TradeResult> {
   try {
     console.log('Executing market order:', params);
-
-    // First attempt to match the order locally with enhanced logic
-    const matchResult = await matchOrder({
-      symbol: params.symbol,
-      assetCategory: params.assetCategory,
-      direction: params.direction,
-      units: params.units,
-      currentPrice: params.currentPrice,
-      userId: params.userId,
-      availableMargin: 10000, // TODO: Get from user's account
-      currentDailyLoss: 0 // TODO: Calculate from today's trades
-    });
-
-    if (!matchResult.success) {
-      return matchResult;
-    }
-
-    // If order matching succeeds, persist the trade
+    
     const { data, error } = await supabase.functions.invoke('execute-trade', {
       body: {
         assetSymbol: params.symbol,
-        assetName: params.symbol.replace('USD', ''),
-        marketType: params.assetCategory,
-        units: matchResult.filledUnits,
-        pricePerUnit: matchResult.averagePrice,
+        assetName: params.symbol.replace('USD', ''), // Simplified - in production, pass the full name
+        marketType: params.assetCategory || 'Crypto',
+        units: params.units,
+        pricePerUnit: params.currentPrice,
         tradeType: params.direction,
         orderType: 'market',
         stopLoss: params.stopLoss,
-        takeProfit: params.takeProfit,
-        slippage: matchResult.slippage
+        takeProfit: params.takeProfit
       }
     });
     
