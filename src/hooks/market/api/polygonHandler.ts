@@ -1,9 +1,18 @@
-import { Asset } from "../types";
+import { type Asset } from "../types";
 import { supabase } from '@/integrations/supabase/client';
-import { getLastQuote, getLastTrade, getDailyOHLC } from "@/utils/api/polygon";
 import { transformTickerToAsset } from "@/utils/api/polygon/transformers";
 
-const fetchPolygonData = async (endpoint: string): Promise<any> => {
+interface PolygonQuoteResult {
+  p?: number; // price
+  a?: number; // ask price (for forex)
+  c?: number; // close price (for daily)
+  v?: number; // volume (for daily)
+}
+interface PolygonResultsWrapper {
+  results?: PolygonQuoteResult[] | PolygonQuoteResult;
+}
+
+const fetchPolygonData = async (endpoint: string): Promise<PolygonResultsWrapper> => {
   try {
     const { data, error } = await supabase.functions.invoke('get-polygon-data', {
       body: { endpoint }
@@ -25,11 +34,10 @@ export const fetchStockData = async (symbols: string[]): Promise<Asset[]> => {
     for (const symbol of symbols) {
       // Fetch last quote for the stock
       const quoteData = await fetchPolygonData(`/v2/last/nbbo/${symbol}`);
-      
       if (quoteData && quoteData.results) {
-        const lastQuote = quoteData.results;
+        const lastQuote = quoteData.results as PolygonQuoteResult;
         const tradeData = await fetchPolygonData(`/v2/last/trade/${symbol}`);
-        const lastTrade = tradeData?.results || null;
+        const lastTrade = (tradeData?.results as PolygonQuoteResult) || null;
         
         // Get previous day data for change calculation
         const today = new Date();
@@ -46,8 +54,8 @@ export const fetchStockData = async (symbols: string[]): Promise<Asset[]> => {
           ticker: symbol,
           lastQuote,
           lastTrade,
-          todaysChange: dailyData?.results?.[0]?.c || 0,
-          volume: dailyData?.results?.[0]?.v || 0
+          todaysChange: (Array.isArray(dailyData?.results) ? dailyData.results[0]?.c : 0) || 0,
+          volume: (Array.isArray(dailyData?.results) ? dailyData.results[0]?.v : 0) || 0
         });
         
         if (asset) {
@@ -74,17 +82,18 @@ export const fetchCryptoData = async (symbols: string[]): Promise<Asset[]> => {
       
       // Fetch last quote for the crypto
       const quoteData = await fetchPolygonData(`/v2/last/crypto/${cryptoSymbol}`);
-      
       if (quoteData && quoteData.results) {
+        const quote = quoteData.results as PolygonQuoteResult;
+        
         // Transform directly to our Asset format
         const asset: Asset = {
           symbol: cryptoSymbol,
           name: getCryptoName(cryptoSymbol),
-          price: quoteData.results.p || 0,
+          price: quote.p || 0,
           change_percentage: 0, // Polygon doesn't provide this directly
           market_type: 'Crypto',
           volume: formatLargeNumber(10000000 + Math.random() * 100000000), // Simulated volume
-          market_cap: formatLargeNumber(quoteData.results.p * (10000000 + Math.random() * 1000000000)), // Simulated market cap
+          market_cap: formatLargeNumber((quote.p || 0) * (10000000 + Math.random() * 1000000000)), // Simulated market cap
           last_updated: new Date().toISOString()
         };
         
@@ -110,13 +119,14 @@ export const fetchForexData = async (symbols: string[]): Promise<Asset[]> => {
       
       // Fetch last quote for the forex pair
       const quoteData = await fetchPolygonData(`/v2/last/currency/${forexSymbol}`);
-      
       if (quoteData && quoteData.results) {
+        const quote = quoteData.results as PolygonQuoteResult;
+        
         // Transform directly to our Asset format
         const asset: Asset = {
           symbol: forexSymbol,
           name: forexSymbol,
-          price: quoteData.results.p || quoteData.results.a || 0,
+          price: quote.p || quote.a || 0,
           change_percentage: 0, // Polygon doesn't provide this directly
           market_type: 'Forex',
           volume: formatLargeNumber(50000000 + Math.random() * 500000000), // Simulated volume

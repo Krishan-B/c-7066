@@ -2,7 +2,7 @@
 import React from "react";
 import PortfolioAllocation from "@/components/portfolio/PortfolioAllocation";
 import MonthlyReturns from "@/components/portfolio/MonthlyReturns";
-import { AllocationData, PerformanceData } from "@/types/account";
+import { type AllocationData, type PerformanceData } from "@/types/account";
 
 interface PortfolioSideSectionProps {
   totalValue: number;

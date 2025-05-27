@@ -3,7 +3,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw } from "lucide-react";
-import { Asset } from "@/hooks/market/types";
+import { type Asset } from "@/hooks/market/types";
 import { getMarketHoursMessage } from "@/utils/marketHours";
 import { Separator } from "@/components/ui/separator";
 

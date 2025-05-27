@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { TradeResult } from '../types';
+import { type TradeResult } from '../types';
 
 /**
  * Close an open position at the current market price

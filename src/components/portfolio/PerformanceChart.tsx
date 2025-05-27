@@ -1,10 +1,7 @@
-
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   ChartContainer, 
-  ChartTooltipContent
 } from "@/components/ui/chart";
 import { 
   LineChart, 
@@ -15,6 +12,7 @@ import {
   Tooltip, 
   CartesianGrid 
 } from "recharts";
+import { CustomTooltip } from "@/components/ui/CustomTooltip";
 
 interface PerformanceData {
   date: string;
@@ -33,24 +31,6 @@ const PerformanceChart = ({
   onTimeframeChange 
 }: PerformanceChartProps) => {
   
-  const renderTooltipContent = (props: any) => {
-    if (!props.active || !props.payload || !props.payload.length) {
-      return null;
-    }
-    
-    return (
-      <ChartTooltipContent
-        {...props}
-        indicator="dot"
-        formatter={(value, name) => (
-          <div className="flex items-center justify-between gap-2">
-            <span>{name}</span>
-            <span className="font-medium">${value.toLocaleString()}</span>
-          </div>
-        )}
-      />
-    );
-  };
 
   return (
     <Card className="mb-6">
@@ -81,7 +61,7 @@ const PerformanceChart = ({
                 stroke="#666" 
                 tickFormatter={(value) => `$${(value/1000).toFixed(0)}K`}
               />
-              <Tooltip content={renderTooltipContent} />
+              <Tooltip content={<CustomTooltip />} />
               <Line
                 type="monotone"
                 dataKey="value"

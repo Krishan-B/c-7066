@@ -1,5 +1,5 @@
 
-import { TradeRequest, TradeResult } from './types.ts';
+import { type TradeRequest, type TradeResult } from './types.ts';
 import { getUserAccount } from './utils.ts';
 
 /**

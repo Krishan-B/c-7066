@@ -1,9 +1,6 @@
-
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
-  ChartContainer, 
-  ChartTooltipContent
+  ChartContainer
 } from "@/components/ui/chart";
 import { 
   BarChart,
@@ -14,6 +11,7 @@ import {
   Tooltip, 
   CartesianGrid 
 } from "recharts";
+import { CustomTooltip } from "@/components/ui/CustomTooltip";
 
 interface MonthlyData {
   date: string;
@@ -26,25 +24,6 @@ interface MonthlyReturnsProps {
 
 const MonthlyReturns = ({ data }: MonthlyReturnsProps) => {
   
-  const renderTooltipContent = (props: any) => {
-    if (!props.active || !props.payload || !props.payload.length) {
-      return null;
-    }
-    
-    return (
-      <ChartTooltipContent
-        {...props}
-        indicator="dot"
-        formatter={(value, name) => (
-          <div className="flex items-center justify-between gap-2">
-            <span>{name}</span>
-            <span className="font-medium">${value.toLocaleString()}</span>
-          </div>
-        )}
-      />
-    );
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -59,7 +38,7 @@ const MonthlyReturns = ({ data }: MonthlyReturnsProps) => {
               <YAxis 
                 tickFormatter={(value) => `${(value/1000).toFixed(0)}K`}
               />
-              <Tooltip content={renderTooltipContent} />
+              <Tooltip content={<CustomTooltip />} />
               <Bar 
                 dataKey="value" 
                 name="Monthly Value" 

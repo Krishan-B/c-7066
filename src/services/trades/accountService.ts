@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from "sonner";
 
 /**
  * Updates the user account after a trade is executed

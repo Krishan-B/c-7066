@@ -1,5 +1,4 @@
-
-import { Asset as MarketAsset } from '@/hooks/market/types';
+import { type Asset } from '@/hooks/market/types';
 
 export interface AccountMetrics {
   balance: number;
@@ -23,15 +22,7 @@ export interface MetricItem {
   tooltip: string;
 }
 
-// Extend the MarketAsset with account-specific properties
-export interface Asset extends MarketAsset {
-  amount: number;
-  entryPrice: number;
-  value: number;
-  change: number;
-  pnl: number;
-  pnlPercentage: number;
-}
+// Removed local Asset interface, using imported Asset type
 
 export interface ClosedPosition {
   id: string;
@@ -75,5 +66,5 @@ export interface PortfolioData {
     weeklyReturn: number;
     dailyReturn: number;
   };
-  monthlyReturns?: any[];
+  monthlyReturns?: unknown[]; // Changed to unknown[]
 }

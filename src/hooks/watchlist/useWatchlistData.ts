@@ -1,11 +1,11 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { Asset } from '@/hooks/market/types';
+import { type Asset } from '@/hooks/market/types';
 import { useQuery } from '@tanstack/react-query';
 import { usePolygonWebSocket } from "@/hooks/market/usePolygonWebSocket";
 import { fetchWatchlistData } from './fetchWatchlistData';
-import { UseWatchlistDataReturn } from './types';
+import { type UseWatchlistDataReturn } from './types';
 
 export const useWatchlistData = (): UseWatchlistDataReturn => {
   const { toast } = useToast();

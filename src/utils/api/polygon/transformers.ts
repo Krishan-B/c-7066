@@ -1,56 +1,64 @@
-
-import { Asset } from "@/hooks/market/types";
+import { type Asset, type MarketType } from "@/hooks/market/types";
 
 /**
  * Transform ticker details to Asset format
  */
-export function transformTickerToAsset(ticker: any): Asset | null {
-  if (!ticker) return null;
-  
-  try {
-    return {
-      symbol: ticker.ticker || ticker.symbol,
-      name: ticker.name || ticker.ticker || ticker.symbol,
-      price: parseFloat(ticker.lastTrade?.p || ticker.lastQuote?.p || ticker.price || 0),
-      change_percentage: ticker.todaysChange || ticker.changePercent || 0,
-      market_type: getMarketType(ticker.ticker || ticker.symbol),
-      volume: formatVolume(ticker.volume || ticker.v || 0),
-      last_updated: new Date().toISOString()
-    };
-  } catch (e) {
-    console.error('Error transforming ticker to asset:', e);
-    return null;
-  }
+export function transformTickerToAsset(ticker: unknown): Asset | null {
+  if (!ticker || typeof ticker !== 'object') return null;
+  // Use destructuring and type guards
+  const t = ticker as Record<string, unknown>;
+  const symbol = typeof t.ticker === 'string' ? t.ticker : typeof t.symbol === 'string' ? t.symbol : '';
+  const name = typeof t.name === 'string' ? t.name : symbol;
+  const lastTrade = t.lastTrade && typeof t.lastTrade === 'object' ? (t.lastTrade as Record<string, unknown>) : undefined;
+  const lastQuote = t.lastQuote && typeof t.lastQuote === 'object' ? (t.lastQuote as Record<string, unknown>) : undefined;
+  const price = parseFloat(
+    (lastTrade?.p as string | number | undefined)?.toString() ??
+    (lastQuote?.p as string | number | undefined)?.toString() ??
+    (t.price as string | number | undefined)?.toString() ?? '0'
+  );
+  const change_percentage = typeof t.todaysChange === 'number' ? t.todaysChange : typeof t.changePercent === 'number' ? t.changePercent : 0;
+  const volume = typeof t.volume === 'number' ? t.volume : typeof t.v === 'number' ? t.v : 0;
+  const market_type = getMarketType(symbol);
+  return {
+    symbol,
+    name,
+    price,
+    change_percentage,
+    market_type,
+    volume: formatVolume(volume),
+    last_updated: new Date().toISOString()
+  };
 }
 
 /**
  * Transform quote to Asset format
  */
-export function transformQuoteToAsset(quote: any, symbol: string): Asset | null {
-  if (!quote) return null;
-  
-  try {
-    return {
-      symbol,
-      name: symbol,
-      price: parseFloat(quote.c || quote.lastTrade?.p || 0),
-      change_percentage: quote.dp || 0,
-      market_type: getMarketType(symbol),
-      volume: formatVolume(quote.v || 0),
-      last_updated: new Date().toISOString()
-    };
-  } catch (e) {
-    console.error('Error transforming quote to asset:', e);
-    return null;
-  }
+export function transformQuoteToAsset(quote: unknown, symbol: string): Asset | null {
+  if (!quote || typeof quote !== 'object') return null;
+  const q = quote as Record<string, unknown>;
+  const lastTrade = q.lastTrade && typeof q.lastTrade === 'object' ? (q.lastTrade as Record<string, unknown>) : undefined;
+  const price = parseFloat(
+    (typeof q.c === 'number' ? q.c.toString() : typeof q.c === 'string' ? q.c : lastTrade?.p?.toString()) ?? '0'
+  );
+  const change_percentage = typeof q.dp === 'number' ? q.dp : 0;
+  const volume = typeof q.v === 'number' ? q.v : 0;
+  const market_type = getMarketType(symbol);
+  return {
+    symbol,
+    name: symbol,
+    price,
+    change_percentage,
+    market_type,
+    volume: formatVolume(volume),
+    last_updated: new Date().toISOString()
+  };
 }
 
 /**
  * Determine market type based on symbol
  */
-function getMarketType(symbol: string): string {
+function getMarketType(symbol: string): MarketType {
   if (!symbol) return 'Stock';
-  
   if (symbol.includes('USD') || symbol.includes('BTC') || symbol.includes('ETH')) {
     return 'Crypto';
   } else if (symbol.includes('/') || symbol.endsWith('USD') || /[A-Z]{3}[A-Z]{3}/.test(symbol)) {
@@ -58,9 +66,8 @@ function getMarketType(symbol: string): string {
   } else if (symbol.startsWith('^') || symbol.includes('INDEX')) {
     return 'Index';
   } else if (symbol.includes('OIL') || symbol.includes('GOLD') || symbol.includes('SILVER')) {
-    return 'Commodity';
+    return 'Commodities';
   }
-  
   return 'Stock';
 }
 
@@ -75,6 +82,5 @@ function formatVolume(volume: number): string {
   } else if (volume >= 1e3) {
     return (volume / 1e3).toFixed(2) + 'K';
   }
-  
   return volume.toString();
 }

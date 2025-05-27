@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,7 @@ const PasswordResetDialog = ({ open, onOpenChange }: PasswordResetDialogProps) =
       if (error) throw error;
       
       setResetEmailSent(true);
-    } catch (error: any) {
+    } catch {
       // Error is handled by the resetPassword function
     } finally {
       setLoading(false);

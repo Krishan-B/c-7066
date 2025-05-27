@@ -1,5 +1,3 @@
-
-import React from 'react';
 import WatchlistHeader from './WatchlistHeader';
 import WatchlistLoading from './WatchlistLoading';
 import WatchlistTableHeader from './WatchlistTableHeader';
@@ -7,17 +5,7 @@ import WatchlistTableRow from './WatchlistTableRow';
 import { useWatchlistData } from '@/hooks/useWatchlistData';
 import { Badge } from '@/components/ui/badge';
 import { Wifi } from 'lucide-react';
-
-interface Asset {
-  id?: string;
-  name: string;
-  symbol: string;
-  price: number;
-  change_percentage: number;
-  volume: string;
-  market_type: string;
-  market_cap?: string;
-}
+import type { Asset } from "@/hooks/market/types";
 
 interface WatchlistTableProps {
   onAssetSelect: (asset: Asset) => void;

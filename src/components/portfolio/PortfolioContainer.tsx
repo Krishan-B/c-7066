@@ -18,7 +18,7 @@ import RiskManagementPanel from "@/components/portfolio/RiskManagementPanel";
 
 // Import the real-time portfolio hook
 import { useRealTimePortfolio } from "@/hooks/portfolio/useRealTimePortfolio";
-import { Asset } from "@/types/account";
+import { type Asset } from "@/types/account";
 
 const PortfolioContainer = () => {
   const { user } = useAuth();

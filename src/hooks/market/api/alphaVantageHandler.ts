@@ -8,7 +8,7 @@ import {
   transformCryptoData as transformAlphaVantageCryptoData 
 } from "@/utils/api/alphaVantage";
 
-import { Asset } from "../types";
+import { type Asset } from "../types";
 
 export async function fetchAlphaVantageData(marketTypes: string[], symbols: Record<string, string[]>): Promise<Asset[]> {
   console.log('Fetching data from Alpha Vantage');

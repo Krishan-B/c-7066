@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { useAuth } from '@/hooks/useAuth'
 import { useNavigate } from "react-router-dom"
@@ -34,20 +33,14 @@ const MobileMenu = ({ onMenuToggle }: MobileMenuProps) => {
       });
       navigate("/auth");
       setOpen(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error signing out:", error);
       toast({
         title: "Error signing out",
-        description: "There was a problem signing out",
+        description: error instanceof Error ? error.message : "There was a problem signing out",
         variant: "destructive",
       });
     }
-  };
-
-  // Navigate to portfolio when a metric is clicked
-  const handleMetricClick = () => {
-    navigate("/portfolio");
-    setOpen(false);
   };
 
   return (

@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Trade, TradeManagementState } from './types';
+import { type Trade, type TradeManagementState } from './types';
 
 /**
  * Custom hook for managing trade state

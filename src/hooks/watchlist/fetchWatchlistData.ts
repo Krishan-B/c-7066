@@ -1,7 +1,6 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { Asset } from '@/hooks/market/types';
-import { WatchlistFetchOptions } from './types';
+import { type Asset } from '@/hooks/market/types';
+import { type WatchlistFetchOptions } from './types';
 
 export async function fetchWatchlistData(options: WatchlistFetchOptions = {}): Promise<Asset[]> {
   try {
@@ -54,7 +53,7 @@ export async function fetchWatchlistData(options: WatchlistFetchOptions = {}): P
 
     // Fallback to default data
     return getFallbackData();
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching market data:", error);
     throw error;
   }
@@ -100,7 +99,7 @@ export function getFallbackData(): Asset[] {
       symbol: "XAUUSD", 
       price: 2325.60, 
       change_percentage: 1.3, 
-      market_type: "Commodity", 
+      market_type: "Commodities", // Fixed from "Commodity"
       volume: "$15.8B" 
     },
   ];

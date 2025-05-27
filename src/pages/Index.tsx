@@ -12,15 +12,17 @@ import AlertsWidget from "@/components/AlertsWidget";
 import { Badge } from "@/components/ui/badge";
 import { useCombinedMarketData } from "@/hooks/market";
 import QuickTradePanel from "@/components/trade/QuickTradePanel";
+import type { Asset } from "@/hooks/market/types";
 
 const Index = () => {
-  const [selectedAsset, setSelectedAsset] = useState({
+  const [selectedAsset, setSelectedAsset] = useState<Asset>({
     name: "Bitcoin",
     symbol: "BTCUSD",
     price: 67543.21,
     change_percentage: 2.4,
     change: 2.4,
-    market_type: "Crypto"
+    market_type: "Crypto",
+    volume: "0" // Added required property for Asset
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
@@ -40,7 +42,7 @@ const Index = () => {
     });
   }, [toast]);
 
-  const handleAssetSelect = (asset: any) => {
+  const handleAssetSelect = (asset: Asset) => {
     setSelectedAsset(asset);
     
     // Scroll to chart section
@@ -123,8 +125,8 @@ const Index = () => {
             <div className="flex items-center">
               <h2 className="text-xl font-semibold">{selectedAsset.name} Chart</h2>
               <div className="ml-4 text-sm">
-                <span className={`${selectedAsset.change >= 0 ? 'text-success' : 'text-warning'} font-medium`}>
-                  {selectedAsset.change >= 0 ? '+' : ''}{selectedAsset.change}%
+                <span className={`${(selectedAsset.change ?? 0) >= 0 ? 'text-success' : 'text-warning'} font-medium`}>
+                  {(selectedAsset.change ?? 0) >= 0 ? '+' : ''}{selectedAsset.change ?? 0}%
                 </span>
               </div>
             </div>

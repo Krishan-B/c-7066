@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { Asset } from './types';
+import { type Asset } from './types';
 
 interface PriceUpdate {
   symbol: string;

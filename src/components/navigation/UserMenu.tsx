@@ -1,5 +1,3 @@
-
-import * as React from "react"
 import { useNavigate } from "react-router-dom"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from '@/hooks/useAuth'
@@ -28,10 +26,10 @@ const UserMenu = () => {
       await signOut()
       // Removed the navigate call here since signOut function in AuthProvider
       // already redirects to the landing page
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error signing out",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An error occurred while signing out.",
         variant: "destructive",
       })
     }

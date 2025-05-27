@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 // Base URL for Polygon.io API
@@ -57,7 +56,7 @@ export function hasPolygonApiKey(): boolean {
  */
 export async function polygonRequest<T>(
   endpoint: string,
-  params: Record<string, any> = {}
+  params: Record<string, unknown> = {}
 ): Promise<T> {
   try {
     const apiKey = POLYGON_API_KEY || await getPolygonApiKey();
@@ -104,7 +103,7 @@ export async function polygonRequest<T>(
  */
 export async function getPolygonData<T>(
   endpoint: string,
-  params: Record<string, any> = {}
+  params: Record<string, unknown> = {}
 ): Promise<T | null> {
   try {
     return await polygonRequest<T>(endpoint, params);

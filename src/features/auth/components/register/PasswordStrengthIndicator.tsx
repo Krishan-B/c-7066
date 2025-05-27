@@ -1,7 +1,6 @@
 
 import { Progress } from "@/components/ui/progress";
 import { Check, X } from "lucide-react";
-import { type PasswordStrength } from "../../hooks/usePasswordStrength";
 
 interface PasswordStrengthIndicatorProps {
   password: string;

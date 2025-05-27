@@ -1,5 +1,4 @@
-
-import { Session } from "@supabase/supabase-js";
+import { type Session } from "@supabase/supabase-js";
 import { signOut, refreshSession } from "@/utils/auth/authUtils";
 
 export const useAuthActions = () => {
@@ -14,7 +13,7 @@ export const useAuthActions = () => {
       if (error) throw error;
       
       return session;
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error refreshing session:", error);
       return null;
     }

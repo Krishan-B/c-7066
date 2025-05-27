@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { UserProfile } from "@/features/profile/types";
+import { type UserProfile } from "@/features/profile/types";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

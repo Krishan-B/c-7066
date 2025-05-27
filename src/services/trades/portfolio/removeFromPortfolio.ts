@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { PortfolioRemoveParams, PortfolioUpdateResult } from "../types";
+import { type PortfolioRemoveParams, type PortfolioUpdateResult } from "../types";
 
 /**
  * Remove asset from user's portfolio

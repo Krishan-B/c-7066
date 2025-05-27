@@ -1,6 +1,6 @@
 
 import { toast } from "sonner";
-import { Asset } from "@/types/account";
+import { type Asset } from "@/types/account";
 
 interface PortfolioActions {
   handleExportReport: () => void;

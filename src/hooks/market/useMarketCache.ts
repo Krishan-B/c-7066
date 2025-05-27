@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Asset } from './types';
+import { type Asset } from './types';
 
 interface CacheConfig {
   staleTimes: {

@@ -1,5 +1,5 @@
 
-import { UserProfile } from "@/features/profile/types";
+import { type UserProfile } from "@/features/profile/types";
 import { countries } from "@/lib/countries";
 
 interface ProfileDisplayProps {

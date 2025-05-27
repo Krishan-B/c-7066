@@ -1,7 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from "sonner";
-import { TradeResult, EntryOrderParams } from '../types';
+import { type TradeResult, type EntryOrderParams } from '../types';
 
 /**
  * Place an entry order (limit/stop) through the Supabase edge function

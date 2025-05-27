@@ -1,6 +1,6 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { UserAccount } from './types.ts';
+import { type UserAccount } from './types.ts';
 
 /**
  * Get Supabase client

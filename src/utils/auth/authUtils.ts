@@ -1,8 +1,7 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { Session, User } from "@supabase/supabase-js";
+import { type Session, type User } from "@supabase/supabase-js";
 import { toast } from "@/hooks/use-toast";
-import { UserProfile } from "@/features/profile/types";
+import { type UserProfile } from "@/features/profile/types";
 
 /**
  * Handle authentication errors and display appropriate toast messages
@@ -70,7 +69,7 @@ export const signInWithEmail = async (
     // First attempt to sign out globally in case there's an existing session
     try {
       await supabase.auth.signOut({ scope: 'global' });
-    } catch (err) {
+    } catch {
       // Ignore errors during cleanup
     }
     
@@ -86,9 +85,9 @@ export const signInWithEmail = async (
       user: data?.user || null, 
       error: null 
     };
-  } catch (error: any) {
-    handleAuthError(error, "sign in");
-    return { session: null, user: null, error };
+  } catch (error: unknown) {
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), "sign in");
+    return { session: null, user: null, error: error instanceof Error ? error : new Error(String(error)) };
   }
 };
 
@@ -98,7 +97,7 @@ export const signInWithEmail = async (
 export const signUpWithEmail = async (
   email: string, 
   password: string,
-  metadata: Record<string, any> = {}
+  metadata: Record<string, unknown> = {}
 ): Promise<{ session: Session | null; user: User | null; error: Error | null }> => {
   try {
     // Clean up any existing auth state
@@ -107,7 +106,7 @@ export const signUpWithEmail = async (
     // First attempt to sign out globally in case there's an existing session
     try {
       await supabase.auth.signOut({ scope: 'global' });
-    } catch (err) {
+    } catch {
       // Ignore errors during cleanup
     }
     
@@ -126,9 +125,9 @@ export const signUpWithEmail = async (
       user: data?.user || null, 
       error: null 
     };
-  } catch (error: any) {
-    handleAuthError(error, "sign up");
-    return { session: null, user: null, error };
+  } catch (error: unknown) {
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), "sign up");
+    return { session: null, user: null, error: error instanceof Error ? error : new Error(String(error)) };
   }
 };
 
@@ -144,9 +143,9 @@ export const signOut = async (): Promise<{ error: Error | null }> => {
     await supabase.auth.signOut({ scope: 'global' });
     
     return { error: null };
-  } catch (error: any) {
-    handleAuthError(error, "sign out");
-    return { error };
+  } catch (error: unknown) {
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), "sign out");
+    return { error: error instanceof Error ? error : new Error(String(error)) };
   }
 };
 
@@ -163,9 +162,9 @@ export const refreshSession = async (): Promise<{ session: Session | null; error
     if (error) throw error;
     
     return { session: data.session, error: null };
-  } catch (error: any) {
-    handleAuthError(error, "session refresh");
-    return { session: null, error };
+  } catch (error: unknown) {
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), "session refresh");
+    return { session: null, error: error instanceof Error ? error : new Error(String(error)) };
   }
 };
 
@@ -194,9 +193,9 @@ export const updateProfile = async (
     });
     
     return { error: null };
-  } catch (error: any) {
-    handleAuthError(error, "profile update");
-    return { error };
+  } catch (error: unknown) {
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), "profile update");
+    return { error: error instanceof Error ? error : new Error(String(error)) };
   }
 };
 
@@ -217,9 +216,9 @@ export const resetPassword = async (email: string): Promise<{ error: Error | nul
     });
     
     return { error: null };
-  } catch (error: any) {
-    handleAuthError(error, "password reset");
-    return { error };
+  } catch (error: unknown) {
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), "password reset");
+    return { error: error instanceof Error ? error : new Error(String(error)) };
   }
 };
 
@@ -230,16 +229,14 @@ export const extractProfileFromUser = (user: User): UserProfile => {
   if (!user) {
     throw new Error("Cannot extract profile from undefined user");
   }
-  
-  const metadata = user.user_metadata || {};
-  
+  const metadata = (user.user_metadata as Record<string, unknown>) || {};
   return {
     id: user.id,
-    firstName: metadata.first_name || "",
-    lastName: metadata.last_name || "",
-    email: user.email || "",
-    country: metadata.country || "",
-    phoneNumber: metadata.phone_number || ""
+    firstName: typeof metadata.first_name === 'string' ? metadata.first_name : "",
+    lastName: typeof metadata.last_name === 'string' ? metadata.last_name : "",
+    email: typeof user.email === 'string' ? user.email : "",
+    country: typeof metadata.country === 'string' ? metadata.country : "",
+    phoneNumber: typeof metadata.phone_number === 'string' ? metadata.phone_number : ""
   };
 };
 

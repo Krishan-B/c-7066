@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-export const getWatchlist = async (): Promise<any> => {
+export const getWatchlist = async (): Promise<unknown> => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error("No session found");
@@ -24,13 +24,13 @@ export const getWatchlist = async (): Promise<any> => {
     const data = await response.json();
     return data;
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching watchlist:", error);
     throw error;
   }
 };
 
-export const addToWatchlist = async (symbol: string): Promise<any> => {
+export const addToWatchlist = async (symbol: string): Promise<unknown> => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error("No session found");
@@ -53,13 +53,13 @@ export const addToWatchlist = async (symbol: string): Promise<any> => {
 
     const data = await response.json();
     return data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error adding to watchlist:", error);
     throw error;
   }
 };
 
-export const removeFromWatchlist = async (symbol: string): Promise<any> => {
+export const removeFromWatchlist = async (symbol: string): Promise<unknown> => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error("No session found");
@@ -82,7 +82,7 @@ export const removeFromWatchlist = async (symbol: string): Promise<any> => {
 
     const data = await response.json();
     return data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error removing from watchlist:", error);
     throw error;
   }

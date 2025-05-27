@@ -1,5 +1,5 @@
 
-import { TradeRequest } from './types.ts';
+import { type TradeRequest } from './types.ts';
 
 // Define leverage map
 export const LEVERAGE_MAP: Record<string, number> = {

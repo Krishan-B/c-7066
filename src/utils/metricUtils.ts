@@ -1,5 +1,5 @@
 
-import { AccountMetrics, MetricItem } from "@/types/account";
+import { type AccountMetrics, type MetricItem } from "@/types/account";
 
 /**
  * Mock account metrics for development purposes

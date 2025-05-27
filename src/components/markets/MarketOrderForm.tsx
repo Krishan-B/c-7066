@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AdvancedOrderForm, AdvancedOrderFormValues } from "@/components/trade/AdvancedOrderForm";
+import { AdvancedOrderForm, type AdvancedOrderFormValues } from "@/components/trade/AdvancedOrderForm";
 import { toast } from "sonner";
 import { useCombinedMarketData } from "@/hooks/market";
 import { useAccountMetrics } from "@/hooks/portfolio/useAccountMetrics";

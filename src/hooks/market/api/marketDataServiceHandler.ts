@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Asset } from "../types";
+import { type Asset } from "../types";
 
 /**
  * Fetch market data from the market-data-service edge function

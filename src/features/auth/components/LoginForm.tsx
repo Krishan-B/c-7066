@@ -1,7 +1,5 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import { validateSignIn } from "../utils/validation";
 import { signInWithEmail } from "@/utils/auth/authUtils";
 import PasswordResetDialog from "./PasswordResetDialog";
@@ -23,7 +21,6 @@ const LoginForm = () => {
   const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
   
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +48,7 @@ const LoginForm = () => {
         navigate("/dashboard", { replace: true });
       }
       
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       setFormError("Unexpected error occurred");
       console.error("Login error:", error);
     } finally {

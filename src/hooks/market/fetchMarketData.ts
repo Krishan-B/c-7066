@@ -1,5 +1,5 @@
 
-import { Asset } from './types';
+import { type Asset } from './types';
 
 // Simulated crypto assets
 const cryptoAssets: Asset[] = [

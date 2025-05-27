@@ -12,7 +12,7 @@ import {
   transformForexData
 } from "@/utils/api/finnhub/transformers";
 
-import { Asset } from "../types";
+import { type Asset } from "../types";
 
 // Interface for Finnhub quote response to validate incoming data
 interface FinnhubQuote {

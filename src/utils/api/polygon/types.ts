@@ -1,4 +1,3 @@
-
 /**
  * WebSocket connection status
  */
@@ -12,7 +11,7 @@ export type WebSocketEvent = 'message' | 'open' | 'close' | 'error';
 /**
  * WebSocket event listener
  */
-export type WebSocketEventListener = (event: any) => void;
+export type WebSocketEventListener = (event: unknown) => void; // Use type guard in implementation
 
 /**
  * Asset data from Polygon WebSocket

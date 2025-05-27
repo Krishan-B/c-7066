@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 import { Wallet } from "lucide-react";
 import DepositForm from "@/components/wallet/DepositForm";
 import WithdrawForm from "@/components/wallet/WithdrawForm";
 import BalanceInfo from "@/components/wallet/BalanceInfo";
 import TransactionHistory from "@/components/wallet/TransactionHistory";
-import { useAuth } from '@/hooks/useAuth'; // Add this if it's needed but missing
+// Add this if it's needed but missing
 
 const WalletPage = () => {
   const [activeTab, setActiveTab] = useState("deposit");

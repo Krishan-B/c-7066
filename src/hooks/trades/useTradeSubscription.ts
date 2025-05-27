@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -18,9 +17,9 @@ export const useTradeSubscription = (
         { event: '*', schema: 'public', table: 'user_trades' },
         payload => {
           // Refresh relevant data based on the updated record's status
-          const record = payload.new as any;
-          if (record && record.status) {
-            onTradeUpdate(record.status);
+          const record = payload.new as unknown;
+          if (record && typeof record === 'object' && 'status' in record && typeof (record as { status: unknown }).status === 'string') {
+            onTradeUpdate((record as { status: string }).status);
           }
         })
       .subscribe();

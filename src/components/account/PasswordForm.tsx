@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,12 @@ import { useToast } from "@/hooks/use-toast";
 import { usePasswordStrength } from "@/features/auth/hooks/usePasswordStrength";
 import { useState } from "react";
 import PasswordStrengthIndicator from "@/features/auth/components/register/PasswordStrengthIndicator";
-import { validatePassword } from "@/features/auth/utils/validation";
+
+interface PasswordFormValues {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
 
 export function PasswordForm() {
   const { toast } = useToast();
@@ -20,7 +24,7 @@ export function PasswordForm() {
     meetsMinimumRequirements 
   } = usePasswordStrength(newPassword);
   
-  const form = useForm({
+  const form = useForm<PasswordFormValues>({
     defaultValues: {
       currentPassword: "",
       newPassword: "",
@@ -28,7 +32,7 @@ export function PasswordForm() {
     },
   });
 
-  const onSubmit = (values: any) => {
+  const onSubmit = (values: PasswordFormValues) => {
     // Validate password strength
     if (!meetsMinimumRequirements) {
       toast({

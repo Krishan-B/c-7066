@@ -7,7 +7,7 @@ import { Plus } from "lucide-react";
 import PositionsTable from "@/components/portfolio/PositionsTable";
 import ClosedPositionsTable from "@/components/portfolio/ClosedPositionsTable";
 import PositionFilter from "@/components/portfolio/PositionFilter";
-import { Asset, ClosedPosition } from "@/types/account";
+import { type Asset, type ClosedPosition } from "@/types/account";
 
 interface PositionsSectionProps {
   assets: Asset[];

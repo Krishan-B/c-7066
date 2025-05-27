@@ -1,6 +1,6 @@
 
-import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Asset } from "../types.ts";
+import { type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { type Asset } from "../types.ts";
 
 /**
  * Check if there's recent market data in the cache (database)

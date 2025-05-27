@@ -1,5 +1,6 @@
-
-import { ConnectionStatus, WebSocketEvent, WebSocketEventListener, SubscriptionRequest } from './types';
+import { type ConnectionStatus, type WebSocketEvent, type WebSocketEventListener, type SubscriptionRequest } from './types';
+import type { Asset } from '@/hooks/market/types';
+import { getAssetNameBySymbol } from '@/utils/assetNameLookup';
 
 // WebSocket instance
 let webSocket: WebSocket | null = null;
@@ -177,29 +178,41 @@ export function offPolygonEvent(event: WebSocketEvent, listener: WebSocketEventL
 /**
  * Process Polygon WebSocket message
  */
-export function processPolygonMessage(data: any): any {
-  // Handle authentication response
-  if (data.ev === 'status') {
-    if (data.status === 'auth_success') {
-      console.log('Polygon WebSocket authenticated successfully');
-    } else if (data.status === 'auth_failed') {
-      console.error('Polygon WebSocket authentication failed');
+export function processPolygonMessage(data: unknown): Asset | null {
+  if (typeof data !== 'object' || data === null) return null;
+  const d = data as Record<string, unknown>;
+  if (d.ev === 'Q') {
+    const symbol = typeof d.sym === 'string' ? d.sym : '';
+    // Try to extract price, volume, and change if available
+    const price = typeof d.p === 'number' ? d.p : 0;
+    // Some Polygon quote messages may include 'v' (volume) and 'c' (change/close)
+    const volume = typeof d.v === 'number' ? d.v.toLocaleString() : '';
+    const change = typeof d.c === 'number' ? d.c : undefined;
+    // Optionally, calculate change_percentage if both price and change are available
+    let change_percentage = 0;
+    if (typeof price === 'number' && typeof change === 'number' && change !== 0) {
+      change_percentage = ((price - change) / change) * 100;
     }
-    return null;
-  }
-  
-  // Handle quote message
-  if (data.ev === 'Q') {
     return {
-      symbol: data.sym,
-      price: data.p,
-      timestamp: data.t,
-      size: data.s,
-      exchange: data.x
+      symbol,
+      name: getAssetNameBySymbol(symbol),
+      price,
+      change_percentage,
+      market_type: inferMarketTypeFromSymbol(symbol),
+      volume,
+      last_updated: new Date().toISOString(),
+      change, // Optional: add raw change value for further use
     };
   }
-  
   return null;
+}
+
+function inferMarketTypeFromSymbol(symbol: string): 'Crypto' | 'Stock' | 'Forex' | 'Index' | 'Commodities' {
+  if (symbol.includes('-USD') || symbol === symbol.toUpperCase() && symbol.length > 3) return 'Crypto';
+  if (symbol.includes('/')) return 'Forex';
+  if (symbol.startsWith('US') && symbol.length > 4) return 'Index';
+  if (symbol === 'XAUUSD' || symbol === 'XAGUSD') return 'Commodities';
+  return 'Stock';
 }
 
 // Export the WebSocket object for debugging

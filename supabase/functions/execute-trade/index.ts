@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { TradeRequest, TradeResult } from './types.ts';
+import { type TradeRequest, type TradeResult } from './types.ts';
 import { 
   corsHeaders, 
   validateTradeRequest, 

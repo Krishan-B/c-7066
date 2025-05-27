@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { 
   initPolygonWebSocket, 
@@ -10,7 +9,7 @@ import {
   processPolygonMessage,
   setPolygonWebSocketApiKey
 } from '@/utils/api/polygon';
-import { Asset } from './types';
+import { type Asset } from './types';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UsePolygonWebSocketOptions {
@@ -25,7 +24,7 @@ interface UsePolygonWebSocketResult {
   disconnect: () => void;
   subscribe: (symbols: string[]) => boolean;
   unsubscribe: (symbols: string[]) => boolean;
-  lastMessage: any;
+  lastMessage: unknown; // was any
   lastUpdate: Asset | null;
   error: Error | null;
 }
@@ -35,7 +34,7 @@ export function usePolygonWebSocket(options: UsePolygonWebSocketOptions = {}): U
   
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
-  const [lastMessage, setLastMessage] = useState<any>(null);
+  const [lastMessage, setLastMessage] = useState<unknown>(null); // was any
   const [lastUpdate, setLastUpdate] = useState<Asset | null>(null);
   const [error, setError] = useState<Error | null>(null);
   
@@ -78,12 +77,35 @@ export function usePolygonWebSocket(options: UsePolygonWebSocketOptions = {}): U
     closePolygonWebSocket();
   };
   
+  // Type for Polygon WebSocket quote message
+  interface PolygonQuoteMessage {
+    ev: "Q";
+    sym: string;
+    p: number;
+    t: number;
+    [key: string]: unknown;
+  }
+
+  // Type guard for PolygonQuoteMessage
+  function isPolygonQuoteMessage(data: unknown): data is PolygonQuoteMessage {
+    if (typeof data !== "object" || data === null) return false;
+    const d = data as Record<string, unknown>;
+    return (
+      d.ev === "Q" &&
+      typeof d.sym === "string" &&
+      typeof d.p === "number"
+    );
+  }
+  
   // Handle messages
-  const handleMessage = (data: any) => {
+  const handleMessage = (data: unknown) => {
     setLastMessage(data);
-    const asset = processPolygonMessage(data);
-    if (asset) {
-      setLastUpdate(asset);
+    if (isPolygonQuoteMessage(data)) {
+      // Now you can safely access data.sym, data.p, etc.
+      const asset = processPolygonMessage(data);
+      if (asset) {
+        setLastUpdate(asset);
+      }
     }
   };
   
@@ -102,7 +124,7 @@ export function usePolygonWebSocket(options: UsePolygonWebSocketOptions = {}): U
     setIsConnected(false);
   };
   
-  const handleError = (err: any) => {
+  const handleError = (err: unknown) => { // was any
     setError(err instanceof Error ? err : new Error('WebSocket error occurred'));
   };
   
@@ -134,7 +156,7 @@ export function usePolygonWebSocket(options: UsePolygonWebSocketOptions = {}): U
     if (isConnected && symbols.length > 0) {
       subscribeToSymbols(symbols);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [symbols, isConnected]);
   
   return {
@@ -149,5 +171,7 @@ export function usePolygonWebSocket(options: UsePolygonWebSocketOptions = {}): U
     error
   };
 }
+
+// Documentation: Always use type guards when handling unknown WebSocket data for type safety and maintainability.
 
 export default usePolygonWebSocket;

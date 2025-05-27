@@ -1,18 +1,24 @@
-
 /**
  * Transform Alpha Vantage stock data to our app's Asset format
  */
-export function transformStockData(data: any): any {
-  if (!data || !data['Global Quote'] || Object.keys(data['Global Quote']).length === 0) return null;
-  
-  const quote = data['Global Quote'];
-  
+export interface AlphaVantageStockQuote {
+  [key: string]: string;
+}
+
+export interface AlphaVantageStockData {
+  'Global Quote': AlphaVantageStockQuote;
+}
+
+export function transformStockData(data: unknown): unknown {
+  if (!data || typeof data !== 'object' || !('Global Quote' in data)) return null;
+  const quote = (data as AlphaVantageStockData)['Global Quote'];
+  if (!quote || Object.keys(quote).length === 0) return null;
   return {
     symbol: quote['01. symbol'],
-    name: quote['01. symbol'], // Alpha Vantage doesn't provide name in quote
-    price: parseFloat(quote['05. price']),
-    change_percentage: parseFloat(quote['10. change percent'].replace('%', '')),
-    volume: formatVolume(quote['06. volume']),
+    name: quote['01. symbol'],
+    price: parseFloat(quote['05. price'] ?? '0'),
+    change_percentage: parseFloat((quote['10. change percent'] ?? '0').replace('%', '')),
+    volume: formatVolume(quote['06. volume'] ?? '0'),
     market_type: 'Stock',
     last_updated: new Date().toISOString()
   };
@@ -21,19 +27,23 @@ export function transformStockData(data: any): any {
 /**
  * Transform Alpha Vantage forex data to our app's Asset format
  */
-export function transformForexData(data: any): any {
-  if (!data || !data['Realtime Currency Exchange Rate']) return null;
-  
-  const exchangeRate = data['Realtime Currency Exchange Rate'];
-  
+export interface AlphaVantageForexRate {
+  [key: string]: string;
+}
+export interface AlphaVantageForexData {
+  'Realtime Currency Exchange Rate': AlphaVantageForexRate;
+}
+
+export function transformForexData(data: unknown): unknown {
+  if (!data || typeof data !== 'object' || !('Realtime Currency Exchange Rate' in data)) return null;
+  const exchangeRate = (data as AlphaVantageForexData)['Realtime Currency Exchange Rate'];
   const fromCurrency = exchangeRate['1. From_Currency Code'];
   const toCurrency = exchangeRate['3. To_Currency Code'];
-  
   return {
     symbol: `${fromCurrency}${toCurrency}`,
     name: `${fromCurrency}/${toCurrency}`,
-    price: parseFloat(exchangeRate['5. Exchange Rate']),
-    change_percentage: 0, // Alpha Vantage doesn't provide change in this endpoint
+    price: parseFloat(exchangeRate['5. Exchange Rate'] ?? '0'),
+    change_percentage: 0,
     volume: "N/A",
     market_type: 'Forex',
     last_updated: exchangeRate['6. Last Refreshed']
@@ -43,38 +53,55 @@ export function transformForexData(data: any): any {
 /**
  * Transform Alpha Vantage crypto data to our app's Asset format
  */
-export function transformCryptoData(data: any): any {
-  if (!data || !data['Time Series Crypto (5min)']) return null;
-  
-  // Get the most recent data point
-  const timeSeriesData = data['Time Series Crypto (5min)'];
-  const timestamps = Object.keys(timeSeriesData).sort().reverse();
-  
+export interface AlphaVantageCryptoTimeSeries {
+  [timestamp: string]: {
+    '1. open': string;
+    '2. high': string;
+    '3. low': string;
+    '4. close': string;
+    '5. volume': string;
+  };
+}
+export interface AlphaVantageCryptoMetaData {
+  [key: string]: string;
+}
+export interface AlphaVantageCryptoData {
+  'Meta Data'?: AlphaVantageCryptoMetaData;
+  'Time Series Crypto (5min)': AlphaVantageCryptoTimeSeries;
+  symbol?: string;
+}
+
+export function transformCryptoData(data: unknown): unknown {
+  if (!data || typeof data !== 'object' || !('Time Series Crypto (5min)' in data)) return null;
+  const cryptoData = data as AlphaVantageCryptoData;
+  const timeSeriesData = cryptoData['Time Series Crypto (5min)'];
+  if (!timeSeriesData || typeof timeSeriesData !== 'object') return null;
+  const timestamps = Object.keys(timeSeriesData as object).sort().reverse();
   if (timestamps.length === 0) return null;
-  
-  const latestData = timeSeriesData[timestamps[0]];
-  const prevData = timestamps.length > 1 ? timeSeriesData[timestamps[1]] : null;
-  
-  const currentPrice = parseFloat(latestData['4. close']);
+  const latestTimestamp = timestamps[0];
+  const prevTimestamp = timestamps.length > 1 ? timestamps[1] : undefined;
+  const latestData = latestTimestamp ? timeSeriesData[latestTimestamp] : undefined;
+  const prevData = prevTimestamp ? timeSeriesData[prevTimestamp] : undefined;
+  if (!latestData) return null;
+  const currentPrice = parseFloat(latestData['4. close'] ?? '0');
   let changePercentage = 0;
-  
   if (prevData) {
-    const prevPrice = parseFloat(prevData['4. close']);
-    changePercentage = ((currentPrice - prevPrice) / prevPrice) * 100;
+    const prevPrice = parseFloat(prevData['4. close'] ?? '0');
+    if (prevPrice !== 0) {
+      changePercentage = ((currentPrice - prevPrice) / prevPrice) * 100;
+    }
   }
-  
-  const metaData = data['Meta Data'];
-  const symbol = metaData ? metaData['2. Digital Currency Code'] : data.symbol || "CRYPTO";
+  const metaData = cryptoData['Meta Data'];
+  const symbol = metaData ? metaData['2. Digital Currency Code'] : cryptoData.symbol || "CRYPTO";
   const market = metaData ? metaData['4. Market Code'] : "USD";
-  
   return {
     symbol: `${symbol}${market}`,
     name: `${symbol}/${market}`,
     price: currentPrice,
     change_percentage: changePercentage,
-    volume: formatVolume(latestData['5. volume']),
+    volume: formatVolume(latestData['5. volume'] ?? '0'),
     market_type: 'Crypto',
-    last_updated: timestamps[0]
+    last_updated: latestTimestamp
   };
 }
 

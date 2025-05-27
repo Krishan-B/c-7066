@@ -1,5 +1,4 @@
 
-import { usePasswordStrength } from "../hooks/usePasswordStrength";
 
 export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

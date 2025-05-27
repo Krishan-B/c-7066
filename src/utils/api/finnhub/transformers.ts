@@ -1,6 +1,6 @@
 
-import { FinnhubQuote } from './client';
-import { Asset } from '@/hooks/market/types';
+import { type FinnhubQuote } from './client';
+import { type Asset } from '@/hooks/market/types';
 
 /**
  * Transform stock data from Finnhub to a standardized format

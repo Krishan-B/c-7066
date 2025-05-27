@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X, Clock, AlertCircle, ShieldCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Trade } from "@/hooks/trades/types";
+import { type Trade } from "@/hooks/trades/types";
 import { formatCurrency, formatNumber } from "@/utils/formatUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 

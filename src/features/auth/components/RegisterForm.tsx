@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -34,8 +33,7 @@ const RegisterForm = () => {
     score, 
     getPasswordStrengthLabel, 
     getPasswordStrengthColor,
-    feedback,
-    meetsMinimumRequirements 
+    feedback
   } = usePasswordStrength(password);
   
   const navigate = useNavigate();
@@ -86,7 +84,7 @@ const RegisterForm = () => {
       // Use navigate instead of window.location to avoid full page reload
       navigate("/auth");
       
-    } catch (error: any) {
+    } catch (error) {
       setFormError("Unexpected error occurred");
       console.error("Signup error:", error);
     } finally {

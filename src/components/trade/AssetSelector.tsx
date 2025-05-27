@@ -1,5 +1,5 @@
 
-import { Asset } from "@/hooks/market";
+import { type Asset } from "@/hooks/market";
 import { 
   Select, 
   SelectContent, 

@@ -1,5 +1,5 @@
 
-import { OpenTrade, PendingOrder, ClosedTrade, OrderHistory } from "@/types/orders";
+import { type OpenTrade, type PendingOrder, type ClosedTrade, type OrderHistory } from "@/types/orders";
 
 // Sample orders data
 export const openTrades: OpenTrade[] = [

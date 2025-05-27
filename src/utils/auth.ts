@@ -1,7 +1,7 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { Session, User } from "@supabase/supabase-js";
-import { UserProfile } from "@/features/profile/types";
+import { type Session, type User } from "@supabase/supabase-js";
+import { type UserProfile } from "@/features/profile/types";
+import { handleAuthError } from "@/utils/auth/authUtils";
 
 /**
  * Clean up auth state - essential for consistent auth behavior
@@ -39,7 +39,7 @@ export const signOutUser = async (): Promise<void> => {
     
     // Force page reload for clean state
     window.location.href = '/';
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error signing out:", error);
     throw error;
   }
@@ -59,11 +59,11 @@ export const refreshUserSession = async (): Promise<Session | null> => {
     if (error) throw error;
     
     return data.session;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error refreshing session:", error);
-    
     // If refreshing fails, clean up and force re-login
     cleanupAuthState();
+    handleAuthError(error instanceof Error ? error : new Error(String(error)));
     window.location.href = '/auth';
     return null;
   }
@@ -136,8 +136,8 @@ export const initializeAuthListeners = (callbacks: {
           try {
             const profile = extractProfileFromUser(newSession.user!);
             callbacks.onProfileLoad(profile);
-          } catch (error: any) {
-            callbacks.onError(error);
+          } catch (error: unknown) {
+            callbacks.onError(error instanceof Error ? error : new Error(String(error)));
           }
         }, 0);
       } else if (event === 'SIGNED_OUT') {
@@ -148,8 +148,8 @@ export const initializeAuthListeners = (callbacks: {
           try {
             const profile = extractProfileFromUser(newSession.user!);
             callbacks.onProfileLoad(profile);
-          } catch (error: any) {
-            callbacks.onError(error);
+          } catch (error: unknown) {
+            callbacks.onError(error instanceof Error ? error : new Error(String(error)));
           }
         }, 0);
       }

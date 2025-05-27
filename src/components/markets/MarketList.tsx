@@ -1,27 +1,11 @@
-
 import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowUp, ArrowDown, Star, Bell, Info } from "lucide-react";
+import { ArrowUp, ArrowDown, Star, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { formatCurrency, formatNumber } from "@/utils/formatUtils";
-
-interface Asset {
-  id?: string;
-  name: string;
-  symbol: string;
-  price: number;
-  change_percentage: number;
-  volume: string;
-  market_cap?: string;
-  market_type: string;
-  // We'll simulate these values as they're not in the original data
-  day_low?: number;
-  day_high?: number;
-  buy_price?: number;
-  sell_price?: number;
-}
+import type { Asset } from "@/hooks/market/types";
 
 interface MarketListProps {
   isLoading: boolean;

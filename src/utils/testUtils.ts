@@ -1,10 +1,4 @@
-
 // Test utilities for mocking and testing
-
-// Global jest mock setup
-declare global {
-  var jest: any;
-}
 
 export const mockData = {
   user: {
@@ -29,15 +23,15 @@ export const mockData = {
 
 // Mock functions for testing
 export const mockFunctions = {
-  executeTradeAPI: global.jest?.fn() || (() => {}),
-  getAccountMetrics: global.jest?.fn() || (() => {}),
-  getUserTrades: global.jest?.fn() || (() => {})
+  executeTradeAPI: typeof global.jest === 'object' && global.jest && 'fn' in global.jest ? (global.jest as { fn: () => unknown }).fn() : (() => {}),
+  getAccountMetrics: typeof global.jest === 'object' && global.jest && 'fn' in global.jest ? (global.jest as { fn: () => unknown }).fn() : (() => {}),
+  getUserTrades: typeof global.jest === 'object' && global.jest && 'fn' in global.jest ? (global.jest as { fn: () => unknown }).fn() : (() => {})
 };
 
 // Helper function to create jest mocks safely
 export const createMockFn = () => {
-  if (typeof global.jest !== 'undefined') {
-    return global.jest.fn();
+  if (typeof global.jest === 'object' && global.jest && 'fn' in global.jest) {
+    return (global.jest as { fn: () => unknown }).fn();
   }
   return () => {};
 };

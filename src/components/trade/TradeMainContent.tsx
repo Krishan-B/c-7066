@@ -17,7 +17,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCombinedMarketData, MarketType } from "@/hooks/market";
+import { useCombinedMarketData, type MarketType } from "@/hooks/market";
 import { useTradeCalculations } from "@/hooks/trades/useTradeCalculations";
 
 interface SelectedAsset {

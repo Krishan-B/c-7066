@@ -1,12 +1,11 @@
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   ChartContainer,
-  ChartTooltipContent
 } from "@/components/ui/chart";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { CustomTooltip } from "@/components/ui/CustomTooltip";
 
 interface AllocationData {
   name: string;
@@ -29,25 +28,6 @@ const PortfolioAllocation = ({
 }: PortfolioAllocationProps) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const isPositive = dayChange > 0;
-
-  const renderTooltipContent = (props: any) => {
-    if (!props.active || !props.payload || !props.payload.length) {
-      return null;
-    }
-    
-    return (
-      <ChartTooltipContent
-        {...props}
-        indicator="dot"
-        formatter={(value, name) => (
-          <div className="flex items-center justify-between gap-2">
-            <span>{name}</span>
-            <span className="font-medium">{value}%</span>
-          </div>
-        )}
-      />
-    );
-  };
 
   return (
     <Card className="h-full">
@@ -72,7 +52,7 @@ const PortfolioAllocation = ({
           <ChartContainer config={{ series: {} }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Tooltip content={renderTooltipContent} />
+                <Tooltip content={<CustomTooltip />} />
                 <Pie
                   data={allocationData}
                   cx="50%"

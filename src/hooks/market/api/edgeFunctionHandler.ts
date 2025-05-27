@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Asset } from "../types";
+import { type Asset } from "../types";
 
 export async function fetchEdgeFunctionData(marketTypes: string[]): Promise<Asset[]> {
   console.log('Fetching data from Edge Functions');

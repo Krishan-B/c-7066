@@ -1,18 +1,6 @@
-
-import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarketList from "./MarketList";
-
-interface Asset {
-  id?: string;
-  name: string;
-  symbol: string;
-  price: number;
-  change_percentage: number;
-  volume: string;
-  market_cap?: string;
-  market_type: string;
-}
+import type { Asset } from "@/hooks/market/types";
 
 interface MarketTabsProps {
   activeTab: string;

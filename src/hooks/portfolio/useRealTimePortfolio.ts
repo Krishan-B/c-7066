@@ -1,9 +1,7 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { PortfolioData } from '@/types/account';
 import { usePortfolioAPI } from '@/hooks/portfolio/usePortfolioAPI';
 import { getRiskLevel } from '@/utils/riskManagementUtils';
 
@@ -87,16 +85,18 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
           console.log('Account update received:', payload);
           if (payload.new && typeof payload.new === 'object') {
             // Check if payload has the properties we need
-            const newData = payload.new as Record<string, any>;
-            
-            if ('equity' in newData && 'used_margin' in newData) {
+            const newData = payload.new as Record<string, unknown>;
+            if (
+              'equity' in newData &&
+              typeof newData.equity === 'number' &&
+              'used_margin' in newData &&
+              typeof newData.used_margin === 'number'
+            ) {
               // Check margin level and update status
               const marginLevel = newData.equity / (newData.used_margin || 1) * 100;
               const newRiskLevel = getRiskLevel(marginLevel);
-              
               if (newRiskLevel !== marginLevelStatus) {
                 setMarginLevelStatus(newRiskLevel);
-                
                 // Show appropriate notifications based on risk level
                 if (newRiskLevel === 'warning') {
                   toast.warning('Margin level warning: approaching margin call threshold');
@@ -108,7 +108,6 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
                   });
                 }
               }
-              
               refetch();
             }
           }

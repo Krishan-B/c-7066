@@ -1,6 +1,6 @@
 
-import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Asset } from "../types.ts";
+import { type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { type Asset } from "../types.ts";
 import { formatVolume, formatMarketCap, getCommodityName } from "../utils/formatters.ts";
 
 const ALPHA_VANTAGE_API_KEY = Deno.env.get('ALPHA_VANTAGE_API_KEY');

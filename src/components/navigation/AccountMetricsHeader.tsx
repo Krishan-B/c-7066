@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AccountMetrics } from "@/types/account";
+import { type AccountMetrics } from "@/types/account";
 import { mockAccountMetrics, getDisplayedMetrics, getAllMetrics, calculateAvailableFunds } from "@/utils/metricUtils";
 import MetricItem from "./MetricItem";
 import MetricsDropdown from "./MetricsDropdown";

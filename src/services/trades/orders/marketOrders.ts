@@ -1,7 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from "sonner";
-import { TradeResult, MarketOrderParams } from '../types';
+import { type TradeResult, type MarketOrderParams } from '../types';
 
 /**
  * Execute a market order through the Supabase edge function

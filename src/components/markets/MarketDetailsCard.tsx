@@ -1,21 +1,9 @@
-
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Globe, ChartLine } from "lucide-react";
 import { MarketHoursDisplay } from "@/components/trade";
 import { Separator } from "@/components/ui/separator";
-
-interface Asset {
-  id?: string;
-  name: string;
-  symbol: string;
-  price: number;
-  change_percentage: number;
-  volume: string;
-  market_cap?: string;
-  market_type: string;
-}
+import type { Asset } from "@/hooks/market/types";
 
 interface MarketDetailsCardProps {
   selectedAsset: Asset;

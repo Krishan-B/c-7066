@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, ShieldCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Trade } from "@/hooks/trades/types";
+import { type Trade } from "@/hooks/trades/types";
 
 interface OrderHistoryTableProps {
   ordersHistory: Trade[];

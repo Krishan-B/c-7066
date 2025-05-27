@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { ArrowUp, ArrowDown, Eye } from "lucide-react";
 import { formatCurrency, formatNumber } from "@/utils/formatUtils";
-import { Asset } from "@/types/account";
+import { type Asset } from "@/types/account";
 
 interface PositionsTableProps {
   assets: Asset[];

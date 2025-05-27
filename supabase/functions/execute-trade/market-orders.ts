@@ -1,5 +1,5 @@
 
-import { TradeRequest, TradeResult } from './types.ts';
+import { type TradeRequest, type TradeResult } from './types.ts';
 import { calculateMarginRequired, getUserAccount } from './utils.ts';
 import { updatePortfolio } from './portfolio.ts';
 

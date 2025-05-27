@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, AlertTriangle } from "lucide-react";
+import { ArrowUp, ArrowDown } from "lucide-react";
 
 interface TradeActionButtonProps {
   action: "buy" | "sell";

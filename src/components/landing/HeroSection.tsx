@@ -2,7 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, ArrowRight, BarChart3, LineChart, TrendingUp } from "lucide-react";
+import { ChevronRight, BarChart3, LineChart, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme } from "@/components/ThemeProvider";
 

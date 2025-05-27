@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from "react";
 import { Separator } from "@/components/ui/separator";
-import { Asset } from "@/hooks/market";
+import { type Asset } from "@/hooks/market";
 import { isMarketOpen } from "@/utils/marketHours";
 import MarketHeader from "@/components/markets/MarketHeader";
 import MarketSearch from "@/components/markets/MarketSearch";

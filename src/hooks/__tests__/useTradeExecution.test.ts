@@ -1,22 +1,22 @@
-
 /**
  * @jest-environment jsdom
  */
 /// <reference types="jest" />
 
 import { renderHook } from '@testing-library/react';
-import { useTradeExecution, TradeParams } from '../useTradeExecution';
+import { useTradeExecution, type TradeParams } from '../useTradeExecution';
+import { describe, it, beforeEach, expect, vi } from 'vitest';
 
-// Mock the dependencies
-jest.mock('@/hooks/useAuth');
-jest.mock('@/services/trades/orders/marketOrders');
-jest.mock('@/services/trades/orders/entryOrders');
-jest.mock('@/services/trades/accountService');
-jest.mock('sonner');
+// Mock the dependencies using Vitest's vi.mock
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'test-user' } }) }));
+vi.mock('@/services/trades/orders/marketOrders', () => ({ executeMarketOrder: vi.fn() }));
+vi.mock('@/services/trades/orders/entryOrders', () => ({ placeEntryOrder: vi.fn() }));
+vi.mock('@/services/trades/accountService', () => ({ calculateMarginRequired: vi.fn(() => 100) }));
+vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
 
 describe('useTradeExecution', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should provide executeTrade function and isExecuting state', () => {

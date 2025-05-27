@@ -1,8 +1,7 @@
-
 import { useState, useEffect, useCallback } from "react";
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
-import { UserProfile } from "@/features/profile/types";
+import type { UserProfile } from "@/features/profile/types";
 import { extractProfileFromUser, updateProfile as updateUserProfile } from "@/utils/auth/authUtils";
 
 /**
@@ -72,11 +71,12 @@ export const useAuthProfile = (user: User | null, initialized: boolean) => {
         description: "Your profile has been updated successfully",
       });
       
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error("Error updating profile:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unable to update your profile";
       toast({
         title: "Profile update failed",
-        description: error.message || "Unable to update your profile",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

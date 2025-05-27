@@ -7,7 +7,7 @@ import { SecuritySettings } from "@/components/account/SecuritySettings";
 import { NotificationPreferences } from "@/components/account/NotificationPreferences";
 import { AccountStatus } from "@/components/account/AccountStatus";
 import { AccountSecurity } from "@/components/account/AccountSecurity";
-import { useAuth } from '@/hooks/useAuth'; // Add this if it's needed but missing
+// Add this if it's needed but missing
 
 const Account = () => {
   return (

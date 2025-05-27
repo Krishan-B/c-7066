@@ -44,7 +44,7 @@ export async function getApiKey(): Promise<string | null> {
     }
 
     return data.value;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching Alpha Vantage API key:', error);
     return null;
   }
@@ -58,7 +58,7 @@ export async function getApiKey(): Promise<string | null> {
 export async function fetchAlphaVantageData(
   endpoint: string, 
   params: Record<string, string>
-): Promise<any> {
+): Promise<unknown> {
   try {
     const apiKey = await getApiKey();
     
@@ -100,8 +100,8 @@ export async function fetchAlphaVantageData(
     }
     
     return data;
-  } catch (error) {
-    console.error('Error fetching data from Alpha Vantage:', error);
-    return { error: error instanceof Error ? error.message : "Unknown error" };
+  } catch (error: unknown) {
+    console.error('Error fetching Alpha Vantage data:', error);
+    return { error: (error instanceof Error ? error.message : String(error)) };
   }
 }

@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Percent, AlertCircle, ShieldCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Trade } from "@/hooks/trades/types";
+import { type Trade } from "@/hooks/trades/types";
 import { calculateDuration } from "@/utils/orderUtils";
 import { formatCurrency, formatNumber } from "@/utils/formatUtils";
 import { Skeleton } from "@/components/ui/skeleton";

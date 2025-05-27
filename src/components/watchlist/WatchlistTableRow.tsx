@@ -1,18 +1,6 @@
-
-import React from 'react';
 import { ArrowUpIcon, ArrowDownIcon, StarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface Asset {
-  id?: string;
-  name: string;
-  symbol: string;
-  price: number;
-  change_percentage: number;
-  volume: string;
-  market_type: string;
-  market_cap?: string;
-}
+import type { Asset } from "@/hooks/market/types";
 
 interface WatchlistTableRowProps {
   asset: Asset;

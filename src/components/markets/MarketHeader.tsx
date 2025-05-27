@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Asset } from "@/hooks/market/types";
+import { type Asset } from "@/hooks/market/types";
 import { MarketHoursDisplay, TradeButton } from "@/components/trade";
 
 interface MarketHeaderProps {

@@ -1,5 +1,5 @@
 
-import { TradeRequest, Portfolio } from './types.ts';
+import { type TradeRequest } from './types.ts';
 
 /**
  * Update portfolio with new trade position

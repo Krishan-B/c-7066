@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
-import { Trade } from './types';
+import { type Trade } from './types';
 import { closePosition as closePositionService, cancelPendingOrder } from '@/services/trades/orderService';
 
 export const fetchTradesByStatus = async (status: string | string[]): Promise<Trade[]> => {

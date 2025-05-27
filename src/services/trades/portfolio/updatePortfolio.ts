@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { PortfolioUpdateParams, PortfolioUpdateResult } from "../types";
+import { type PortfolioUpdateParams, type PortfolioUpdateResult } from "../types";
 
 /**
  * Update user portfolio with a new trade

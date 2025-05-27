@@ -1,11 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Asset, 
-  ClosedPosition, 
-  AllocationData,
-  PerformanceData,
-  PortfolioData 
+import {
+  type PortfolioData 
 } from '@/types/account';
 import { toast } from "sonner";
 

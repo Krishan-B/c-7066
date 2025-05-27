@@ -1,6 +1,6 @@
 
-import { Trade } from "@/hooks/trades/types";
-import { AccountMetrics } from "@/types/account";
+import { type Trade } from "@/hooks/trades/types";
+import { type AccountMetrics } from "@/types/account";
 
 export interface OrderTabsProps {
   activeTab: string;

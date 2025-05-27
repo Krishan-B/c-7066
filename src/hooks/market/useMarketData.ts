@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "@/hooks/use-toast";
 import { fetchMarketData } from "./fetchMarketData";
-import { Asset } from "./types";
+import { type Asset } from "./types";
 import { useState, useCallback } from "react";
 
 interface UseMarketDataOptions {
