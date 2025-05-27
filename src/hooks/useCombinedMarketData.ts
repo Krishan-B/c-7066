@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useEffect } from "react";
-import { useMarketData, Asset } from "@/hooks/market";
+import { useMarketData } from "@/hooks/market";
 import { usePolygonWebSocket } from "@/hooks/market/usePolygonWebSocket";
 import { getSymbolsForMarketType } from "@/hooks/market/marketSymbols";
 import { toast } from "@/hooks/use-toast";
@@ -28,6 +28,9 @@ export const useCombinedMarketData = (
   const symbols = marketTypes.length > 0 
     ? marketTypes.flatMap(type => getSymbolsForMarketType([type])[type] || [])
     : [];
+  
+  // Keep track of the active market type for service params
+  const activeMarketType = marketTypes.length > 0 ? marketTypes[0] : 'Crypto';
   
   // Initialize WebSocket connection if enabled
   const { 
@@ -60,7 +63,7 @@ export const useCombinedMarketData = (
   } = useMarketDataService({
     // Fix: Change initialMarketTypes (plural) to initialMarketType (singular)
     // and pass the first market type in the array, or 'Crypto' as default
-    initialMarketType: marketTypes.length > 0 ? marketTypes[0] : 'Crypto',
+    initialMarketType: activeMarketType,
     initialSymbols: symbols,
     refetchInterval: refetchInterval,
     enabled: useExternalApis && marketTypes.length > 0
@@ -85,15 +88,18 @@ export const useCombinedMarketData = (
     
     // Also update service params if we're using external APIs
     if (useExternalApis) {
-      // Get symbols for the first market type
-      const newSymbols = types.length > 0 
-        ? getSymbolsForMarketType([types[0]])[types[0]] || []
-        : [];
+      // Always use a default market type if none is selected
+      const defaultMarketType = 'Crypto' as const;
+      const firstType = types.length > 0 ? types[0] : null;
+      const newMarketType = firstType || defaultMarketType;
       
-      updateServiceParams(
-        types.length > 0 ? types[0] : undefined,
-        newSymbols
-      );
+      // Get symbols for the selected market type
+      const marketSymbols = getSymbolsForMarketType([newMarketType]);
+      const symbolsForType = marketSymbols && marketSymbols[newMarketType as keyof typeof marketSymbols];
+      const newSymbols = symbolsForType || [];
+      
+      // Since updateServiceParams expects a string, we ensure newMarketType is always valid
+      updateServiceParams(newMarketType, newSymbols);
     }
   }, [useExternalApis, updateServiceParams]);
 

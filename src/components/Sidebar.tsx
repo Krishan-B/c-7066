@@ -1,8 +1,9 @@
 
 import { cn } from "@/lib/utils";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, LineChart, BarChart3, Newspaper, ShoppingCart, Wallet, Settings, UserCircle, LogOut, ListCheck } from "lucide-react";
+import { LayoutDashboard, LineChart, BarChart3, Newspaper, Wallet, Settings, UserCircle, LogOut, ListCheck } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
+import { preloadRoute } from "@/utils/routePreload";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -16,9 +17,10 @@ interface SidebarItemProps {
   icon: React.ReactNode;
   label: string;
   delay?: number;
+  onMouseEnter?: () => void;
 }
 
-const SidebarItem = ({ to, icon, label, delay = 0 }: SidebarItemProps) => (
+const SidebarItem = ({ to, icon, label, delay = 0, onMouseEnter }: SidebarItemProps) => (
   <motion.div
     initial={{ opacity: 0, x: -10 }}
     animate={{ opacity: 1, x: 0 }}
@@ -32,6 +34,7 @@ const SidebarItem = ({ to, icon, label, delay = 0 }: SidebarItemProps) => (
           ? "bg-primary/20 text-primary font-medium" 
           : "hover:bg-primary/10 text-muted-foreground hover:text-primary"
       )}
+      onMouseEnter={onMouseEnter}
     >
       <span className="mr-3">{icon}</span>
       {label}
@@ -71,12 +74,51 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
       <div className="flex flex-col h-full p-4">
         <div className="flex-grow">
           <nav className="space-y-1">
-            <SidebarItem to="/dashboard" icon={<LayoutDashboard className="h-5 w-5" />} label="Dashboard" delay={0.1} />
-            <SidebarItem to="/dashboard/markets" icon={<LineChart className="h-5 w-5" />} label="Markets" delay={0.2} />
-            <SidebarItem to="/dashboard/portfolio" icon={<BarChart3 className="h-5 w-5" />} label="Portfolio" delay={0.3} />
-            <SidebarItem to="/dashboard/orders" icon={<ListCheck className="h-5 w-5" />} label="Orders" delay={0.4} />
-            <SidebarItem to="/dashboard/news" icon={<Newspaper className="h-5 w-5" />} label="News" delay={0.5} />
-            <SidebarItem to="/dashboard/wallet" icon={<Wallet className="h-5 w-5" />} label="Wallet" delay={0.6} />
+            <SidebarItem 
+              to="/dashboard" 
+              icon={<LayoutDashboard className="h-5 w-5" />} 
+              label="Dashboard" 
+              delay={0.1} 
+            />
+            <SidebarItem 
+              to="/dashboard/markets" 
+              icon={<LineChart className="h-5 w-5" />} 
+              label="Markets" 
+              delay={0.2} 
+              onMouseEnter={() => preloadRoute('markets')}
+            />
+            <SidebarItem 
+              to="/dashboard/portfolio" 
+              icon={<BarChart3 className="h-5 w-5" />} 
+              label="Portfolio" 
+              delay={0.3}
+              onMouseEnter={() => preloadRoute('portfolio')}
+              data-route="portfolio"
+            />
+            <SidebarItem 
+              to="/dashboard/orders" 
+              icon={<ListCheck className="h-5 w-5" />} 
+              label="Orders" 
+              delay={0.4}
+              onMouseEnter={() => preloadRoute('orders')}
+              data-route="orders"
+            />
+            <SidebarItem 
+              to="/dashboard/news" 
+              icon={<Newspaper className="h-5 w-5" />} 
+              label="News" 
+              delay={0.5}
+              onMouseEnter={() => preloadRoute('news')}
+              data-route="news"
+            />
+            <SidebarItem 
+              to="/dashboard/wallet" 
+              icon={<Wallet className="h-5 w-5" />} 
+              label="Wallet" 
+              delay={0.6}
+              onMouseEnter={() => preloadRoute('wallet')}
+              data-route="wallet"
+            />
           </nav>
           
           <div className="mt-8">
