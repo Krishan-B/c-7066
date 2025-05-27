@@ -1,4 +1,2 @@
-
-import { useWatchlistData } from './watchlist/useWatchlistData';
-
-export { useWatchlistData };
+// This file is kept for backward compatibility
+export * from './watchlist';

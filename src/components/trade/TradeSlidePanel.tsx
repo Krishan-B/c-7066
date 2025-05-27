@@ -1,10 +1,8 @@
-
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
+import { useCombinedMarketData, MarketType } from "@/hooks/market";
 import { useTradeExecution } from "@/hooks/useTradeExecution";
 import { useAccountMetrics } from "@/hooks/useAccountMetrics";
 
@@ -12,18 +10,23 @@ import { useAccountMetrics } from "@/hooks/useAccountMetrics";
 import { TradeMainContent } from "./TradeMainContent";
 import { TradePanelFooter } from "./TradePanelFooter";
 
+interface SelectedAsset {
+  name: string;
+  symbol: string;
+  market_type: MarketType;
+}
+
 interface TradeSlidePanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
-  const { user } = useAuth();
   const { toast } = useToast();
   
   // State variables
-  const [assetCategory, setAssetCategory] = useState<string>("Crypto");
-  const [selectedAsset, setSelectedAsset] = useState({
+  const [assetCategory, setAssetCategory] = useState<MarketType>("Crypto");
+  const [selectedAsset, setSelectedAsset] = useState<SelectedAsset>({
     name: "Bitcoin",
     symbol: "BTCUSD",
     market_type: "Crypto"
@@ -55,29 +58,48 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   // Get the current price of the selected asset
   const currentAssetPrice = marketData.find(asset => asset.symbol === selectedAsset.symbol)?.price || 0;
   
-  // Handle asset category change
-  const handleAssetCategoryChange = (category: string) => {
+  // Market type specific defaults
+  const defaultAssets: Record<MarketType, SelectedAsset> = {
+    Crypto: { name: "Bitcoin", symbol: "BTCUSD", market_type: "Crypto" },
+    Stock: { name: "Apple Inc.", symbol: "AAPL", market_type: "Stock" },
+    Forex: { name: "EUR/USD", symbol: "EURUSD", market_type: "Forex" },
+    Index: { name: "S&P 500", symbol: "SPX", market_type: "Index" },
+    Commodities: { name: "Gold", symbol: "XAUUSD", market_type: "Commodities" }
+  };
+
+  const handleAssetCategoryChange = (category: MarketType) => {
     setAssetCategory(category);
     
-    // Select the first asset in this category
-    const assetsInCategory = marketData.filter(asset => asset.market_type === category);
-    if (assetsInCategory.length > 0) {
-      setSelectedAsset({
-        name: assetsInCategory[0].name,
-        symbol: assetsInCategory[0].symbol,
-        market_type: category
-      });
-    }
+    // Select the first valid asset in this category with additional validation
+    const assetsInCategory = marketData.filter(asset => 
+      asset && 
+      asset.market_type === category && 
+      asset.symbol && 
+      asset.name && 
+      !asset.symbol.includes('undefined')
+    );
+
+    // Use first valid asset or fall back to category default
+    const firstValidAsset = assetsInCategory[0];
+    const defaultAsset = defaultAssets[category];
+    
+    setSelectedAsset(firstValidAsset ? {
+      name: firstValidAsset.name,
+      symbol: firstValidAsset.symbol,
+      market_type: category
+    } : defaultAsset);
   };
   
   // Handle asset selection
   const handleAssetSelect = (symbol: string) => {
     const asset = marketData.find(a => a.symbol === symbol);
     if (asset) {
+      const name = asset.name || symbol;
+      const marketType = asset.market_type || assetCategory;
       setSelectedAsset({
-        name: asset.name,
-        symbol: asset.symbol,
-        market_type: asset.market_type
+        name,
+        symbol,
+        market_type: marketType
       });
     }
   };

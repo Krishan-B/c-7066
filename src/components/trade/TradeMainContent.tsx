@@ -1,4 +1,3 @@
-
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,21 +15,21 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { CalendarIcon, CalendarOff } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Asset } from "@/hooks/market";
-import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
+import { useCombinedMarketData, MarketType } from "@/hooks/market";
 import { useTradeCalculations } from "@/hooks/useTradeCalculations";
 
+interface SelectedAsset {
+  name: string;
+  symbol: string;
+  market_type: MarketType;
+}
+
 interface TradeMainContentProps {
-  assetCategory: string;
-  onAssetCategoryChange: (category: string) => void;
-  selectedAsset: {
-    name: string;
-    symbol: string;
-    market_type: string;
-  };
+  assetCategory: MarketType;
+  onAssetCategoryChange: (category: MarketType) => void;
+  selectedAsset: SelectedAsset;
   onAssetSelect: (symbol: string) => void;
   orderType: "market" | "entry";
   setOrderType: (type: "market" | "entry") => void;
@@ -53,6 +52,13 @@ interface TradeMainContentProps {
   setTakeProfitRate?: (rate: string) => void;
   setExpirationDate?: (date: string | undefined) => void;
 }
+
+// Numeric input validation function
+const validateNumericInput = (value: string): string => {
+  const num = parseFloat(value);
+  if (isNaN(num) || num <= 0) return "0.01";
+  return value;
+};
 
 export function TradeMainContent({
   assetCategory,
@@ -94,13 +100,12 @@ export function TradeMainContent({
   const filteredAssets = marketData.filter(
     asset => asset.market_type === assetCategory
   );
-  
-  // Asset categories
-  const assetCategories = [
-    "Crypto", 
-    "Stocks", 
-    "Forex", 
-    "Indices", 
+   // Asset categories
+  const assetCategories: MarketType[] = [
+    "Crypto",
+    "Stock",
+    "Forex",
+    "Index",
     "Commodities"
   ];
   
@@ -109,11 +114,22 @@ export function TradeMainContent({
     leverage, 
     positionValue, 
     requiredFunds 
-  } = useTradeCalculations(units, currentPrice, assetCategory, 10000);
+  } = useTradeCalculations(
+    units, // pass as string
+    currentPrice,
+    assetCategory,
+    10000
+  );
   
   // Handle calendar date selection
   const handleDateSelect = (date: Date | undefined) => {
+    if (!setExpirationDate) return; // Guard clause for optional prop
+    
     if (date) {
+      const minDate = new Date();
+      if (date < minDate) {
+        return; // Don't allow past dates
+      }
       setExpirationDate(date.toISOString());
     } else {
       setExpirationDate(undefined);
@@ -223,7 +239,7 @@ export function TradeMainContent({
           id="units"
           type="number"
           value={units}
-          onChange={(e) => setUnits(e.target.value)}
+          onChange={(e) => setUnits(validateNumericInput(e.target.value))}
           step="0.01"
           min="0.01"
           disabled={isExecuting}
@@ -242,7 +258,7 @@ export function TradeMainContent({
             id="entry-price"
             type="number"
             value={orderRate}
-            onChange={(e) => setOrderRate(e.target.value)}
+            onChange={(e) => setOrderRate(validateNumericInput(e.target.value))}
             placeholder={`Current: ${currentPrice.toFixed(2)}`}
             step="0.01"
             min="0.01"
@@ -272,7 +288,7 @@ export function TradeMainContent({
               id="stop-loss-price"
               type="number"
               value={stopLossRate}
-              onChange={(e) => setStopLossRate(e.target.value)}
+              onChange={(e) => setStopLossRate(validateNumericInput(e.target.value))}
               placeholder="Set price"
               step="0.01"
               min="0.01"
@@ -303,7 +319,7 @@ export function TradeMainContent({
               id="take-profit-price"
               type="number"
               value={takeProfitRate}
-              onChange={(e) => setTakeProfitRate(e.target.value)}
+              onChange={(e) => setTakeProfitRate(validateNumericInput(e.target.value))}
               placeholder="Set price"
               step="0.01"
               min="0.01"
@@ -331,17 +347,13 @@ export function TradeMainContent({
           {hasExpirationDate && (
             <div className="pl-6 space-y-2 border-l-2 border-muted-foreground/20">
               <Popover>
-                <PopoverTrigger asChild>
-                  <Button
+                <PopoverTrigger asChild>                    <Button
                     variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !setExpirationDate && "text-muted-foreground"
-                    )}
+                    className="w-full justify-start text-left font-normal"
                     disabled={isExecuting}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {setExpirationDate ? (
+                    {hasExpirationDate ? (
                       format(new Date(), "PPP")
                     ) : (
                       <span>Pick a date</span>

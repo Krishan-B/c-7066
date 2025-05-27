@@ -1,10 +1,9 @@
-
 import { useState, useCallback, useEffect } from "react";
-import { useMarketData } from "@/hooks/market";
-import { usePolygonWebSocket } from "@/hooks/market/usePolygonWebSocket";
-import { getSymbolsForMarketType } from "@/hooks/market/marketSymbols";
+import { useMarketData } from "./useMarketData";
+import { usePolygonWebSocket } from "./usePolygonWebSocket";
+import { getSymbolsForMarketType } from "./marketSymbols";
 import { toast } from "@/hooks/use-toast";
-import { useMarketDataService } from "@/hooks/market/useMarketDataService";
+import { useMarketDataService } from "./useMarketDataService";
 
 interface UseCombinedMarketDataOptions {
   refetchInterval?: number;
@@ -61,8 +60,6 @@ export const useCombinedMarketData = (
     refreshData: refreshServiceData,
     updateParams: updateServiceParams
   } = useMarketDataService({
-    // Fix: Change initialMarketTypes (plural) to initialMarketType (singular)
-    // and pass the first market type in the array, or 'Crypto' as default
     initialMarketType: activeMarketType,
     initialSymbols: symbols,
     refetchInterval: refetchInterval,

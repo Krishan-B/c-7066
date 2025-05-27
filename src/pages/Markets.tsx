@@ -1,6 +1,5 @@
-
-import React, { useState, useEffect } from "react";
-import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
+import { useState, useEffect } from "react";
+import { useCombinedMarketData } from "@/hooks/market";
 import MarketContainer from "@/components/markets/MarketContainer";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";

@@ -1,7 +1,7 @@
+// Export the data source enum and API key management functions
+export { DataSource, setApiKey } from './apiKeyManager';
 
-export * from './apiKeyManager';
-export * from './polygonHandler';
-export * from './finnhubHandler';
-export * from './alphaVantageHandler';
-export * from './edgeFunctionHandler';
-export * from './databaseHandler';
+// Export data fetching handlers
+export { fetchFinnhubData } from './finnhubHandler';
+export { fetchAlphaVantageData } from './alphaVantageHandler';
+export { fetchEdgeFunctionData } from './edgeFunctionHandler';

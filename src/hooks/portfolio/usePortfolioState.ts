@@ -1,22 +1,7 @@
-
 import { useState } from 'react';
-import { Asset, PortfolioData, PerformanceData } from "@/types/account";
+import type { PortfolioData } from "@/types/account";
 
-interface PortfolioState {
-  portfolioData: PortfolioData | null;
-  timeframe: string;
-  activeTrades: number;
-  isLoading: boolean;
-  error: Error | null;
-}
-
-export const usePortfolioState = (): PortfolioState & {
-  setTimeframe: (timeframe: string) => void;
-  setPortfolioData: (data: PortfolioData | null) => void;
-  setActiveTrades: (count: number) => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: Error | null) => void;
-} => {
+export const usePortfolioState = () => {
   const [portfolioData, setPortfolioData] = useState<PortfolioData | null>(null);
   const [timeframe, setTimeframe] = useState<string>("1m");
   const [activeTrades, setActiveTrades] = useState<number>(0);

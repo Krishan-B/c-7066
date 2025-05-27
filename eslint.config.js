@@ -1,4 +1,3 @@
-
 import js from "@eslint/js";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -24,10 +23,17 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
-      "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-unused-imports": "off",
-      "no-unused-vars": "off",
-      "prefer-const": "off",
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": true,
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_"
+      }],
+      "@typescript-eslint/consistent-type-imports": ["warn", { 
+        "fixStyle": "inline-type-imports",
+        "prefer": "type-imports"
+      }]
     },
   }
 );

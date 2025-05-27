@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Wifi } from "lucide-react";
@@ -8,11 +7,10 @@ import TradingViewChart from "@/components/TradingViewChart";
 import { TradeButton } from "@/components/trade";
 import PortfolioCard from "@/components/PortfolioCard";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import AlertsWidget from "@/components/AlertsWidget";
 import { Badge } from "@/components/ui/badge";
-import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
+import { useCombinedMarketData } from "@/hooks/market";
 import QuickTradePanel from "@/components/trade/QuickTradePanel";
 
 const Index = () => {
@@ -26,11 +24,10 @@ const Index = () => {
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
   const chartSectionRef = useRef<HTMLDivElement>(null);
   
   // Initialize combined market data with real-time updates
-  const { marketData, realtimeEnabled } = useCombinedMarketData(['Crypto', 'Stock', 'Forex', 'Index'], {
+  const { realtimeEnabled } = useCombinedMarketData(['Crypto', 'Stock', 'Forex', 'Index'], {
     enableRealtime: true
   });
 

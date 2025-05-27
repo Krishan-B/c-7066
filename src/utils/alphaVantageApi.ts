@@ -1,4 +1,2 @@
-
-// This file exports all functionality from the newly refactored modules
-// for backward compatibility
+// This file exports all functionality from the refactored modules
 export * from './api/alphaVantage';

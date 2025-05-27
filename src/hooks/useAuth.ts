@@ -1,13 +1,5 @@
+// This file is deprecated. 
+// All auth hooks have been moved to the auth module.
+// Import from @/hooks/auth/useAuth instead.
 
-import { useContext } from 'react';
-import { AuthContext } from '@/components/AuthContext';
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  
-  return context;
-};
+export { useAuth } from './auth/useAuth';
