@@ -1,15 +1,15 @@
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth";
 import { useNavigate } from "react-router-dom";
 import { TradeButton } from "@/components/trade";
 import OrderTabs from "@/components/orders/OrderTabs";
-import { useTradeManagement } from "@/hooks/useTradeManagement";
+import { useTradeManagement } from "@/hooks/trades/useTradeManagement";
 import { toast } from "sonner";
-import { useAccountMetrics } from "@/hooks/useAccountMetrics";
+import { useAccountMetrics } from "@/hooks/portfolio/useAccountMetrics";
 
 const Orders = () => {
   const { user } = useAuth();

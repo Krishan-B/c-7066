@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdvancedOrderForm, AdvancedOrderFormValues } from "@/components/trade/AdvancedOrderForm";
 import { toast } from "sonner";
 import { useCombinedMarketData } from "@/hooks/market";
-import { useAccountMetrics } from "@/hooks/useAccountMetrics";
-import { useTradeExecution } from "@/hooks/useTradeExecution";
+import { useAccountMetrics } from "@/hooks/portfolio/useAccountMetrics";
+import { useTradeExecution } from "@/hooks/trades/useTradeExecution";
 
 interface MarketOrderFormProps {
   selectedAsset: {

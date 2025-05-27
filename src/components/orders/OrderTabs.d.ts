@@ -1,5 +1,5 @@
 
-import { Trade } from "@/hooks/useTradeManagement";
+import { Trade } from "@/hooks/trades/types";
 import { AccountMetrics } from "@/types/account";
 
 export interface OrderTabsProps {

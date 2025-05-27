@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, X, AlertCircle, ShieldCheck, Percent } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Trade } from "@/hooks/useTradeManagement";
-import { calculatePnlPercentage, calculateSpread } from "@/utils/orderUtils";
+import { Trade } from "@/hooks/trades/types";
+import { calculateSpread } from "@/utils/orderUtils";
 import { formatCurrency, formatNumber } from "@/utils/formatUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 

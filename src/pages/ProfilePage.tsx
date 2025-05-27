@@ -1,12 +1,12 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserProfile } from "@/features/profile/types";
+import type { UserProfile } from "@/features/profile/types";
 import ProfileDisplay from "@/features/profile/components/ProfileDisplay";
 import ProfileEditForm from "@/features/profile/components/ProfileEditForm";
 import { Button } from "@/components/ui/button";
 import { Pencil, User } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth";
 import { useToast } from "@/hooks/use-toast";
 
 const ProfilePage = () => {

@@ -2,9 +2,10 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { useCombinedMarketData, MarketType } from "@/hooks/market";
-import { useTradeExecution } from "@/hooks/useTradeExecution";
-import { useAccountMetrics } from "@/hooks/useAccountMetrics";
+import { useCombinedMarketData } from "@/hooks/market";
+import type { MarketType } from "@/hooks/market";
+import { useTradeExecution } from "@/hooks/trades/useTradeExecution";
+import { useAccountMetrics } from "@/hooks/portfolio/useAccountMetrics";
 
 // Import refactored components
 import { TradeMainContent } from "./TradeMainContent";

@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { isMarketOpen } from "@/utils/marketHours";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth";
 
 interface TradePanelFooterProps {
   onExecuteTrade: (action: "buy" | "sell") => void;

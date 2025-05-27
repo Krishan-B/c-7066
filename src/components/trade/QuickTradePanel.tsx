@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { isMarketOpen } from "@/utils/marketHours";
 import { TradeActionButton } from "./TradeActionButton";
-import { usePriceMovement } from "@/hooks/usePriceMovement";
+import { usePriceMovement } from "@/hooks/market/usePriceMovement";
 import { UnitsInput } from "./UnitsInput";
 import { StopLossCheckbox } from "./StopLossCheckbox";
 import { TakeProfitCheckbox } from "./TakeProfitCheckbox";
@@ -11,7 +11,7 @@ import { MarketStatusAlert } from "./MarketStatusAlert";
 import { TradeSummary } from "./TradeSummary";
 import { getLeverageForAssetType } from "@/utils/leverageUtils";
 import { mockAccountMetrics } from "@/utils/metricUtils";
-import { useTradeCalculations } from "@/hooks/useTradeCalculations";
+import { useTradeCalculations } from "@/hooks/trades/useTradeCalculations";
 
 export interface QuickTradePanelProps {
   symbol: string;

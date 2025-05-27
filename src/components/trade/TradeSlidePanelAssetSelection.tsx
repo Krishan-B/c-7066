@@ -1,5 +1,5 @@
 
-import { Asset } from "@/hooks/useMarketData";
+import type { Asset } from "@/hooks/market/types";
 import { AssetCategorySelector } from "./AssetCategorySelector";
 import { AssetSelector } from "./AssetSelector";
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { 
   Form, 
@@ -24,8 +24,8 @@ import {
   TooltipTrigger
 } from "@/components/ui/tooltip";
 import { Info, Minus, Plus } from "lucide-react";
-import { Asset } from "@/hooks/useMarketData";
-import { calculateMarginRequired, getLeverageForAssetType } from "@/utils/leverageUtils";
+import type { Asset } from "@/hooks/market/types";
+import { getLeverageForAssetType } from "@/utils/leverageUtils";
 
 export interface AdvancedOrderFormValues {
   orderType: "market" | "entry";
@@ -86,10 +86,11 @@ export function AdvancedOrderForm({
     },
   });
 
-  // Filter assets based on the selected category
-  const filteredAssets = marketData?.filter(asset => 
-    asset.market_type === selectedAssetCategory
-  ) || [];
+  // Filter assets based on the selected category using useMemo
+  const filteredAssets = useMemo(() => 
+    marketData?.filter(asset => asset.market_type === selectedAssetCategory) ?? [],
+    [marketData, selectedAssetCategory]
+  );
 
   // Watch form values for conditional rendering
   const orderType = form.watch("orderType");
@@ -120,9 +121,10 @@ export function AdvancedOrderForm({
     form.setValue("assetCategory", selectedAssetCategory);
     
     // Reset asset selection when category changes
-    if (filteredAssets.length > 0) {
-      setSelectedAsset(filteredAssets[0].symbol);
-      form.setValue("assetSymbol", filteredAssets[0].symbol);
+    const firstAsset = filteredAssets[0];
+    if (firstAsset?.symbol) {
+      setSelectedAsset(firstAsset.symbol);
+      form.setValue("assetSymbol", firstAsset.symbol);
     }
   }, [selectedAssetCategory, form, onAssetCategoryChange, assetCategory, filteredAssets]);
 

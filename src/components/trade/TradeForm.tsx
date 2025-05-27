@@ -1,6 +1,5 @@
-
-import { useState, useEffect } from "react";
-import { Asset } from "@/hooks/useMarketData";
+import { useState } from "react";
+import type { Asset } from "@/hooks/market/types";
 import { OrderTypeSelector } from "@/components/trade";
 import { TradeSummary } from "@/components/trade";
 import { AssetCategorySelector } from "./AssetCategorySelector";
@@ -12,8 +11,8 @@ import { TradeActionButton } from "./TradeActionButton";
 import { EntryRateInput } from "./EntryRateInput";
 import { StopLossSettings } from "./StopLossSettings";
 import { TakeProfitSettings } from "./TakeProfitSettings";
-import { usePriceMovement } from "@/hooks/usePriceMovement";
-import { useTradeCalculations } from "@/hooks/useTradeCalculations";
+import { usePriceMovement } from "@/hooks/market/usePriceMovement";
+import { useTradeCalculations } from "@/hooks/trades/useTradeCalculations";
 
 interface TradeFormProps {
   action: "buy" | "sell";
@@ -27,7 +26,6 @@ interface TradeFormProps {
   isLoading: boolean;
   isExecuting: boolean;
   marketIsOpen: boolean;
-  fixedLeverage?: number;
   onSubmit: (amount: string, orderType: string, leverage?: number[]) => void;
   availableFunds?: number;
   marketData?: Asset[];
@@ -40,7 +38,6 @@ const TradeForm = ({
   isLoading,
   isExecuting,
   marketIsOpen,
-  fixedLeverage = 1, // Default to 1:1 (no leverage) if not provided
   onSubmit,
   availableFunds = 10000,
   marketData = [],
@@ -55,8 +52,8 @@ const TradeForm = ({
   // Use our custom hooks
   const { buyPrice, sellPrice } = usePriceMovement(currentPrice);
   
-  // Filter assets based on selected category
-  const filteredAssets = marketData?.filter(a => a.market_type === assetCategory) || [];
+  // Filter assets based on selected category with null check
+  const filteredAssets = marketData?.filter(a => a.market_type === assetCategory) ?? [];
   
   // Use the trade calculations hook with proper parameters
   const tradeCalculations = useTradeCalculations(units, currentPrice, assetCategory, availableFunds);
@@ -65,8 +62,8 @@ const TradeForm = ({
     setAssetCategory(value);
     
     // Reset asset selection if there are assets in this category
-    const assetsInCategory = marketData?.filter(a => a.market_type === value);
-    if (assetsInCategory && assetsInCategory.length > 0) {
+    const assetsInCategory = marketData?.filter(a => a.market_type === value) ?? [];
+    if (assetsInCategory.length > 0 && assetsInCategory[0]?.symbol) {
       setSelectedAsset(assetsInCategory[0].symbol);
     }
   };

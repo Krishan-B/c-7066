@@ -4,11 +4,13 @@ import OpenPositionsTable from "./OpenPositionsTable";
 import PendingOrdersTable from "./PendingOrdersTable";
 import ClosedTradesTable from "./ClosedTradesTable";
 import OrderHistoryTable from "./OrderHistoryTable";
-import { AdvancedOrderForm, AdvancedOrderFormValues } from "@/components/trade/AdvancedOrderForm";
+import { AdvancedOrderForm } from "@/components/trade/AdvancedOrderForm";
+import type { AdvancedOrderFormValues } from "@/components/trade/AdvancedOrderForm";
 import { toast } from "sonner";
-import { OrderTabsProps } from "./OrderTabs.d";
-import { useTradeExecution } from "@/hooks/useTradeExecution";
-import { useCombinedMarketData, MarketType } from "@/hooks/market";
+import type { OrderTabsProps } from "./OrderTabs.d";
+import { useTradeExecution } from "@/hooks/trades/useTradeExecution";
+import { useCombinedMarketData } from "@/hooks/market";
+import type { MarketType } from "@/hooks/market";
 
 const OrderTabs: React.FC<OrderTabsProps> = ({ 
   activeTab, 

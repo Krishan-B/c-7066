@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/auth";
 import { useNavigate } from "react-router-dom";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -17,7 +17,7 @@ import PortfolioSideSection from "@/components/portfolio/PortfolioSideSection";
 import RiskManagementPanel from "@/components/portfolio/RiskManagementPanel";
 
 // Import the real-time portfolio hook
-import { useRealTimePortfolio } from "@/hooks/useRealTimePortfolio";
+import { useRealTimePortfolio } from "@/hooks/portfolio/useRealTimePortfolio";
 import { Asset } from "@/types/account";
 
 const PortfolioContainer = () => {

@@ -1,8 +1,6 @@
-
-import * as React from "react"
-import { useNavigate } from "react-router-dom"
-import { LineChart } from "lucide-react"
-import { useAuth } from "@/hooks/useAuth"
+import { useNavigate } from "react-router-dom";
+import { LineChart } from "lucide-react";
+import { useAuth } from "@/hooks/auth";
 
 const ApplicationLogo = () => {
   const { user } = useAuth();
