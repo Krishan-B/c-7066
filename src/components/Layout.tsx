@@ -10,7 +10,7 @@ const Layout = () => {
       <Navigation />
       <KYCVerificationBanner />
       <div className="flex">
-        <Sidebar />
+        <Sidebar isOpen={true} />
         <main className="flex-1 overflow-auto">
           <Outlet />
         </main>

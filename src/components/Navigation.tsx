@@ -1,5 +1,4 @@
 
-import * as React from "react"
 import ApplicationLogo from "./navigation/ApplicationLogo"
 import MainNav from "./navigation/MainNav"
 import UserMenu from "./navigation/UserMenu"

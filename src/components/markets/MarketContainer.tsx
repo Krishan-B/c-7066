@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Asset } from "@/hooks/market";
 import { isMarketOpen } from "@/utils/marketHours";
@@ -49,6 +49,10 @@ const MarketContainer = ({
   // Check if the selected market is open
   const marketIsOpen = selectedAsset ? isMarketOpen(selectedAsset.market_type) : false;
 
+  const handleAssetSelect = (asset: Asset) => {
+    setSelectedAsset(asset);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
@@ -96,7 +100,7 @@ const MarketContainer = ({
               isLoading={isLoading}
               error={error}
               searchTerm={searchTerm}
-              onSelectAsset={setSelectedAsset}
+              onSelectAsset={handleAssetSelect}
               containerRef={chartSectionRef}
             />
           </div>
