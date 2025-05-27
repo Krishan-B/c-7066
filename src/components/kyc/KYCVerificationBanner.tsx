@@ -1,7 +1,7 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, CheckCircle, Clock, XCircle } from "lucide-react";
+import { AlertCircle, Clock, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useKYC } from "@/hooks/kyc/useKYC";
 import { useAuth } from "@/hooks/auth";

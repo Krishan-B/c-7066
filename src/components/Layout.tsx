@@ -1,7 +1,7 @@
 
 import { Outlet } from "react-router-dom";
-import { Sidebar } from "@/components/Sidebar";
-import Navigation from "@/components/Navigation";
+import Sidebar from "@/components/Sidebar";
+import { Navigation } from "@/components/Navigation";
 import KYCVerificationBanner from "@/components/kyc/KYCVerificationBanner";
 
 const Layout = () => {

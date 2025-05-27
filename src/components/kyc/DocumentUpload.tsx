@@ -27,6 +27,11 @@ const DocumentUpload = ({ onUpload, isUploading }: DocumentUploadProps) => {
 
     const file = acceptedFiles[0];
     
+    if (!file) {
+      setError('No file selected');
+      return;
+    }
+    
     // Validate file
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
