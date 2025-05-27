@@ -24,6 +24,7 @@ const News = lazy(() => import(/* webpackChunkName: "news" */ "@/pages/News"));
 const Wallet = lazy(() => import(/* webpackChunkName: "wallet" */ "@/pages/Wallet"));
 const Account = lazy(() => import(/* webpackChunkName: "account" */ "@/pages/Account"));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const KYCPage = lazy(() => import("@/pages/KYCPage"));
 
 export default function App() {
   useEffect(() => {
@@ -78,6 +79,11 @@ export default function App() {
                   <Route path="profile" element={
                     <Suspense fallback={<LoadingFallback />}>
                       <ProtectedRoute><ProfilePage /></ProtectedRoute>
+                    </Suspense>
+                  } />
+                  <Route path="kyc" element={
+                    <Suspense fallback={<LoadingFallback />}>
+                      <ProtectedRoute><KYCPage /></ProtectedRoute>
                     </Suspense>
                   } />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
