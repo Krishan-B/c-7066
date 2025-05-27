@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import OpenPositionsTable from "./OpenPositionsTable";
 import PendingOrdersTable from "./PendingOrdersTable";
@@ -7,11 +6,9 @@ import ClosedTradesTable from "./ClosedTradesTable";
 import OrderHistoryTable from "./OrderHistoryTable";
 import { AdvancedOrderForm, AdvancedOrderFormValues } from "@/components/trade/AdvancedOrderForm";
 import { toast } from "sonner";
-import { AccountMetrics } from "@/types/account";
-import { Trade } from "@/hooks/useTradeManagement";
 import { OrderTabsProps } from "./OrderTabs.d";
 import { useTradeExecution } from "@/hooks/useTradeExecution";
-import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
+import { useCombinedMarketData, MarketType } from "@/hooks/market";
 
 const OrderTabs: React.FC<OrderTabsProps> = ({ 
   activeTab, 
@@ -25,7 +22,7 @@ const OrderTabs: React.FC<OrderTabsProps> = ({
   accountMetrics
 }) => {
   const [selectedSymbol, setSelectedSymbol] = useState("BTCUSD");
-  const [assetCategory, setAssetCategory] = useState("Crypto");
+  const [assetCategory, setAssetCategory] = useState<MarketType>("Crypto");
   
   // Fetch real-time market data
   const { marketData, isLoading: isLoadingMarketData } = useCombinedMarketData(
@@ -39,6 +36,27 @@ const OrderTabs: React.FC<OrderTabsProps> = ({
   
   // Use our trade execution hook
   const { executeTrade, isExecuting } = useTradeExecution();
+
+  // Handle asset category change with type safety
+  const handleAssetCategoryChange = (category: string) => {
+    // Validate that the category is a valid MarketType
+    if (
+      category === "Crypto" ||
+      category === "Stock" ||
+      category === "Forex" ||
+      category === "Index" ||
+      category === "Commodities"
+    ) {
+      setAssetCategory(category);
+      
+      // Select the first asset in this category
+      const assetsInCategory = marketData.filter(asset => asset.market_type === category);
+      const firstAsset = assetsInCategory[0];
+      if (firstAsset?.symbol) {
+        setSelectedSymbol(firstAsset.symbol);
+      }
+    }
+  };
 
   // Handle order submission
   const handleOrderSubmit = async (values: AdvancedOrderFormValues, action: "buy" | "sell") => {
@@ -98,22 +116,6 @@ const OrderTabs: React.FC<OrderTabsProps> = ({
       takeProfit,
       expiration
     });
-  };
-  
-  // Handle symbol change
-  const handleSymbolChange = (symbol: string) => {
-    setSelectedSymbol(symbol);
-  };
-  
-  // Handle asset category change
-  const handleAssetCategoryChange = (category: string) => {
-    setAssetCategory(category);
-    
-    // Select the first asset in this category
-    const assetsInCategory = marketData.filter(asset => asset.market_type === category);
-    if (assetsInCategory.length > 0) {
-      setSelectedSymbol(assetsInCategory[0].symbol);
-    }
   };
 
   return (
