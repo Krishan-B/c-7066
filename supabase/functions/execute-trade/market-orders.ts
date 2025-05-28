@@ -1,5 +1,5 @@
 
-import { type TradeRequest, type TradeResult } from './types.ts';
+import { type TradeRequest, type TradeResult, type SupabaseClientType } from './types.ts';
 import { calculateMarginRequired, getUserAccount } from './utils.ts';
 import { updatePortfolio } from './portfolio.ts';
 
@@ -7,7 +7,7 @@ import { updatePortfolio } from './portfolio.ts';
  * Execute a market order
  */
 export async function executeMarketOrder(
-  supabase: any, 
+  supabase: SupabaseClientType, 
   userId: string, 
   params: TradeRequest
 ): Promise<TradeResult> {

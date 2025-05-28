@@ -83,7 +83,7 @@ export default function QuickTradePanel({ symbol, name, price, marketType }: Qui
         description: `${action === "buy" ? "Bought" : "Sold"} ${parsedUnits} units at $${(action === "buy" ? buyPrice : sellPrice).toFixed(2)}`,
         variant: action === "buy" ? "default" : "destructive",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Execution Failed",
         description: "There was an error executing your trade. Please try again.",

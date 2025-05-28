@@ -1,3 +1,6 @@
+// Import only the type from createClient to avoid Deno errors
+// @ts-expect-error: Deno-specific module import
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // Define common types for the execute-trade function
 export interface TradeRequest {
@@ -43,4 +46,37 @@ export interface Portfolio {
   pnl: number;
   pnl_percentage: number;
   last_updated?: string;
+}
+
+// Define a type for the Supabase client to avoid using any
+export type SupabaseClientType = SupabaseClient;
+
+// For Typescript only - not used in runtime
+export interface SupabaseClient {
+  auth: {
+    getUser: (token?: string) => Promise<{
+      data: { user: unknown };
+      error: unknown;
+    }>;
+  };
+  from: (table: string) => {
+    select: (columns?: string) => {
+      eq: (column: string, value: string | number) => {
+        single: () => Promise<{
+          data: unknown;
+          error: unknown;
+        }>;
+      };
+    };
+    update: (data: Record<string, unknown>) => {
+      eq: (column: string, value: string | number) => Promise<{
+        data: unknown;
+        error: unknown;
+      }>;
+    };
+    insert: (data: Record<string, unknown>) => Promise<{
+      data: unknown;
+      error: unknown;
+    }>;
+  };
 }

@@ -1,11 +1,11 @@
 
-import { type TradeResult } from './types.ts';
+import { type TradeResult, type SupabaseClientType } from './types.ts';
 
 /**
  * Cancel a pending order
  */
 export async function cancelOrder(
-  supabase: any,
+  supabase: SupabaseClientType,
   userId: string,
   tradeId: string
 ): Promise<TradeResult> {

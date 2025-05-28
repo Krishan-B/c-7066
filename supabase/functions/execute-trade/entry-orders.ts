@@ -1,12 +1,12 @@
 
-import { type TradeRequest, type TradeResult } from './types.ts';
+import { type TradeRequest, type TradeResult, type SupabaseClientType } from './types.ts';
 import { getUserAccount } from './utils.ts';
 
 /**
  * Execute an entry order (pending)
  */
 export async function executeEntryOrder(
-  supabase: any, 
+  supabase: SupabaseClientType, 
   userId: string, 
   params: TradeRequest
 ): Promise<TradeResult> {
@@ -15,7 +15,7 @@ export async function executeEntryOrder(
     const totalAmount = params.units * params.pricePerUnit;
     
     // Get user's account to validate
-    const { account, error: accountError } = await getUserAccount(supabase, userId);
+    const { error: accountError } = await getUserAccount(supabase, userId);
     
     if (accountError) {
       throw new Error(accountError);

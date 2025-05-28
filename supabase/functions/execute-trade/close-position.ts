@@ -1,12 +1,12 @@
 
-import { type TradeResult } from './types.ts';
+import { type TradeResult, type SupabaseClientType } from './types.ts';
 import { calculateMarginRequired, getUserAccount } from './utils.ts';
 
 /**
  * Close an open position
  */
 export async function closePosition(
-  supabase: any,
+  supabase: SupabaseClientType,
   userId: string,
   tradeId: string,
   closePrice: number
@@ -65,11 +65,11 @@ export async function closePosition(
       .from('user_account')
       .update({
         cash_balance: account!.cash_balance + pnl,
-        equity: account!.cash_balance + pnl + (account!.unrealized_pnl - pnl || 0),
+        equity: account!.cash_balance + pnl + ((account!.unrealized_pnl ?? 0) - pnl),
         used_margin: Math.max(0, account!.used_margin - marginRequired),
         available_funds: account!.available_funds + marginRequired,
-        realized_pnl: (account!.realized_pnl || 0) + pnl,
-        unrealized_pnl: Math.max(0, (account!.unrealized_pnl || 0) - pnl),
+        realized_pnl: (account!.realized_pnl ?? 0) + pnl,
+        unrealized_pnl: Math.max(0, (account!.unrealized_pnl ?? 0) - pnl),
         last_updated: new Date().toISOString()
       })
       .eq('id', userId);

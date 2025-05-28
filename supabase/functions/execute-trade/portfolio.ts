@@ -1,10 +1,10 @@
 
-import { type TradeRequest } from './types.ts';
+import { type TradeRequest, type SupabaseClientType } from './types.ts';
 
 /**
  * Update portfolio with new trade position
  */
-export async function updatePortfolio(supabase: any, userId: string, params: TradeRequest): Promise<void> {
+export async function updatePortfolio(supabase: SupabaseClientType, userId: string, params: TradeRequest): Promise<void> {
   try {
     // Check if we already have this asset in the portfolio
     const { data: portfolioData, error: portfolioError } = await supabase
