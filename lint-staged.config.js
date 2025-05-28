@@ -3,3 +3,4 @@ module.exports = {
 };
 
 // Test comment for pre-commit hook
+// Test comment for CI trigger
