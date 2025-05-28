@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/31</span>
+                <span class='fraction'>0/11</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/31</span>
+                <span class='fraction'>0/11</span>
             </div>
         
             
@@ -85,20 +85,14 @@
 <a name='L20'></a><a href='#L20'>20</a>
 <a name='L21'></a><a href='#L21'>21</a>
 <a name='L22'></a><a href='#L22'>22</a>
-<a name='L23'></a><a href='#L23'>23</a>
-<a name='L24'></a><a href='#L24'>24</a>
-<a name='L25'></a><a href='#L25'>25</a>
-<a name='L26'></a><a href='#L26'>26</a>
-<a name='L27'></a><a href='#L27'>27</a>
-<a name='L28'></a><a href='#L28'>28</a>
-<a name='L29'></a><a href='#L29'>29</a>
-<a name='L30'></a><a href='#L30'>30</a>
-<a name='L31'></a><a href='#L31'>31</a>
-<a name='L32'></a><a href='#L32'>32</a>
-<a name='L33'></a><a href='#L33'>33</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L23'></a><a href='#L23'>23</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -109,64 +103,40 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { useQuery } from "@tanstack/react-query";</span></span></span>
-<span class="cstat-no" title="statement not covered" >const fetchBitcoinPrices = async () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  const response = await fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&amp;days=180&amp;interval=daily");</span>
-<span class="cstat-no" title="statement not covered" >  const data = await response.json();</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" >import { /* useQuery */ } from "@tanstack/react-query";</span></span></span>
+/*
+// Commented out unused function
+const fetchBitcoinPrices = async () =&gt; {
+  const response = await fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&amp;days=180&amp;interval=daily");
+  const data = await response.json();
+  return data;
+};
+*/
 &nbsp;
-  // Format data for the chart - take last 6 months
-<span class="cstat-no" title="statement not covered" >  return data.prices.slice(-180).map(([timestamp, price]: [number, number]) =&gt; ({</span>
-<span class="cstat-no" title="statement not covered" >    date: new Date(timestamp).toLocaleDateString('en-US', {</span>
-<span class="cstat-no" title="statement not covered" >      month: 'short'</span>
-<span class="cstat-no" title="statement not covered" >    }),</span>
-<span class="cstat-no" title="statement not covered" >    price: Math.round(price)</span>
-<span class="cstat-no" title="statement not covered" >  }));</span>
-<span class="cstat-no" title="statement not covered" >};</span>
 <span class="cstat-no" title="statement not covered" >const PortfolioCard = () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >  const {</span>
-<span class="cstat-no" title="statement not covered" >    data: priceData,</span>
-<span class="cstat-no" title="statement not covered" >    isLoading</span>
-<span class="cstat-no" title="statement not covered" >  } = useQuery({</span>
-<span class="cstat-no" title="statement not covered" >    queryKey: ['bitcoinPrices'],</span>
-<span class="cstat-no" title="statement not covered" >    queryFn: fetchBitcoinPrices,</span>
-<span class="cstat-no" title="statement not covered" >    refetchInterval: 60000 // Refetch every minute</span>
-<span class="cstat-no" title="statement not covered" >  });</span>
-<span class="cstat-no" title="statement not covered" >  if (isLoading) {</span>
-<span class="cstat-no" title="statement not covered" >    return &lt;div className="glass-card p-6 rounded-lg mb-8 animate-fade-in"&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;h2 className="text-xl font-semibold mb-6"&gt;Bitcoin Performance&lt;/h2&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;div className="w-full h-[200px] flex items-center justify-center"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;span className="text-muted-foreground"&gt;Loading...&lt;/span&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;/div&gt;;</span>
-<span class="cstat-no" title="statement not covered" >  }</span>
-<span class="cstat-no" title="statement not covered" >  return;</span>
+<span class="cstat-no" title="statement not covered" >  return (</span>
+<span class="cstat-no" title="statement not covered" >    &lt;div className="glass-card p-6 rounded-lg mb-8 animate-fade-in"&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;h2 className="text-xl font-semibold mb-6"&gt;Bitcoin Performance&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;div className="w-full h-[200px] flex items-center justify-center"&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;span className="text-muted-foreground"&gt;Chart loading...&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;/div&gt;</span>
+  );
 <span class="cstat-no" title="statement not covered" >};</span>
-<span class="cstat-no" title="statement not covered" >export default PortfolioCard;</span></pre></td></tr></table></pre>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >export default PortfolioCard;</span>
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-28T00:12:49.724Z
+                at 2025-05-28T13:04:56.558Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

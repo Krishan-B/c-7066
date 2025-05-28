@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">3.89% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/77</span>
+                <span class='fraction'>3/77</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/1</span>
-            </div>
-        
-            
-            <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
-                <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/0</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/6</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">3.89% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/77</span>
+                <span class='fraction'>3/77</span>
             </div>
         
             
@@ -167,23 +167,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -199,7 +183,23 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -264,7 +264,7 @@ import { type Asset } from '@/hooks/market/types';
 /**
  * Transform stock data from Finnhub to a standardized format
  */
-<span class="cstat-no" title="statement not covered" >export function transformStockData(data: FinnhubQuote, symbol: string): Asset {</span>
+export <span class="fstat-no" title="function not covered" >function transformStockData(data: FinnhubQuote, symbol: string): Asset {</span>
 <span class="cstat-no" title="statement not covered" >  return {</span>
 <span class="cstat-no" title="statement not covered" >    symbol: symbol,</span>
 <span class="cstat-no" title="statement not covered" >    name: getStockName(symbol),</span>
@@ -280,7 +280,7 @@ import { type Asset } from '@/hooks/market/types';
 /**
  * Transform crypto data from Finnhub to a standardized format
  */
-<span class="cstat-no" title="statement not covered" >export function transformCryptoData(data: FinnhubQuote, symbol: string): Asset {</span>
+export <span class="fstat-no" title="function not covered" >function transformCryptoData(data: FinnhubQuote, symbol: string): Asset {</span>
 <span class="cstat-no" title="statement not covered" >  return {</span>
 <span class="cstat-no" title="statement not covered" >    symbol: symbol,</span>
 <span class="cstat-no" title="statement not covered" >    name: getCryptoName(symbol),</span>
@@ -296,7 +296,7 @@ import { type Asset } from '@/hooks/market/types';
 /**
  * Transform forex data from Finnhub to a standardized format
  */
-<span class="cstat-no" title="statement not covered" >export function transformForexData(data: FinnhubQuote, fromCurrency: string, toCurrency: string): Asset {</span>
+export <span class="fstat-no" title="function not covered" >function transformForexData(data: FinnhubQuote, fromCurrency: string, toCurrency: string): Asset {</span>
 <span class="cstat-no" title="statement not covered" >  const symbol = `${fromCurrency}/${toCurrency}`;</span>
 <span class="cstat-no" title="statement not covered" >  return {</span>
 <span class="cstat-no" title="statement not covered" >    symbol: symbol,</span>
@@ -310,7 +310,7 @@ import { type Asset } from '@/hooks/market/types';
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
 // Helper functions
-<span class="cstat-no" title="statement not covered" >function getStockName(symbol: string): string {</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >function getStockName(symbol: string): string {</span></span>
 <span class="cstat-no" title="statement not covered" >  const stockNames: Record&lt;string, string&gt; = {</span>
 <span class="cstat-no" title="statement not covered" >    'AAPL': 'Apple Inc.',</span>
 <span class="cstat-no" title="statement not covered" >    'MSFT': 'Microsoft Corp.',</span>
@@ -326,7 +326,7 @@ import { type Asset } from '@/hooks/market/types';
 <span class="cstat-no" title="statement not covered" >  return stockNames[symbol] || symbol;</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >function getCryptoName(symbol: string): string {</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >function getCryptoName(symbol: string): string {</span></span>
 <span class="cstat-no" title="statement not covered" >  const symbolMap: Record&lt;string, string&gt; = {</span>
 <span class="cstat-no" title="statement not covered" >    'BINANCE:BTCUSDT': 'Bitcoin',</span>
 <span class="cstat-no" title="statement not covered" >    'BINANCE:ETHUSDT': 'Ethereum',</span>
@@ -342,7 +342,7 @@ import { type Asset } from '@/hooks/market/types';
 <span class="cstat-no" title="statement not covered" >  return symbolMap[symbol] || symbol.replace('BINANCE:', '');</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >function formatLargeNumber(num: number): string {</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >function formatLargeNumber(num: number): string {</span></span>
   // Format large numbers for volume and market cap
 <span class="cstat-no" title="statement not covered" >  if (num &gt;= 1000000000) {</span>
 <span class="cstat-no" title="statement not covered" >    return `$${(num / 1000000000).toFixed(2)}B`;</span>
@@ -361,7 +361,7 @@ import { type Asset } from '@/hooks/market/types';
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-28T00:12:49.724Z
+                at 2025-05-28T13:04:56.558Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

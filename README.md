@@ -1,3 +1,4 @@
+[![CI](https://github.com/Krishan-B/c-7066/actions/workflows/ci.yml/badge.svg)](https://github.com/Krishan-B/c-7066/actions/workflows/ci.yml)
 
 # Trading Pro - Simulated CFD Trading Platform
 
@@ -64,3 +65,27 @@ A multi-asset simulated CFD trading platform that allows users to practice tradi
 - Commodities: 50:1 (2% margin)
 - Forex: 100:1 (1% margin)
 - Crypto: 50:1 (2% margin)
+
+## Context & Provider Architecture
+
+This project uses React Context Providers and custom hooks for state management and cross-cutting concerns. Key providers and hooks include:
+
+### Theme Context
+- **File:** `src/components/theme/ThemeProviderContent.tsx`
+- **Usage:** Wrap your app with `<ThemeProvider>` to provide theme state and toggling across the app.
+- **Access:** Use the `useTheme` hook from `src/components/theme/use-theme.ts` to access or toggle the theme.
+
+### Trade Panel Context
+- **File:** `src/components/trade/TradePanelProviderContent.tsx`
+- **Usage:** Wrap relevant parts of your app with `<TradePanelProvider>` to manage the trade panel's open/close state.
+- **Access:** Use the `useTradePanelContext` hook from `src/components/trade/use-trade-panel.ts` to open/close the trade panel from any component.
+
+### Auth Context
+- **File:** `src/components/AuthProvider.tsx` and `src/components/AuthContext.tsx`
+- **Usage:** Wrap your app with `<AuthProvider>` to provide authentication state and user info.
+- **Access:** Use the `useAuth` hook from `src/hooks/auth/useAuth.ts` for authentication and user profile actions.
+
+### Best Practices
+- Always wrap your app (or relevant subtree) with the required provider.
+- Use the provided custom hooks to access context values and actions.
+- See `DEVELOPER_NOTES.md` for more on context/provider and hook best practices.

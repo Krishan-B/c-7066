@@ -1,0 +1,13 @@
+frontend:
+  - 'src/components/**'
+  - 'src/pages/**'
+backend:
+  - 'src/services/**'
+  - 'src/hooks/**'
+types:
+  - 'src/types/**'
+docs:
+  - '*.md'
+  - 'docs/**'
+ci:
+  - '.github/workflows/**'

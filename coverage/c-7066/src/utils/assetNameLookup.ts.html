@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">73.33% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>11/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/1</span>
-            </div>
-        
-            
-            <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
-                <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/0</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">73.33% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>11/15</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -85,19 +85,19 @@
 <a name='L20'></a><a href='#L20'>20</a>
 <a name='L21'></a><a href='#L21'>21</a>
 <a name='L22'></a><a href='#L22'>22</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -106,19 +106,19 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// Utility to look up asset names by symbol for WebSocket/Polygon data
-<span class="cstat-no" title="statement not covered" >const assetNameMap: Record&lt;string, string&gt; = {</span>
-<span class="cstat-no" title="statement not covered" >  'AAPL': 'Apple Inc.',</span>
-<span class="cstat-no" title="statement not covered" >  'GOOGL': 'Alphabet Inc.',</span>
-<span class="cstat-no" title="statement not covered" >  'MSFT': 'Microsoft Corporation',</span>
-<span class="cstat-no" title="statement not covered" >  'BTC-USD': 'Bitcoin',</span>
-<span class="cstat-no" title="statement not covered" >  'ETH-USD': 'Ethereum',</span>
-<span class="cstat-no" title="statement not covered" >  'XAUUSD': 'Gold',</span>
-<span class="cstat-no" title="statement not covered" >  'XAGUSD': 'Silver',</span>
-<span class="cstat-no" title="statement not covered" >  'US500': 'S&amp;P 500',</span>
+const assetNameMap: Record&lt;string, string&gt; = {
+  'AAPL': 'Apple Inc.',
+  'GOOGL': 'Alphabet Inc.',
+  'MSFT': 'Microsoft Corporation',
+  'BTC-USD': 'Bitcoin',
+  'ETH-USD': 'Ethereum',
+  'XAUUSD': 'Gold',
+  'XAGUSD': 'Silver',
+  'US500': 'S&amp;P 500',
   // Add more mappings as needed
-<span class="cstat-no" title="statement not covered" >};</span>
+};
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export function getAssetNameBySymbol(symbol: string): string {</span>
+export <span class="fstat-no" title="function not covered" >function getAssetNameBySymbol(symbol: string): string {</span>
   // Try direct match
 <span class="cstat-no" title="statement not covered" >  if (assetNameMap[symbol]) return assetNameMap[symbol];</span>
   // Try fallback for crypto (BTC, ETH, etc.)
@@ -133,7 +133,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-28T00:12:49.724Z
+                at 2025-05-28T13:04:56.558Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

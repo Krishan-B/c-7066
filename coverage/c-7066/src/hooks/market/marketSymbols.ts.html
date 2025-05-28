@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">89.47% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>17/19</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>1/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">89.47% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/19</span>
+                <span class='fraction'>17/19</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -104,33 +104,33 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">&nbsp;
@@ -139,33 +139,33 @@ interface MarketSymbols {
 }
 &nbsp;
 // Define default symbols for each market type
-<span class="cstat-no" title="statement not covered" >const defaultSymbols: MarketSymbols = {</span>
-<span class="cstat-no" title="statement not covered" >  'Crypto': ['BTCUSD', 'ETHUSD', 'ADAUSD', 'SOLUSD', 'DOTUSD'],</span>
-<span class="cstat-no" title="statement not covered" >  'Stock': ['AAPL', 'MSFT', 'TSLA', 'AMZN', 'GOOGL'],</span>
-<span class="cstat-no" title="statement not covered" >  'Forex': ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD'],</span>
-<span class="cstat-no" title="statement not covered" >  'Index': ['SPX500', 'NASDAQ', 'DJI', 'UK100', 'JP225'],</span>
-<span class="cstat-no" title="statement not covered" >  'Commodities': ['XAUUSD', 'XAGUSD', 'USOIL', 'NATGAS', 'COPPER']</span>
-<span class="cstat-no" title="statement not covered" >};</span>
+const defaultSymbols: MarketSymbols = {
+  'Crypto': ['BTCUSD', 'ETHUSD', 'ADAUSD', 'SOLUSD', 'DOTUSD'],
+  'Stock': ['AAPL', 'MSFT', 'TSLA', 'AMZN', 'GOOGL'],
+  'Forex': ['EURUSD', 'GBPUSD', 'USDJPY', 'AUDUSD', 'USDCAD'],
+  'Index': ['SPX500', 'NASDAQ', 'DJI', 'UK100', 'JP225'],
+  'Commodities': ['XAUUSD', 'XAGUSD', 'USOIL', 'NATGAS', 'COPPER']
+};
 &nbsp;
 /**
  * Get symbols for specified market types
  */
-<span class="cstat-no" title="statement not covered" >export function getSymbolsForMarketType(marketTypes: string[]): MarketSymbols {</span>
-<span class="cstat-no" title="statement not covered" >  const result: MarketSymbols = {};</span>
+export function getSymbolsForMarketType(marketTypes: string[]): MarketSymbols {
+  const result: MarketSymbols = {};
   
-<span class="cstat-no" title="statement not covered" >  marketTypes.forEach(type =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    if (defaultSymbols[type]) {</span>
-<span class="cstat-no" title="statement not covered" >      result[type] = defaultSymbols[type];</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
-<span class="cstat-no" title="statement not covered" >  });</span>
+  marketTypes.forEach(type =&gt; {
+    if (defaultSymbols[type]) {
+      result[type] = defaultSymbols[type];
+    }
+  });
   
-<span class="cstat-no" title="statement not covered" >  return result;</span>
-<span class="cstat-no" title="statement not covered" >}</span>
+  return result;
+}
 &nbsp;
 /**
  * Get all available symbols across all market types
  */
-<span class="cstat-no" title="statement not covered" >export function getAllMarketSymbols(): string[] {</span>
+export <span class="fstat-no" title="function not covered" >function getAllMarketSymbols(): string[] {</span>
 <span class="cstat-no" title="statement not covered" >  return Object.values(defaultSymbols).flat();</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;</pre></td></tr></table></pre>
@@ -175,7 +175,7 @@ interface MarketSymbols {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-28T00:12:49.724Z
+                at 2025-05-28T13:04:56.558Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm ci
+      - name: Run ESLint
+        run: npx eslint .
+      - name: Run TypeScript type check
+        run: npx tsc --noEmit
+      - name: Run Tests
+        run: npx vitest run --coverage
+      - name: Build Project
+        run: npm run build
+
+  pr-labeler:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+
+  markdown-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          globs: |
+            **/*.md
+
+  notify-on-failure:
+    needs: [lint-and-typecheck, pr-labeler, markdown-lint]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email on failure
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.example.com
+          server_port: 465
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "CI Failed for ${{ github.repository }}"
+          to: your@email.com
+          from: CI Bot <ci@example.com>
+          body: |
+            The CI workflow failed for ${{ github.repository }}.
+            Commit: ${{ github.sha }}
+            Workflow: ${{ github.workflow }}
+            Run: ${{ github.run_id }}
+            Please check the Actions tab for details.

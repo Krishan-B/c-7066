@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">2.94% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/68</span>
+                <span class='fraction'>2/68</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/1</span>
-            </div>
-        
-            
-            <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
-                <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/0</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/4</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">2.94% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/68</span>
+                <span class='fraction'>2/68</span>
             </div>
         
             
@@ -154,37 +154,37 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -240,7 +240,7 @@
 /**
  * Transform ticker details to Asset format
  */
-<span class="cstat-no" title="statement not covered" >export function transformTickerToAsset(ticker: unknown): Asset | null {</span>
+export <span class="fstat-no" title="function not covered" >function transformTickerToAsset(ticker: unknown): Asset | null {</span>
 <span class="cstat-no" title="statement not covered" >  if (!ticker || typeof ticker !== 'object') return null;</span>
   // Use destructuring and type guards
 <span class="cstat-no" title="statement not covered" >  const t = ticker as Record&lt;string, unknown&gt;;</span>
@@ -270,7 +270,7 @@
 /**
  * Transform quote to Asset format
  */
-<span class="cstat-no" title="statement not covered" >export function transformQuoteToAsset(quote: unknown, symbol: string): Asset | null {</span>
+export <span class="fstat-no" title="function not covered" >function transformQuoteToAsset(quote: unknown, symbol: string): Asset | null {</span>
 <span class="cstat-no" title="statement not covered" >  if (!quote || typeof quote !== 'object') return null;</span>
 <span class="cstat-no" title="statement not covered" >  const q = quote as Record&lt;string, unknown&gt;;</span>
 <span class="cstat-no" title="statement not covered" >  const lastTrade = q.lastTrade &amp;&amp; typeof q.lastTrade === 'object' ? (q.lastTrade as Record&lt;string, unknown&gt;) : undefined;</span>
@@ -294,7 +294,7 @@
 /**
  * Determine market type based on symbol
  */
-<span class="cstat-no" title="statement not covered" >function getMarketType(symbol: string): MarketType {</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >function getMarketType(symbol: string): MarketType {</span></span>
 <span class="cstat-no" title="statement not covered" >  if (!symbol) return 'Stock';</span>
 <span class="cstat-no" title="statement not covered" >  if (symbol.includes('USD') || symbol.includes('BTC') || symbol.includes('ETH')) {</span>
 <span class="cstat-no" title="statement not covered" >    return 'Crypto';</span>
@@ -311,7 +311,7 @@
 /**
  * Format volume for display
  */
-<span class="cstat-no" title="statement not covered" >function formatVolume(volume: number): string {</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >function formatVolume(volume: number): string {</span></span>
 <span class="cstat-no" title="statement not covered" >  if (volume &gt;= 1e9) {</span>
 <span class="cstat-no" title="statement not covered" >    return (volume / 1e9).toFixed(2) + 'B';</span>
 <span class="cstat-no" title="statement not covered" >  } else if (volume &gt;= 1e6) {</span>
@@ -328,7 +328,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-28T00:12:49.724Z
+                at 2025-05-28T13:04:56.558Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

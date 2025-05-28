@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">7.57% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/66</span>
+                <span class='fraction'>5/66</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/1</span>
-            </div>
-        
-            
-            <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
-                <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/0</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/8</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">7.57% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/66</span>
+                <span class='fraction'>5/66</span>
             </div>
         
             
@@ -201,28 +201,28 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -335,28 +335,28 @@
 /**
  * Finnhub API client
  */
-<span class="cstat-no" title="statement not covered" >const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';</span>
-<span class="cstat-no" title="statement not covered" >let FINNHUB_API_KEY: string | undefined;</span>
+const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
+let FINNHUB_API_KEY: string | undefined;
 &nbsp;
 /**
  * Set the Finnhub API key
  * @param apiKey The API key
  */
-<span class="cstat-no" title="statement not covered" >export function setFinnhubApiKey(apiKey: string) {</span>
+export <span class="fstat-no" title="function not covered" >function setFinnhubApiKey(apiKey: string) {</span>
 <span class="cstat-no" title="statement not covered" >  FINNHUB_API_KEY = apiKey;</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
 /**
  * Get the Finnhub API key
  */
-<span class="cstat-no" title="statement not covered" >export function getFinnhubApiKey(): string | undefined {</span>
+export <span class="fstat-no" title="function not covered" >function getFinnhubApiKey(): string | undefined {</span>
 <span class="cstat-no" title="statement not covered" >  return FINNHUB_API_KEY;</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
 /**
  * Check if the Finnhub API key is set
  */
-<span class="cstat-no" title="statement not covered" >export function hasFinnhubApiKey(): boolean {</span>
+export <span class="fstat-no" title="function not covered" >function hasFinnhubApiKey(): boolean {</span>
 <span class="cstat-no" title="statement not covered" >  return !!FINNHUB_API_KEY;</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
@@ -366,7 +366,7 @@
  * @param params Additional query parameters
  * @returns Response data
  */
-<span class="cstat-no" title="statement not covered" >async function makeRequest&lt;T&gt;(endpoint: string, params: Record&lt;string, string&gt; = {}): Promise&lt;T&gt; {</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async function makeRequest&lt;T&gt;(endpoint: string, params: Record&lt;string, string&gt; = {}): Promise&lt;T&gt; {</span></span>
 <span class="cstat-no" title="statement not covered" >  if (!FINNHUB_API_KEY) {</span>
 <span class="cstat-no" title="statement not covered" >    throw new Error('Finnhub API key is not set');</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
@@ -407,7 +407,7 @@ export interface FinnhubQuote {
  * Get a stock quote
  * @param symbol Stock symbol
  */
-<span class="cstat-no" title="statement not covered" >export async function getStockQuote(symbol: string): Promise&lt;FinnhubQuote&gt; {</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >export async function getStockQuote(symbol: string): Promise&lt;FinnhubQuote&gt; {</span></span>
 <span class="cstat-no" title="statement not covered" >  return makeRequest&lt;FinnhubQuote&gt;('/quote', { symbol });</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
@@ -415,7 +415,7 @@ export interface FinnhubQuote {
  * Get a crypto quote
  * @param symbol Crypto symbol
  */
-<span class="cstat-no" title="statement not covered" >export async function getCryptoQuote(symbol: string): Promise&lt;FinnhubQuote&gt; {</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >export async function getCryptoQuote(symbol: string): Promise&lt;FinnhubQuote&gt; {</span></span>
 <span class="cstat-no" title="statement not covered" >  return makeRequest&lt;FinnhubQuote&gt;('/quote', { symbol });</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
@@ -424,7 +424,7 @@ export interface FinnhubQuote {
  * @param fromCurrency From currency
  * @param toCurrency To currency
  */
-<span class="cstat-no" title="statement not covered" >export async function getForexQuote(fromCurrency: string, toCurrency: string): Promise&lt;FinnhubQuote&gt; {</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >export async function getForexQuote(fromCurrency: string, toCurrency: string): Promise&lt;FinnhubQuote&gt; {</span></span>
 <span class="cstat-no" title="statement not covered" >  return makeRequest&lt;FinnhubQuote&gt;('/forex/rates', { base: fromCurrency });</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
@@ -433,7 +433,7 @@ export interface FinnhubQuote {
  * @param symbols Array of symbols to fetch
  * @param assetType Type of asset (Stocks, Crypto, etc.)
  */
-<span class="cstat-no" title="statement not covered" >export async function getMarketData(symbols: string[], assetType: string) {</span>
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >export async function getMarketData(symbols: string[], assetType: string) {</span></span>
 <span class="cstat-no" title="statement not covered" >  console.log(`Fetching ${assetType} data for symbols:`, symbols);</span>
   
 <span class="cstat-no" title="statement not covered" >  const results = [];</span>
@@ -472,7 +472,7 @@ export interface FinnhubQuote {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-28T00:12:49.724Z
+                at 2025-05-28T13:04:56.558Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>

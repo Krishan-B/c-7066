@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/69</span>
+                <span class='fraction'>0/75</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/69</span>
+                <span class='fraction'>0/75</span>
             </div>
         
             
@@ -157,7 +157,13 @@
 <a name='L92'></a><a href='#L92'>92</a>
 <a name='L93'></a><a href='#L93'>93</a>
 <a name='L94'></a><a href='#L94'>94</a>
-<a name='L95'></a><a href='#L95'>95</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -183,8 +189,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -192,6 +196,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -202,6 +209,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -261,7 +273,7 @@ import { LoadingFallback } from "@/components/ui/loading-fallback";
 import Layout from "@/components/Layout";
 import { Toaster } from "@/components/ui/toaster";
 import { TradePanelProvider } from "@/components/trade/TradePanelProvider";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeProvider } from "@/components/theme";
 import { HelmetProvider } from "react-helmet-async";
 &nbsp;
 // Critical components that should be eagerly loaded
@@ -277,6 +289,7 @@ import Auth from "@/pages/Auth";
 <span class="cstat-no" title="statement not covered" >const Wallet = lazy(() =&gt; import(/* webpackChunkName: "wallet" */ "@/pages/Wallet"));</span>
 <span class="cstat-no" title="statement not covered" >const Account = lazy(() =&gt; import(/* webpackChunkName: "account" */ "@/pages/Account"));</span>
 <span class="cstat-no" title="statement not covered" >const ProfilePage = lazy(() =&gt; import("@/pages/ProfilePage"));</span>
+<span class="cstat-no" title="statement not covered" >const KYCPage = lazy(() =&gt; import("@/pages/KYCPage"));</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >export default function App() {</span>
 <span class="cstat-no" title="statement not covered" >  useEffect(() =&gt; {</span>
@@ -333,6 +346,11 @@ import Auth from "@/pages/Auth";
 <span class="cstat-no" title="statement not covered" >                      &lt;ProtectedRoute&gt;&lt;ProfilePage /&gt;&lt;/ProtectedRoute&gt;</span>
 <span class="cstat-no" title="statement not covered" >                    &lt;/Suspense&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  } /&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  &lt;Route path="kyc" element={</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;Suspense fallback={&lt;LoadingFallback /&gt;}&gt;</span>
+<span class="cstat-no" title="statement not covered" >                      &lt;ProtectedRoute&gt;&lt;KYCPage /&gt;&lt;/ProtectedRoute&gt;</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;/Suspense&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  } /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                  &lt;Route path="*" element={&lt;Navigate to="/dashboard" replace /&gt;} /&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;/Route&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;Route path="*" element={&lt;Navigate to="/" replace /&gt;} /&gt;</span>
@@ -352,7 +370,7 @@ import Auth from "@/pages/Auth";
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-28T00:12:49.724Z
+                at 2025-05-28T13:04:56.558Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

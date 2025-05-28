@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/27</span>
+                <span class='fraction'>0/33</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/27</span>
+                <span class='fraction'>0/33</span>
             </div>
         
             
@@ -109,7 +109,37 @@
 <a name='L44'></a><a href='#L44'>44</a>
 <a name='L45'></a><a href='#L45'>45</a>
 <a name='L46'></a><a href='#L46'>46</a>
-<a name='L47'></a><a href='#L47'>47</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -129,19 +159,25 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -156,13 +192,25 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
+// @ts-expect-error: Deno-specific module import
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { type UserAccount } from './types.ts';
+import { type UserAccount, type SupabaseClientType } from './types.ts';
+&nbsp;
+// Add type declarations for Deno runtime
+declare global {
+  interface DenoEnv {
+    get(key: string): string | undefined;
+  }
+  
+  const Deno: {
+    env: DenoEnv;
+  };
+}
 &nbsp;
 /**
  * Get Supabase client
  */
-<span class="cstat-no" title="statement not covered" >export function getSupabaseClient() {</span>
+<span class="cstat-no" title="statement not covered" >export function getSupabaseClient(): SupabaseClientType {</span>
 <span class="cstat-no" title="statement not covered" >  const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';</span>
 <span class="cstat-no" title="statement not covered" >  const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') ?? '';</span>
 <span class="cstat-no" title="statement not covered" >  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);</span>
@@ -171,7 +219,10 @@ import { type UserAccount } from './types.ts';
 /**
  * Get user from auth token
  */
-<span class="cstat-no" title="statement not covered" >export async function getUserFromToken(supabase: any, authHeader: string | null): Promise&lt;{ user: any; error: any }&gt; {</span>
+<span class="cstat-no" title="statement not covered" >export async function getUserFromToken(</span>
+<span class="cstat-no" title="statement not covered" >  supabase: SupabaseClientType, </span>
+<span class="cstat-no" title="statement not covered" >  authHeader: string | null</span>
+<span class="cstat-no" title="statement not covered" >): Promise&lt;{ user: unknown; error: string | null }&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  if (!authHeader) {</span>
 <span class="cstat-no" title="statement not covered" >    return { user: null, error: 'No authorization header' };</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
@@ -188,7 +239,10 @@ import { type UserAccount } from './types.ts';
 /**
  * Get user account data
  */
-<span class="cstat-no" title="statement not covered" >export async function getUserAccount(supabase: any, userId: string): Promise&lt;{ account: UserAccount | null; error: any }&gt; {</span>
+<span class="cstat-no" title="statement not covered" >export async function getUserAccount(</span>
+<span class="cstat-no" title="statement not covered" >  supabase: SupabaseClientType, </span>
+<span class="cstat-no" title="statement not covered" >  userId: string</span>
+<span class="cstat-no" title="statement not covered" >): Promise&lt;{ account: UserAccount | null; error: string | null }&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  const { data: accountData, error: accountError } = await supabase</span>
 <span class="cstat-no" title="statement not covered" >    .from('user_account')</span>
 <span class="cstat-no" title="statement not covered" >    .select('*')</span>
@@ -208,7 +262,7 @@ import { type UserAccount } from './types.ts';
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-28T00:12:49.724Z
+                at 2025-05-28T13:04:56.558Z
             </div>
         <script src="../../../../prettify.js"></script>
         <script>

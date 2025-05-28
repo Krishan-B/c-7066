@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">11.9% </span>
+                <span class="strong">25.39% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>15/126</span>
+                <span class='fraction'>32/126</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/0</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">14.28% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>1/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">11.9% </span>
+                <span class="strong">25.39% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>15/126</span>
+                <span class='fraction'>32/126</span>
             </div>
         
             
@@ -424,25 +424,25 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import * as React from "react"
@@ -615,25 +615,25 @@ type Toast = Omit&lt;ToasterToast, "id"&gt;
 <span class="cstat-no" title="statement not covered" >  }</span>
 <span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >function useToast() {</span></span>
-<span class="cstat-no" title="statement not covered" >  const [state, setState] = React.useState&lt;State&gt;(memoryState)</span>
+function useToast() {
+  const [state, setState] = React.useState&lt;State&gt;(memoryState)
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  React.useEffect(() =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    listeners.push(setState)</span>
-<span class="cstat-no" title="statement not covered" >    return () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      const index = listeners.indexOf(setState)</span>
-<span class="cstat-no" title="statement not covered" >      if (index &gt; -1) {</span>
-<span class="cstat-no" title="statement not covered" >        listeners.splice(index, 1)</span>
-<span class="cstat-no" title="statement not covered" >      }</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
-<span class="cstat-no" title="statement not covered" >  }, [state])</span>
+  React.useEffect(() =&gt; {
+    listeners.push(setState)
+    return () =&gt; {
+      const index = listeners.indexOf(setState)
+      if (index &gt; -1) {
+        listeners.splice(index, 1)
+      }
+    }
+  }, [state])
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return {</span>
-<span class="cstat-no" title="statement not covered" >    ...state,</span>
-<span class="cstat-no" title="statement not covered" >    toast,</span>
-<span class="cstat-no" title="statement not covered" >    dismiss: (toastId?: string) =&gt; dispatch({ type: "DISMISS_TOAST", toastId }),</span>
-<span class="cstat-no" title="statement not covered" >  }</span>
-<span class="cstat-no" title="statement not covered" >}</span>
+  return {
+    ...state,
+    toast,
+    dismiss: <span class="fstat-no" title="function not covered" >(toastId?: string) =&gt; dispatch({ type: "DISMISS_TOAST", toastId }),</span>
+  }
+}
 &nbsp;
 export { useToast, toast }
 &nbsp;</pre></td></tr></table></pre>
@@ -643,7 +643,7 @@ export { useToast, toast }
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-28T00:12:49.724Z
+                at 2025-05-28T13:04:56.558Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>
