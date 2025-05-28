@@ -14,7 +14,7 @@ export async function updateDatabaseWithMarketData(
   marketType: string
 ): Promise<void> {
   for (const asset of marketData) {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('market_data')
       .upsert({
         symbol: asset.symbol,
@@ -59,7 +59,7 @@ export async function fetchYahooFinanceData(symbols: string[]): Promise<Asset[]>
     console.log(`Received ${result.length} results from Yahoo Finance`);
     
     // Transform Yahoo Finance data to our format
-    return result.map((item: any) => ({
+    return result.map((item: Record<string, unknown>) => ({
       symbol: item.symbol,
       name: item.shortName || item.longName,
       price: item.regularMarketPrice,
@@ -227,16 +227,16 @@ export async function fetchCoinGeckoData(symbols: string[]): Promise<Asset[]> {
     console.log(`Received ${data.length} results from CoinGecko`);
     
     // Transform CoinGecko data to our format
-    return data.map((coin: any) => ({
-      symbol: `${coin.symbol.toUpperCase()}USD`, // Standardize to match our format
-      name: coin.name,
-      price: coin.current_price,
-      change_percentage: coin.price_change_percentage_24h,
-      volume: formatVolume(coin.total_volume),
-      market_cap: formatMarketCap(coin.market_cap),
+    return data.map((coin: Record<string, unknown>) => ({
+      symbol: `${String(coin.symbol).toUpperCase()}USD`, // Standardize to match our format
+      name: coin.name as string,
+      price: coin.current_price as number,
+      change_percentage: coin.price_change_percentage_24h as number,
+      volume: formatVolume(coin.total_volume as number),
+      market_cap: formatMarketCap(coin.market_cap as number),
       market_type: 'Crypto',
-      high_price: coin.high_24h,
-      low_price: coin.low_24h,
+      high_price: coin.high_24h as number,
+      low_price: coin.low_24h as number,
       open_price: null, // Not provided directly by CoinGecko in this endpoint
       previous_close: null, // Not provided directly by CoinGecko in this endpoint
     }));

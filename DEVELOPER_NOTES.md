@@ -15,7 +15,8 @@ for consistency, type safety, and a unified user experience.
 ## Context/Provider & Hook Best Practices
 
 - **Separation of Concerns:**
-  - Keep provider components, context creation, and custom hooks in separate files for clarity and Fast Refresh compatibility.
+  - Keep provider components, context creation, and custom hooks in  
+    separate files for clarity and Fast Refresh compatibility.
   - Example: `ThemeProviderContent.tsx`, `theme-utils.ts`, `use-theme.ts`.
 
 - **Barrel Exports:**
@@ -24,15 +25,19 @@ for consistency, type safety, and a unified user experience.
 - **Testing:**
   - Always test context providers by rendering them with a consumer in your tests.
   - For hooks, use `@testing-library/react`'s `renderHook` or similar utilities.
-  - Mock browser APIs (e.g., `window.matchMedia`) and wrap with required providers (e.g., `QueryClientProvider` for React Query).
+  - Mock browser APIs (e.g., `window.matchMedia`) and wrap with required  
+    providers (e.g., `QueryClientProvider` for React Query).
 
 - **Usage Example:**
   - To access theme context:
+
     ```tsx
     import { useTheme } from '@/components/theme/use-theme';
     const { theme, toggleTheme } = useTheme();
     ```
+
   - To open the trade panel:
+
     ```tsx
     import { useTradePanelContext } from '@/components/trade/use-trade-panel';
     const { openTradePanel } = useTradePanelContext();

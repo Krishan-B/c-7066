@@ -14,7 +14,10 @@ export const assetGenerators = {
 /**
  * Generates market data for a specific market type
  */
-export function generateMarketData(market: string, generators: Record<string, () => any[]>) {
+export function generateMarketData(
+  market: string, 
+  generators: Record<string, () => Array<Record<string, unknown>>>
+) {
   if (!generators[market]) {
     throw new Error(`Invalid market type: ${market}`);
   }
@@ -26,7 +29,10 @@ export function generateMarketData(market: string, generators: Record<string, ()
 /**
  * Updates the database with the generated market data
  */
-export async function updateDatabaseWithMarketData(marketData: any[], supabaseClient: SupabaseClient) {
+export async function updateDatabaseWithMarketData(
+  marketData: Array<Record<string, unknown>>, 
+  supabaseClient: SupabaseClient
+) {
   for (const asset of marketData) {
     await supabaseClient
       .from('market_data')
@@ -46,13 +52,14 @@ export async function updateDatabaseWithMarketData(marketData: any[], supabaseCl
 /**
  * Generates realistic price fluctuations for assets
  */
-function generatePriceFluctuations(assets: any[], marketType: string) {
+function generatePriceFluctuations(assets: Array<Record<string, unknown>>, marketType: string) {
   return assets.map(asset => {
     // Generate a random price fluctuation between -3% and +3%
     const randomFluctuation = (Math.random() * 6 - 3) / 100;
     
     // Calculate the new price with the random fluctuation
-    const price = parseFloat((asset.base * (1 + randomFluctuation)).toFixed(2));
+    const basePrice = typeof asset.base === 'number' ? asset.base : 0;
+    const price = parseFloat((basePrice * (1 + randomFluctuation)).toFixed(2));
     
     // Calculate the change percentage (-3% to +3%)
     const changePercentage = parseFloat((randomFluctuation * 100).toFixed(2));

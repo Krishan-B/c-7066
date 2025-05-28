@@ -1,12 +1,14 @@
-[![CI](https://github.com/Krishan-B/c-7066/actions/workflows/ci.yml/badge.svg)](https://github.com/Krishan-B/c-7066/actions/workflows/ci.yml)
-
 # Trading Pro - Simulated CFD Trading Platform
 
-A multi-asset simulated CFD trading platform that allows users to practice trading across multiple asset classes without risking real money.
+[![CI](https://github.com/Krishan-B/c-7066/actions/workflows/ci.yml/badge.svg)](https://github.com/Krishan-B/c-7066/actions/workflows/ci.yml)
+
+A multi-asset simulated CFD trading platform that allows users to practice trading
+across multiple asset classes without risking real money.
 
 ## Features
 
 ### Core Trading Features
+
 - Simulated CFD trading across 5 asset classes:
   - Cryptocurrency
   - Stocks
@@ -21,11 +23,13 @@ A multi-asset simulated CFD trading platform that allows users to practice tradi
 - Comprehensive account metrics
 
 ### User Management
+
 - User registration and authentication
 - Secure profile management
 - Paper trading accounts with initial balance
 
 ### Portfolio Management
+
 - Real-time portfolio tracking
 - Position management
 - Trade history and reporting
@@ -34,24 +38,28 @@ A multi-asset simulated CFD trading platform that allows users to practice tradi
 ## Technical Implementation
 
 ### Database Structure
+
 - User accounts and profiles
 - Trading positions and orders
 - Portfolio management
 - Market data
 
 ### Trading Engine
+
 - Order processing system
 - Position management
 - P&L calculation
 - Risk management
 
 ### API Services
+
 - Market data integration
 - Real-time price updates
 - Order execution
 - Account metrics
 
 ## Getting Started
+
 1. Register for an account
 2. Browse available markets
 3. Create a watchlist of assets you're interested in
@@ -60,6 +68,7 @@ A multi-asset simulated CFD trading platform that allows users to practice tradi
 6. Track your performance
 
 ## Default Leverage Settings
+
 - Stocks: 20:1 (5% margin)
 - Indices: 50:1 (2% margin)
 - Commodities: 50:1 (2% margin)
@@ -68,24 +77,29 @@ A multi-asset simulated CFD trading platform that allows users to practice tradi
 
 ## Context & Provider Architecture
 
-This project uses React Context Providers and custom hooks for state management and cross-cutting concerns. Key providers and hooks include:
+This project uses React Context Providers and custom hooks for state management and
+cross-cutting concerns. Key providers and hooks include:
 
 ### Theme Context
+
 - **File:** `src/components/theme/ThemeProviderContent.tsx`
-- **Usage:** Wrap your app with `<ThemeProvider>` to provide theme state and toggling across the app.
-- **Access:** Use the `useTheme` hook from `src/components/theme/use-theme.ts` to access or toggle the theme.
+- **Usage:** Wrap your app with `<ThemeProvider>` to provide theme state and toggling.
+- **Access:** Use the `useTheme` hook from `src/components/theme/use-theme.ts`.
 
 ### Trade Panel Context
+
 - **File:** `src/components/trade/TradePanelProviderContent.tsx`
-- **Usage:** Wrap relevant parts of your app with `<TradePanelProvider>` to manage the trade panel's open/close state.
-- **Access:** Use the `useTradePanelContext` hook from `src/components/trade/use-trade-panel.ts` to open/close the trade panel from any component.
+- **Usage:** Wrap relevant parts of your app with `<TradePanelProvider>`.
+- **Access:** Use the `useTradePanelContext` hook from `components/trade/use-trade-panel.ts`.
 
 ### Auth Context
+
 - **File:** `src/components/AuthProvider.tsx` and `src/components/AuthContext.tsx`
-- **Usage:** Wrap your app with `<AuthProvider>` to provide authentication state and user info.
-- **Access:** Use the `useAuth` hook from `src/hooks/auth/useAuth.ts` for authentication and user profile actions.
+- **Usage:** Wrap your app with `<AuthProvider>` to provide authentication.
+- **Access:** Use the `useAuth` hook from `src/hooks/auth/useAuth.ts`.
 
 ### Best Practices
+
 - Always wrap your app (or relevant subtree) with the required provider.
 - Use the provided custom hooks to access context values and actions.
 - See `DEVELOPER_NOTES.md` for more on context/provider and hook best practices.

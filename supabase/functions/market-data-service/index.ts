@@ -46,7 +46,7 @@ serve(async (req: Request) => {
     }
     
     // Determine which source to use based on market type
-    let marketData: any[] = [];
+    let marketData: Array<Record<string, unknown>> = [];
     
     switch(marketType.toLowerCase()) {
       case 'stock':
