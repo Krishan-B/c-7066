@@ -1,7 +1,9 @@
 
-import { type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+// Import types first
 import { type Asset } from "../types.ts";
 import { formatVolume, formatMarketCap, getCommodityName } from "../utils/formatters.ts";
+// Import Supabase types with proper path to ensure types are found
+import { type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const ALPHA_VANTAGE_API_KEY = Deno.env.get('ALPHA_VANTAGE_API_KEY');
 
@@ -60,16 +62,16 @@ export async function fetchYahooFinanceData(symbols: string[]): Promise<Asset[]>
     
     // Transform Yahoo Finance data to our format
     return result.map((item: Record<string, unknown>) => ({
-      symbol: item.symbol,
-      name: item.shortName || item.longName,
-      price: item.regularMarketPrice,
-      change_percentage: item.regularMarketChangePercent,
-      volume: formatVolume(item.regularMarketVolume),
-      market_cap: formatMarketCap(item.marketCap),
-      high_price: item.regularMarketDayHigh,
-      low_price: item.regularMarketDayLow,
-      open_price: item.regularMarketOpen,
-      previous_close: item.regularMarketPreviousClose,
+      symbol: item.symbol as string,
+      name: (item.shortName || item.longName) as string,
+      price: item.regularMarketPrice as number,
+      change_percentage: item.regularMarketChangePercent as number,
+      volume: formatVolume(item.regularMarketVolume as number | string | null),
+      market_cap: formatMarketCap(item.marketCap as number | string | null),
+      high_price: item.regularMarketDayHigh as number,
+      low_price: item.regularMarketDayLow as number,
+      open_price: item.regularMarketOpen as number,
+      previous_close: item.regularMarketPreviousClose as number,
     }));
   } catch (error) {
     console.error('Error fetching Yahoo Finance data:', error);
@@ -118,14 +120,14 @@ export async function fetchAlphaVantageForexData(symbols: string[]): Promise<Ass
             name: getCommodityName(symbol),
             price: parseFloat(quote['05. price']),
             change_percentage: parseFloat(quote['10. change percent'].replace('%', '')),
-            volume: quote['06. volume'],
+            volume: quote['06. volume'] as string,
             market_cap: 'N/A', // Alpha Vantage doesn't provide market cap for commodities
             market_type: 'Commodity',
-            high_price: null,
-            low_price: null,
+            high_price: undefined, // Use undefined instead of null to match Asset type
+            low_price: undefined, // Use undefined instead of null to match Asset type
             open_price: parseFloat(quote['02. open']),
             previous_close: parseFloat(quote['08. previous close']),
-          };
+          } as Asset;
         }
         return null;
       }
@@ -148,21 +150,22 @@ export async function fetchAlphaVantageForexData(symbols: string[]): Promise<Ass
           name: `${fromCurrency}/${toCurrency}`,
           price: parseFloat(exchangeRate['5. Exchange Rate']),
           change_percentage: 0, // Alpha Vantage doesn't provide change in this endpoint
-          volume: 'N/A',
-          market_cap: 'N/A',
+          volume: 'N/A' as string,
+          market_cap: 'N/A' as string,
           market_type: 'Forex',
-          high_price: null,
-          low_price: null,
-          open_price: null,
-          previous_close: null,
-        };
+          high_price: undefined, // Use undefined instead of null to match Asset type
+          low_price: undefined, // Use undefined instead of null to match Asset type
+          open_price: undefined, // Use undefined instead of null to match Asset type
+          previous_close: undefined, // Use undefined instead of null to match Asset type
+        } as Asset;
       }
       
       return null;
     });
     
     // Wait for all requests to complete and filter out nulls
-    const results = (await Promise.all(promises)).filter(Boolean);
+    const results = (await Promise.all(promises))
+      .filter((result): result is Asset => result !== null);
     console.log(`Received ${results.length} results from Alpha Vantage`);
     
     return results;
@@ -237,8 +240,8 @@ export async function fetchCoinGeckoData(symbols: string[]): Promise<Asset[]> {
       market_type: 'Crypto',
       high_price: coin.high_24h as number,
       low_price: coin.low_24h as number,
-      open_price: null, // Not provided directly by CoinGecko in this endpoint
-      previous_close: null, // Not provided directly by CoinGecko in this endpoint
+      open_price: undefined, // Not provided directly by CoinGecko in this endpoint
+      previous_close: undefined, // Not provided directly by CoinGecko in this endpoint
     }));
   } catch (error) {
     console.error('Error fetching CoinGecko data:', error);

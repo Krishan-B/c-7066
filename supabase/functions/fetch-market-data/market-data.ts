@@ -37,13 +37,13 @@ export async function updateDatabaseWithMarketData(
     await supabaseClient
       .from('market_data')
       .upsert({
-        symbol: asset.symbol,
-        name: asset.name,
-        price: asset.price,
-        change_percentage: asset.change_percentage,
-        volume: asset.volume,
-        market_cap: asset.market_cap,
-        market_type: asset.market_type,
+        symbol: asset.symbol as string,
+        name: asset.name as string,
+        price: asset.price as number,
+        change_percentage: asset.change_percentage as number,
+        volume: asset.volume as string,
+        market_cap: asset.market_cap as string | undefined,
+        market_type: asset.market_type as string,
         last_updated: new Date().toISOString(),
       }, { onConflict: 'symbol' });
   }
@@ -80,8 +80,8 @@ function generatePriceFluctuations(assets: Array<Record<string, unknown>>, marke
 
     // Return the asset with updated values
     return {
-      symbol: asset.symbol,
-      name: asset.name,
+      symbol: asset.symbol as string,
+      name: asset.name as string,
       price,
       change_percentage: changePercentage,
       volume: volumeValue,

@@ -9,6 +9,7 @@ import {
   fetchCoinGeckoData 
 } from "./api/data-sources.ts";
 import { checkCachedData } from "./utils/cache-helper.ts";
+import type { Asset } from "./types.ts";
 
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
@@ -46,7 +47,7 @@ serve(async (req: Request) => {
     }
     
     // Determine which source to use based on market type
-    let marketData: Array<Record<string, unknown>> = [];
+    let marketData: Asset[] = [];
     
     switch(marketType.toLowerCase()) {
       case 'stock':
@@ -84,9 +85,10 @@ serve(async (req: Request) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error fetching market data:", error);
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return new Response(JSON.stringify({ success: false, error: errorMessage }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });

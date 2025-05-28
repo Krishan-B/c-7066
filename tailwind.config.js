@@ -1,7 +1,6 @@
 
-import type { Config } from "tailwindcss";
-
-export default {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
@@ -108,9 +107,8 @@ export default {
       },
     },
   },
+  // Add the animate plugin
   plugins: [
-    // Use a cast to unknown first, then to the appropriate plugin type
-    // Since we can't directly import the type, we use an intermediate cast
-    (await import("tailwindcss-animate")).default as unknown as { handler: () => void }
+    require("tailwindcss-animate")
   ],
-} satisfies Config;
+};
