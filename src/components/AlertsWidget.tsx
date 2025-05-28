@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bell, AlertTriangle, Newspaper, TrendingUp, Activity } from "lucide-react";
@@ -21,7 +21,7 @@ const AlertsWidget = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchAlerts = async () => {
+  const fetchAlerts = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -45,11 +45,11 @@ const AlertsWidget = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
   
   useEffect(() => {
     fetchAlerts();
-  }, []);
+  }, [fetchAlerts]);
   
   const getAlertIcon = (type: string) => {
     switch (type) {

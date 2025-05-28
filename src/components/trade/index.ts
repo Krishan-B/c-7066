@@ -1,4 +1,4 @@
-// Re-export all trade-related components for easier imports
+// Re-export all trade-related components and hooks for easier imports
 export { default as TradeForm } from "./TradeForm";
 export { default as OrderTypeSelector } from "./OrderTypeSelector";
 export { default as QuickTradePanel } from "./QuickTradePanel";
@@ -25,3 +25,6 @@ export { default as LeverageSlider } from "./LeverageSlider";
 export { EntryRateInput } from "./EntryRateInput";
 export { StopLossSettings } from "./StopLossSettings";
 export { TakeProfitSettings } from "./TakeProfitSettings";
+
+// Export the hook separately
+export { useTradePanelContext } from './use-trade-panel';

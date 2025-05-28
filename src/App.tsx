@@ -8,7 +8,7 @@ import { LoadingFallback } from "@/components/ui/loading-fallback";
 import Layout from "@/components/Layout";
 import { Toaster } from "@/components/ui/toaster";
 import { TradePanelProvider } from "@/components/trade/TradePanelProvider";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeProvider } from "@/components/theme";
 import { HelmetProvider } from "react-helmet-async";
 
 // Critical components that should be eagerly loaded

@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { TradePanelContext } from "./TradePanelProvider";
+import { TradePanelContext } from "./trade-panel-utils";
 import { useContext } from "react";
 
 export interface TradeButtonProps {

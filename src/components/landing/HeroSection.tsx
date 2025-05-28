@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, BarChart3, LineChart, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
-import { useTheme } from "@/components/ThemeProvider";
+import { useTheme } from "@/components/theme/use-theme";
 
 const HeroSection: React.FC = () => {
   const navigate = useNavigate();

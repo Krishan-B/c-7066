@@ -1,6 +1,7 @@
 // Test utilities for mocking and testing
-import { render, RenderOptions } from '@testing-library/react';
-import { ReactElement } from 'react';
+import { render } from '@testing-library/react';
+import type { RenderOptions } from '@testing-library/react';
+import type { ReactElement } from 'react';
 
 export const mockData = {
   user: {
@@ -46,4 +47,3 @@ export const customRender = (
 
 // Re-export everything from React Testing Library
 export * from '@testing-library/react';
->>>>>>> 50cec73656e1321cbd0cd46de19e0afd8485e070

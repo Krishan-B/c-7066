@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, ArrowUpRight, ChevronDown } from "lucide-react";
@@ -29,7 +29,7 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -52,11 +52,11 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [marketType, toast]);
   
   useEffect(() => {
     fetchNews();
-  }, [marketType]);
+  }, [fetchNews]);
   
   const formatTime = (timestamp: string) => {
     const now = new Date();

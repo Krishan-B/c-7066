@@ -1,7 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { /* useQuery */ } from "@tanstack/react-query";
+/*
+// Commented out unused function
 const fetchBitcoinPrices = async () => {
   const response = await fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=180&interval=daily");
   const data = await response.json();
+  return data;
+};
+*/
 
 const PortfolioCard = () => {
   return (

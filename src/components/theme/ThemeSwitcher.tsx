@@ -1,6 +1,5 @@
 
-import React from "react";
-import { useTheme } from "@/components/ThemeProvider";
+import { useTheme } from "@/components/theme/use-theme";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 import { Switch } from "@/components/ui/switch";

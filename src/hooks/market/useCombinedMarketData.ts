@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useMarketData } from "./useMarketData";
 import { usePolygonWebSocket } from "./usePolygonWebSocket";
 import { getSymbolsForMarketType } from "./marketSymbols";
@@ -23,10 +23,12 @@ export const useCombinedMarketData = (
   
   const [marketTypes, setMarketTypes] = useState<string[]>(initialMarketTypes);
   
-  // Get symbols for all market types
-  const symbols = marketTypes.length > 0 
-    ? marketTypes.flatMap(type => getSymbolsForMarketType([type])[type] || [])
-    : [];
+  // Get symbols for all market types - memoize to avoid unnecessary re-renders
+  const symbols = useMemo(() => 
+    marketTypes.length > 0 
+      ? marketTypes.flatMap(type => getSymbolsForMarketType([type])[type] || [])
+      : []
+  , [marketTypes]);
   
   // Keep track of the active market type for service params
   const activeMarketType = marketTypes.length > 0 ? marketTypes[0] : 'Crypto';
