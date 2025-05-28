@@ -1,4 +1,3 @@
-
 import { ArrowUpIcon, ArrowDownIcon, TrendingUpIcon, TrendingDownIcon } from "lucide-react";
 import { useMarketData } from "@/hooks/market";
 import { Skeleton } from "@/components/ui/skeleton";

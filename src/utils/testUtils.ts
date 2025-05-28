@@ -1,4 +1,6 @@
 // Test utilities for mocking and testing
+import { render, RenderOptions } from '@testing-library/react';
+import { ReactElement } from 'react';
 
 export const mockData = {
   user: {
@@ -35,3 +37,13 @@ export const createMockFn = () => {
   }
   return () => {};
 };
+
+// Custom render function for testing with providers
+export const customRender = (
+  ui: ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>
+) => render(ui, { ...options });
+
+// Re-export everything from React Testing Library
+export * from '@testing-library/react';
+>>>>>>> 50cec73656e1321cbd0cd46de19e0afd8485e070
