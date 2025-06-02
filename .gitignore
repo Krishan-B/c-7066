@@ -161,3 +161,16 @@ $RECYCLE.BIN/
 # Miscellaneous
 *.tgz
 *.tar.gz
+
+# Problematic files to avoid
+nul
+tatus
+con
+prn
+aux
+com[0-9]
+lpt[0-9]
+
+# Files with special characters or invalid names
+*\357\200*
+*\u*
