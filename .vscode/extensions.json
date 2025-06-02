@@ -1,0 +1,49 @@
+{
+  "recommendations": [
+    // AI-Powered Development Extensions  
+    "github.copilot",
+    "github.copilot-chat",
+    
+    // Core Development Extensions
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode", 
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "usernamehw.errorlens",
+    
+    // Git & GitHub Extensions
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    "github.vscode-github-actions",
+    
+    // Database Extensions (for Supabase)
+    "ms-mssql.mssql",
+    "mtxr.sqltools",
+    
+    // Documentation Extensions
+    "yzhang.markdown-all-in-one"
+    
+    // Optional Extensions (uncomment if needed):
+    // "davidanson.vscode-markdownlint",  // Heavy documentation workflows
+    // "github.remotehub"                 // GitHub repo browsing
+  ],
+  
+  "unwantedRecommendations": [
+    // Unused Technology Extensions
+    "vue.volar",
+    "firefox-devtools.vscode-firefox-debug",
+    "ms-edgedevtools.vscode-edge-devtools",
+    "ms-azuretools.vscode-containers",
+    "ms-azuretools.vscode-docker",
+    
+    // Redundant/Conflicting Extensions
+    "christian-kohler.npm-intellisense",
+    "coderabbit.coderabbit-vscode",
+    "github.codespaces",
+    "ms-vscode.azure-repos",
+    "ms-vscode.remote-repositories",
+    "ms-mssql.data-workspace-vscode",
+    "ms-mssql.sql-bindings-vscode", 
+    "ms-mssql.sql-database-projects-vscode"
+  ]
+}

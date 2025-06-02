@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "🔧 Optimize VS Code Extensions",
+			"type": "shell",
+			"command": "scripts\\optimize-extensions.bat",
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

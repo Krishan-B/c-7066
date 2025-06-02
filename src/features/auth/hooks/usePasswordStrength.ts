@@ -19,10 +19,9 @@ export const usePasswordStrength = (password: string): PasswordStrength & {
     color: "bg-muted",
     feedback: []
   });
-  
-  useEffect(() => {
-    // If no password, return default state
-    if (!password) {
+    useEffect(() => {
+    // Handle null, undefined, or empty password
+    if (!password || typeof password !== 'string') {
       setPasswordStrength({
         score: 0,
         label: "None",
@@ -94,11 +93,11 @@ export const usePasswordStrength = (password: string): PasswordStrength & {
   // For backward compatibility
   const getPasswordStrengthLabel = () => passwordStrength.label;
   const getPasswordStrengthColor = () => passwordStrength.color;
-  
-  // Determine if password meets minimum requirements (useful for validation)
-  const meetsMinimumRequirements = password.length >= 8 && 
+    // Determine if password meets minimum requirements (useful for validation)
+  const meetsMinimumRequirements = password && typeof password === 'string' && 
+    password.length >= 8 && 
     /\d/.test(password) && 
-    /[a-z]/.test(password) && 
+    /[a-z]/.test(password) &&
     (/[A-Z]/.test(password) || /[^a-zA-Z0-9]/.test(password));
 
   return { 

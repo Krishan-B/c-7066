@@ -1,0 +1,84 @@
+{
+  // TypeScript Performance Configuration for Large Projects
+  // Optimized to work with GitHub Copilot without causing extension host issues
+  
+  "compilerOptions": {
+    // Performance optimizations
+    "incremental": true,
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    
+    // Memory management
+    "preserveWatchOutput": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    
+    // Module resolution optimization
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    
+    // Type checking optimizations
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    
+    // Output configuration
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    
+    // JSX configuration
+    "jsx": "react-jsx",
+    
+    // Path mapping
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/stores/*": ["./src/stores/*"]
+    }
+  },
+  
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "*.ts",
+    "*.tsx"
+  ],
+  
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts", 
+    "**/*.spec.tsx",
+    ".vscode",
+    "supabase/functions"
+  ],
+  
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  
+  // TypeScript language server optimizations
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "typescript.suggest.autoImports": false,
+  "typescript.suggest.includeCompletionsForImportStatements": false,
+  "typescript.updateImportsOnFileMove.enabled": "never",
+  "typescript.workspaceSymbols.scope": "currentProject",
+  "typescript.disableAutomaticTypeAcquisition": true
+}

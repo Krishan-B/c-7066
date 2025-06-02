@@ -3,13 +3,13 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ],
-  "compilerOptions": {
+  ],  "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
     "composite": true,
+    "tsBuildInfoFile": "./tsconfig.root.tsbuildinfo",
     "skipLibCheck": true,
     "allowJs": true,
     "esModuleInterop": true,

@@ -1,8 +1,38 @@
-
-
 export const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+  // Basic format check
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  
+  // Security checks to prevent injection attacks
+  const hasInjectionPattern = /['";\\<>(){}[\]|&$*?]/;
+  const hasSqlKeywords = /(drop|select|insert|update|delete|union|where|or|and|exec|script)/i;
+  const hasJsPatterns = /(javascript:|on\w+\s*=|alert\s*\(|eval\s*\()/i;
+  
+  // Check for basic email format
+  if (!emailRegex.test(email)) {
+    return false;
+  }
+  
+  // Check for injection patterns
+  if (hasInjectionPattern.test(email)) {
+    return false;
+  }
+  
+  // Check for SQL injection keywords
+  if (hasSqlKeywords.test(email)) {
+    return false;
+  }
+  
+  // Check for XSS patterns
+  if (hasJsPatterns.test(email)) {
+    return false;
+  }
+  
+  // Check length (prevent excessively long emails)
+  if (email.length > 254) {
+    return false;
+  }
+  
+  return true;
 };
 
 export const validateSignIn = (
@@ -83,4 +113,35 @@ export const validateSignUp = (
   }
   
   return errors;
+};
+
+// Additional security validation functions
+
+export const sanitizeInput = (input: string): string => {
+  if (!input || typeof input !== 'string') return '';
+  
+  // Remove potential XSS patterns
+  return input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    .trim();
+};
+
+export const validateInput = (input: string): boolean => {
+  if (!input || typeof input !== 'string') return false;
+  
+  // Check for common injection patterns
+  const dangerousPatterns = [
+    /<script/gi,
+    /javascript:/gi,
+    /on\w+\s*=/gi,
+    /drop\s+table/gi,
+    /union\s+select/gi,
+    /insert\s+into/gi,
+    /delete\s+from/gi
+  ];
+  
+  return !dangerousPatterns.some(pattern => pattern.test(input));
 };

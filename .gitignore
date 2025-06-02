@@ -7,13 +7,57 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+node_modules/
+
+# Build outputs
 dist
 dist-ssr
+build/
+out/
+*.tsbuildinfo
+
+# Environment variables
 *.local
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Cache and temporary files
+.cache/
+.eslintcache
+.parcel-cache/
+.npm/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Coverage reports
+coverage/
+.nyc_output/
+*.lcov
+
+# Testing
+jest/
+__tests__/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Temporary folders
+tmp/
+temp/
 
 # Editor directories and files
 .vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 !.vscode/extensions.json
 .idea
 .DS_Store
@@ -22,3 +66,98 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# OS generated files
+.directory
+*.tmp
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Supabase
+supabase/.branches
+supabase/.temp
+
+# Local development
+.local
+.netlify
+.vercel
+.turbo
+
+# Additional performance optimizations
+# TypeScript compiler files
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Build tool caches
+.vite/
+.rollup.cache/
+.webpack/
+.cache/
+.parcel-cache/
+
+# Runtime files
+*.pid
+*.seed
+*.pid.lock
+
+# Logs and databases
+*.sqlite
+*.sqlite3
+*.db
+*.log
+
+# Package manager lock files (if using multiple)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# IDE and editor files
+.history/
+.vscode-test/
+*.code-workspace
+
+# System files
+desktop.ini
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Mac folder attributes
+.DS_Store
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.swp
+*.swo
+*~
+
+# Miscellaneous
+*.tgz
+*.tar.gz

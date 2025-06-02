@@ -1,7 +1,36 @@
+import { type UserProfile } from "@/features/profile/types";
+import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { type Session, type User } from "@supabase/supabase-js";
-import { toast } from "@/hooks/use-toast";
-import { type UserProfile } from "@/features/profile/types";
+import { SecureTokenManager } from "./secureTokenManager";
+
+/**
+ * Sanitize error messages to prevent XSS and information disclosure
+ */
+const sanitizeErrorMessage = (message: string): string => {
+  if (!message || typeof message !== 'string') return "An error occurred";
+  
+  // Remove potential XSS patterns
+  let sanitized = message
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    .replace(/alert\s*\(/gi, '')
+    .replace(/eval\s*\(/gi, '');
+  
+  // Remove sensitive information patterns
+  sanitized = sanitized
+    .replace(/password[=\s]*[^\s]+/gi, '[REDACTED]')
+    .replace(/user[=\s]*[^\s]+/gi, '[REDACTED]')
+    .replace(/token[=\s]*[^\s]+/gi, '[REDACTED]')
+    .replace(/key[=\s]*[^\s]+/gi, '[REDACTED]')
+    .replace(/secret[=\s]*[^\s]+/gi, '[REDACTED]')
+    .replace(/\/[\w\/]*\.php/gi, '[PATH]')
+    .replace(/\/[\w\/]*\.js/gi, '[PATH]')
+    .replace(/line\s+\d+/gi, '[LINE]');
+    return sanitized.trim() || "An error occurred";
+};
 
 /**
  * Handle authentication errors and display appropriate toast messages
@@ -11,18 +40,25 @@ export const handleAuthError = (error: Error | null, context: string = "authenti
   
   console.error(`Auth error during ${context}:`, error);
   
-  // Extract readable message
-  let errorMessage = error.message;
+  // Extract and sanitize readable message
+  let errorMessage = error.message || "An error occurred";
   
-  // Handle specific error types
-  if (errorMessage.includes("rate")) {
+  // Sanitize the error message to prevent XSS and sensitive data exposure
+  errorMessage = sanitizeErrorMessage(errorMessage);
+  
+  // Handle specific error types with secure responses
+  if (errorMessage.toLowerCase().includes("rate")) {
     errorMessage = "Too many attempts. Please try again later.";
-  } else if (errorMessage.includes("email") && errorMessage.includes("already")) {
+  } else if (errorMessage.toLowerCase().includes("email") && errorMessage.toLowerCase().includes("already")) {
     errorMessage = "This email is already in use. Please log in instead.";
-  } else if (errorMessage.includes("password")) {
-    errorMessage = "Invalid password. Please check your password and try again.";
-  } else if (errorMessage.includes("credentials")) {
+  } else if (errorMessage.toLowerCase().includes("password") || errorMessage.toLowerCase().includes("credential")) {
     errorMessage = "Invalid credentials. Please check your email and password.";
+  } else if (errorMessage.toLowerCase().includes("database") || errorMessage.toLowerCase().includes("connection")) {
+    errorMessage = "Service temporarily unavailable. Please try again later.";
+  } else if (errorMessage.toLowerCase().includes("user") && errorMessage.toLowerCase().includes("table")) {
+    errorMessage = "Authentication service error. Please try again.";
+  } else if (errorMessage.toLowerCase().includes("internal") || errorMessage.toLowerCase().includes("server")) {
+    errorMessage = "Service error. Please contact support if this persists.";
   }
   
   // Display toast
@@ -34,25 +70,59 @@ export const handleAuthError = (error: Error | null, context: string = "authenti
 };
 
 /**
- * Enhanced token cleanup for auth state management
+ * Enhanced token cleanup for auth state management with secure token migration
+ * 
+ * Security Implementation:
+ * - Migrates from insecure localStorage to secure httpOnly cookies
+ * - Cleans up legacy token storage
+ * - Uses SecureTokenManager for proper token handling
  */
-export const cleanAuthTokens = (): void => {
-  // Remove standard auth tokens
-  localStorage.removeItem('supabase.auth.token');
-  
-  // Remove all Supabase auth keys from localStorage
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
+export const cleanAuthTokens = async (): Promise<void> => {
+  try {
+    // Use secure token manager to clear all tokens (includes migration cleanup)
+    await SecureTokenManager.clearAllTokens();
+    
+    // Additional legacy cleanup for any remaining localStorage items
+    try {
+      // Remove standard auth tokens
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Remove all Supabase auth keys from localStorage
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      // Handle storage access errors gracefully
+      console.warn('Unable to access localStorage for token cleanup:', error);
     }
-  });
-  
-  // Clean sessionStorage if applicable
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
+    
+    try {
+      // Clean sessionStorage if applicable
+      Object.keys(sessionStorage || {}).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    } catch (error) {
+      // Handle storage access errors gracefully
+      console.warn('Unable to access sessionStorage for token cleanup:', error);
     }
-  });
+  } catch (error) {
+    console.error('Error during secure token cleanup:', error);
+    // Fall back to basic cleanup if secure manager fails
+    try {
+      localStorage.removeItem('supabase.auth.token');
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch (fallbackError) {
+      console.warn('Fallback token cleanup also failed:', fallbackError);
+    }
+  }
 };
 
 /**
@@ -64,7 +134,7 @@ export const signInWithEmail = async (
 ): Promise<{ session: Session | null; user: User | null; error: Error | null }> => {
   try {
     // Clean up any existing auth state
-    cleanAuthTokens();
+    await cleanAuthTokens();
     
     // First attempt to sign out globally in case there's an existing session
     try {
@@ -101,7 +171,7 @@ export const signUpWithEmail = async (
 ): Promise<{ session: Session | null; user: User | null; error: Error | null }> => {
   try {
     // Clean up any existing auth state
-    cleanAuthTokens();
+    await cleanAuthTokens();
     
     // First attempt to sign out globally in case there's an existing session
     try {
@@ -137,7 +207,7 @@ export const signUpWithEmail = async (
 export const signOut = async (): Promise<{ error: Error | null }> => {
   try {
     // Clean up any existing auth state first
-    cleanAuthTokens();
+    await cleanAuthTokens();
     
     // Then attempt a global sign out
     await supabase.auth.signOut({ scope: 'global' });
@@ -155,7 +225,7 @@ export const signOut = async (): Promise<{ error: Error | null }> => {
 export const refreshSession = async (): Promise<{ session: Session | null; error: Error | null }> => {
   try {
     // Clean up first to avoid conflicts
-    cleanAuthTokens();
+    await cleanAuthTokens();
     
     const { data, error } = await supabase.auth.refreshSession();
     

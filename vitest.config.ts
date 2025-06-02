@@ -1,5 +1,5 @@
-import { defineConfig } from 'vitest/config';
 import path from 'path';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   resolve: {
@@ -11,6 +11,11 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    include: ['**/*.{test,spec}.{ts,tsx}'],
+    typecheck: {
+      tsconfig: './tsconfig.json',
+      include: ['**/*.{test,spec}.{ts,tsx}'],
+    },
     coverage: {
       reporter: ['text', 'html'],
       thresholds: {
