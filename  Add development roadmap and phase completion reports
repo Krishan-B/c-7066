@@ -1,9 +1,0 @@
-[33m8538084[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: Add tests for Avatar and Tooltip components, and implement useMarketData hook tests
-[33m4a39ce8[m feat: Add tests for Carousel component and enhance KYC service type definitions
-[33mcc5cd9f[m Refactor UI components and tests
-[33m611d684[m feat: Implement account service with REST and WebSocket APIs for user management and account updates
-[33m2ae6ab5[m PRD 2
-[33m795043a[m PRD for Chat Agent Understanding
-[33m5a8fd53[m feat: Add scripts for monitoring code quality, performance audits, and pre-commit checks
-[33m31e7d76[m chore: update CI configuration to use secrets for email notifications and add workflow documentation
-[33m81b579d[m refactor: import tailwindcss-animate as a variable and update plugin usage
