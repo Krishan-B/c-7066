@@ -215,8 +215,8 @@
   // Enable/Disable Settings
   "github.copilot.enable": {
     "*": true,
+    "plaintext": true,
     "markdown": true,
-    "plaintext": false,
     "scminput": false,
     "csv": false,
     "log": false,

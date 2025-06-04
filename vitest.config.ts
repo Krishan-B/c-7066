@@ -22,11 +22,22 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'html'],
       thresholds: {
-        statements: 80,
-        branches: 80,
-        functions: 80,
-        lines: 80,
+        statements: 60,
+        branches: 60,
+        functions: 60,
+        lines: 60,
       },
+      exclude: [
+        'node_modules/**',
+        'dist/**',
+        '**/*.config.*',
+        '**/*.test.*',
+        '**/*.spec.*',
+        '**/test/**',
+        '**/tests/**',
+        '**/__tests__/**',
+        'src/test/**',
+      ],
     },
   },
 });

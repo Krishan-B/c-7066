@@ -120,6 +120,14 @@ export default tseslint.config(
           fixStyle: 'inline-type-imports',
           prefer: 'type-imports',
         },
+      ], // TypeScript expression rules
+      '@typescript-eslint/no-unused-expressions': [
+        'warn',
+        {
+          allowShortCircuit: true,
+          allowTernary: true,
+          allowTaggedTemplates: true,
+        },
       ],
 
       // Relaxed rules for development

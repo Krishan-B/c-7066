@@ -10,8 +10,12 @@
     "lint": "eslint . --cache --cache-location .eslintcache",
     "lint:fix": "eslint . --cache --cache-location .eslintcache --fix",
     "lint:clear-cache": "rm -f .eslintcache",
+    "lint:ci": "eslint . --no-cache --format=compact",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:ci": "vitest run --reporter=basic",
+    "ci:check": "npm run lint:ci && npm run typecheck && npm run test:ci && npm run build",
     "prepare": "husky install",
     "typecheck": "tsc --noEmit"
   },
