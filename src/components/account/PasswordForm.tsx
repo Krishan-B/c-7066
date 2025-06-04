@@ -72,9 +72,14 @@ export function PasswordForm() {
           name="currentPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Current Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="Enter current password" {...field} />
+              <FormLabel>Current Password</FormLabel>              <FormControl>
+                <Input 
+                  type="password" 
+                  placeholder="Enter current password" 
+                  data-testid="current-password-input"
+                  autoComplete="current-password"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -86,10 +91,11 @@ export function PasswordForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>New Password</FormLabel>
-              <FormControl>
-                <Input 
+              <FormControl>                <Input 
                   type="password" 
                   placeholder="Enter new password" 
+                  data-testid="new-password-input"
+                  autoComplete="new-password"
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -116,9 +122,14 @@ export function PasswordForm() {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm New Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="Confirm new password" {...field} />
+              <FormLabel>Confirm New Password</FormLabel>              <FormControl>
+                <Input 
+                  type="password" 
+                  placeholder="Confirm new password" 
+                  data-testid="confirm-password-input"
+                  autoComplete="new-password"
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

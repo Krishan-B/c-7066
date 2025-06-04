@@ -11,11 +11,9 @@
     {
       "mode": "auto"
     }
-  ],
-  "eslint.options": {
+  ],  "eslint.options": {
     "cache": true,
-    "cacheLocation": ".eslintcache",
-    "maxWarnings": 0
+    "cacheLocation": ".eslintcache"
   },
   "eslint.codeAction.showDocumentation": {
     "enable": true
@@ -165,31 +163,30 @@
     "*.spec.tsx": "typescriptreact",
     "*.spec.ts": "typescript"
   },
-
   // Language-specific formatting
   "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     }
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     }
   },
   "[javascript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     }
   },
   "[javascriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"

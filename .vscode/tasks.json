@@ -2,10 +2,16 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "🔧 Optimize VS Code Extensions",
+			"label": "Phase 1B Comprehensive Security Tests",
 			"type": "shell",
-			"command": "scripts\\optimize-extensions.bat",
-			"group": "build",
+			"command": "npx",
+			"args": [
+				"vitest",
+				"run",
+				"tests/phase1b-comprehensive.test.ts",
+				"--reporter=verbose"
+			],
+			"group": "test",
 			"isBackground": false,
 			"problemMatcher": []
 		}

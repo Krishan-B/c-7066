@@ -13,11 +13,12 @@ vi.mock('@/hooks/use-toast');
 
 // Mock navigation
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+vi.mock('react-router-dom', async importOriginal => {
+  const actual = (await importOriginal()) as any;
   return {
     ...actual,
     useNavigate: () => mockNavigate,
+    BrowserRouter: ({ children }: { children: React.ReactNode }) => children,
   };
 });
 
@@ -34,7 +35,11 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 describe('RegisterForm Security Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSignUpWithEmail.mockResolvedValue({ error: null });
+    mockSignUpWithEmail.mockResolvedValue({
+      session: null,
+      user: null,
+      error: null,
+    });
     mockNavigate.mockClear();
   });
 
@@ -53,12 +58,12 @@ describe('RegisterForm Security Tests', () => {
 
       const firstNameInput = screen.getByLabelText(/first name/i);
       const maliciousInput = '<script>alert("XSS")</script>';
-      
+
       await user.type(firstNameInput, maliciousInput);
-      
+
       // Input should contain the raw text, not execute the script
       expect(firstNameInput).toHaveValue(maliciousInput);
-      
+
       // Verify no script execution occurred
       expect(window.alert).not.toHaveBeenCalled();
     });
@@ -73,9 +78,9 @@ describe('RegisterForm Security Tests', () => {
 
       const lastNameInput = screen.getByLabelText(/last name/i);
       const maliciousInput = '<img src="x" onerror="alert(\'XSS\')" />';
-      
+
       await user.type(lastNameInput, maliciousInput);
-      
+
       expect(lastNameInput).toHaveValue(maliciousInput);
       expect(window.alert).not.toHaveBeenCalled();
     });
@@ -90,9 +95,9 @@ describe('RegisterForm Security Tests', () => {
 
       const emailInput = screen.getByLabelText(/email/i);
       const maliciousEmail = 'test@example.com<svg onload="alert(1)">';
-      
+
       await user.type(emailInput, maliciousEmail);
-      
+
       expect(emailInput).toHaveValue(maliciousEmail);
       expect(window.alert).not.toHaveBeenCalled();
     });
@@ -106,17 +111,19 @@ describe('RegisterForm Security Tests', () => {
       );
 
       const phoneInput = screen.getByDisplayValue('');
-      const maliciousPhone = '1234567890<script>document.cookie="stolen"</script>';
-      
+      const maliciousPhone =
+        '1234567890<script>document.cookie="stolen"</script>';
+
       fireEvent.change(phoneInput, { target: { value: maliciousPhone } });
-      
+
       expect(phoneInput).toHaveValue(maliciousPhone);
     });
-
     it('should properly escape error messages to prevent XSS', async () => {
       const user = userEvent.setup();
       mockSignUpWithEmail.mockResolvedValue({
-        error: new Error('<script>alert("Error XSS")</script>')
+        session: null,
+        user: null,
+        error: new Error('<script>alert("Error XSS")</script>'),
       });
 
       render(
@@ -129,9 +136,15 @@ describe('RegisterForm Security Tests', () => {
       await user.type(screen.getByLabelText(/first name/i), 'John');
       await user.type(screen.getByLabelText(/last name/i), 'Doe');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getAllByLabelText(/password/i)[0], 'SecurePass123!');
-      await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
-      
+      await user.type(
+        screen.getAllByLabelText(/password/i)[0],
+        'SecurePass123!'
+      );
+      await user.type(
+        screen.getByLabelText(/confirm password/i),
+        'SecurePass123!'
+      );
+
       // Submit form
       const submitButton = screen.getByRole('button', { name: /sign up/i });
       await user.click(submitButton);
@@ -197,11 +210,17 @@ describe('RegisterForm Security Tests', () => {
       await user.type(screen.getByLabelText(/first name/i), 'John');
       await user.type(screen.getByLabelText(/last name/i), 'Doe');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getAllByLabelText(/password/i)[0], 'SecurePass123!');
-      await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
+      await user.type(
+        screen.getAllByLabelText(/password/i)[0],
+        'SecurePass123!'
+      );
+      await user.type(
+        screen.getByLabelText(/confirm password/i),
+        'SecurePass123!'
+      );
 
       const submitButton = screen.getByRole('button', { name: /sign up/i });
-      
+
       // Rapid submissions
       await user.click(submitButton);
       await user.click(submitButton);
@@ -226,7 +245,7 @@ describe('RegisterForm Security Tests', () => {
         lastName: 'Doe',
         email: 'test@example.com',
         password: 'SecurePass123!',
-        confirmPassword: 'SecurePass123!'
+        confirmPassword: 'SecurePass123!',
       };
 
       // This should not work - form requires user interaction
@@ -245,8 +264,14 @@ describe('RegisterForm Security Tests', () => {
       await user.type(screen.getByLabelText(/first name/i), 'John');
       await user.type(screen.getByLabelText(/last name/i), 'Doe');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getAllByLabelText(/password/i)[0], 'SecurePass123!');
-      await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
+      await user.type(
+        screen.getAllByLabelText(/password/i)[0],
+        'SecurePass123!'
+      );
+      await user.type(
+        screen.getByLabelText(/confirm password/i),
+        'SecurePass123!'
+      );
 
       const submitButton = screen.getByRole('button', { name: /sign up/i });
       await user.click(submitButton);
@@ -258,7 +283,7 @@ describe('RegisterForm Security Tests', () => {
           'SecurePass123!',
           expect.objectContaining({
             first_name: 'John',
-            last_name: 'Doe'
+            last_name: 'Doe',
           })
         );
       });
@@ -290,7 +315,7 @@ describe('RegisterForm Security Tests', () => {
         const emailInput = screen.getByLabelText(/email/i);
         await user.clear(emailInput);
         await user.type(emailInput, email);
-        
+
         const submitButton = screen.getByRole('button', { name: /sign up/i });
         await user.click(submitButton);
 
@@ -324,7 +349,7 @@ describe('RegisterForm Security Tests', () => {
         const passwordInput = screen.getAllByLabelText(/password/i)[0];
         await user.clear(passwordInput);
         await user.type(passwordInput, password);
-        
+
         const submitButton = screen.getByRole('button', { name: /sign up/i });
         await user.click(submitButton);
 
@@ -367,10 +392,12 @@ describe('RegisterForm Security Tests', () => {
       );
 
       const longString = 'a'.repeat(10000);
-      
+
       const firstNameInput = screen.getByLabelText(/first name/i);
-      await user.type(firstNameInput, longString);      // Input should be limited or handled gracefully
-      expect((firstNameInput as HTMLInputElement).value.length).toBeLessThanOrEqual(1000);
+      await user.type(firstNameInput, longString); // Input should be limited or handled gracefully
+      expect(
+        (firstNameInput as HTMLInputElement).value.length
+      ).toBeLessThanOrEqual(1000);
     });
 
     it('should sanitize special characters in name fields', async () => {
@@ -382,16 +409,16 @@ describe('RegisterForm Security Tests', () => {
       );
 
       const specialCharsName = 'John<>&"\'';
-      
+
       const firstNameInput = screen.getByLabelText(/first name/i);
       await user.type(firstNameInput, specialCharsName);
 
       expect(firstNameInput).toHaveValue(specialCharsName);
-      
+
       // Should handle special characters without causing issues
       const submitButton = screen.getByRole('button', { name: /sign up/i });
       await user.click(submitButton);
-      
+
       // Should not crash or cause XSS
       expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
     });
@@ -401,7 +428,11 @@ describe('RegisterForm Security Tests', () => {
     it('should handle authentication errors securely', async () => {
       const user = userEvent.setup();
       const authError = new Error('User already exists');
-      mockSignUpWithEmail.mockResolvedValue({ error: authError });
+      mockSignUpWithEmail.mockResolvedValue({
+        session: null as any,
+        user: null as any,
+        error: authError,
+      });
 
       render(
         <TestWrapper>
@@ -413,8 +444,14 @@ describe('RegisterForm Security Tests', () => {
       await user.type(screen.getByLabelText(/first name/i), 'John');
       await user.type(screen.getByLabelText(/last name/i), 'Doe');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getAllByLabelText(/password/i)[0], 'SecurePass123!');
-      await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
+      await user.type(
+        screen.getAllByLabelText(/password/i)[0],
+        'SecurePass123!'
+      );
+      await user.type(
+        screen.getByLabelText(/confirm password/i),
+        'SecurePass123!'
+      );
 
       const submitButton = screen.getByRole('button', { name: /sign up/i });
       await user.click(submitButton);
@@ -442,14 +479,22 @@ describe('RegisterForm Security Tests', () => {
       await user.type(screen.getByLabelText(/first name/i), 'John');
       await user.type(screen.getByLabelText(/last name/i), 'Doe');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getAllByLabelText(/password/i)[0], 'SecurePass123!');
-      await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
+      await user.type(
+        screen.getAllByLabelText(/password/i)[0],
+        'SecurePass123!'
+      );
+      await user.type(
+        screen.getByLabelText(/confirm password/i),
+        'SecurePass123!'
+      );
 
       const submitButton = screen.getByRole('button', { name: /sign up/i });
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Unexpected error occurred')).toBeInTheDocument();
+        expect(
+          screen.getByText('Unexpected error occurred')
+        ).toBeInTheDocument();
       });
     });
 
@@ -465,18 +510,25 @@ describe('RegisterForm Security Tests', () => {
       await user.type(screen.getByLabelText(/first name/i), 'John');
       await user.type(screen.getByLabelText(/last name/i), 'Doe');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      
+
       // Find phone number input by its placeholder or container
-      const phoneInput = screen.getByPlaceholderText(/phone number/i) || 
-                        document.querySelector('input[type="tel"]') ||
-                        screen.getByDisplayValue('');
-      
+      const phoneInput =
+        screen.getByPlaceholderText(/phone number/i) ||
+        document.querySelector('input[type="tel"]') ||
+        screen.getByDisplayValue('');
+
       if (phoneInput) {
         await user.type(phoneInput, '1234567890');
       }
-      
-      await user.type(screen.getAllByLabelText(/password/i)[0], 'SecurePass123!');
-      await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
+
+      await user.type(
+        screen.getAllByLabelText(/password/i)[0],
+        'SecurePass123!'
+      );
+      await user.type(
+        screen.getByLabelText(/confirm password/i),
+        'SecurePass123!'
+      );
 
       const submitButton = screen.getByRole('button', { name: /sign up/i });
       await user.click(submitButton);
@@ -486,7 +538,7 @@ describe('RegisterForm Security Tests', () => {
           'test@example.com',
           'SecurePass123!',
           expect.objectContaining({
-            phone_number: expect.stringContaining('+1')
+            phone_number: expect.stringContaining('+1'),
           })
         );
       });
@@ -494,7 +546,11 @@ describe('RegisterForm Security Tests', () => {
 
     it('should securely navigate after successful registration', async () => {
       const user = userEvent.setup();
-      mockSignUpWithEmail.mockResolvedValue({ error: null });
+      mockSignUpWithEmail.mockResolvedValue({
+        session: null as any,
+        user: null as any,
+        error: null,
+      });
 
       render(
         <TestWrapper>
@@ -506,8 +562,14 @@ describe('RegisterForm Security Tests', () => {
       await user.type(screen.getByLabelText(/first name/i), 'John');
       await user.type(screen.getByLabelText(/last name/i), 'Doe');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getAllByLabelText(/password/i)[0], 'SecurePass123!');
-      await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
+      await user.type(
+        screen.getAllByLabelText(/password/i)[0],
+        'SecurePass123!'
+      );
+      await user.type(
+        screen.getByLabelText(/confirm password/i),
+        'SecurePass123!'
+      );
 
       const submitButton = screen.getByRole('button', { name: /sign up/i });
       await user.click(submitButton);
@@ -516,7 +578,8 @@ describe('RegisterForm Security Tests', () => {
         expect(mockNavigate).toHaveBeenCalledWith('/auth');
         expect(mockToast).toHaveBeenCalledWith({
           title: 'Account created successfully',
-          description: 'Please check your email for verification and then log in'
+          description:
+            'Please check your email for verification and then log in',
         });
       });
     });
@@ -526,7 +589,7 @@ describe('RegisterForm Security Tests', () => {
     it('should not expose password in DOM or console', async () => {
       const user = userEvent.setup();
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-      
+
       render(
         <TestWrapper>
           <RegisterForm />
@@ -535,12 +598,12 @@ describe('RegisterForm Security Tests', () => {
 
       const password = 'SecurePass123!';
       const passwordInput = screen.getAllByLabelText(/password/i)[0];
-      
+
       await user.type(passwordInput, password);
 
       // Check DOM doesn't contain password in plain text
       expect(document.body.innerHTML).not.toContain('SecurePass123!');
-      
+
       // Check console doesn't log password
       expect(consoleSpy).not.toHaveBeenCalledWith(
         expect.stringContaining('SecurePass123!')
@@ -562,20 +625,21 @@ describe('RegisterForm Security Tests', () => {
 
       // Look for password visibility toggle
       const toggleButtons = screen.getAllByRole('button');
-      const visibilityToggle = toggleButtons.find(button => 
-        button.getAttribute('aria-label')?.includes('password') ||
-        button.textContent?.includes('👁') ||
-        button.querySelector('svg')
+      const visibilityToggle = toggleButtons.find(
+        button =>
+          button.getAttribute('aria-label')?.includes('password') ||
+          button.textContent?.includes('👁') ||
+          button.querySelector('svg')
       );
 
       if (visibilityToggle) {
         await user.click(visibilityToggle);
-        
+
         // Password should temporarily be visible
         expect(passwordInput).toHaveAttribute('type', 'text');
-        
+
         await user.click(visibilityToggle);
-        
+
         // Password should be hidden again
         expect(passwordInput).toHaveAttribute('type', 'password');
       }
@@ -590,15 +654,16 @@ describe('RegisterForm Security Tests', () => {
       );
 
       const passwordInput = screen.getAllByLabelText(/password/i)[0];
-      
+
       // Test weak password
       await user.type(passwordInput, 'weak');
-      
+
       // Password strength indicator should show
       await waitFor(() => {
-        const strengthIndicator = screen.getByText(/password strength/i) ||
-                                screen.getByText(/weak/i) ||
-                                document.querySelector('[data-testid*="strength"]');
+        const strengthIndicator =
+          screen.getByText(/password strength/i) ||
+          screen.getByText(/weak/i) ||
+          document.querySelector('[data-testid*="strength"]');
         if (strengthIndicator) {
           expect(strengthIndicator).toBeInTheDocument();
         }
@@ -607,12 +672,13 @@ describe('RegisterForm Security Tests', () => {
       // Test strong password
       await user.clear(passwordInput);
       await user.type(passwordInput, 'StrongPass123!@#');
-      
+
       // Should show better strength
       await waitFor(() => {
-        const strengthIndicator = screen.getByText(/strong/i) ||
-                                screen.getByText(/good/i) ||
-                                document.querySelector('[data-testid*="strength"]');
+        const strengthIndicator =
+          screen.getByText(/strong/i) ||
+          screen.getByText(/good/i) ||
+          document.querySelector('[data-testid*="strength"]');
         if (strengthIndicator) {
           expect(strengthIndicator).toBeInTheDocument();
         }
@@ -630,11 +696,26 @@ describe('RegisterForm Security Tests', () => {
       );
 
       // Fill form with potentially malicious data
-      await user.type(screen.getByLabelText(/first name/i), 'John<script>alert("XSS")</script>');
-      await user.type(screen.getByLabelText(/last name/i), 'Doe<img src="x" onerror="alert(1)">');
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com<svg onload="alert(2)">');
-      await user.type(screen.getAllByLabelText(/password/i)[0], 'SecurePass123!');
-      await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
+      await user.type(
+        screen.getByLabelText(/first name/i),
+        'John<script>alert("XSS")</script>'
+      );
+      await user.type(
+        screen.getByLabelText(/last name/i),
+        'Doe<img src="x" onerror="alert(1)">'
+      );
+      await user.type(
+        screen.getByLabelText(/email/i),
+        'test@example.com<svg onload="alert(2)">'
+      );
+      await user.type(
+        screen.getAllByLabelText(/password/i)[0],
+        'SecurePass123!'
+      );
+      await user.type(
+        screen.getByLabelText(/confirm password/i),
+        'SecurePass123!'
+      );
 
       const submitButton = screen.getByRole('button', { name: /sign up/i });
       await user.click(submitButton);
@@ -686,12 +767,18 @@ describe('RegisterForm Security Tests', () => {
       );
 
       const unicodeInput = 'José María Ñoño 测试用户 🚀';
-      
+
       await user.type(screen.getByLabelText(/first name/i), unicodeInput);
       await user.type(screen.getByLabelText(/last name/i), 'González');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getAllByLabelText(/password/i)[0], 'SecurePass123!');
-      await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
+      await user.type(
+        screen.getAllByLabelText(/password/i)[0],
+        'SecurePass123!'
+      );
+      await user.type(
+        screen.getByLabelText(/confirm password/i),
+        'SecurePass123!'
+      );
 
       const submitButton = screen.getByRole('button', { name: /sign up/i });
       await user.click(submitButton);
@@ -702,7 +789,7 @@ describe('RegisterForm Security Tests', () => {
           'SecurePass123!',
           expect.objectContaining({
             first_name: unicodeInput,
-            last_name: 'González'
+            last_name: 'González',
           })
         );
       });
@@ -720,7 +807,7 @@ describe('RegisterForm Security Tests', () => {
 
       // Submit form with invalid data
       await user.type(screen.getByLabelText(/email/i), 'invalid-email');
-      
+
       const submitButton = screen.getByRole('button', { name: /sign up/i });
       await user.click(submitButton);
 
@@ -738,7 +825,9 @@ describe('RegisterForm Security Tests', () => {
     it('should properly clean up form state on errors', async () => {
       const user = userEvent.setup();
       mockSignUpWithEmail.mockResolvedValue({
-        error: new Error('Registration failed')
+        session: null as any,
+        user: null as any,
+        error: new Error('Registration failed'),
       });
 
       render(
@@ -751,8 +840,14 @@ describe('RegisterForm Security Tests', () => {
       await user.type(screen.getByLabelText(/first name/i), 'John');
       await user.type(screen.getByLabelText(/last name/i), 'Doe');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getAllByLabelText(/password/i)[0], 'SecurePass123!');
-      await user.type(screen.getByLabelText(/confirm password/i), 'SecurePass123!');
+      await user.type(
+        screen.getAllByLabelText(/password/i)[0],
+        'SecurePass123!'
+      );
+      await user.type(
+        screen.getByLabelText(/confirm password/i),
+        'SecurePass123!'
+      );
 
       const submitButton = screen.getByRole('button', { name: /sign up/i });
       await user.click(submitButton);
@@ -765,7 +860,7 @@ describe('RegisterForm Security Tests', () => {
 
       // Form should be usable for retry
       await user.click(submitButton);
-      
+
       await waitFor(() => {
         expect(mockSignUpWithEmail).toHaveBeenCalledTimes(2);
       });
