@@ -14,22 +14,36 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     include: ['**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['**/node_modules/**', '**/dist/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/build/**'],
+
+    // Enhanced test execution settings
+    testTimeout: 30000,
+    hookTimeout: 30000,
+    maxConcurrency: 5,
+
+    // Optimized typecheck configuration
     typecheck: {
       tsconfig: './tsconfig.app.json',
       include: ['**/*.{test,spec}.{ts,tsx}'],
+      checker: 'tsc',
     },
+
+    // Comprehensive coverage configuration
     coverage: {
-      reporter: ['text', 'html'],
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov', 'json'],
+      reportsDirectory: './coverage',
       thresholds: {
-        statements: 60,
-        branches: 60,
-        functions: 60,
-        lines: 60,
+        statements: 75,
+        branches: 70,
+        functions: 75,
+        lines: 75,
       },
+      include: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts', '!src/test/**'],
       exclude: [
         'node_modules/**',
         'dist/**',
+        'build/**',
         '**/*.config.*',
         '**/*.test.*',
         '**/*.spec.*',
@@ -37,7 +51,34 @@ export default defineConfig({
         '**/tests/**',
         '**/__tests__/**',
         'src/test/**',
+        'src/vite-env.d.ts',
+        'src/main.tsx',
       ],
+      watermarks: {
+        statements: [70, 85],
+        functions: [70, 85],
+        branches: [65, 80],
+        lines: [70, 85],
+      },
     },
+
+    // Enhanced reporter configuration
+    reporters: ['verbose', 'json'],
+    outputFile: {
+      json: './test-results.json',
+    },
+
+    // Test isolation and cleanup
+    isolate: true,
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: false,
+        minThreads: 1,
+        maxThreads: 4,
+      },
+    },
+    // Watch mode configuration
+    watch: false,
   },
 });

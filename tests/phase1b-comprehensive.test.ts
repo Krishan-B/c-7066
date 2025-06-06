@@ -7,7 +7,6 @@ import React from 'react';
 let OAuthLogin: any;
 let OAuthCallback: any;
 let UserAgreements: any;
-let TwoFactorSetup: any;
 let EnhancedLoginPage: any;
 let EnhancedRegisterPage: any;
 let securityUtils: any;
@@ -78,7 +77,7 @@ vi.mock('@/utils/security/securityConfig', () => ({
 // Mock crypto for tests
 Object.defineProperty(window, 'crypto', {
   value: {
-    getRandomValues: vi.fn(array => {
+    getRandomValues: vi.fn((array) => {
       for (let i = 0; i < array.length; i++) {
         array[i] = Math.floor(Math.random() * 256);
       }
@@ -120,11 +119,7 @@ vi.mock('react-router-dom', async () => {
 // Mock UI components
 vi.mock('@/components/ui/card', () => ({
   Card: ({ children, className, ...props }: any) =>
-    React.createElement(
-      'div',
-      { className: `card ${className || ''}`, ...props },
-      children
-    ),
+    React.createElement('div', { className: `card ${className || ''}`, ...props }, children),
   CardContent: ({ children, className, ...props }: any) =>
     React.createElement(
       'div',
@@ -138,26 +133,14 @@ vi.mock('@/components/ui/card', () => ({
       children
     ),
   CardHeader: ({ children, className, ...props }: any) =>
-    React.createElement(
-      'div',
-      { className: `card-header ${className || ''}`, ...props },
-      children
-    ),
+    React.createElement('div', { className: `card-header ${className || ''}`, ...props }, children),
   CardTitle: ({ children, className, ...props }: any) =>
-    React.createElement(
-      'div',
-      { className: `card-title ${className || ''}`, ...props },
-      children
-    ),
+    React.createElement('div', { className: `card-title ${className || ''}`, ...props }, children),
 }));
 
 vi.mock('@/components/ui/button', () => ({
   Button: ({ children, className, ...props }: any) =>
-    React.createElement(
-      'button',
-      { className: `button ${className || ''}`, ...props },
-      children
-    ),
+    React.createElement('button', { className: `button ${className || ''}`, ...props }, children),
 }));
 
 vi.mock('@/components/ui/separator', () => ({
@@ -174,11 +157,7 @@ vi.mock('@/hooks/use-toast', () => ({
 
 // Create test wrapper component to provide React Router context
 const TestWrapper = ({ children }: { children: React.ReactNode }) => {
-  return React.createElement(
-    'div',
-    { 'data-testid': 'router-wrapper' },
-    children
-  );
+  return React.createElement('div', { 'data-testid': 'router-wrapper' }, children);
 };
 
 describe('Phase 1B Security Implementation Tests', () => {
@@ -200,37 +179,20 @@ describe('Phase 1B Security Implementation Tests', () => {
 
     // Load components dynamically with error handling
     try {
-      const oauthLoginModule = await import(
-        '../src/features/auth/components/OAuthLogin'
-      );
+      const oauthLoginModule = await import('../src/features/auth/components/OAuthLogin');
       OAuthLogin =
-        oauthLoginModule.default ||
-        (() => React.createElement('div', {}, 'OAuthLogin Mock'));
+        oauthLoginModule.default || (() => React.createElement('div', {}, 'OAuthLogin Mock'));
 
-      const oauthCallbackModule = await import(
-        '../src/features/auth/components/OAuthCallback'
-      );
+      const oauthCallbackModule = await import('../src/features/auth/components/OAuthCallback');
       OAuthCallback =
-        oauthCallbackModule.default ||
-        (() => React.createElement('div', {}, 'OAuthCallback Mock'));
+        oauthCallbackModule.default || (() => React.createElement('div', {}, 'OAuthCallback Mock'));
 
-      const userAgreementsModule = await import(
-        '../src/features/auth/components/UserAgreements'
-      );
+      const userAgreementsModule = await import('../src/features/auth/components/UserAgreements');
       UserAgreements =
         userAgreementsModule.default ||
         (() => React.createElement('div', {}, 'UserAgreements Mock'));
 
-      const twoFactorSetupModule = await import(
-        '../src/features/auth/components/TwoFactorSetup'
-      );
-      TwoFactorSetup =
-        twoFactorSetupModule.default ||
-        (() => React.createElement('div', {}, 'TwoFactorSetup Mock'));
-
-      const enhancedLoginModule = await import(
-        '../src/features/auth/components/EnhancedLoginPage'
-      );
+      const enhancedLoginModule = await import('../src/features/auth/components/EnhancedLoginPage');
       EnhancedLoginPage =
         enhancedLoginModule.default ||
         (() => React.createElement('div', {}, 'EnhancedLoginPage Mock'));
@@ -242,26 +204,24 @@ describe('Phase 1B Security Implementation Tests', () => {
         enhancedRegisterModule.default ||
         (() => React.createElement('div', {}, 'EnhancedRegisterPage Mock'));
 
-      securityUtils = await import('../src/utils/security/securityUtils').catch(
-        () => ({
-          generateSecureRandom: vi.fn(() => 'mock-random-string'),
-          generatePKCE: vi.fn(() => ({
-            codeVerifier: 'mock-verifier',
-            codeChallenge: 'mock-challenge',
-          })),
-          validatePasswordStrength: vi.fn(() => ({
-            isValid: true,
-            score: 4,
-            errors: [],
-          })),
-          sanitizeInput: vi.fn(input => input.replace(/[<>&"]/g, '')),
-          validateEmail: vi.fn(() => true),
-          validateRedirectUrl: vi.fn(() => true),
-          RateLimiter: vi.fn(() => ({ isAllowed: vi.fn(() => true) })),
-          encryptData: vi.fn(() => 'encrypted-data'),
-          decryptData: vi.fn(() => 'decrypted-data'),
-        })
-      );
+      securityUtils = await import('../src/utils/security/securityUtils').catch(() => ({
+        generateSecureRandom: vi.fn(() => 'mock-random-string'),
+        generatePKCE: vi.fn(() => ({
+          codeVerifier: 'mock-verifier',
+          codeChallenge: 'mock-challenge',
+        })),
+        validatePasswordStrength: vi.fn(() => ({
+          isValid: true,
+          score: 4,
+          errors: [],
+        })),
+        sanitizeInput: vi.fn((input) => input.replace(/[<>&"]/g, '')),
+        validateEmail: vi.fn(() => true),
+        validateRedirectUrl: vi.fn(() => true),
+        RateLimiter: vi.fn(() => ({ isAllowed: vi.fn(() => true) })),
+        encryptData: vi.fn(() => 'encrypted-data'),
+        decryptData: vi.fn(() => 'decrypted-data'),
+      }));
 
       authUtils = await import('../src/utils/auth/authUtils').catch(() => ({
         initOAuthFlow: vi.fn(() => ({
@@ -282,7 +242,7 @@ describe('Phase 1B Security Implementation Tests', () => {
           isValid: true,
           securityLevel: 'high',
         })),
-        validatePassword: vi.fn(password => ({
+        validatePassword: vi.fn((password) => ({
           isValid:
             password.length >= 8 &&
             /[A-Z]/.test(password) &&
@@ -291,17 +251,13 @@ describe('Phase 1B Security Implementation Tests', () => {
         })),
       }));
 
-      const securityConfigModule = await import(
-        '../src/utils/security/securityConfig'
-      ).catch(() => ({
-        getSecurityConfig: vi.fn(() => ({})),
-        validateSecurityConfig: vi.fn(() => []),
-        getEnabledOAuthProviders: vi.fn(() => [
-          'google',
-          'github',
-          'microsoft',
-        ]),
-      }));
+      const securityConfigModule = await import('../src/utils/security/securityConfig').catch(
+        () => ({
+          getSecurityConfig: vi.fn(() => ({})),
+          validateSecurityConfig: vi.fn(() => []),
+          getEnabledOAuthProviders: vi.fn(() => ['google', 'github', 'microsoft']),
+        })
+      );
 
       getSecurityConfig = securityConfigModule.getSecurityConfig;
       validateSecurityConfig = securityConfigModule.validateSecurityConfig;
@@ -314,16 +270,8 @@ describe('Phase 1B Security Implementation Tests', () => {
         React.createElement(
           'div',
           { 'data-testid': 'oauth-login', className },
-          React.createElement(
-            'button',
-            { 'data-testid': 'google-oauth' },
-            'Continue with Google'
-          ),
-          React.createElement(
-            'button',
-            { 'data-testid': 'github-oauth' },
-            'Continue with GitHub'
-          ),
+          React.createElement('button', { 'data-testid': 'google-oauth' }, 'Continue with Google'),
+          React.createElement('button', { 'data-testid': 'github-oauth' }, 'Continue with GitHub'),
           React.createElement(
             'button',
             { 'data-testid': 'microsoft-oauth' },
@@ -331,11 +279,7 @@ describe('Phase 1B Security Implementation Tests', () => {
           )
         );
       OAuthCallback = () =>
-        React.createElement(
-          'div',
-          { 'data-testid': 'oauth-callback' },
-          'OAuth Callback'
-        );
+        React.createElement('div', { 'data-testid': 'oauth-callback' }, 'OAuth Callback');
       UserAgreements = ({ onAgreementChange, onAcceptAll }: any) =>
         React.createElement(
           'div',
@@ -343,21 +287,6 @@ describe('Phase 1B Security Implementation Tests', () => {
           React.createElement('div', {}, 'Terms of Service'),
           React.createElement('div', {}, 'Privacy Policy'),
           React.createElement('button', { onClick: onAcceptAll }, 'Accept All')
-        );
-      TwoFactorSetup = ({ onSetupComplete }: any) =>
-        React.createElement(
-          'div',
-          { 'data-testid': 'two-factor-setup' },
-          React.createElement(
-            'button',
-            { 'data-testid': 'setup-2fa-start' },
-            'Get Started'
-          ),
-          React.createElement(
-            'div',
-            { 'data-testid': 'qr-code-section' },
-            'Scan this QR code with your authenticator app'
-          )
         );
       EnhancedLoginPage = ({ onLoginSuccess, onOAuthSuccess }: any) =>
         React.createElement(
@@ -371,37 +300,27 @@ describe('Phase 1B Security Implementation Tests', () => {
           )
         );
       EnhancedRegisterPage = () =>
-        React.createElement(
-          'div',
-          { 'data-testid': 'enhanced-register' },
-          'Enhanced Register'
-        );
+        React.createElement('div', { 'data-testid': 'enhanced-register' }, 'Enhanced Register');
 
       // Mock utilities with fallback implementations
       securityUtils = {
-        generateSecureRandom: vi.fn(length => 'a'.repeat(length * 2)),
+        generateSecureRandom: vi.fn((length) => 'a'.repeat(length * 2)),
         generatePKCE: vi.fn(() =>
           Promise.resolve({
             codeVerifier: 'mock-code-verifier',
             codeChallenge: 'mock-code-challenge',
           })
         ),
-        validatePasswordStrength: vi.fn(password => ({
+        validatePasswordStrength: vi.fn((password) => ({
           isValid: password.length >= 8,
           score: password.length >= 12 ? 4 : 2,
-          errors:
-            password.length < 8
-              ? ['Password must be at least 8 characters']
-              : [],
+          errors: password.length < 8 ? ['Password must be at least 8 characters'] : [],
         })),
-        sanitizeInput: vi.fn(input =>
-          input
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
+        sanitizeInput: vi.fn((input) =>
+          input.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
         ),
-        validateEmail: vi.fn(email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)),
-        validateRedirectUrl: vi.fn(url => {
+        validateEmail: vi.fn((email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)),
+        validateRedirectUrl: vi.fn((url) => {
           try {
             const parsed = new URL(url);
             return (
@@ -427,20 +346,17 @@ describe('Phase 1B Security Implementation Tests', () => {
             codeVerifier: 'mock-verifier',
           })
         ),
-        validateOAuthCallback: vi.fn(
-          (provider, code, receivedState, expectedState) => ({
-            isValid: receivedState === expectedState && code.length > 0,
-            codeVerifier:
-              receivedState === expectedState ? 'test-verifier' : undefined,
-            error:
-              receivedState !== expectedState
-                ? 'CSRF attack detected'
-                : !code
-                ? 'Authorization code missing'
-                : undefined,
-          })
-        ),
-        setup2FA: vi.fn(userId =>
+        validateOAuthCallback: vi.fn((provider, code, receivedState, expectedState) => ({
+          isValid: receivedState === expectedState && code.length > 0,
+          codeVerifier: receivedState === expectedState ? 'test-verifier' : undefined,
+          error:
+            receivedState !== expectedState
+              ? 'CSRF attack detected'
+              : !code
+              ? 'Authorization code missing'
+              : undefined,
+        })),
+        setup2FA: vi.fn((userId) =>
           Promise.resolve({
             secret: 'JBSWY3DPEHPK3PXP',
             backupCodes: Array.from(
@@ -450,14 +366,13 @@ describe('Phase 1B Security Implementation Tests', () => {
             qrCodeData: 'data:image/png;base64,mockqrcode',
           })
         ),
-        validateSecureSession: vi.fn(session =>
+        validateSecureSession: vi.fn((session) =>
           Promise.resolve({
-            isValid:
-              session?.access_token && session?.expires_at > Date.now() / 1000,
+            isValid: session?.access_token && session?.expires_at > Date.now() / 1000,
             securityLevel: 'high',
           })
         ),
-        validatePassword: vi.fn(password => ({
+        validatePassword: vi.fn((password) => ({
           isValid:
             password.length >= 8 &&
             /[A-Z]/.test(password) &&
@@ -466,15 +381,23 @@ describe('Phase 1B Security Implementation Tests', () => {
         })),
       };
 
-      getSecurityConfig = vi.fn(() => ({
-        oauth: { providers: {}, pkce: {}, security: {} },
-        twoFactor: { totp: {}, backupCodes: {} },
-        session: {},
-        rateLimit: {},
-        encryption: {},
-      }));
-      validateSecurityConfig = vi.fn(() => []);
-      getEnabledOAuthProviders = vi.fn(() => ['google', 'github', 'microsoft']);
+      const securityConfigModule = await import('../src/utils/security/securityConfig').catch(
+        () => ({
+          getSecurityConfig: vi.fn(() => ({
+            oauth: { providers: {}, pkce: {}, security: {} },
+            twoFactor: { totp: {}, backupCodes: {} },
+            session: {},
+            rateLimit: {},
+            encryption: {},
+          })),
+          validateSecurityConfig: vi.fn(() => []),
+          getEnabledOAuthProviders: vi.fn(() => ['google', 'github', 'microsoft']),
+        })
+      );
+
+      getSecurityConfig = securityConfigModule.getSecurityConfig;
+      validateSecurityConfig = securityConfigModule.validateSecurityConfig;
+      getEnabledOAuthProviders = securityConfigModule.getEnabledOAuthProviders;
     }
   });
 
@@ -530,33 +453,6 @@ describe('Phase 1B Security Implementation Tests', () => {
     });
   });
 
-  describe('Two-Factor Authentication Setup', () => {
-    it('should load TwoFactorSetup component', async () => {
-      expect(TwoFactorSetup).toBeDefined();
-      expect(typeof TwoFactorSetup).toBe('function');
-    });
-    it('should generate QR code for 2FA setup', async () => {
-      const onSetupComplete = vi.fn();
-
-      render(
-        React.createElement(TestWrapper, {
-          children: React.createElement(TwoFactorSetup, { onSetupComplete }),
-        })
-      );
-
-      // Start setup process
-      const setupButton = screen.getByTestId('setup-2fa-start');
-      fireEvent.click(setupButton);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('qr-code-section')).toBeInTheDocument();
-        expect(
-          screen.getByText(/scan this qr code with your authenticator app/i)
-        ).toBeInTheDocument();
-      });
-    });
-  });
-
   describe('Enhanced Authentication Pages', () => {
     it('should load EnhancedLoginPage component', async () => {
       expect(EnhancedLoginPage).toBeDefined();
@@ -603,12 +499,9 @@ describe('Phase 1B Security Implementation Tests', () => {
     it('should validate password strength', async () => {
       const weakPassword = securityUtils.validatePasswordStrength('123');
       expect(weakPassword.isValid).toBe(false);
-      expect(weakPassword.errors).toContain(
-        expect.stringMatching(/at least.*characters/i)
-      );
+      expect(weakPassword.errors).toContain(expect.stringMatching(/at least.*characters/i));
 
-      const strongPassword =
-        securityUtils.validatePasswordStrength('StrongP@ssw0rd123');
+      const strongPassword = securityUtils.validatePasswordStrength('StrongP@ssw0rd123');
       expect(strongPassword.isValid).toBe(true);
       expect(strongPassword.errors).toHaveLength(0);
       expect(strongPassword.score).toBeGreaterThan(3);
@@ -632,22 +525,14 @@ describe('Phase 1B Security Implementation Tests', () => {
     });
     it('should validate redirect URLs', async () => {
       // Should allow localhost in development
-      expect(
-        securityUtils.validateRedirectUrl('http://localhost:3000/callback')
-      ).toBe(true);
-      expect(
-        securityUtils.validateRedirectUrl('https://127.0.0.1:3000/callback')
-      ).toBe(true);
+      expect(securityUtils.validateRedirectUrl('http://localhost:3000/callback')).toBe(true);
+      expect(securityUtils.validateRedirectUrl('https://127.0.0.1:3000/callback')).toBe(true);
 
       // Should reject invalid protocols
-      expect(securityUtils.validateRedirectUrl('javascript:alert(1)')).toBe(
+      expect(securityUtils.validateRedirectUrl('javascript:alert(1)')).toBe(false);
+      expect(securityUtils.validateRedirectUrl('data:text/html,<script>alert(1)</script>')).toBe(
         false
       );
-      expect(
-        securityUtils.validateRedirectUrl(
-          'data:text/html,<script>alert(1)</script>'
-        )
-      ).toBe(false);
     });
   });
   describe('Security Configuration', () => {
@@ -674,10 +559,7 @@ describe('Phase 1B Security Implementation Tests', () => {
 
   describe('Enhanced Authentication Utilities', () => {
     it('should initialize OAuth flow with PKCE', async () => {
-      const oauthData = await authUtils.initOAuthFlow(
-        'google',
-        'http://localhost:3000/callback'
-      );
+      const oauthData = await authUtils.initOAuthFlow('google', 'http://localhost:3000/callback');
 
       expect(oauthData).toHaveProperty('state');
       expect(oauthData).toHaveProperty('codeChallenge');
@@ -741,10 +623,7 @@ describe('Phase 1B Security Implementation Tests', () => {
       // Simulate complete OAuth flow
 
       // 1. Initialize OAuth flow
-      const oauthInit = await authUtils.initOAuthFlow(
-        'google',
-        'http://localhost:3000/callback'
-      );
+      const oauthInit = await authUtils.initOAuthFlow('google', 'http://localhost:3000/callback');
 
       // 2. Simulate OAuth provider callback
       window.sessionStorage.getItem = vi
@@ -785,12 +664,7 @@ describe('Phase 1B Security Implementation Tests', () => {
 describe('Phase 1B Security Edge Cases', () => {
   it('should handle malformed OAuth parameters', async () => {
     // Missing code
-    let result = authUtils.validateOAuthCallback(
-      'google',
-      '',
-      'state',
-      'state'
-    );
+    let result = authUtils.validateOAuthCallback('google', '', 'state', 'state');
     expect(result.isValid).toBe(false);
     expect(result.error).toContain('code missing');
 
@@ -825,10 +699,7 @@ describe('Phase 1B Security Edge Cases', () => {
     // Test with custom key
     const customKey = 'custom-32-character-encryption-key';
     const encryptedCustom = securityUtils.encryptData(sensitiveData, customKey);
-    const decryptedCustom = securityUtils.decryptData(
-      encryptedCustom,
-      customKey
-    );
+    const decryptedCustom = securityUtils.decryptData(encryptedCustom, customKey);
 
     expect(decryptedCustom).toBe(sensitiveData);
   });

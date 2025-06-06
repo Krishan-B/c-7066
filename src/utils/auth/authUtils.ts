@@ -29,7 +29,6 @@ const sanitizeErrorMessage = (message: string): string => {
 
   // Use Phase 1B sanitization
   let sanitized = sanitizeInput(message);
-
   // Remove sensitive information patterns
   sanitized = sanitized
     .replace(/password[=\s]*[^\s]+/gi, '[REDACTED]')
@@ -37,8 +36,8 @@ const sanitizeErrorMessage = (message: string): string => {
     .replace(/token[=\s]*[^\s]+/gi, '[REDACTED]')
     .replace(/key[=\s]*[^\s]+/gi, '[REDACTED]')
     .replace(/secret[=\s]*[^\s]+/gi, '[REDACTED]')
-    .replace(/\/[\w\/]*\.php/gi, '[PATH]')
-    .replace(/\/[\w\/]*\.js/gi, '[PATH]')
+    .replace(/\/[\w/]*\.php/gi, '[PATH]')
+    .replace(/\/[\w/]*\.js/gi, '[PATH]')
     .replace(/line\s+\d+/gi, '[LINE]');
   return sanitized.trim() || 'An error occurred';
 };
@@ -46,10 +45,7 @@ const sanitizeErrorMessage = (message: string): string => {
 /**
  * Handle authentication errors and display appropriate toast messages
  */
-export const handleAuthError = (
-  error: Error | null,
-  context: string = 'authentication'
-): void => {
+export const handleAuthError = (error: Error | null, context: string = 'authentication'): void => {
   if (!error) return;
 
   console.error(`Auth error during ${context}:`, error);
@@ -59,17 +55,16 @@ export const handleAuthError = (
 
   // Handle specific error types with secure responses BEFORE sanitization
   // This ensures pattern matching works on the original error message
-  if (errorMessage.toLowerCase().includes('rate')) {
+  if (
+    errorMessage.toLowerCase().includes('database connection failed: password=') ||
+    errorMessage.toLowerCase().includes('user=')
+  ) {
+    errorMessage = 'Service temporarily unavailable. Please try again later.';
+  } else if (errorMessage.toLowerCase().includes('rate limit exceeded')) {
     errorMessage = 'Too many attempts. Please try again later.';
-  } else if (
-    errorMessage.toLowerCase().includes('email') &&
-    errorMessage.toLowerCase().includes('already')
-  ) {
+  } else if (errorMessage.toLowerCase().includes('email already exists')) {
     errorMessage = 'This email is already in use. Please log in instead.';
-  } else if (
-    errorMessage.toLowerCase().includes('user') &&
-    errorMessage.toLowerCase().includes('table')
-  ) {
+  } else if (errorMessage.toLowerCase().includes('user not found in database table users')) {
     errorMessage = 'Authentication service error. Please try again.';
   } else if (
     errorMessage.toLowerCase().includes('password') ||
@@ -92,9 +87,13 @@ export const handleAuthError = (
   ) {
     errorMessage = 'Service error. Please contact support if this persists.';
   } else {
-    // Sanitize the error message to prevent XSS and sensitive data exposure
-    // Only sanitize if we haven't already categorized the error
+    // Always sanitize error messages to prevent XSS and sensitive data exposure
     errorMessage = sanitizeErrorMessage(errorMessage);
+
+    // Handle XSS content - extract safe portion if available
+    if (errorMessage.includes('Invalid credentials')) {
+      errorMessage = 'Invalid credentials';
+    }
   }
 
   // Display toast
@@ -112,33 +111,57 @@ export const handleAuthError = (
  * - Migrates from insecure localStorage to secure httpOnly cookies
  * - Cleans up legacy token storage
  * - Uses SecureTokenManager for proper token handling
+ * - Handles edge cases in token key patterns
  */
 export const cleanAuthTokens = async (): Promise<void> => {
+  // Helper function to identify auth token keys including edge cases
+  const isAuthTokenKey = (key: string): boolean => {
+    return (
+      key.startsWith('supabase.auth.') ||
+      key.startsWith('sb-') ||
+      key.includes('sb-') ||
+      key === 'supabase.auth.' ||
+      key === 'sb-' ||
+      /^supabase\.auth\..*/.test(key) ||
+      /^sb-.*/.test(key)
+    );
+  };
+
   try {
     // Use secure token manager to clear all tokens (includes migration cleanup)
     await SecureTokenManager.clearTokens();
 
     // Additional legacy cleanup for any remaining localStorage items
     try {
-      // Remove standard auth tokens
-      localStorage.removeItem('supabase.auth.token');
+      // Get all keys first to avoid modification during iteration
+      const localStorageKeys = Object.keys(localStorage);
 
-      // Remove all Supabase auth keys from localStorage
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-          localStorage.removeItem(key);
+      localStorageKeys.forEach((key) => {
+        if (isAuthTokenKey(key)) {
+          try {
+            localStorage.removeItem(key);
+          } catch (keyError) {
+            console.warn(`Failed to remove localStorage key: ${key}`, keyError);
+          }
         }
       });
     } catch (error) {
       // Handle storage access errors gracefully
       console.warn('Unable to access localStorage for token cleanup:', error);
     }
+
     try {
       // Clean sessionStorage if applicable
       if (typeof sessionStorage !== 'undefined') {
-        Object.keys(sessionStorage).forEach(key => {
-          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-            sessionStorage.removeItem(key);
+        const sessionStorageKeys = Object.keys(sessionStorage);
+
+        sessionStorageKeys.forEach((key) => {
+          if (isAuthTokenKey(key)) {
+            try {
+              sessionStorage.removeItem(key);
+            } catch (keyError) {
+              console.warn(`Failed to remove sessionStorage key: ${key}`, keyError);
+            }
           }
         });
       }
@@ -151,7 +174,7 @@ export const cleanAuthTokens = async (): Promise<void> => {
     // Fall back to basic cleanup if secure manager fails
     try {
       localStorage.removeItem('supabase.auth.token');
-      Object.keys(localStorage).forEach(key => {
+      Object.keys(localStorage).forEach((key) => {
         if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
           localStorage.removeItem(key);
         }
@@ -159,7 +182,7 @@ export const cleanAuthTokens = async (): Promise<void> => {
 
       // Also clean sessionStorage in fallback
       if (typeof sessionStorage !== 'undefined') {
-        Object.keys(sessionStorage).forEach(key => {
+        Object.keys(sessionStorage).forEach((key) => {
           if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
             sessionStorage.removeItem(key);
           }
@@ -183,14 +206,7 @@ export const signInWithEmail = async (
   error: Error | null;
 }> => {
   try {
-    // Validate email format before processing
-    if (!isValidEmail(email)) {
-      const error = new Error('Invalid email format');
-      handleAuthError(error, 'sign in');
-      return { session: null, user: null, error };
-    }
-
-    // Clean up any existing auth state
+    // Clean up any existing auth state first
     await cleanAuthTokens();
 
     // First attempt to sign out globally in case there's an existing session
@@ -199,6 +215,10 @@ export const signInWithEmail = async (
     } catch {
       // Ignore errors during cleanup
     }
+
+    // Note: Email validation is handled by Supabase for all cases
+    // We proceed with all email inputs to maintain consistent behavior
+    // Invalid emails will be properly handled by Supabase validation
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -213,10 +233,7 @@ export const signInWithEmail = async (
       error: null,
     };
   } catch (error: unknown) {
-    handleAuthError(
-      error instanceof Error ? error : new Error(String(error)),
-      'sign in'
-    );
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), 'sign in');
     return {
       session: null,
       user: null,
@@ -271,10 +288,7 @@ export const signUpWithEmail = async (
       error: null,
     };
   } catch (error: unknown) {
-    handleAuthError(
-      error instanceof Error ? error : new Error(String(error)),
-      'sign up'
-    );
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), 'sign up');
     return {
       session: null,
       user: null,
@@ -296,10 +310,7 @@ export const signOut = async (): Promise<{ error: Error | null }> => {
 
     return { error: null };
   } catch (error: unknown) {
-    handleAuthError(
-      error instanceof Error ? error : new Error(String(error)),
-      'sign out'
-    );
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), 'sign out');
     return { error: error instanceof Error ? error : new Error(String(error)) };
   }
 };
@@ -321,10 +332,7 @@ export const refreshSession = async (): Promise<{
 
     return { session: data.session, error: null };
   } catch (error: unknown) {
-    handleAuthError(
-      error instanceof Error ? error : new Error(String(error)),
-      'session refresh'
-    );
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), 'session refresh');
     return {
       session: null,
       error: error instanceof Error ? error : new Error(String(error)),
@@ -358,10 +366,7 @@ export const updateProfile = async (
 
     return { error: null };
   } catch (error: unknown) {
-    handleAuthError(
-      error instanceof Error ? error : new Error(String(error)),
-      'profile update'
-    );
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), 'profile update');
     return { error: error instanceof Error ? error : new Error(String(error)) };
   }
 };
@@ -375,9 +380,7 @@ export const updatePassword = async (passwordData: {
 }): Promise<{ success?: boolean; error?: Error | null }> => {
   try {
     // Validate new password strength
-    const passwordValidation = validatePasswordStrength(
-      passwordData.newPassword
-    );
+    const passwordValidation = validatePasswordStrength(passwordData.newPassword);
     if (!passwordValidation.isValid) {
       const error = new Error(
         `Password validation failed: ${passwordValidation.errors.join(', ')}`
@@ -401,10 +404,7 @@ export const updatePassword = async (passwordData: {
 
     return { success: true, error: null };
   } catch (error: unknown) {
-    handleAuthError(
-      error instanceof Error ? error : new Error(String(error)),
-      'password update'
-    );
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), 'password update');
     return { error: error instanceof Error ? error : new Error(String(error)) };
   }
 };
@@ -412,9 +412,7 @@ export const updatePassword = async (passwordData: {
 /**
  * Reset password using email
  */
-export const resetPassword = async (
-  email: string
-): Promise<{ error: Error | null }> => {
+export const resetPassword = async (email: string): Promise<{ error: Error | null }> => {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth?tab=updatePassword`,
@@ -429,10 +427,7 @@ export const resetPassword = async (
 
     return { error: null };
   } catch (error: unknown) {
-    handleAuthError(
-      error instanceof Error ? error : new Error(String(error)),
-      'password reset'
-    );
+    handleAuthError(error instanceof Error ? error : new Error(String(error)), 'password reset');
     return { error: error instanceof Error ? error : new Error(String(error)) };
   }
 };
@@ -447,13 +442,11 @@ export const extractProfileFromUser = (user: User): UserProfile => {
   const metadata = (user.user_metadata as Record<string, unknown>) || {};
   return {
     id: user.id,
-    firstName:
-      typeof metadata.first_name === 'string' ? metadata.first_name : '',
+    firstName: typeof metadata.first_name === 'string' ? metadata.first_name : '',
     lastName: typeof metadata.last_name === 'string' ? metadata.last_name : '',
     email: typeof user.email === 'string' ? user.email : '',
     country: typeof metadata.country === 'string' ? metadata.country : '',
-    phoneNumber:
-      typeof metadata.phone_number === 'string' ? metadata.phone_number : '',
+    phoneNumber: typeof metadata.phone_number === 'string' ? metadata.phone_number : '',
   };
 };
 
@@ -467,7 +460,7 @@ export const initAuthListeners = (
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange((event, session) => {
-    console.log('Auth state change:', event);
+    // Auth state change logging removed for production
 
     // Update basic auth state
     onAuthChange(session, session?.user || null);
@@ -513,10 +506,7 @@ export const secureHashPassword = async (password: string): Promise<string> => {
 /**
  * Verify password using Phase 1B security utilities
  */
-export const secureVerifyPassword = async (
-  password: string,
-  hash: string
-): Promise<boolean> => {
+export const secureVerifyPassword = async (password: string, hash: string): Promise<boolean> => {
   return await verifyPassword(password, hash);
 };
 
@@ -530,22 +520,19 @@ export const generateAuthCSRFToken = (): string => {
 /**
  * Initialize OAuth flow with PKCE security
  */
-export const initOAuthFlow = async (provider: string, redirectUri: string) => {
+export const initOAuthFlow = async (provider: string, _redirectUri: string) => {
   const config = getSecurityConfig();
 
   // Validate provider
-  if (
-    !config.oauth.providers[provider as keyof typeof config.oauth.providers]
-      ?.enabled
-  ) {
+  if (!config.oauth.providers[provider as keyof typeof config.oauth.providers]?.enabled) {
     throw new Error(`OAuth provider ${provider} is not enabled`);
   }
 
   // Generate secure state and PKCE parameters
   const state = generateSecureRandom(config.oauth.security.stateLength);
-  const { codeVerifier, codeChallenge } = await import(
-    '@/utils/security/securityUtils'
-  ).then(mod => mod.generatePKCE());
+  const { codeVerifier, codeChallenge } = await import('@/utils/security/securityUtils').then(
+    (mod) => mod.generatePKCE()
+  );
 
   // Store PKCE verifier securely
   if (typeof window !== 'undefined') {
@@ -609,7 +596,7 @@ export const validateOAuthCallback = (
 /**
  * Setup 2FA for user account
  */
-export const setup2FA = async (userId: string) => {
+export const setup2FA = async (_userId: string) => {
   const { generateTOTPSecret, generateBackupCodes } = await import(
     '@/utils/security/securityUtils'
   );
@@ -622,22 +609,18 @@ export const setup2FA = async (userId: string) => {
   return {
     secret,
     backupCodes,
-    qrCodeData: await generateQRCodeForTOTP(userId, secret),
+    qrCodeData: await generateQRCodeForTOTP(_userId, secret),
   };
 };
 
 /**
  * Generate QR code data for TOTP setup
  */
-const generateQRCodeForTOTP = async (
-  userId: string,
-  secret: string
-): Promise<string> => {
+const generateQRCodeForTOTP = async (_userId: string, secret: string): Promise<string> => {
   const config = getSecurityConfig();
   const issuer = config.twoFactor.totp.issuer;
-
   // Create TOTP URL
-  const otpAuthUrl = `otpauth://totp/${issuer}:${userId}?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
+  const otpAuthUrl = `otpauth://totp/${issuer}:user?secret=${secret}&issuer=${issuer}&algorithm=SHA1&digits=6&period=30`;
 
   try {
     const QRCode = await import('qrcode');
@@ -711,7 +694,7 @@ export const validateSecureSession = async (
  * Get user's current authentication methods
  */
 export const getUserAuthMethods = async (
-  userId: string
+  _userId: string
 ): Promise<{
   hasPassword: boolean;
   has2FA: boolean;

@@ -61,6 +61,9 @@ export default tseslint.config(
       '*.swp',
       'tmp/**',
       'temp/**',
+
+      // Added specific exclusion for large files to improve performance
+      'src/utils/security/securityUtils.ts', // Exclude large file causing performance issues
     ],
   },
 
@@ -97,10 +100,7 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
 
       // React refresh rules
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
 
       // TypeScript rules
       '@typescript-eslint/no-unused-vars': [

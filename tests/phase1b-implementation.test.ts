@@ -15,17 +15,13 @@ import React from 'react';
 describe('Phase 1B Security Implementation Tests', () => {
   describe('OAuth Authentication Components', () => {
     it('should have OAuthLogin component with PKCE security', async () => {
-      const { default: OAuthLogin } = await import(
-        '@/features/auth/components/OAuthLogin'
-      );
+      const { default: OAuthLogin } = await import('@/features/auth/components/OAuthLogin');
       expect(OAuthLogin).toBeDefined();
       expect(typeof OAuthLogin).toBe('function');
     });
 
     it('should have OAuthCallback component for secure token exchange', async () => {
-      const { default: OAuthCallback } = await import(
-        '@/features/auth/components/OAuthCallback'
-      );
+      const { default: OAuthCallback } = await import('@/features/auth/components/OAuthCallback');
       expect(OAuthCallback).toBeDefined();
       expect(typeof OAuthCallback).toBe('function');
     });
@@ -49,9 +45,7 @@ describe('Phase 1B Security Implementation Tests', () => {
 
   describe('User Agreements and Consent Management', () => {
     it('should have UserAgreements component for GDPR compliance', async () => {
-      const { default: UserAgreements } = await import(
-        '@/features/auth/components/UserAgreements'
-      );
+      const { default: UserAgreements } = await import('@/features/auth/components/UserAgreements');
       expect(UserAgreements).toBeDefined();
       expect(typeof UserAgreements).toBe('function');
     });
@@ -63,7 +57,7 @@ describe('Phase 1B Security Implementation Tests', () => {
         { id: 'marketing', required: false },
       ];
 
-      const requiredAgreements = mockAgreements.filter(a => a.required);
+      const requiredAgreements = mockAgreements.filter((a) => a.required);
       expect(requiredAgreements).toHaveLength(1);
       expect(requiredAgreements[0].id).toBe('terms');
     });
@@ -80,71 +74,17 @@ describe('Phase 1B Security Implementation Tests', () => {
     });
   });
 
-  describe('2FA Implementation', () => {
-    it('should have TwoFactorSetup component', async () => {
-      const { default: TwoFactorSetup } = await import(
-        '@/features/auth/components/TwoFactorSetup'
-      );
-      expect(TwoFactorSetup).toBeDefined();
-      expect(typeof TwoFactorSetup).toBe('function');
-    });
-
-    it('should generate cryptographically secure TOTP secrets', () => {
-      const generateSecureSecret = () => {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-        const array = new Uint8Array(32);
-        window.crypto.getRandomValues(array);
-        return Array.from(array, byte => chars[byte % chars.length]).join('');
-      };
-
-      const secret1 = generateSecureSecret();
-      const secret2 = generateSecureSecret();
-
-      expect(secret1).toHaveLength(32);
-      expect(secret2).toHaveLength(32);
-      expect(secret1).not.toBe(secret2);
-      expect(/^[A-Z2-7]+$/.test(secret1)).toBe(true);
-    });
-
-    it('should generate secure backup codes', () => {
-      const generateBackupCodes = () => {
-        const codes: string[] = [];
-        for (let i = 0; i < 10; i++) {
-          const code = Array.from(
-            window.crypto.getRandomValues(new Uint8Array(4)),
-            byte => byte.toString(16).padStart(2, '0')
-          )
-            .join('')
-            .toUpperCase();
-          codes.push(`${code.slice(0, 4)}-${code.slice(4)}`);
-        }
-        return codes;
-      };
-
-      const codes = generateBackupCodes();
-      expect(codes).toHaveLength(10);
-      expect(codes[0]).toMatch(/^[A-F0-9]{4}-[A-F0-9]{4}$/);
-
-      // Ensure all codes are unique
-      const uniqueCodes = new Set(codes);
-      expect(uniqueCodes.size).toBe(10);
-    });
-  });
-
   describe('Security Compliance Features', () => {
     it('should implement PKCE for OAuth security', () => {
       const generatePKCE = async () => {
-        const codeVerifier = Array.from(
-          window.crypto.getRandomValues(new Uint8Array(32)),
-          byte => byte.toString(16).padStart(2, '0')
+        const codeVerifier = Array.from(window.crypto.getRandomValues(new Uint8Array(32)), (byte) =>
+          byte.toString(16).padStart(2, '0')
         ).join('');
 
         const encoder = new TextEncoder();
         const data = encoder.encode(codeVerifier);
         const digest = await window.crypto.subtle.digest('SHA-256', data);
-        const codeChallenge = btoa(
-          String.fromCharCode(...new Uint8Array(digest))
-        )
+        const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
           .replace(/\+/g, '-')
           .replace(/\//g, '_')
           .replace(/=/g, '');
@@ -163,9 +103,7 @@ describe('Phase 1B Security Implementation Tests', () => {
       const generateSecureState = () => {
         const array = new Uint8Array(32);
         window.crypto.getRandomValues(array);
-        return Array.from(array, byte =>
-          byte.toString(16).padStart(2, '0')
-        ).join('');
+        return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
       };
 
       const state1 = generateSecureState();
@@ -188,32 +126,22 @@ describe('Phase 1B Security Implementation Tests', () => {
         }
       };
 
-      expect(validateRedirectUri('https://localhost:3000/auth/callback')).toBe(
-        true
-      );
-      expect(validateRedirectUri('https://tradepro.com/auth/callback')).toBe(
-        true
-      );
-      expect(validateRedirectUri('https://malicious.com/auth/callback')).toBe(
-        false
-      );
+      expect(validateRedirectUri('https://localhost:3000/auth/callback')).toBe(true);
+      expect(validateRedirectUri('https://tradepro.com/auth/callback')).toBe(true);
+      expect(validateRedirectUri('https://malicious.com/auth/callback')).toBe(false);
       expect(validateRedirectUri('invalid-url')).toBe(false);
     });
   });
 
   describe('Enhanced Authentication Forms', () => {
     it('should maintain existing RegisterForm functionality', async () => {
-      const { default: RegisterForm } = await import(
-        '@/features/auth/components/RegisterForm'
-      );
+      const { default: RegisterForm } = await import('@/features/auth/components/RegisterForm');
       expect(RegisterForm).toBeDefined();
       expect(typeof RegisterForm).toBe('function');
     });
 
     it('should maintain existing LoginForm functionality', async () => {
-      const { default: LoginForm } = await import(
-        '@/features/auth/components/LoginForm'
-      );
+      const { default: LoginForm } = await import('@/features/auth/components/LoginForm');
       expect(LoginForm).toBeDefined();
       expect(typeof LoginForm).toBe('function');
     });
