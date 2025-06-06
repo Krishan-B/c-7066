@@ -40,9 +40,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
+      - name: Remove node_modules (workaround for npm/rollup bug)
         run: |
-          rm -rf node_modules package-lock.json
+          rm -rf node_modules
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
@@ -86,9 +86,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
-      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
+      - name: Remove node_modules (workaround for npm/rollup bug)
         run: |
-          rm -rf node_modules package-lock.json
+          rm -rf node_modules
 
       - name: Run ${{ matrix.test-suite }} tests
         run: |
@@ -144,9 +144,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
-      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
+      - name: Remove node_modules (workaround for npm/rollup bug)
         run: |
-          rm -rf node_modules package-lock.json
+          rm -rf node_modules
 
       - name: Run performance tests
         run: |
@@ -189,7 +189,7 @@ jobs:
 
       - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
         run: |
-          rm -rf node_modules package-lock.json
+          rm -rf node_modules
 
       - name: Run npm audit
         run: |
@@ -228,9 +228,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
-      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
+      - name: Remove node_modules (workaround for npm/rollup bug)
         run: |
-          rm -rf node_modules package-lock.json
+          rm -rf node_modules
 
       - name: Build project
         run: |
@@ -270,9 +270,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
-      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
+      - name: Remove node_modules (workaround for npm/rollup bug)
         run: |
-          rm -rf node_modules package-lock.json
+          rm -rf node_modules
 
       - name: Start test environment
         run: |
