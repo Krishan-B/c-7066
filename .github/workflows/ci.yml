@@ -40,6 +40,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
+        run: |
+          rm -rf node_modules package-lock.json
+
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
@@ -81,6 +85,10 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
+
+      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
+        run: |
+          rm -rf node_modules package-lock.json
 
       - name: Run ${{ matrix.test-suite }} tests
         run: |
@@ -136,6 +144,10 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
+      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
+        run: |
+          rm -rf node_modules package-lock.json
+
       - name: Run performance tests
         run: |
           npx vitest run tests/performance --reporter=verbose --reporter=json --outputFile=performance-results.json
@@ -175,6 +187,10 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
+      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
+        run: |
+          rm -rf node_modules package-lock.json
+
       - name: Run npm audit
         run: |
           npm audit --audit-level=moderate --json > audit-report.json
@@ -211,6 +227,10 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
+
+      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
+        run: |
+          rm -rf node_modules package-lock.json
 
       - name: Build project
         run: |
@@ -249,6 +269,10 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
+
+      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
+        run: |
+          rm -rf node_modules package-lock.json
 
       - name: Start test environment
         run: |
