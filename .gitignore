@@ -174,3 +174,7 @@ lpt[0-9]
 # Files with special characters or invalid names
 *\357\200*
 *\u*
+
+# Allow GitHub workflows and config
+!.github/
+!.github/**

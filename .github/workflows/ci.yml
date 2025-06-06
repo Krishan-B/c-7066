@@ -10,7 +10,7 @@ on:
     - cron: '0 2 * * *'
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   COVERAGE_THRESHOLD: 75
 
 jobs:
@@ -144,10 +144,6 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
-      - name: Remove node_modules (workaround for npm/rollup bug)
-        run: |
-          rm -rf node_modules
-
       - name: Run performance tests
         run: |
           npx vitest run tests/performance --reporter=verbose --reporter=json --outputFile=performance-results.json
@@ -187,13 +183,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
 
-      - name: Remove node_modules and lockfile (workaround for npm/rollup bug)
-        run: |
-          rm -rf node_modules
-
       - name: Run npm audit
         run: |
-          npm audit --audit-level=moderate --json > audit-report.json
+          npm audit --audit-level=moderate --json > audit-report.json || true
         continue-on-error: true
 
       - name: Run security tests
