@@ -56,7 +56,7 @@ jobs:
         run: npx tsc --noEmit --incremental
 
       - name: Upload ESLint results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: eslint-report
@@ -100,14 +100,14 @@ jobs:
           NODE_ENV: test
 
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results-${{ matrix.test-suite }}
           path: test-results-${{ matrix.test-suite }}.json
 
       - name: Upload coverage reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: matrix.test-suite == 'unit'
         with:
           name: coverage-report
@@ -152,7 +152,7 @@ jobs:
           node scripts/generate-perf-report.js >> performance-report.md
 
       - name: Upload performance results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: performance-results
           path: |
@@ -190,7 +190,7 @@ jobs:
           ! grep -r -i "password\|secret\|key\|token" src/ --include="*.ts" --include="*.js" || echo "Potential sensitive data found"
 
       - name: Upload security audit
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-audit
@@ -229,7 +229,7 @@ jobs:
           du -sh dist/* || echo "No dist files to analyze"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: dist/
@@ -265,7 +265,7 @@ jobs:
           NODE_ENV: test
 
       - name: Upload integration results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: integration-results
@@ -304,7 +304,7 @@ jobs:
           fi
 
       - name: Upload test summary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-summary
           path: test-summary.md
