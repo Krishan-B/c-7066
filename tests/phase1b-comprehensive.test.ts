@@ -499,7 +499,7 @@ describe('Phase 1B Security Implementation Tests', () => {
     it('should validate password strength', async () => {
       const weakPassword = securityUtils.validatePasswordStrength('123');
       expect(weakPassword.isValid).toBe(false);
-      expect(weakPassword.errors).toContain(expect.stringMatching(/at least.*characters/i));
+      expect(weakPassword.errors).toContain('Password must be at least 8 characters');
 
       const strongPassword = securityUtils.validatePasswordStrength('StrongP@ssw0rd123');
       expect(strongPassword.isValid).toBe(true);
