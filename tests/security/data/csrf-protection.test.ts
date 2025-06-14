@@ -233,7 +233,7 @@ describe('CSRF Protection Tests', () => {
       const stateChangingMethods = ['POST', 'PUT', 'DELETE', 'PATCH'];
       const safeMethods = ['GET', 'HEAD', 'OPTIONS'];
 
-      mockCSRFProtection.isTokenRequired.mockImplementation(function (method) {
+      mockCSRFProtection.isTokenRequired.mockImplementation(function (method: string) {
         return stateChangingMethods.includes(method.toUpperCase());
       });
 

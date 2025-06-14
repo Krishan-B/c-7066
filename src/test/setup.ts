@@ -18,6 +18,9 @@ global.console = {
   error: () => {},
 };
 
+// Mock window.alert for security tests
+global.window.alert = vi.fn();
+
 // Mock ResizeObserver for jsdom
 global.ResizeObserver = class {
   observe() {}
@@ -33,14 +36,16 @@ class MockIntersectionObserver implements IntersectionObserver {
   observe() {}
   unobserve() {}
   disconnect() {}
-  takeRecords() { return []; }
+  takeRecords() {
+    return [];
+  }
   constructor(_cb: IntersectionObserverCallback, _options?: IntersectionObserverInit) {}
 }
 global.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
 
 /**
  * Phase 1 Security Implementation: Critical Toast Mock Configuration
- * 
+ *
  * CVE Reference: Fixes authentication form test failures (CVSS 9.0)
  * Security Consideration: Prevents toast system crashes that block security validations
  * Test Coverage: Enables authentication security test suite execution
@@ -48,12 +53,12 @@ global.IntersectionObserver = MockIntersectionObserver as unknown as typeof Inte
 
 // Mock the toast hook to prevent authentication test failures
 vi.mock('@/hooks/use-toast', () => ({
-  useToast: () => ({
-    toast: vi.fn(),
+  useToast: vi.fn(() => ({
     toasts: [],
-    dismiss: vi.fn()
-  }),
-  toast: vi.fn()
+    toast: vi.fn(),
+    dismiss: vi.fn(),
+  })),
+  toast: vi.fn(),
 }));
 
 // Mock navigation for security tests

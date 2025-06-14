@@ -15,6 +15,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --reporter=basic",
+    "test:security:ci": "vitest run tests/security --coverage --reporter=basic",
     "ci:check": "npm run lint:ci && npm run typecheck && npm run test:ci && npm run build",
     "prepare": "husky install",
     "typecheck": "tsc --noEmit"
@@ -52,6 +53,7 @@
     "@supabase/supabase-js": "^2.49.4",
     "@tanstack/react-query": "^5.56.2",
     "@types/dompurify": "^3.0.5",
+    "bcrypt": "^6.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -84,6 +86,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
+    "@playwright/test": "^1.52.0",
     "@tailwindcss/typography": "^0.5.15",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -116,6 +119,7 @@
     "lint-staged": "^16.1.0",
     "lovable-tagger": "^1.1.8",
     "markdownlint-cli": "^0.45.0",
+    "playwright": "^1.52.0",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.11",
     "ts-jest": "^29.3.4",
