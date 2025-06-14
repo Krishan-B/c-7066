@@ -1,5 +1,6 @@
+
 import { type Session } from "@supabase/supabase-js";
-import { signOut, refreshSession } from "@/utils/auth/authUtils";
+import { signOut, refreshSession } from "@/utils/auth";
 
 export const useAuthActions = () => {
   const handleSignOut = async () => {

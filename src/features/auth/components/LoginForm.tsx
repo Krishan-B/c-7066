@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { validateSignIn } from '../utils/validation';
-import { signInWithEmail } from '@/utils/auth/authUtils';
+import { signInWithEmail } from '@/utils/auth';
 import PasswordResetDialog from './PasswordResetDialog';
 
 // Import our components

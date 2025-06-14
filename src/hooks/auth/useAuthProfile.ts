@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import type { UserProfile } from "@/features/profile/types";
-import { extractProfileFromUser, updateProfile as updateUserProfile } from "@/utils/auth/authUtils";
+import { extractProfileFromUser, updateProfile as updateUserProfile } from "@/utils/auth";
 
 /**
  * Hook to manage user profile data

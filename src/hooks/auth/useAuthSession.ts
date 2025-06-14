@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { type Session, type User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { initAuthListeners } from "@/utils/auth/authUtils";
+import { initAuthListeners } from "@/utils/auth";
 
 /**
  * Initialize Supabase auth session and return current state
@@ -45,20 +44,19 @@ export const useAuthSession = () => {
     // Set up auth listeners first to ensure we catch all events
     const subscription = initAuthListeners(
       // Auth change handler
-      (newSession, newUser) => {
+      (event, newSession) => {
         // Only process events after initialization is complete
         if (!initialized && !newSession) {
           return;
         }
         
+        const newUser = newSession?.user ?? null;
         setSession(newSession);
         setUser(newUser);
         
         // Set loading to false once we've processed this event
         setLoading(false);
-      },
-      // Profile change handler (handled in useAuthProfile)
-      () => {}
+      }
     );
 
     // Then check for existing session
