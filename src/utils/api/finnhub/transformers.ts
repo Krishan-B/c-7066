@@ -60,3 +60,32 @@ export const transformFinnhubCryptoData = (data: any): Asset | null => {
     return null;
   }
 };
+
+// Add the specific function signatures that the handlers expect
+export const transformStockData = (data: any, symbol: string): Asset | null => {
+  const transformed = transformFinnhubStockData(data);
+  if (transformed) {
+    transformed.symbol = symbol;
+    transformed.name = symbol; // Use symbol as name for now
+  }
+  return transformed;
+};
+
+export const transformCryptoData = (data: any, symbol: string): Asset | null => {
+  const transformed = transformFinnhubCryptoData(data);
+  if (transformed) {
+    transformed.symbol = symbol;
+    transformed.name = symbol; // Use symbol as name for now
+  }
+  return transformed;
+};
+
+export const transformForexData = (data: any, fromCurrency: string, toCurrency: string): Asset | null => {
+  const transformed = transformFinnhubForexData(data);
+  if (transformed) {
+    const pairSymbol = `${fromCurrency}/${toCurrency}`;
+    transformed.symbol = pairSymbol;
+    transformed.name = pairSymbol;
+  }
+  return transformed;
+};

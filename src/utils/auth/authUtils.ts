@@ -1,3 +1,4 @@
+
 import { type UserProfile } from '@/features/profile/types';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,6 +36,68 @@ const validatePasswordStrength = (password: string) => {
     isValid: errors.length === 0,
     errors
   };
+};
+
+// Simple implementations of missing security functions
+const hashPassword = async (password: string): Promise<string> => {
+  // Simple hash implementation - in production, use proper bcrypt
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+};
+
+const verifyPassword = async (password: string, hash: string): Promise<boolean> => {
+  const computedHash = await hashPassword(password);
+  return computedHash === hash;
+};
+
+const generateCSRFToken = (): string => {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+};
+
+const generateSecureRandom = (length: number): string => {
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+};
+
+const getSecurityConfig = () => ({
+  oauth: {
+    providers: {
+      google: { enabled: false },
+      facebook: { enabled: false },
+      github: { enabled: false }
+    },
+    security: {
+      stateLength: 32
+    }
+  },
+  session: {
+    renewThreshold: 300
+  },
+  twoFactor: {
+    totp: {
+      issuer: 'TradingPlatform'
+    }
+  }
+});
+
+const generatePKCE = async () => {
+  const codeVerifier = generateSecureRandom(32);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(codeVerifier);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(hash)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+  
+  return { codeVerifier, codeChallenge };
 };
 
 /**
@@ -528,9 +591,7 @@ export const initOAuthFlow = async (provider: string, _redirectUri: string) => {
 
   // Generate secure state and PKCE parameters
   const state = generateSecureRandom(config.oauth.security.stateLength);
-  const { codeVerifier, codeChallenge } = await import('@/utils/security/securityUtils').then(
-    (mod) => mod.generatePKCE()
-  );
+  const { codeVerifier, codeChallenge } = await generatePKCE();
 
   // Store PKCE verifier securely
   if (typeof window !== 'undefined') {
@@ -595,9 +656,8 @@ export const validateOAuthCallback = (
  * Setup 2FA for user account
  */
 export const setup2FA = async (_userId: string) => {
-  const { generateTOTPSecret, generateBackupCodes } = await import(
-    '@/utils/security/securityUtils'
-  );
+  const generateTOTPSecret = () => generateSecureRandom(16);
+  const generateBackupCodes = () => Array.from({ length: 8 }, () => generateSecureRandom(8));
 
   const secret = generateTOTPSecret();
   const backupCodes = generateBackupCodes();

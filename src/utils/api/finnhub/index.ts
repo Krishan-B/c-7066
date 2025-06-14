@@ -1,3 +1,4 @@
+
 // Export functionality from modules while avoiding ambiguous re-exports
 export {
   setFinnhubApiKey,
@@ -5,4 +6,11 @@ export {
   hasFinnhubApiKey,
   getMarketData
 } from './client';
-export { transformStockData, transformCryptoData, transformForexData } from './transformers';
+export { 
+  transformStockData, 
+  transformCryptoData, 
+  transformForexData,
+  transformFinnhubStockData,
+  transformFinnhubForexData,
+  transformFinnhubCryptoData
+} from './transformers';
