@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,11 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 
-interface PasswordFieldProps extends React.ComponentPropsWithoutRef<'input'> {
+interface PasswordFieldProps {
   password: string;
   onChange: (value: string) => void;
   error?: string;
   label?: string;
+  id?: string;
+  placeholder?: string;
   showForgotPassword?: boolean;
   onForgotPasswordClick?: () => void;
 }
@@ -23,7 +26,6 @@ const PasswordField = ({
   placeholder = '••••••••',
   showForgotPassword = false,
   onForgotPasswordClick,
-  ...rest
 }: PasswordFieldProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -50,7 +52,6 @@ const PasswordField = ({
           value={password}
           onChange={(e) => onChange(e.target.value)}
           className={error ? 'border-destructive pr-10' : 'pr-10'}
-          {...rest}
         />
         <Button
           type="button"

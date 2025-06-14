@@ -1,3 +1,4 @@
+
 import { type Asset } from '@/hooks/market/types';
 
 export interface AccountMetrics {
@@ -22,7 +23,8 @@ export interface MetricItem {
   tooltip: string;
 }
 
-// Removed local Asset interface, using imported Asset type
+// Export the Asset type so components can import it
+export { type Asset };
 
 export interface ClosedPosition {
   id: string;
@@ -66,5 +68,5 @@ export interface PortfolioData {
     weeklyReturn: number;
     dailyReturn: number;
   };
-  monthlyReturns?: unknown[]; // Changed to unknown[]
+  monthlyReturns?: unknown[];
 }

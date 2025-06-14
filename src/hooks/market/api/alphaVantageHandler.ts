@@ -10,6 +10,14 @@ import {
 
 import { type Asset } from "../types";
 
+// Define proper types for Alpha Vantage responses
+interface AlphaVantageResponse {
+  error?: string;
+  'Global Quote'?: unknown;
+  'Realtime Currency Exchange Rate'?: unknown;
+  [key: string]: unknown;
+}
+
 export async function fetchAlphaVantageData(marketTypes: string[], symbols: Record<string, string[]>): Promise<Asset[]> {
   console.log('Fetching data from Alpha Vantage');
   const marketData: Asset[] = [];
@@ -19,35 +27,47 @@ export async function fetchAlphaVantageData(marketTypes: string[], symbols: Reco
     for (const marketType of marketTypes) {
       if (marketType === 'Stock') {
         for (const symbol of symbols[marketType]) {
-          const data = await getAlphaVantageStockQuote(symbol);
-          if (data && !data.error && data['Global Quote']) {
-            const transformedData = transformAlphaVantageStockData(data);
-            if (transformedData) {
-              marketData.push(transformedData);
+          try {
+            const data = await getAlphaVantageStockQuote(symbol) as AlphaVantageResponse;
+            if (data && !data.error && data['Global Quote']) {
+              const transformedData = transformAlphaVantageStockData(data);
+              if (transformedData) {
+                marketData.push(transformedData);
+              }
             }
+          } catch (error) {
+            console.warn(`Failed to fetch stock data for ${symbol}:`, error);
           }
         }
       } 
       else if (marketType === 'Forex') {
         for (const pair of symbols[marketType]) {
-          const [fromCurrency, toCurrency] = pair.split('/');
-          const data = await getAlphaVantageForexRate(fromCurrency, toCurrency);
-          if (data && !data.error) {
-            const transformedData = transformAlphaVantageForexData(data);
-            if (transformedData) {
-              marketData.push(transformedData);
+          try {
+            const [fromCurrency, toCurrency] = pair.split('/');
+            const data = await getAlphaVantageForexRate(fromCurrency, toCurrency) as AlphaVantageResponse;
+            if (data && !data.error) {
+              const transformedData = transformAlphaVantageForexData(data);
+              if (transformedData) {
+                marketData.push(transformedData);
+              }
             }
+          } catch (error) {
+            console.warn(`Failed to fetch forex data for ${pair}:`, error);
           }
         }
       }
       else if (marketType === 'Crypto') {
         for (const symbol of symbols[marketType]) {
-          const data = await getAlphaVantageCryptoQuote(symbol);
-          if (data && !data.error) {
-            const transformedData = transformAlphaVantageCryptoData(data);
-            if (transformedData) {
-              marketData.push(transformedData);
+          try {
+            const data = await getAlphaVantageCryptoQuote(symbol) as AlphaVantageResponse;
+            if (data && !data.error) {
+              const transformedData = transformAlphaVantageCryptoData(data);
+              if (transformedData) {
+                marketData.push(transformedData);
+              }
             }
+          } catch (error) {
+            console.warn(`Failed to fetch crypto data for ${symbol}:`, error);
           }
         }
       }

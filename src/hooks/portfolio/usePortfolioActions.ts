@@ -1,34 +1,46 @@
 
-import { toast } from "sonner";
-import { type Asset } from "@/types/account";
+import { useCallback } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { type Asset } from '@/types/account';
 
-interface PortfolioActions {
-  handleExportReport: () => void;
-  handleTaxEvents: () => void;
-  handleViewDetails: (asset: Asset) => void;
-}
+export const usePortfolioActions = () => {
+  const { toast } = useToast();
 
-export const usePortfolioActions = (): PortfolioActions => {
-  const handleExportReport = () => {
-    toast.success("Portfolio report exported successfully");
-    console.log("Exporting portfolio report");
-    // Implementation can be expanded in the future
-  };
+  const handleExportReport = useCallback(() => {
+    toast({
+      title: "Export Started",
+      description: "Your portfolio report is being generated...",
+    });
+    
+    // Mock implementation - would generate and download report
+    setTimeout(() => {
+      toast({
+        title: "Export Complete",
+        description: "Portfolio report has been downloaded successfully.",
+      });
+    }, 2000);
+  }, [toast]);
 
-  const handleTaxEvents = () => {
-    toast.info("Tax events view will be available soon");
-    console.log("Showing tax events");
-    // Implementation can be expanded in the future
-  };
+  const handleTaxEvents = useCallback(() => {
+    toast({
+      title: "Tax Events",
+      description: "Tax events feature will be available soon.",
+    });
+  }, [toast]);
 
-  const handleViewDetails = (asset: Asset) => {
-    console.log("Viewing details for asset:", asset);
-    // Implementation can be expanded to navigate to asset details page
-  };
+  const handleViewAssetDetails = useCallback((asset: Asset) => {
+    toast({
+      title: `${asset.name} Details`,
+      description: `Viewing details for ${asset.symbol}`,
+    });
+    
+    // Mock implementation - would navigate to asset detail page
+    console.log('Viewing asset details:', asset);
+  }, [toast]);
 
   return {
     handleExportReport,
     handleTaxEvents,
-    handleViewDetails,
+    handleViewAssetDetails
   };
 };
