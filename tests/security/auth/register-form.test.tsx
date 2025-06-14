@@ -1,14 +1,15 @@
+
 // Security tests for RegisterForm component - comprehensive coverage
 import RegisterForm from '@/features/auth/components/RegisterForm';
 import { useToast } from '@/hooks/use-toast';
-import { signUpWithEmail } from '@/utils/auth/authUtils';
+import { signUpWithEmail } from '@/utils/auth';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock dependencies
-vi.mock('@/utils/auth/authUtils');
+vi.mock('@/utils/auth');
 
 // Mock navigation
 const mockNavigate = vi.fn();

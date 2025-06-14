@@ -33,10 +33,10 @@ import PasswordField from '@/features/auth/components/login/PasswordField';
 
 // Utilities and services
 import { validateSignIn, validateSignUp } from '@/features/auth/utils/validation';
-import { signInWithEmail, signUpWithEmail } from '@/utils/auth/authUtils';
+import { signInWithEmail, signUpWithEmail } from '@/utils/auth';
 
 // Mock dependencies
-vi.mock('@/utils/auth/authUtils');
+vi.mock('@/utils/auth');
 vi.mock('@/features/auth/utils/validation');
 
 /**

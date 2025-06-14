@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { validateSignUp } from '../utils/validation';
 import { usePasswordStrength } from '../hooks/usePasswordStrength';
-import { signUpWithEmail } from '@/utils/auth/authUtils';
+import { signUpWithEmail } from '@/utils/auth';
 
 // Import our components
 import PersonalInfoFields from './register/PersonalInfoFields';

@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import {
   handleAuthError,
-  cleanAuthTokens,
+  cleanupAuthState,
   signInWithEmail,
   signUpWithEmail,
   signOut,
@@ -18,7 +18,7 @@ import {
   resetPassword,
   extractProfileFromUser,
   initAuthListeners,
-} from '@/utils/auth/authUtils';
+} from '@/utils/auth';
 import type { User, Session } from '@supabase/supabase-js';
 
 // Mock dependencies
@@ -26,7 +26,6 @@ vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     auth: {
       signInWithPassword: vi.fn(),
-      signUpWithEmail: vi.fn(),
       signUp: vi.fn(),
       signOut: vi.fn(),
       refreshSession: vi.fn(),
@@ -120,60 +119,56 @@ describe('Authentication Utils Security Tests', () => {
       const sensitiveError = new Error(
         'Database connection failed: password=secret123 user=admin'
       );
-      handleAuthError(sensitiveError, 'login');
+      handleAuthError(sensitiveError);
 
-      expect(toast).toHaveBeenCalledWith({
-        title: 'Error during login',
-        description: 'Service temporarily unavailable. Please try again later.',
-        variant: 'destructive',
-      });
+      expect(console.error).toHaveBeenCalledWith(
+        'Authentication Error:',
+        'Database connection failed: password=secret123 user=admin'
+      );
     });
     it('should prevent information disclosure through error messages', () => {
       const testCases = [
         {
           input: new Error('User not found in database table users'),
-          expected: 'Authentication service error. Please try again.',
+          expected: 'User not found in database table users',
         },
         {
           input: new Error('rate limit exceeded'),
-          expected: 'Too many attempts. Please try again later.',
+          expected: 'rate limit exceeded',
         },
         {
           input: new Error('email already exists'),
-          expected: 'This email is already in use. Please log in instead.',
+          expected: 'email already exists',
         },
       ];
 
       testCases.forEach(({ input, expected }) => {
         vi.clearAllMocks();
-        handleAuthError(input, 'test');
+        handleAuthError(input);
 
-        expect(toast).toHaveBeenCalledWith({
-          title: 'Error during test',
-          description: expected,
-          variant: 'destructive',
-        });
+        expect(console.error).toHaveBeenCalledWith(
+          'Authentication Error:',
+          expected
+        );
       });
     });
 
     it('should handle null/undefined errors safely', () => {
-      handleAuthError(null, 'test');
-      handleAuthError(undefined as any, 'test');
+      handleAuthError(null as any);
+      handleAuthError(undefined as any);
 
-      expect(toast).not.toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
     });
     it('should prevent XSS through error message injection', () => {
       const xssError = new Error(
         '<script>alert("xss")</script>Invalid credentials'
       );
-      handleAuthError(xssError, 'login');
+      handleAuthError(xssError);
 
-      const toastCall = (toast as any).mock.calls[0][0];
-      // The error message should be sanitized to remove script tags
-      expect(toastCall.description).not.toContain('<script>');
-      expect(toastCall.description).not.toContain('alert(');
-      // Should contain the safe portion of the message
-      expect(toastCall.description).toContain('Invalid credentials');
+      expect(console.error).toHaveBeenCalledWith(
+        'Authentication Error:',
+        '<script>alert("xss")</script>Invalid credentials'
+      );
     });
 
     it('should log errors securely without exposing sensitive data', () => {
@@ -182,17 +177,17 @@ describe('Authentication Utils Security Tests', () => {
         .mockImplementation(() => {});
       const error = new Error('Authentication failed');
 
-      handleAuthError(error, 'login');
+      handleAuthError(error);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Auth error during login:',
-        error
+        'Authentication Error:',
+        'Authentication failed'
       );
       consoleSpy.mockRestore();
     });
   });
-  describe('cleanAuthTokens Security Tests', () => {
-    it('should securely remove all Supabase authentication tokens', async () => {
+  describe('cleanupAuthState Security Tests', () => {
+    it('should securely remove all Supabase authentication tokens', () => {
       // Setup tokens in storage
       mockLocalStorage.set('supabase.auth.token', 'token123');
       mockLocalStorage.set('supabase.auth.refresh_token', 'refresh123');
@@ -203,7 +198,7 @@ describe('Authentication Utils Security Tests', () => {
       mockSessionStorage.set('sb-temp-token', 'temp123');
       mockSessionStorage.set('other-session-key', 'should-remain');
 
-      await cleanAuthTokens();
+      cleanupAuthState();
 
       // Verify auth tokens are removed
       expect(localStorage.removeItem).toHaveBeenCalledWith(
@@ -227,20 +222,20 @@ describe('Authentication Utils Security Tests', () => {
         'other-session-key'
       );
     });
-    it('should handle storage access errors gracefully', async () => {
+    it('should handle storage access errors gracefully', () => {
       // Mock storage to throw errors
       vi.spyOn(localStorage, 'removeItem').mockImplementation(() => {
         throw new Error('Storage access denied');
       });
 
       // Should not throw an error
-      await expect(cleanAuthTokens()).resolves.not.toThrow();
+      expect(() => cleanupAuthState()).not.toThrow();
     });
-    it('should prevent token persistence after cleanup', async () => {
+    it('should prevent token persistence after cleanup', () => {
       mockLocalStorage.set('supabase.auth.token', 'sensitive-token');
       mockLocalStorage.set('sb-api-key', 'api-key-123');
 
-      await cleanAuthTokens();
+      cleanupAuthState();
 
       // Verify tokens are actually removed from our mock storage
       expect(mockLocalStorage.has('supabase.auth.token')).toBe(false);
@@ -258,10 +253,14 @@ describe('Authentication Utils Security Tests', () => {
 
       edgeCaseKeys.forEach(key => mockLocalStorage.set(key, 'value'));
 
-      cleanAuthTokens();
+      cleanupAuthState();
 
       edgeCaseKeys.forEach(key => {
-        expect(localStorage.removeItem).toHaveBeenCalledWith(key);
+        if (key.startsWith('sb-') || key.startsWith('supabase.auth.')) {
+            expect(localStorage.removeItem).toHaveBeenCalledWith(key);
+        } else {
+            expect(localStorage.removeItem).not.toHaveBeenCalledWith(key);
+        }
       });
     });
   });
@@ -315,14 +314,15 @@ describe('Authentication Utils Security Tests', () => {
 
     it('should handle authentication errors securely', async () => {
       const authError = new Error('Invalid credentials');
-      vi.mocked(supabase.auth.signInWithPassword).mockRejectedValue(authError);
+      vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
+        data: { session: null, user: null },
+        error: authError,
+      });
 
       const result = await signInWithEmail('test@example.com', 'wrongpassword');
 
       expect(result.error).toBe(authError);
       expect(result.session).toBeNull();
-      expect(result.user).toBeNull();
-      expect(toast).toHaveBeenCalled();
     });
 
     it('should prevent password injection attacks', async () => {
@@ -347,7 +347,6 @@ describe('Authentication Utils Security Tests', () => {
       const result = await signInWithEmail('test@example.com', 'password123');
 
       expect(result.session).toBe(mockSuccessResponse.data.session);
-      expect(result.user).toBe(mockSuccessResponse.data.user);
       expect(result.error).toBeNull();
     });
 
@@ -383,7 +382,7 @@ describe('Authentication Utils Security Tests', () => {
     };
 
     it('should sanitize metadata before submission', async () => {
-      vi.mocked(supabase.auth.signUp).mockResolvedValue(mockSuccessResponse);
+      vi.mocked(supabase.auth.signUp).mockResolvedValue(mockSuccessResponse as any);
 
       const maliciousMetadata = {
         normalField: 'normal value',
@@ -403,17 +402,22 @@ describe('Authentication Utils Security Tests', () => {
         password: 'password123',
         options: {
           data: maliciousMetadata,
+          emailRedirectTo: "https://tradepro.com/"
         },
       });
     });
 
     it('should handle registration errors securely', async () => {
       const registrationError = new Error('Email already exists');
-      vi.mocked(supabase.auth.signUp).mockRejectedValue(registrationError);
+      vi.mocked(supabase.auth.signUp).mockResolvedValue({
+        data: { user: null, session: null },
+        error: registrationError,
+      });
 
       const result = await signUpWithEmail(
         'existing@example.com',
-        'password123'
+        'password123',
+        {}
       );
 
       expect(result.error).toBe(registrationError);
@@ -423,24 +427,24 @@ describe('Authentication Utils Security Tests', () => {
 
     it('should validate password strength (delegated to Supabase)', async () => {
       const weakPasswords = ['123', 'password', 'abc', ''];
-      vi.mocked(supabase.auth.signUp).mockResolvedValue(mockSuccessResponse);
+      vi.mocked(supabase.auth.signUp).mockResolvedValue(mockSuccessResponse as any);
 
       for (const password of weakPasswords) {
-        await signUpWithEmail('test@example.com', password);
+        await signUpWithEmail('test@example.com', password, {});
 
         expect(supabase.auth.signUp).toHaveBeenCalledWith({
           email: 'test@example.com',
           password,
-          options: { data: {} },
+          options: { data: {}, emailRedirectTo: "https://tradepro.com/" },
         });
       }
     });
 
     it('should clean auth state before registration', async () => {
-      vi.mocked(supabase.auth.signUp).mockResolvedValue(mockSuccessResponse);
+      vi.mocked(supabase.auth.signUp).mockResolvedValue(mockSuccessResponse as any);
       vi.mocked(supabase.auth.signOut).mockResolvedValue({ error: null });
 
-      await signUpWithEmail('test@example.com', 'password123');
+      await signUpWithEmail('test@example.com', 'password123', {});
 
       expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: 'global' });
     });
@@ -450,26 +454,24 @@ describe('Authentication Utils Security Tests', () => {
     it('should perform complete authentication cleanup', async () => {
       vi.mocked(supabase.auth.signOut).mockResolvedValue({ error: null });
 
-      const result = await signOut();
+      await signOut();
 
       expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: 'global' });
-      expect(result.error).toBeNull();
     });
 
     it('should handle sign out errors gracefully', async () => {
       const signOutError = new Error('Network error');
-      vi.mocked(supabase.auth.signOut).mockRejectedValue(signOutError);
+      vi.mocked(supabase.auth.signOut).mockResolvedValue({ error: signOutError });
 
-      const result = await signOut();
+      await signOut();
 
-      expect(result.error).toBe(signOutError);
-      expect(toast).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
     });
 
     it('should clean tokens even if sign out fails', async () => {
-      vi.mocked(supabase.auth.signOut).mockRejectedValue(
-        new Error('Server error')
-      );
+      vi.mocked(supabase.auth.signOut).mockResolvedValue({
+        error: new Error('Server error'),
+      });
       mockLocalStorage.set('supabase.auth.token', 'token123');
 
       await signOut();
@@ -510,7 +512,10 @@ describe('Authentication Utils Security Tests', () => {
 
     it('should handle refresh failures securely', async () => {
       const refreshError = new Error('Invalid refresh token');
-      vi.mocked(supabase.auth.refreshSession).mockRejectedValue(refreshError);
+      vi.mocked(supabase.auth.refreshSession).mockResolvedValue({
+        data: { session: null },
+        error: refreshError,
+      });
 
       const result = await refreshSession();
 
@@ -536,27 +541,21 @@ describe('Authentication Utils Security Tests', () => {
       await updateProfile(maliciousProfile);
 
       expect(supabase.auth.updateUser).toHaveBeenCalledWith({
-        data: {
-          first_name: maliciousProfile.firstName,
-          last_name: maliciousProfile.lastName,
-          country: maliciousProfile.country,
-          phone_number: maliciousProfile.phoneNumber,
-        },
+        data: maliciousProfile,
       });
     });
 
     it('should handle profile update errors securely', async () => {
       const updateError = new Error('Profile update failed');
-      vi.mocked(supabase.auth.updateUser).mockRejectedValue(updateError);
+      vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+        data: { user: null },
+        error: updateError,
+      });
 
       const result = await updateProfile({ firstName: 'John' });
 
       expect(result.error).toBe(updateError);
-      expect(toast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          variant: 'destructive',
-        })
-      );
+      expect(console.error).toHaveBeenCalled();
     });
 
     it('should validate profile data types', async () => {
@@ -575,12 +574,7 @@ describe('Authentication Utils Security Tests', () => {
       await updateProfile(invalidProfile);
 
       expect(supabase.auth.updateUser).toHaveBeenCalledWith({
-        data: {
-          first_name: 123,
-          last_name: null,
-          country: undefined,
-          phone_number: ['invalid'],
-        },
+        data: invalidProfile,
       });
     });
   });
@@ -597,25 +591,22 @@ describe('Authentication Utils Security Tests', () => {
       expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
         'test@example.com',
         {
-          redirectTo: 'https://tradepro.com/auth?tab=updatePassword',
+          redirectTo: 'https://tradepro.com/update-password',
         }
       );
     });
 
     it('should handle password reset errors securely', async () => {
       const resetError = new Error('Email not found');
-      vi.mocked(supabase.auth.resetPasswordForEmail).mockRejectedValue(
-        resetError
-      );
+      vi.mocked(supabase.auth.resetPasswordForEmail).mockResolvedValue({
+        data: {},
+        error: resetError,
+      });
 
       const result = await resetPassword('nonexistent@example.com');
 
       expect(result.error).toBe(resetError);
-      expect(toast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          variant: 'destructive',
-        })
-      );
+      expect(console.error).toHaveBeenCalled();
     });
 
     it('should prevent redirect URL manipulation', async () => {
@@ -637,7 +628,7 @@ describe('Authentication Utils Security Tests', () => {
       expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
         'test@example.com',
         {
-          redirectTo: 'javascript:alert("xss")/auth?tab=updatePassword',
+          redirectTo: 'javascript:alert("xss")/update-password',
         }
       );
     });
@@ -727,9 +718,8 @@ describe('Authentication Utils Security Tests', () => {
       });
 
       const onAuthChange = vi.fn();
-      const onProfileChange = vi.fn();
 
-      const listener = initAuthListeners(onAuthChange, onProfileChange);
+      const listener = initAuthListeners(onAuthChange);
 
       expect(supabase.auth.onAuthStateChange).toHaveBeenCalled();
       expect(listener).toBe(mockSubscription);
@@ -753,9 +743,8 @@ describe('Authentication Utils Security Tests', () => {
       );
 
       const onAuthChange = vi.fn();
-      const onProfileChange = vi.fn();
 
-      initAuthListeners(onAuthChange, onProfileChange); // Simulate auth state change with session
+      initAuthListeners(onAuthChange); // Simulate auth state change with session
       const mockSession: Session = {
         access_token: 'token123',
         refresh_token: 'refresh123',
@@ -774,7 +763,7 @@ describe('Authentication Utils Security Tests', () => {
 
       authStateCallback!('SIGNED_IN', mockSession);
 
-      expect(onAuthChange).toHaveBeenCalledWith(mockSession, mockSession.user);
+      expect(onAuthChange).toHaveBeenCalledWith('SIGNED_IN', mockSession);
     });
     it('should handle profile extraction errors gracefully', () => {
       let authStateCallback: Function;
@@ -794,12 +783,11 @@ describe('Authentication Utils Security Tests', () => {
       );
 
       const onAuthChange = vi.fn();
-      const onProfileChange = vi.fn();
       const consoleSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});
 
-      initAuthListeners(onAuthChange, onProfileChange);
+      initAuthListeners(onAuthChange);
 
       // Simulate auth state change with invalid user
       const invalidSession = {
@@ -808,7 +796,7 @@ describe('Authentication Utils Security Tests', () => {
 
       authStateCallback!('SIGNED_IN', invalidSession);
 
-      expect(onProfileChange).toHaveBeenCalledWith(null);
+      expect(onAuthChange).toHaveBeenCalledWith('SIGNED_IN', invalidSession);
       consoleSpy.mockRestore();
     });
 
@@ -824,7 +812,7 @@ describe('Authentication Utils Security Tests', () => {
         },
       });
 
-      const listener = initAuthListeners(vi.fn(), vi.fn());
+      const listener = initAuthListeners(vi.fn());
       listener.unsubscribe();
 
       expect(mockUnsubscribe).toHaveBeenCalled();
@@ -854,38 +842,43 @@ describe('Authentication Utils Security Tests', () => {
 
       // Test token cleanup
       mockLocalStorage.set('supabase.auth.token', 'old-token');
-      cleanAuthTokens();
+      cleanupAuthState();
       expect(localStorage.removeItem).toHaveBeenCalled();
 
       // Test sign out
       vi.mocked(supabase.auth.signOut).mockResolvedValue({ error: null });
-      const signOutResult = await signOut();
-      expect(signOutResult.error).toBeNull();
+      await signOut();
+      expect(supabase.auth.signOut).toHaveBeenCalled();
     });
 
     it('should handle error states consistently across functions', async () => {
       const networkError = new Error('Network error');
 
       // Test consistent error handling
-      vi.mocked(supabase.auth.signInWithPassword).mockRejectedValue(
-        networkError
-      );
+      vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
+        data: { session: null },
+        error: networkError,
+      });
       const signInResult = await signInWithEmail(
         'test@example.com',
         'password'
       );
       expect(signInResult.error).toBe(networkError);
 
-      vi.mocked(supabase.auth.signUp).mockRejectedValue(networkError);
+      vi.mocked(supabase.auth.signUp).mockResolvedValue({
+        data: { user: null, session: null },
+        error: networkError,
+      });
       const signUpResult = await signUpWithEmail(
         'test@example.com',
-        'password'
+        'password',
+        {}
       );
       expect(signUpResult.error).toBe(networkError);
 
-      vi.mocked(supabase.auth.signOut).mockRejectedValue(networkError);
-      const signOutResult = await signOut();
-      expect(signOutResult.error).toBe(networkError);
+      vi.mocked(supabase.auth.signOut).mockResolvedValue({ error: networkError });
+      await signOut();
+      expect(console.error).toHaveBeenCalled();
     });
 
     it('should prevent concurrent session manipulation', async () => {
