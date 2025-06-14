@@ -1,18 +1,21 @@
+
 import { render, screen } from '@testing-library/react';
 import { ThemeProviderContent } from '../ThemeProviderContent';
 import { useContext } from 'react';
 import { ThemeContext } from '../theme-utils';
 
 beforeAll(() => {
-  window.matchMedia = window.matchMedia || function() {
+  window.matchMedia = window.matchMedia || function(query: string): MediaQueryList {
     return {
       matches: false,
+      media: query,
+      onchange: null,
       addEventListener: () => {},
       removeEventListener: () => {},
       addListener: () => {},
       removeListener: () => {},
       dispatchEvent: () => false,
-    };
+    } as MediaQueryList;
   };
 });
 
