@@ -71,8 +71,9 @@ export const DEVELOPMENT_TOKEN_CONFIG: SecureTokenConfig = {
  * Get environment-appropriate token configuration
  */
 export const getTokenConfig = (): SecureTokenConfig => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  // Use import.meta.env for Vite compatibility
+  const isProduction = import.meta.env.PROD;
+  const isDevelopment = import.meta.env.DEV;
 
   if (isProduction) {
     return PRODUCTION_TOKEN_CONFIG;
@@ -98,7 +99,7 @@ export const getTokenConfig = (): SecureTokenConfig => {
  */
 export class TokenEncryptionService {
   private static readonly ENCRYPTION_KEY =
-    process.env.VITE_TOKEN_ENCRYPTION_KEY || 'dev-fallback-key-change-in-production';
+    import.meta.env.VITE_TOKEN_ENCRYPTION_KEY || 'dev-fallback-key-change-in-production';
   private static readonly ALGORITHM = 'AES';
 
   /**
