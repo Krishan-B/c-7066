@@ -13,6 +13,9 @@ import { updateProfile, resetPassword } from './operations/profileManagement';
 import { updatePassword, validatePasswordStrength } from './operations/passwordManagement';
 import { initAuthListeners } from './operations/authListeners';
 
+// Import secure token management
+import { SecureTokenManager } from './security';
+
 // Re-export all functions for backward compatibility
 export {
   handleAuthError,
@@ -26,7 +29,8 @@ export {
   resetPassword,
   extractProfileFromUser,
   initAuthListeners,
-  validatePasswordStrength
+  validatePasswordStrength,
+  SecureTokenManager
 };
 
 // Legacy exports for backward compatibility
