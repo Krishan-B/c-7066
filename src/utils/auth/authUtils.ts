@@ -3,32 +3,55 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { type Session, type User } from '@supabase/supabase-js';
 import { SecureTokenManager } from './secureTokenManager';
-import {
-  validateEmail,
-  validatePasswordStrength,
-  sanitizeInput,
-  hashPassword,
-  verifyPassword,
-  generateSecureRandom,
-  generateCSRFToken,
-} from '@/utils/security/securityUtils';
-import { getSecurityConfig } from '@/utils/security/securityConfig';
+
+// Simple validation functions to replace missing security utils
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const sanitizeInput = (input: string): string => {
+  return input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/[<>'"&]/g, (char) => {
+      const entities: Record<string, string> = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        '&': '&amp;'
+      };
+      return entities[char] || char;
+    });
+};
+
+const validatePasswordStrength = (password: string) => {
+  const errors = [];
+  if (password.length < 8) errors.push('Password must be at least 8 characters');
+  if (!/[A-Z]/.test(password)) errors.push('Password must contain uppercase letter');
+  if (!/[a-z]/.test(password)) errors.push('Password must contain lowercase letter');
+  if (!/\d/.test(password)) errors.push('Password must contain a number');
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
 
 /**
- * Validate email format using Phase 1B security utilities
+ * Validate email format using basic validation
  */
 const isValidEmail = (email: string): boolean => {
   return validateEmail(email);
 };
 
 /**
- * Sanitize error messages using Phase 1B security utilities
+ * Sanitize error messages to prevent XSS
  */
 const sanitizeErrorMessage = (message: string): string => {
   if (!message || typeof message !== 'string') return 'An error occurred';
-
-  // Use Phase 1B sanitization
+  
   let sanitized = sanitizeInput(message);
+  
   // Remove sensitive information patterns
   sanitized = sanitized
     .replace(/password[=\s]*[^\s]+/gi, '[REDACTED]')
@@ -39,26 +62,24 @@ const sanitizeErrorMessage = (message: string): string => {
     .replace(/\/[\w/]*\.php/gi, '[PATH]')
     .replace(/\/[\w/]*\.js/gi, '[PATH]')
     .replace(/line\s+\d+/gi, '[LINE]');
+  
   return sanitized.trim() || 'An error occurred';
 };
 
 /**
  * Handle authentication errors and display appropriate toast messages
  */
-export const handleAuthError = (error: Error | null, context: string = 'authentication'): void => {
+export const handleAuthError = (error: Error, context = 'authentication'): void => {
   if (!error) return;
-
+  
   console.error(`Auth error during ${context}:`, error);
-
+  
   // Extract readable message
   let errorMessage = error.message || 'An error occurred';
-
+  
   // Handle specific error types with secure responses BEFORE sanitization
-  // This ensures pattern matching works on the original error message
-  if (
-    errorMessage.toLowerCase().includes('database connection failed: password=') ||
-    errorMessage.toLowerCase().includes('user=')
-  ) {
+  if (errorMessage.toLowerCase().includes('database connection failed: password=') || 
+      errorMessage.toLowerCase().includes('user=')) {
     errorMessage = 'Service temporarily unavailable. Please try again later.';
   } else if (errorMessage.toLowerCase().includes('rate limit exceeded')) {
     errorMessage = 'Too many attempts. Please try again later.';
@@ -66,36 +87,28 @@ export const handleAuthError = (error: Error | null, context: string = 'authenti
     errorMessage = 'This email is already in use. Please log in instead.';
   } else if (errorMessage.toLowerCase().includes('user not found in database table users')) {
     errorMessage = 'Authentication service error. Please try again.';
-  } else if (
-    errorMessage.toLowerCase().includes('password') ||
-    errorMessage.toLowerCase().includes('credential')
-  ) {
+  } else if (errorMessage.toLowerCase().includes('password') || 
+             errorMessage.toLowerCase().includes('credential')) {
     errorMessage = 'Invalid credentials. Please check your email and password.';
-  } else if (
-    errorMessage.toLowerCase().includes('database connection') ||
-    errorMessage.toLowerCase().includes('connection')
-  ) {
+  } else if (errorMessage.toLowerCase().includes('database connection') || 
+             errorMessage.toLowerCase().includes('connection')) {
     errorMessage = 'Service temporarily unavailable. Please try again later.';
-  } else if (
-    errorMessage.toLowerCase().includes('database') &&
-    !errorMessage.toLowerCase().includes('table')
-  ) {
+  } else if (errorMessage.toLowerCase().includes('database') && 
+             !errorMessage.toLowerCase().includes('table')) {
     errorMessage = 'Service temporarily unavailable. Please try again later.';
-  } else if (
-    errorMessage.toLowerCase().includes('internal') ||
-    errorMessage.toLowerCase().includes('server')
-  ) {
+  } else if (errorMessage.toLowerCase().includes('internal') || 
+             errorMessage.toLowerCase().includes('server')) {
     errorMessage = 'Service error. Please contact support if this persists.';
   } else {
     // Always sanitize error messages to prevent XSS and sensitive data exposure
     errorMessage = sanitizeErrorMessage(errorMessage);
-
+    
     // Handle XSS content - extract safe portion if available
     if (errorMessage.includes('Invalid credentials')) {
       errorMessage = 'Invalid credentials';
     }
   }
-
+  
   // Display toast
   toast({
     title: `Error during ${context}`,
@@ -106,36 +119,25 @@ export const handleAuthError = (error: Error | null, context: string = 'authenti
 
 /**
  * Enhanced token cleanup for auth state management with secure token migration
- *
- * Security Implementation:
- * - Migrates from insecure localStorage to secure httpOnly cookies
- * - Cleans up legacy token storage
- * - Uses SecureTokenManager for proper token handling
- * - Handles edge cases in token key patterns
  */
 export const cleanAuthTokens = async (): Promise<void> => {
-  // Helper function to identify auth token keys including edge cases
   const isAuthTokenKey = (key: string): boolean => {
-    return (
-      key.startsWith('supabase.auth.') ||
-      key.startsWith('sb-') ||
-      key.includes('sb-') ||
-      key === 'supabase.auth.' ||
-      key === 'sb-' ||
-      /^supabase\.auth\..*/.test(key) ||
-      /^sb-.*/.test(key)
-    );
+    return key.startsWith('supabase.auth.') || 
+           key.startsWith('sb-') || 
+           key.includes('sb-') || 
+           key === 'supabase.auth.' || 
+           key === 'sb-' || 
+           /^supabase\.auth\..*/.test(key) || 
+           /^sb-.*/.test(key);
   };
 
   try {
-    // Use secure token manager to clear all tokens (includes migration cleanup)
+    // Use secure token manager to clear all tokens
     await SecureTokenManager.clearTokens();
-
+    
     // Additional legacy cleanup for any remaining localStorage items
     try {
-      // Get all keys first to avoid modification during iteration
       const localStorageKeys = Object.keys(localStorage);
-
       localStorageKeys.forEach((key) => {
         if (isAuthTokenKey(key)) {
           try {
@@ -146,15 +148,12 @@ export const cleanAuthTokens = async (): Promise<void> => {
         }
       });
     } catch (error) {
-      // Handle storage access errors gracefully
       console.warn('Unable to access localStorage for token cleanup:', error);
     }
 
     try {
-      // Clean sessionStorage if applicable
       if (typeof sessionStorage !== 'undefined') {
         const sessionStorageKeys = Object.keys(sessionStorage);
-
         sessionStorageKeys.forEach((key) => {
           if (isAuthTokenKey(key)) {
             try {
@@ -166,11 +165,11 @@ export const cleanAuthTokens = async (): Promise<void> => {
         });
       }
     } catch (error) {
-      // Handle storage access errors gracefully
       console.warn('Unable to access sessionStorage for token cleanup:', error);
     }
   } catch (error) {
     console.error('Error during secure token cleanup:', error);
+    
     // Fall back to basic cleanup if secure manager fails
     try {
       localStorage.removeItem('supabase.auth.token');
@@ -179,8 +178,7 @@ export const cleanAuthTokens = async (): Promise<void> => {
           localStorage.removeItem(key);
         }
       });
-
-      // Also clean sessionStorage in fallback
+      
       if (typeof sessionStorage !== 'undefined') {
         Object.keys(sessionStorage).forEach((key) => {
           if (key.startsWith('supabase.auth.') || key.includes('sb-')) {

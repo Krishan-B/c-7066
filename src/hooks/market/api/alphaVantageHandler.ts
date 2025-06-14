@@ -31,8 +31,8 @@ export async function fetchAlphaVantageData(marketTypes: string[], symbols: Reco
             const data = await getAlphaVantageStockQuote(symbol) as AlphaVantageResponse;
             if (data && !data.error && data['Global Quote']) {
               const transformedData = transformAlphaVantageStockData(data);
-              if (transformedData) {
-                marketData.push(transformedData);
+              if (transformedData && isValidAsset(transformedData)) {
+                marketData.push(transformedData as Asset);
               }
             }
           } catch (error) {
@@ -47,8 +47,8 @@ export async function fetchAlphaVantageData(marketTypes: string[], symbols: Reco
             const data = await getAlphaVantageForexRate(fromCurrency, toCurrency) as AlphaVantageResponse;
             if (data && !data.error) {
               const transformedData = transformAlphaVantageForexData(data);
-              if (transformedData) {
-                marketData.push(transformedData);
+              if (transformedData && isValidAsset(transformedData)) {
+                marketData.push(transformedData as Asset);
               }
             }
           } catch (error) {
@@ -62,8 +62,8 @@ export async function fetchAlphaVantageData(marketTypes: string[], symbols: Reco
             const data = await getAlphaVantageCryptoQuote(symbol) as AlphaVantageResponse;
             if (data && !data.error) {
               const transformedData = transformAlphaVantageCryptoData(data);
-              if (transformedData) {
-                marketData.push(transformedData);
+              if (transformedData && isValidAsset(transformedData)) {
+                marketData.push(transformedData as Asset);
               }
             }
           } catch (error) {
@@ -78,4 +78,15 @@ export async function fetchAlphaVantageData(marketTypes: string[], symbols: Reco
     console.error('Alpha Vantage error:', error);
     throw error;
   }
+}
+
+// Helper function to validate if an object is a valid Asset
+function isValidAsset(obj: any): obj is Asset {
+  return obj && 
+    typeof obj.symbol === 'string' &&
+    typeof obj.name === 'string' &&
+    typeof obj.price === 'number' &&
+    typeof obj.change_percentage === 'number' &&
+    typeof obj.market_type === 'string' &&
+    typeof obj.volume === 'string';
 }

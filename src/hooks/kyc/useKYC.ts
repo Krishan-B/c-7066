@@ -36,7 +36,16 @@ export const useKYC = () => {
 
   // Upload document mutation
   const uploadMutation = useMutation({
-    mutationFn: (data: DocumentUploadData) => KYCService.uploadDocument(data),
+    mutationFn: (data: DocumentUploadData) => {
+      // Add userId to the data if not present
+      const uploadData = {
+        ...data,
+        userId: user?.id,
+        fileName: data.file.name,
+        fileUrl: `mock-url-${Date.now()}`
+      };
+      return KYCService.uploadDocument(uploadData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['kyc-status'] });
       queryClient.invalidateQueries({ queryKey: ['kyc-documents'] });

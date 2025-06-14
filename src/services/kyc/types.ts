@@ -26,6 +26,11 @@ export interface KYCStatus {
 export interface DocumentUploadData {
   file: File;
   document_type: KYCDocument['document_type'];
+  userId?: string;
+  fileUrl?: string;
+  fileName?: string;
+  category?: string;
+  comments?: string;
 }
 
 export interface KYCVerificationBanner {

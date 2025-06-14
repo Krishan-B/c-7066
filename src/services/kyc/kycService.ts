@@ -9,14 +9,14 @@ export class KYCService {
     // This would need to be implemented when KYC tables are added to the database
     const mockDocument: KYCDocument = {
       id: `doc_${Date.now()}`,
-      user_id: data.userId,
-      document_type: data.documentType,
-      document_url: data.fileUrl,
-      file_name: data.fileName,
-      status: 'PENDING',
-      uploaded_at: new Date().toISOString(),
-      category: data.category,
-      comments: data.comments
+      user_id: data.userId || 'mock-user-id',
+      document_type: data.document_type,
+      document_url: data.fileUrl || 'mock-file-url',
+      file_name: data.fileName || data.file.name,
+      file_size: data.file.size,
+      mime_type: data.file.type,
+      status: 'pending',
+      uploaded_at: new Date().toISOString()
     };
 
     // In a real implementation, this would save to the kyc_documents table
@@ -35,9 +35,9 @@ export class KYCService {
     // Mock implementation - returns pending status until KYC tables are created
     const mockStatus: KYCStatus = {
       user_id: userId,
-      overall_status: 'PENDING',
-      identity_document_status: 'PENDING',
-      address_document_status: 'PENDING',
+      overall_status: 'pending',
+      identity_document_status: 'pending',
+      address_document_status: 'pending',
       updated_at: new Date().toISOString()
     };
 
@@ -52,10 +52,16 @@ export class KYCService {
 
   static async updateDocumentStatus(
     documentId: string, 
-    status: 'PENDING' | 'APPROVED' | 'REJECTED',
+    status: 'pending' | 'approved' | 'rejected',
     comments?: string
   ): Promise<void> {
     // Mock implementation - would update document status in database
     console.log('Mock update KYC document status:', { documentId, status, comments });
+  }
+
+  static async getDocumentUrl(documentUrl: string): Promise<string> {
+    // Mock implementation - would return signed URL for document download
+    console.log('Mock get document URL:', documentUrl);
+    return documentUrl;
   }
 }
