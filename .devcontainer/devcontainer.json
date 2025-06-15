@@ -1,0 +1,133 @@
+{
+  "name": "Trade Pro CFD - Optimized Workspace",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+
+  // === RESOURCE OPTIMIZATION ===
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
+
+  // === CONTAINER PERFORMANCE ===
+  "runArgs": [
+    "--memory=6g",
+    "--memory-swap=8g",
+    "--cpus=3.5",
+    "--oom-kill-disable",
+    "--security-opt=no-new-privileges:true"
+  ],
+
+  // === CODESPACE TIMEOUT PREVENTION ===
+  "customizations": {
+    "codespaces": {
+      "idleTimeout": "4h",
+      "retentionPeriod": "30d"
+    },
+    "vscode": {
+      "settings": {
+        // Performance-first settings
+        "github.copilot.advanced.timeout": 1000,
+        "github.copilot.advanced.requestTimeout": 500,
+        "github.copilot.advanced.length": 50,
+        "github.copilot.advanced.listCount": 1,
+        "github.copilot.advanced.inlineSuggestCount": 1,
+        "typescript.tsserver.maxTsServerMemory": 1536,
+        "typescript.preferences.importModuleSpecifier": "relative",
+        "typescript.suggest.autoImports": false,
+        "typescript.updateImportsOnFileMove.enabled": "never",
+        "typescript.tsserver.useSyntaxServer": "always",
+        "typescript.experimental.tsserver.web.typeAcquisition.enabled": false,
+        "editor.formatOnSave": false,
+        "editor.minimap.enabled": false,
+        "editor.semanticHighlighting.enabled": false,
+        "editor.wordBasedSuggestions": "off",
+        "files.autoSave": "onFocusChange",
+        "files.exclude": {
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/build": true,
+          "**/.git": true,
+          "**/coverage": true,
+          "**/.eslintcache": true,
+          "**/tsconfig.tsbuildinfo": true,
+          "**/*.log": true,
+          "**/.cache": true,
+          "**/test-results": true
+        },
+        "search.exclude": {
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/build": true,
+          "**/coverage": true,
+          "**/.git": true,
+          "**/.eslintcache": true,
+          "**/tsconfig.tsbuildinfo": true,
+          "**/test-results": true
+        },
+        "extensions.autoUpdate": false,
+        "extensions.autoCheckUpdates": false,
+        "telemetry.telemetryLevel": "off",
+        "workbench.enableExperiments": false,
+        "workbench.settings.enableNaturalLanguageSearch": false,
+        "workbench.startupEditor": "none",
+        "git.decorations.enabled": false,
+        "git.enableStatusBarSync": false,
+        "git.autoRepositoryDetection": false,
+        "scm.diffDecorations": "none"
+      },
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "github.copilot",
+        "vitest.explorer"
+      ]
+    }
+  },
+
+  // === LIFECYCLE OPTIMIZATION ===
+  "onCreateCommand": [
+    "npm config set cache /workspaces/c-7066/.npm",
+    "npm config set prefer-offline true",
+    "npm config set audit false",
+    "npm config set fund false",
+    "npm ci --cache /workspaces/c-7066/.npm --prefer-offline --no-audit --no-fund"
+  ],
+  "updateContentCommand": "npm ci --cache /workspaces/c-7066/.npm --prefer-offline --no-audit --no-fund",
+  "postCreateCommand": [
+    "git config --global init.defaultBranch main",
+    "git config --global core.autocrlf false",
+    "git config --global core.preloadindex true",
+    "git config --global core.fscache true",
+    "git config --global gc.auto 256",
+    "chmod +x .devcontainer/workspace-optimize.sh",
+    "./.devcontainer/workspace-optimize.sh",
+    "echo 'Workspace initialized and optimized successfully'"
+  ],
+  "postStartCommand": "./.devcontainer/workspace-optimize.sh",
+
+  // === FEATURES AND MOUNTS ===
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20",
+      "nodeGypDependencies": true
+    }
+  },
+
+  "mounts": [
+    "source=c7066-node-modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=c7066-npm-cache,target=${containerWorkspaceFolder}/.npm,type=volume",
+    "source=c7066-git-cache,target=/home/node/.gitconfig,type=volume"
+  ],
+
+  // === WORKSPACE PERSISTENCE ===
+  "workspaceFolder": "/workspaces/c-7066",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/c-7066,type=bind,consistency=cached",
+
+  // === SECURITY ===
+  "remoteUser": "node",
+  "containerUser": "node"
+}

@@ -20,6 +20,7 @@ This documentation provides a comprehensive security assessment and guidelines f
 ## Quick Reference
 
 ### Current Security Status
+
 - **Authentication**: ✅ Supabase-based with JWT tokens
 - **API Key Management**: ⚠️ Multiple providers, needs rotation strategy
 - **Password Security**: ✅ Strength validation implemented
@@ -28,6 +29,7 @@ This documentation provides a comprehensive security assessment and guidelines f
 - **Data Encryption**: ✅ In transit, needs at-rest verification
 
 ### Immediate Action Items
+
 1. Implement comprehensive security testing
 2. Add API key rotation mechanisms
 3. Complete 2FA implementation
@@ -37,15 +39,16 @@ This documentation provides a comprehensive security assessment and guidelines f
 ## Quick Start
 
 For immediate security concerns:
+
 1. Review the [Security Assessment Report](./security-assessment.md)
 2. Check [Authentication Guidelines](./authentication.md)
 3. Implement recommendations from [Best Practices](./best-practices.md)
 
 ## Emergency Contacts
 
-- Security Team: security@tradepro.com
-- Incident Response: incident@tradepro.com
-- Compliance: compliance@tradepro.com
+- Security Team: <security@tradepro.com>
+- Incident Response: <incident@tradepro.com>
+- Compliance: <compliance@tradepro.com>
 
 ---
 

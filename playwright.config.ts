@@ -6,8 +6,8 @@ export default defineConfig({
   timeout: 30 * 1000,
   retries: 0,
   use: {
-    baseURL: 'http://localhost:8081', // updated to match Vite dev server
-    ignoreHTTPSErrors: false, // not needed for HTTP
+    baseURL: 'https://didactic-space-waddle-jj9gjj65gvx43pwjr-8080.app.github.dev', // Codespace public URL
+    ignoreHTTPSErrors: true, // allow self-signed certs in Codespace
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

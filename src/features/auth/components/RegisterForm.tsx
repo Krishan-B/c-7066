@@ -91,7 +91,7 @@ const RegisterForm = () => {
     <>
       <ErrorAlert message={formError} />
 
-      <form onSubmit={handleSignUp} className="space-y-4">
+      <form onSubmit={handleSignUp} className="space-y-4" role="form">
         <PersonalInfoFields
           firstName={firstName}
           lastName={lastName}

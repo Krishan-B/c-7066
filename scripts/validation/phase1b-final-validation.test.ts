@@ -30,38 +30,18 @@ vi.mock('@/components/ui/card', () => ({
   Card: ({ children, ...props }: any) =>
     React.createElement('div', { 'data-testid': 'card', ...props }, children),
   CardContent: ({ children, ...props }: any) =>
-    React.createElement(
-      'div',
-      { 'data-testid': 'card-content', ...props },
-      children
-    ),
+    React.createElement('div', { 'data-testid': 'card-content', ...props }, children),
   CardDescription: ({ children, ...props }: any) =>
-    React.createElement(
-      'div',
-      { 'data-testid': 'card-description', ...props },
-      children
-    ),
+    React.createElement('div', { 'data-testid': 'card-description', ...props }, children),
   CardHeader: ({ children, ...props }: any) =>
-    React.createElement(
-      'div',
-      { 'data-testid': 'card-header', ...props },
-      children
-    ),
+    React.createElement('div', { 'data-testid': 'card-header', ...props }, children),
   CardTitle: ({ children, ...props }: any) =>
-    React.createElement(
-      'div',
-      { 'data-testid': 'card-title', ...props },
-      children
-    ),
+    React.createElement('div', { 'data-testid': 'card-title', ...props }, children),
 }));
 
 vi.mock('@/components/ui/button', () => ({
   Button: ({ children, ...props }: any) =>
-    React.createElement(
-      'button',
-      { 'data-testid': 'button', ...props },
-      children
-    ),
+    React.createElement('button', { 'data-testid': 'button', ...props }, children),
 }));
 
 vi.mock('@/hooks/use-toast', () => ({
@@ -76,11 +56,7 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
 
   describe('Test Infrastructure Validation', () => {
     it('should have React working correctly', () => {
-      const element = React.createElement(
-        'div',
-        { 'data-testid': 'test' },
-        'Test'
-      );
+      const element = React.createElement('div', { 'data-testid': 'test' }, 'Test');
       expect(element).toBeDefined();
       expect(element.type).toBe('div');
     });
@@ -96,9 +72,9 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
       expect(typeof useNavigate).toBe('function');
     });
 
-    it('should have UI component mocks available', () => {
-      const { Card } = require('@/components/ui/card');
-      expect(typeof Card).toBe('function');
+    it('should have UI component mocks available', async () => {
+      const mod = await import('@/components/ui/card');
+      expect(typeof mod.Card).toBe('function');
     });
   });
 
@@ -108,16 +84,8 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
         React.createElement(
           'div',
           { 'data-testid': 'oauth-login', className },
-          React.createElement(
-            'button',
-            { 'data-testid': 'google-oauth' },
-            'Continue with Google'
-          ),
-          React.createElement(
-            'button',
-            { 'data-testid': 'github-oauth' },
-            'Continue with GitHub'
-          ),
+          React.createElement('button', { 'data-testid': 'google-oauth' }, 'Continue with Google'),
+          React.createElement('button', { 'data-testid': 'github-oauth' }, 'Continue with GitHub'),
           React.createElement(
             'button',
             { 'data-testid': 'microsoft-oauth' },
@@ -138,11 +106,7 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
         React.createElement(
           'div',
           { 'data-testid': 'two-factor-setup' },
-          React.createElement(
-            'button',
-            { 'data-testid': 'setup-2fa-start' },
-            'Get Started'
-          ),
+          React.createElement('button', { 'data-testid': 'setup-2fa-start' }, 'Get Started'),
           React.createElement(
             'div',
             { 'data-testid': 'qr-code-section' },
@@ -160,7 +124,7 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
 
   describe('Security Utility Validation', () => {
     it('should validate password with special character requirement', () => {
-      const validatePassword = vi.fn(password => ({
+      const validatePassword = vi.fn((password) => ({
         isValid:
           password.length >= 8 &&
           /[A-Z]/.test(password) &&
@@ -176,7 +140,7 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
     });
 
     it('should provide secure random generation', () => {
-      const generateSecureRandom = vi.fn(length => 'a'.repeat(length * 2));
+      const generateSecureRandom = vi.fn((length) => 'a'.repeat(length * 2));
 
       const random1 = generateSecureRandom(16);
       const random2 = generateSecureRandom(16);
@@ -186,9 +150,7 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
     });
 
     it('should validate email addresses properly', () => {
-      const validateEmail = vi.fn(email =>
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-      );
+      const validateEmail = vi.fn((email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
 
       expect(validateEmail('valid@email.com')).toBe(true);
       expect(validateEmail('invalid.email')).toBe(false);
@@ -205,10 +167,7 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
         })
       );
 
-      const result = await initOAuthFlow(
-        'google',
-        'http://localhost:3000/callback'
-      );
+      const result = await initOAuthFlow('google', 'http://localhost:3000/callback');
 
       expect(result.state).toHaveLength(64);
       expect(result.codeChallenge).toBe('mock-challenge');
@@ -216,27 +175,19 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
     });
 
     it('should validate OAuth callback properly', () => {
-      const validateOAuthCallback = vi.fn(
-        (provider, code, receivedState, expectedState) => ({
-          isValid: receivedState === expectedState && code.length > 0,
-          codeVerifier:
-            receivedState === expectedState ? 'test-verifier' : undefined,
-          error:
-            receivedState !== expectedState
-              ? 'CSRF attack detected'
-              : !code
+      const validateOAuthCallback = vi.fn((provider, code, receivedState, expectedState) => ({
+        isValid: receivedState === expectedState && code.length > 0,
+        codeVerifier: receivedState === expectedState ? 'test-verifier' : undefined,
+        error:
+          receivedState !== expectedState
+            ? 'CSRF attack detected'
+            : !code
               ? 'Authorization code missing'
               : undefined,
-        })
-      );
+      }));
 
       // Valid callback
-      const validResult = validateOAuthCallback(
-        'google',
-        'auth-code',
-        'state',
-        'state'
-      );
+      const validResult = validateOAuthCallback('google', 'auth-code', 'state', 'state');
       expect(validResult.isValid).toBe(true);
       expect(validResult.codeVerifier).toBe('test-verifier');
 
@@ -299,11 +250,7 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
     });
 
     it('should identify enabled OAuth providers correctly', () => {
-      const getEnabledOAuthProviders = vi.fn(() => [
-        'google',
-        'github',
-        'microsoft',
-      ]);
+      const getEnabledOAuthProviders = vi.fn(() => ['google', 'github', 'microsoft']);
 
       const providers = getEnabledOAuthProviders();
 

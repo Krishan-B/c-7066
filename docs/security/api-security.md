@@ -9,6 +9,7 @@ TradePro integrates with multiple external APIs for market data and trading func
 ### Market Data Providers
 
 #### 1. Polygon.io API
+
 - **Purpose**: Stock market data, real-time quotes
 - **Authentication**: API Key
 - **Rate Limits**: 5 requests/minute (free tier)
@@ -16,6 +17,7 @@ TradePro integrates with multiple external APIs for market data and trading func
 - **Implementation**: `/src/utils/api/polygon/client.ts`
 
 #### 2. Alpha Vantage API
+
 - **Purpose**: Financial data, technical indicators
 - **Authentication**: API Key
 - **Rate Limits**: 5 requests/minute, 500/day
@@ -23,6 +25,7 @@ TradePro integrates with multiple external APIs for market data and trading func
 - **Implementation**: `/src/utils/api/alphaVantage/client.ts`
 
 #### 3. Finnhub API
+
 - **Purpose**: Market news, company data
 - **Authentication**: API Key
 - **Rate Limits**: 60 requests/minute
@@ -32,6 +35,7 @@ TradePro integrates with multiple external APIs for market data and trading func
 ### API Key Management
 
 #### Current Implementation
+
 ```typescript
 // Location: /src/hooks/market/api/apiKeyManager.ts
 interface APIKeyManager {
@@ -42,6 +46,7 @@ interface APIKeyManager {
 ```
 
 #### Key Storage
+
 - **Method**: Environment variables
 - **Location**: `.env` files (development), deployment environment (production)
 - **Access**: Client-side (⚠️ SECURITY RISK)
@@ -52,9 +57,10 @@ interface APIKeyManager {
 ### Critical Issues
 
 #### 1. Client-Side API Key Exposure
+
 - **Risk Level**: CRITICAL
 - **Description**: API keys are embedded in client-side code
-- **Impact**: 
+- **Impact**:
   - Keys visible in browser developer tools
   - Keys exposed in source code
   - Potential for API abuse and quota exhaustion
@@ -62,6 +68,7 @@ interface APIKeyManager {
 - **Current Mitigation**: None
 
 #### 2. No API Key Rotation
+
 - **Risk Level**: HIGH
 - **Description**: Static API keys with no rotation mechanism
 - **Impact**:
@@ -71,6 +78,7 @@ interface APIKeyManager {
 - **Current Mitigation**: Manual key updates
 
 #### 3. Insufficient Rate Limiting
+
 - **Risk Level**: MEDIUM
 - **Description**: No client-side rate limiting implementation
 - **Impact**:
@@ -80,6 +88,7 @@ interface APIKeyManager {
 - **Current Mitigation**: Provider-side rate limiting only
 
 #### 4. No API Response Validation
+
 - **Risk Level**: MEDIUM
 - **Description**: Limited validation of API responses
 - **Impact**:
@@ -91,6 +100,7 @@ interface APIKeyManager {
 ### API-Specific Vulnerabilities
 
 #### Polygon API Client
+
 ```typescript
 // Location: /src/utils/api/polygon/client.ts
 // Current Issues:
@@ -101,6 +111,7 @@ interface APIKeyManager {
 ```
 
 #### Alpha Vantage API Client
+
 ```typescript
 // Location: /src/utils/api/alphaVantage/client.ts
 // Current Issues:
@@ -111,6 +122,7 @@ interface APIKeyManager {
 ```
 
 #### Finnhub API Client
+
 ```typescript
 // Location: /src/utils/api/finnhub/client.ts
 // Current Issues:
@@ -125,18 +137,21 @@ interface APIKeyManager {
 ### Immediate Actions (High Priority)
 
 #### 1. Implement Server-Side API Proxy
+
 ```typescript
 // Recommended architecture:
 Client Request → Supabase Edge Function → External API → Response
 ```
 
 **Benefits**:
+
 - API keys hidden from client
 - Centralized rate limiting
 - Request/response validation
 - Audit logging
 
 **Implementation**:
+
 ```typescript
 // /supabase/functions/market-data/index.ts
 export default async function handler(req: Request) {
@@ -156,6 +171,7 @@ export default async function handler(req: Request) {
 ```
 
 #### 2. API Key Security Enhancement
+
 ```typescript
 // Secure key management implementation
 interface SecureAPIKeys {
@@ -168,6 +184,7 @@ interface SecureAPIKeys {
 ```
 
 #### 3. Request/Response Validation
+
 ```typescript
 // Input validation schema
 const MarketDataRequest = z.object({
@@ -188,6 +205,7 @@ const sanitizeResponse = (data: unknown) => {
 ### Medium Priority Actions
 
 #### 4. Rate Limiting Implementation
+
 ```typescript
 // Client-side rate limiting
 interface RateLimiter {
@@ -205,6 +223,7 @@ interface ServerRateLimit {
 ```
 
 #### 5. API Monitoring and Alerting
+
 ```typescript
 // API usage monitoring
 interface APIMonitoring {
@@ -215,6 +234,7 @@ interface APIMonitoring {
 ```
 
 #### 6. Error Handling Security
+
 ```typescript
 // Secure error handling
 const handleAPIError = (error: APIError) => {
@@ -238,6 +258,7 @@ const handleAPIError = (error: APIError) => {
 ## Secure API Architecture
 
 ### Recommended Architecture
+
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │   Frontend  │    │  Supabase   │    │   API       │    │  External   │
@@ -249,17 +270,20 @@ const handleAPIError = (error: APIError) => {
 ### Security Layers
 
 #### Layer 1: Client Authentication
+
 - User authentication via Supabase
 - JWT token validation
 - Request rate limiting per user
 
 #### Layer 2: API Gateway
+
 - API key management
 - Request validation and sanitization
 - Response filtering and validation
 - Audit logging
 
 #### Layer 3: External API Integration
+
 - Secure credential storage
 - Connection pooling
 - Response caching
@@ -268,6 +292,7 @@ const handleAPIError = (error: APIError) => {
 ### Data Flow Security
 
 #### Request Flow
+
 1. Client authenticates with JWT
 2. Request validated against schema
 3. Rate limiting check
@@ -278,6 +303,7 @@ const handleAPIError = (error: APIError) => {
 8. Clean response returned to client
 
 #### Security Checkpoints
+
 - Authentication validation
 - Input sanitization
 - Rate limit enforcement
@@ -289,30 +315,35 @@ const handleAPIError = (error: APIError) => {
 ## API Security Best Practices
 
 ### Authentication & Authorization
+
 - Never expose API keys in client-side code
 - Use server-side proxy for all external API calls
 - Implement proper user authentication
 - Apply rate limiting per user and globally
 
 ### Data Validation
+
 - Validate all input parameters
 - Sanitize API responses
 - Implement schema validation
 - Handle edge cases gracefully
 
 ### Error Handling
+
 - Never expose internal errors to client
 - Log detailed errors server-side
 - Return generic error messages
 - Implement proper fallback mechanisms
 
 ### Monitoring & Logging
+
 - Log all API requests and responses
 - Monitor for unusual usage patterns
 - Set up alerts for quota approaching
 - Track error rates and latency
 
 ### Key Management
+
 - Store API keys in secure backend
 - Implement key rotation procedures
 - Monitor key usage and quotas
@@ -321,18 +352,21 @@ const handleAPIError = (error: APIError) => {
 ## Compliance Considerations
 
 ### Data Privacy
+
 - GDPR compliance for EU users
 - Data minimization principles
 - User consent for data processing
 - Right to data deletion
 
 ### Financial Regulations
+
 - Market data licensing compliance
 - Real-time data restrictions
 - Geographic access limitations
 - Audit trail requirements
 
 ### Security Standards
+
 - SOC 2 compliance
 - ISO 27001 alignment
 - PCI DSS (if applicable)
@@ -341,12 +375,14 @@ const handleAPIError = (error: APIError) => {
 ## Incident Response
 
 ### API Security Incidents
+
 1. **API Key Compromise**: Immediate key rotation and usage audit
 2. **Rate Limit Abuse**: User blocking and pattern analysis
 3. **Data Breach**: Impact assessment and user notification
 4. **Service Disruption**: Failover procedures and communication
 
 ### Response Procedures
+
 1. Immediate containment
 2. Impact assessment
 3. Stakeholder notification
@@ -356,18 +392,21 @@ const handleAPIError = (error: APIError) => {
 ## Implementation Timeline
 
 ### Phase 1 (Immediate - 1-2 weeks)
+
 - [ ] Move API keys to server-side
 - [ ] Implement basic API proxy
 - [ ] Add request validation
 - [ ] Set up basic monitoring
 
 ### Phase 2 (Short-term - 1 month)
+
 - [ ] Implement comprehensive rate limiting
 - [ ] Add response validation and sanitization
 - [ ] Set up detailed monitoring and alerting
 - [ ] Implement key rotation procedures
 
 ### Phase 3 (Medium-term - 2-3 months)
+
 - [ ] Advanced security monitoring
 - [ ] Automated threat detection
 - [ ] Performance optimization

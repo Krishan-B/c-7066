@@ -1,0 +1,15 @@
+# Workspace Keep-Alive Configuration
+# Add to .gitignore to avoid committing activity logs
+
+# Activity tracking files
+.workspace-active
+.workspace-log
+.activity-log
+
+# Keep-alive process files
+keep-alive.pid
+activity-simulator.pid
+
+# Performance optimization artifacts
+.npm-cache/
+.optimization-log

@@ -4,49 +4,35 @@
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "skipLibCheck": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,    "moduleDetection": "force",
+    "isolatedModules": true,
+    "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
     "tsBuildInfoFile": "./tsconfig.app.tsbuildinfo",
 
     /* Type Checking - Optimized for Performance */
-    "strict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
-    "noFallthroughCasesInSwitch": false,
-    "noUncheckedIndexedAccess": false,
-    "exactOptionalPropertyTypes": false,
-    "noImplicitReturns": false,
-    "noImplicitOverride": false,
-    "noPropertyAccessFromIndexSignature": false,
+    "strict": true, // Enable strict mode
 
     /* Paths */
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    },    /* Additional settings - Performance Optimized */
+    },
+    /* Additional settings - Performance Optimized */
     "allowJs": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": false,
+    "esModuleInterop": true, // Good for compatibility
     "incremental": true,
     "preserveWatchOutput": true,
     "assumeChangesOnlyAffectDirectDependencies": true,
-    "disableSourceOfProjectReferenceRedirect": true,
-    "disableSolutionSearching": true,
-    "disableReferencedProjectLoad": true
-  },  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.d.ts"
-  ],
+    "skipLibCheck": true, // Explicitly keep skipLibCheck for faster builds if needed
+    "forceConsistentCasingInFileNames": true // Enforce consistent casing
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
   "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
   "exclude": [
     "node_modules",

@@ -7,6 +7,7 @@ This document outlines the security monitoring and alerting strategy for the Tra
 ## Monitoring Architecture
 
 ### Current State
+
 - **Status**: ❌ Minimal monitoring implemented
 - **Coverage**: Basic application logging only
 - **Alerting**: No automated security alerts
@@ -37,6 +38,7 @@ graph TB
 ### 1. Authentication & Authorization
 
 #### Key Metrics
+
 - Failed login attempts
 - Suspicious login patterns
 - Account lockouts
@@ -45,6 +47,7 @@ graph TB
 - JWT token anomalies
 
 #### Alert Conditions
+
 ```yaml
 # Failed Login Alert
 failed_logins:
@@ -66,6 +69,7 @@ impossible_travel:
 ```
 
 #### Implementation
+
 ```typescript
 // Authentication monitoring service
 class AuthMonitoringService {
@@ -110,6 +114,7 @@ class AuthMonitoringService {
 ### 2. API Security
 
 #### Key Metrics
+
 - API request patterns
 - Rate limiting violations
 - API key usage anomalies
@@ -117,6 +122,7 @@ class AuthMonitoringService {
 - External API response anomalies
 
 #### Alert Conditions
+
 ```yaml
 # API Rate Limiting
 api_rate_limit:
@@ -138,6 +144,7 @@ external_api_errors:
 ```
 
 #### Implementation
+
 ```typescript
 // API monitoring middleware
 class ApiMonitoringMiddleware {
@@ -191,6 +198,7 @@ class ApiMonitoringMiddleware {
 ### 3. Data Access
 
 #### Key Metrics
+
 - Database query patterns
 - Data export activities
 - Unauthorized data access attempts
@@ -198,6 +206,7 @@ class ApiMonitoringMiddleware {
 - Sensitive data access
 
 #### Alert Conditions
+
 ```yaml
 # Bulk Data Access
 bulk_data_access:
@@ -221,6 +230,7 @@ unauthorized_access:
 ### 4. Infrastructure Security
 
 #### Key Metrics
+
 - System resource utilization
 - Network traffic anomalies
 - Failed administrative access
@@ -228,6 +238,7 @@ unauthorized_access:
 - Service availability
 
 #### Alert Conditions
+
 ```yaml
 # Resource Anomaly
 resource_anomaly:
@@ -253,21 +264,25 @@ file_integrity_violation:
 ### Alert Severity Levels
 
 #### Critical
+
 - **Response Time**: Immediate (5 minutes)
 - **Examples**: Data breach, system compromise, authentication bypass
 - **Actions**: Page on-call engineer, activate incident response
 
 #### High
+
 - **Response Time**: 15 minutes
 - **Examples**: Brute force attacks, API anomalies, access control violations
 - **Actions**: Email and SMS alerts, security team notification
 
 #### Medium
+
 - **Response Time**: 1 hour
 - **Examples**: Rate limiting violations, suspicious patterns
 - **Actions**: Email alerts, log for review
 
 #### Low
+
 - **Response Time**: 4 hours
 - **Examples**: Audit events, compliance logging
 - **Actions**: Dashboard notification, daily reports
@@ -301,6 +316,7 @@ alert_routing:
 ### Recommended SIEM Solutions
 
 #### Open Source Options
+
 1. **ELK Stack (Elasticsearch, Logstash, Kibana)**
    - Cost: Free
    - Scalability: High
@@ -312,6 +328,7 @@ alert_routing:
    - Community support: Good
 
 #### Commercial Options
+
 1. **Splunk**
    - Cost: High
    - Features: Comprehensive
@@ -325,6 +342,7 @@ alert_routing:
 ### Implementation Priority
 
 #### Phase 1: Basic Monitoring (Month 1)
+
 ```bash
 # Setup ELK Stack
 docker-compose up -d elasticsearch logstash kibana
@@ -340,6 +358,7 @@ filebeat.yml:
 ```
 
 #### Phase 2: Security Analytics (Month 2-3)
+
 ```yaml
 # Logstash security rules
 input {
@@ -371,6 +390,7 @@ output {
 ```
 
 #### Phase 3: Advanced Analytics (Month 4-6)
+
 - Machine learning anomaly detection
 - Behavioral analytics
 - Threat intelligence integration
@@ -380,6 +400,7 @@ output {
 ### Security Dashboard Components
 
 #### Real-time Metrics
+
 ```javascript
 // Kibana dashboard configuration
 const securityDashboard = {
@@ -414,6 +435,7 @@ const securityDashboard = {
 ```
 
 #### Daily Security Report
+
 ```typescript
 // Automated reporting service
 class SecurityReportService {
@@ -442,6 +464,7 @@ class SecurityReportService {
 ## Integration Points
 
 ### Application Integration
+
 ```typescript
 // Security event logging
 class SecurityLogger {
@@ -466,6 +489,7 @@ class SecurityLogger {
 ```
 
 ### Database Integration
+
 ```sql
 -- Database audit triggers
 CREATE OR REPLACE FUNCTION audit_trigger()
@@ -500,12 +524,14 @@ CREATE TRIGGER user_audit_trigger
 ## Performance Considerations
 
 ### Log Volume Management
+
 - Implement log rotation policies
 - Use log sampling for high-volume events
 - Compress and archive old logs
 - Implement retention policies
 
 ### Resource Optimization
+
 ```yaml
 # Monitoring resource limits
 monitoring_limits:
@@ -519,12 +545,14 @@ monitoring_limits:
 ## Continuous Improvement
 
 ### Monitoring Metrics
+
 - Alert accuracy (true positives vs false positives)
 - Response time to security events
 - Mean time to detection (MTTD)
 - Mean time to containment (MTTC)
 
 ### Regular Reviews
+
 - Monthly alert tuning
 - Quarterly monitoring effectiveness review
 - Annual security monitoring strategy review
@@ -532,6 +560,7 @@ monitoring_limits:
 ---
 
 **Document Control**
+
 - Version: 1.0
 - Last Updated: June 1, 2025
 - Next Review: September 1, 2025

@@ -59,7 +59,7 @@ const LoginForm = () => {
     <>
       <ErrorAlert message={formError} />
 
-      <form onSubmit={handleSignIn} className="space-y-4">
+      <form onSubmit={handleSignIn} className="space-y-4" role="form">
         <EmailField
           email={email}
           onChange={setEmail}

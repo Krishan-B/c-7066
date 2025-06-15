@@ -1,17 +1,13 @@
 {
   // ESLint Configuration (optimized for flat config)
   "eslint.enable": true,
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "eslint.workingDirectories": [
     {
       "mode": "auto"
     }
-  ],  "eslint.options": {
+  ],
+  "eslint.options": {
     "cache": true,
     "cacheLocation": ".eslintcache"
   },
@@ -37,7 +33,7 @@
     }
   ],
 
-  // TypeScript Performance Optimizations (Enhanced for Large Projects)
+  // TypeScript Performance Optimizations (Balanced for Stability)
   "typescript.preferences.importModuleSpecifier": "relative",
   "typescript.suggest.autoImports": false,
   "typescript.updateImportsOnFileMove.enabled": "never",
@@ -57,8 +53,8 @@
   "typescript.experimental.tsserver.web.projectWideIntellisense.enabled": false,
   "typescript.experimental.tsserver.web.projectWideIntellisense.suppressSemanticErrors": true,
   "typescript.tsserver.experimental.enableProjectDiagnostics": false,
-  "typescript.tsserver.maxTsServerMemory": 3072,
-  "typescript.tsserver.useSyntaxServer": "auto",
+  "typescript.tsserver.maxTsServerMemory": 1536,
+  "typescript.tsserver.useSyntaxServer": "always",
 
   // JavaScript Performance Optimizations
   "javascript.preferences.importModuleSpecifier": "relative",
@@ -144,10 +140,7 @@
   "tailwindCSS.colorDecorators": true,
 
   // Error Lens Configuration
-  "errorLens.enabledDiagnosticLevels": [
-    "error",
-    "warning"
-  ],
+  "errorLens.enabledDiagnosticLevels": ["error", "warning"],
   "errorLens.enabled": true,
   "errorLens.delay": 500,
   "errorLens.onSave": true,
@@ -223,42 +216,42 @@
     "html": false,
     "css": false
   },
-    // Chat Configuration (DISABLED for CPU performance)
+  // Chat Configuration (DISABLED for CPU performance)
   "github.copilot.chat.enabled": false,
   "github.copilot.chat.welcomeMessage": "never",
   "github.copilot.chat.experimental.codeGeneration": false,
   "github.copilot.chat.experimental.temporalContext": false,
   "github.copilot.chat.experimental.contextualFilterInSidebar": false,
-    // Editor Integration (DISABLED for CPU performance - using github.copilot.enable instead)
+  // Editor Integration (DISABLED for CPU performance - using github.copilot.enable instead)
   "github.copilot.editor.enableCodeActions": false,
   "github.copilot.editor.iterativeFixing": false,
   "github.copilot.renameSuggestions.triggerAutomatically": false,
-  
+
   // Data Collection & Conversation Storage
   "github.copilot.conversation.saveLocation": "never",
-  
+
   // === CRITICAL TELEMETRY DISABLE SETTINGS ===
   "github.copilot.telemetry": false,
   "github.copilot.advanced.telemetry": false,
   "github.copilot.advanced.debug.telemetry": false,
-  
+
   // === CRITICAL PUBLIC CODE MATCHING DISABLE SETTINGS ===
   "github.copilot.suggestions.matching": false,
   "github.copilot.suggestions.matching.enabled": false,
   "github.copilot.suggestions.matching.publicCode": false,
-    // === EMERGENCY CPU PERFORMANCE RESTRICTIONS ===
-  // WARNING: Copilot using 83.8% CPU - SEVERE restrictions applied
+  // === OPTIMIZED CPU PERFORMANCE RESTRICTIONS ===
+  // Balanced performance for workspace stability
   "github.copilot.advanced": {
-    "length": 25,
-    "listCount": 0,
-    "inlineSuggestCount": 0,
-    "timeout": 500,
-    "requestTimeout": 200,
+    "length": 50,
+    "listCount": 1,
+    "inlineSuggestCount": 1,
+    "timeout": 1000,
+    "requestTimeout": 500,
     "stop": {
       "*": ["\n", "\n\n", "}", ";", ")", "]"]
     }
   },
-  
+
   // Debug Settings (Disable All)
   "github.copilot.advanced.debug.useElectronFetch": false,
   "github.copilot.advanced.debug.overrideEngine": "",
@@ -275,18 +268,12 @@
       "icon": "terminal-powershell"
     },
     "Command Prompt": {
-      "path": [
-        "${env:windir}\\Sysnative\\cmd.exe",
-        "${env:windir}\\System32\\cmd.exe"
-      ],
+      "path": ["${env:windir}\\Sysnative\\cmd.exe", "${env:windir}\\System32\\cmd.exe"],
       "args": [],
       "icon": "terminal-cmd"
     },
     "Git Bash": {
-      "path": [
-        "${env:ProgramFiles}\\Git\\bin\\bash.exe",
-        "${env:ProgramFiles(x86)}\\Git\\bin\\bash.exe"
-      ],
+      "path": ["${env:ProgramFiles}\\Git\\bin\\bash.exe", "${env:ProgramFiles(x86)}\\Git\\bin\\bash.exe"],
       "icon": "terminal-bash",
       "env": {
         "TERM": "xterm-256color"
@@ -323,7 +310,7 @@
 
   // === GLOBAL TELEMETRY DISABLE ===
   "telemetry.telemetryLevel": "off",
-  
+
   // General Performance Settings
   "workbench.enableExperiments": false,
   "workbench.settings.enableNaturalLanguageSearch": false,
@@ -340,7 +327,7 @@
   "gitlens.blame.highlight.enabled": false,
   "gitlens.codeLens.enabled": false,
   "gitlens.gitCommands.skipConfirmations": ["fetch:command", "stash-push:command"],
-  
+
   // SQL Tools Performance Configuration
   "sqltools.useNodeRuntime": false,
   "sqltools.connections": [],

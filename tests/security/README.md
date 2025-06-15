@@ -435,13 +435,13 @@ jobs:
 
 The test setup includes:
 
-1.  **Authentication Tests** - JWT validation, session management, password
+1. **Authentication Tests** - JWT validation, session management, password
     security
-2.  **Authorization Tests** - Role-based access control, permission validation
-3.  **Input Validation Tests** - SQL injection, XSS, CSRF protection
-4.  **API Security Tests** - Rate limiting, API key validation, external API
+2. **Authorization Tests** - Role-based access control, permission validation
+3. **Input Validation Tests** - SQL injection, XSS, CSRF protection
+4. **API Security Tests** - Rate limiting, API key validation, external API
     security
-5.  **Integration Tests** - HTTPS enforcement, security headers, vulnerability
+5. **Integration Tests** - HTTPS enforcement, security headers, vulnerability
     scanning
 
 This comprehensive security testing framework will:
@@ -454,8 +454,8 @@ This comprehensive security testing framework will:
 
 ## Next Steps
 
-1.  Install test dependencies: `npm install`
-2.  Run security tests: `npm run test:security`
-3.  Check coverage: `npm run test:security:ci`
-4.  Set up CI/CD integration
-5.  Schedule regular security scans
+1. Install test dependencies: `npm install`
+2. Run security tests: `npm run test:security`
+3. Check coverage: `npm run test:security:ci`
+4. Set up CI/CD integration
+5. Schedule regular security scans

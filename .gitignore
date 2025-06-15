@@ -86,6 +86,14 @@ supabase/.temp
 .vercel
 .turbo
 
+# Workspace keep-alive files
+.workspace-active
+.workspace-log
+.activity-log
+keep-alive.pid
+activity-simulator.pid
+.optimization-log
+
 # Additional performance optimizations
 # TypeScript compiler files
 *.tsbuildinfo
@@ -178,3 +186,7 @@ lpt[0-9]
 # Allow GitHub workflows and config
 !.github/
 !.github/**
+
+# Husky hooks
+!.husky/
+!.husky/**

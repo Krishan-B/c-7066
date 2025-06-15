@@ -104,40 +104,40 @@ inappropriate file types.
 
 ### Features Disabled for Performance
 
-1.  **Auto-imports**: Must manually import modules
-2.  **Code lens**: No reference counts or implementation links
-3.  **Inlay hints**: No parameter names or type hints
-4.  **Semantic highlighting**: Basic syntax highlighting only
-5.  **Git decorations**: No file status indicators in explorer
-6.  **Format on save**: Must format manually or via commands
+1. **Auto-imports**: Must manually import modules
+2. **Code lens**: No reference counts or implementation links
+3. **Inlay hints**: No parameter names or type hints
+4. **Semantic highlighting**: Basic syntax highlighting only
+5. **Git decorations**: No file status indicators in explorer
+6. **Format on save**: Must format manually or via commands
 
 ### Features Retained
 
-1.  **Core language support**: IntelliSense, error checking
-2.  **ESLint integration**: Code quality enforcement
-3.  **Basic Git operations**: Commit, push, pull via commands
-4.  **GitHub Copilot**: For TypeScript/JavaScript files only
-5.  **Debugging**: Full debugging capabilities maintained
+1. **Core language support**: IntelliSense, error checking
+2. **ESLint integration**: Code quality enforcement
+3. **Basic Git operations**: Commit, push, pull via commands
+4. **GitHub Copilot**: For TypeScript/JavaScript files only
+5. **Debugging**: Full debugging capabilities maintained
 
 ## Reverting Changes
 
 To restore full functionality at the cost of performance:
 
-1.  **Enable auto-imports**:
+1. **Enable auto-imports**:
 
     ```json
     "typescript.suggest.autoImports": true,
     "javascript.suggest.autoImports": true
     ```
 
-2.  **Enable Git decorations**:
+2. **Enable Git decorations**:
 
     ```json
     "git.decorations.enabled": true,
     "git.autorefresh": true
     ```
 
-3.  **Enable all Copilot languages**:
+3. **Enable all Copilot languages**:
 
     ```json
     "github.copilot.enable": {
@@ -145,7 +145,7 @@ To restore full functionality at the cost of performance:
     }
     ```
 
-4.  **Restore TypeScript strictness**:
+4. **Restore TypeScript strictness**:
 
     ```json
     "strict": true,
@@ -156,9 +156,9 @@ To restore full functionality at the cost of performance:
 
 ### VS Code Performance Monitor
 
-1.  Open Command Palette (`Ctrl+Shift+P`)
-2.  Run "Developer: Startup Performance"
-3.  Monitor extension activation times
+1. Open Command Palette (`Ctrl+Shift+P`)
+2. Run "Developer: Startup Performance"
+3. Monitor extension activation times
 
 ### Task Manager Monitoring
 
@@ -176,26 +176,26 @@ To restore full functionality at the cost of performance:
 
 ### For Large Projects
 
-1.  **Exclude more directories**: Add project-specific exclusions
-2.  **Disable unused extensions**: Remove unnecessary extensions
-3.  **Use workspace settings**: Isolate settings per project
-4.  **Monitor memory usage**: Restart VS Code periodically
+1. **Exclude more directories**: Add project-specific exclusions
+2. **Disable unused extensions**: Remove unnecessary extensions
+3. **Use workspace settings**: Isolate settings per project
+4. **Monitor memory usage**: Restart VS Code periodically
 
 ### For Better Development Experience
 
-1.  **Use ESLint**: Maintain code quality without TypeScript strict mode
-2.  **Manual formatting**: Use format document command when needed
-3.  **Git commands**: Use terminal for complex Git operations
-4.  **Selective Copilot**: Enable only for files where needed
+1. **Use ESLint**: Maintain code quality without TypeScript strict mode
+2. **Manual formatting**: Use format document command when needed
+3. **Git commands**: Use terminal for complex Git operations
+4. **Selective Copilot**: Enable only for files where needed
 
 ## Troubleshooting
 
 ### If Performance Issues Persist
 
-1.  **Restart VS Code**: Clear extension host cache
-2.  **Clear TypeScript cache**: Delete `tsconfig.tsbuildinfo`
-3.  **Update extensions**: Ensure latest versions
-4.  **Check system resources**: Monitor available RAM and CPU
+1. **Restart VS Code**: Clear extension host cache
+2. **Clear TypeScript cache**: Delete `tsconfig.tsbuildinfo`
+3. **Update extensions**: Ensure latest versions
+4. **Check system resources**: Monitor available RAM and CPU
 
 ### Common Issues
 

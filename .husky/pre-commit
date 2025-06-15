@@ -1,7 +1,4 @@
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
 
 # Run lint-staged only if there are staged files
-if [ -n "$(git diff --cached --name-only)" ]; then
-  npx lint-staged
-fi
+[ -n "$(git diff --cached --name-only)" ] && npx lint-staged

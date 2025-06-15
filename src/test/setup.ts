@@ -21,6 +21,28 @@ global.console = {
 // Mock window.alert for security tests
 global.window.alert = vi.fn();
 
+// JSDOM Polyfills for Radix UI compatibility
+Object.defineProperty(HTMLElement.prototype, 'hasPointerCapture', {
+  value: vi.fn().mockReturnValue(false),
+  writable: true,
+});
+
+Object.defineProperty(HTMLElement.prototype, 'setPointerCapture', {
+  value: vi.fn(),
+  writable: true,
+});
+
+Object.defineProperty(HTMLElement.prototype, 'releasePointerCapture', {
+  value: vi.fn(),
+  writable: true,
+});
+
+// Mock scrollIntoView for Radix UI
+Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+  value: vi.fn(),
+  writable: true,
+});
+
 // Mock ResizeObserver for jsdom
 global.ResizeObserver = class {
   observe() {}
