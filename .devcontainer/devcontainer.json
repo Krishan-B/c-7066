@@ -1,6 +1,6 @@
 {
   "name": "Trade Pro CFD - Optimized Workspace",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/node:20-bullseye",
 
   // === RESOURCE OPTIMIZATION ===
   "hostRequirements": {
@@ -128,6 +128,6 @@
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/c-7066,type=bind,consistency=cached",
 
   // === SECURITY ===
-  "remoteUser": "node",
-  "containerUser": "node"
+  "remoteUser": "root",
+  "containerUser": "root"
 }
