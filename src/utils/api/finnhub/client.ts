@@ -1,4 +1,3 @@
-
 /**
  * Finnhub API client
  */
@@ -42,15 +41,15 @@ async function makeRequest<T>(endpoint: string, params: Record<string, string> =
   queryParams.append('token', FINNHUB_API_KEY);
 
   const url = `${FINNHUB_BASE_URL}${endpoint}?${queryParams.toString()}`;
-  
+
   try {
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Finnhub API error (${response.status}): ${errorText}`);
     }
-    
+
     return response.json() as Promise<T>;
   } catch (error) {
     console.error('Finnhub API request failed:', error);
@@ -60,14 +59,14 @@ async function makeRequest<T>(endpoint: string, params: Record<string, string> =
 
 // Interface for Finnhub quote response
 export interface FinnhubQuote {
-  c: number;  // Current price
-  d: number;  // Change
+  c: number; // Current price
+  d: number; // Change
   dp: number; // Percent change
-  h: number;  // High price of the day
-  l: number;  // Low price of the day
-  o: number;  // Open price of the day
+  h: number; // High price of the day
+  l: number; // Low price of the day
+  o: number; // Open price of the day
   pc: number; // Previous close price
-  t: number;  // Timestamp
+  t: number; // Timestamp
 }
 
 /**
@@ -89,9 +88,12 @@ export async function getCryptoQuote(symbol: string): Promise<FinnhubQuote> {
 /**
  * Get a forex quote
  * @param fromCurrency From currency
- * @param toCurrency To currency
+ * @param _toCurrency To currency
  */
-export async function getForexQuote(fromCurrency: string, toCurrency: string): Promise<FinnhubQuote> {
+export async function getForexQuote(
+  fromCurrency: string,
+  _toCurrency: string
+): Promise<FinnhubQuote> {
   return makeRequest<FinnhubQuote>('/forex/rates', { base: fromCurrency });
 }
 
@@ -101,34 +103,34 @@ export async function getForexQuote(fromCurrency: string, toCurrency: string): P
  * @param assetType Type of asset (Stocks, Crypto, etc.)
  */
 export async function getMarketData(symbols: string[], assetType: string) {
-  console.log(`Fetching ${assetType} data for symbols:`, symbols);
-  
+  console.warn(`Fetching ${assetType} data for symbols:`, symbols);
+
   const results = [];
-  
+
   for (const symbol of symbols) {
     try {
       let quote: FinnhubQuote;
-      
+
       if (assetType === 'Stocks') {
         quote = await getStockQuote(symbol);
       } else if (assetType === 'Crypto') {
         quote = await getCryptoQuote(symbol);
       } else if (assetType === 'Forex') {
-        const [fromCurrency, toCurrency] = symbol.split('_');
-        quote = await getForexQuote(fromCurrency, toCurrency);
+        const [fromCurrency] = symbol.split('_');
+        quote = await getForexQuote(fromCurrency, '');
       } else {
         quote = await getStockQuote(symbol);
       }
-      
+
       results.push({
         symbol,
         assetType,
-        quote
+        quote,
       });
     } catch (error) {
       console.error(`Error fetching data for ${symbol}:`, error);
     }
   }
-  
+
   return results;
 }

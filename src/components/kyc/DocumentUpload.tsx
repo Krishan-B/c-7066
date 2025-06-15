@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, FileText, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { KYCDocument } from "@/services/kyc/types";
+import { type KYCDocument } from "@/services/kyc/types";
 
 interface DocumentUploadProps {
   onUpload: (file: File, documentType: KYCDocument['document_type']) => void;

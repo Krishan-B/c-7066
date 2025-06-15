@@ -1,9 +1,6 @@
-
-import { supabase } from '@/integrations/supabase/client';
-import { KYCDocument, KYCStatus, DocumentUploadData } from './types';
+import { type KYCDocument, type KYCStatus, type DocumentUploadData } from './types';
 
 export class KYCService {
-  
   static async uploadDocument(data: DocumentUploadData): Promise<KYCDocument> {
     // For now, create a mock response since KYC tables don't exist in database
     // This would need to be implemented when KYC tables are added to the database
@@ -16,18 +13,18 @@ export class KYCService {
       file_size: data.file.size,
       mime_type: data.file.type,
       status: 'pending',
-      uploaded_at: new Date().toISOString()
+      uploaded_at: new Date().toISOString(),
     };
 
     // In a real implementation, this would save to the kyc_documents table
-    console.log('Mock KYC document upload:', mockDocument);
-    
+    console.warn('Mock KYC document upload:', mockDocument);
+
     return mockDocument;
   }
 
   static async getUserDocuments(userId: string): Promise<KYCDocument[]> {
     // Mock implementation - returns empty array until KYC tables are created
-    console.log('Getting KYC documents for user:', userId);
+    console.warn('Getting KYC documents for user:', userId);
     return [];
   }
 
@@ -38,30 +35,30 @@ export class KYCService {
       overall_status: 'pending',
       identity_document_status: 'pending',
       address_document_status: 'pending',
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
 
-    console.log('Getting KYC status for user:', userId);
+    console.warn('Getting KYC status for user:', userId);
     return mockStatus;
   }
 
   static async deleteDocument(documentId: string): Promise<void> {
     // Mock implementation - would delete from kyc_documents table
-    console.log('Mock delete KYC document:', documentId);
+    console.warn('Mock delete KYC document:', documentId);
   }
 
   static async updateDocumentStatus(
-    documentId: string, 
+    documentId: string,
     status: 'pending' | 'approved' | 'rejected',
     comments?: string
   ): Promise<void> {
     // Mock implementation - would update document status in database
-    console.log('Mock update KYC document status:', { documentId, status, comments });
+    console.warn('Mock update KYC document status:', { documentId, status, comments });
   }
 
   static async getDocumentUrl(documentUrl: string): Promise<string> {
     // Mock implementation - would return signed URL for document download
-    console.log('Mock get document URL:', documentUrl);
+    console.warn('Mock get document URL:', documentUrl);
     return documentUrl;
   }
 }

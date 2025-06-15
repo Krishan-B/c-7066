@@ -43,13 +43,6 @@ coverage/
 .nyc_output/
 *.lcov
 
-# Testing
-jest/
-__tests__/
-test-results/
-playwright-report/
-playwright/.cache/
-
 # Temporary folders
 tmp/
 temp/
@@ -191,3 +184,6 @@ lpt[0-9]
 # Husky hooks
 !.husky/
 !.husky/**
+
+# Generated type declarations
+types/app/

@@ -1,14 +1,13 @@
-
-import { 
+import {
   getStockQuote as getAlphaVantageStockQuote,
   getForexRate as getAlphaVantageForexRate,
   getCryptoQuote as getAlphaVantageCryptoQuote,
-  transformStockData as transformAlphaVantageStockData, 
+  transformStockData as transformAlphaVantageStockData,
   transformForexData as transformAlphaVantageForexData,
-  transformCryptoData as transformAlphaVantageCryptoData 
-} from "@/utils/api/alphaVantage";
+  transformCryptoData as transformAlphaVantageCryptoData,
+} from '@/utils/api/alphaVantage';
 
-import { type Asset } from "../types";
+import { type Asset } from '../types';
 
 // Define proper types for Alpha Vantage responses
 interface AlphaVantageResponse {
@@ -18,17 +17,20 @@ interface AlphaVantageResponse {
   [key: string]: unknown;
 }
 
-export async function fetchAlphaVantageData(marketTypes: string[], symbols: Record<string, string[]>): Promise<Asset[]> {
-  console.log('Fetching data from Alpha Vantage');
+export async function fetchAlphaVantageData(
+  marketTypes: string[],
+  symbols: Record<string, string[]>
+): Promise<Asset[]> {
+  console.warn('Fetching data from Alpha Vantage');
   const marketData: Asset[] = [];
-  
+
   try {
     // Fetch data for each symbol based on market type
     for (const marketType of marketTypes) {
       if (marketType === 'Stock') {
         for (const symbol of symbols[marketType]) {
           try {
-            const data = await getAlphaVantageStockQuote(symbol) as AlphaVantageResponse;
+            const data = (await getAlphaVantageStockQuote(symbol)) as AlphaVantageResponse;
             if (data && !data.error && data['Global Quote']) {
               const transformedData = transformAlphaVantageStockData(data);
               if (transformedData && isValidAsset(transformedData)) {
@@ -39,12 +41,14 @@ export async function fetchAlphaVantageData(marketTypes: string[], symbols: Reco
             console.warn(`Failed to fetch stock data for ${symbol}:`, error);
           }
         }
-      } 
-      else if (marketType === 'Forex') {
+      } else if (marketType === 'Forex') {
         for (const pair of symbols[marketType]) {
           try {
             const [fromCurrency, toCurrency] = pair.split('/');
-            const data = await getAlphaVantageForexRate(fromCurrency, toCurrency) as AlphaVantageResponse;
+            const data = (await getAlphaVantageForexRate(
+              fromCurrency,
+              toCurrency
+            )) as AlphaVantageResponse;
             if (data && !data.error) {
               const transformedData = transformAlphaVantageForexData(data);
               if (transformedData && isValidAsset(transformedData)) {
@@ -55,11 +59,10 @@ export async function fetchAlphaVantageData(marketTypes: string[], symbols: Reco
             console.warn(`Failed to fetch forex data for ${pair}:`, error);
           }
         }
-      }
-      else if (marketType === 'Crypto') {
+      } else if (marketType === 'Crypto') {
         for (const symbol of symbols[marketType]) {
           try {
-            const data = await getAlphaVantageCryptoQuote(symbol) as AlphaVantageResponse;
+            const data = (await getAlphaVantageCryptoQuote(symbol)) as AlphaVantageResponse;
             if (data && !data.error) {
               const transformedData = transformAlphaVantageCryptoData(data);
               if (transformedData && isValidAsset(transformedData)) {
@@ -72,7 +75,7 @@ export async function fetchAlphaVantageData(marketTypes: string[], symbols: Reco
         }
       }
     }
-    
+
     return marketData;
   } catch (error) {
     console.error('Alpha Vantage error:', error);
@@ -81,12 +84,14 @@ export async function fetchAlphaVantageData(marketTypes: string[], symbols: Reco
 }
 
 // Helper function to validate if an object is a valid Asset
-function isValidAsset(obj: any): obj is Asset {
-  return obj && 
+function isValidAsset(obj: unknown): obj is Asset {
+  return (
+    obj &&
     typeof obj.symbol === 'string' &&
     typeof obj.name === 'string' &&
     typeof obj.price === 'number' &&
     typeof obj.change_percentage === 'number' &&
     typeof obj.market_type === 'string' &&
-    typeof obj.volume === 'string';
+    typeof obj.volume === 'string'
+  );
 }

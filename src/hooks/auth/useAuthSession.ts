@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { type Session, type User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
-import { initAuthListeners } from "@/utils/auth";
+import { useState, useEffect } from 'react';
+import { type Session, type User } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import { initAuthListeners } from '@/utils/auth';
 
 /**
  * Initialize Supabase auth session and return current state
@@ -13,16 +13,19 @@ const initializeSession = async (
   setInitialized: (initialized: boolean) => void
 ) => {
   try {
-    const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-    
+    const {
+      data: { session: initialSession },
+      error,
+    } = await supabase.auth.getSession();
+
     if (error) {
       throw error;
     }
-    
+
     setSession(initialSession);
     setUser(initialSession?.user ?? null);
-  } catch (error) {
-    console.error("Error getting session:", error);
+  } catch {
+    // Removed: console.error('Error getting session:', error);
   } finally {
     setLoading(false);
     // Mark initialization as complete after getting initial session
@@ -49,11 +52,11 @@ export const useAuthSession = () => {
         if (!initialized && !newSession) {
           return;
         }
-        
+
         const newUser = newSession?.user ?? null;
         setSession(newSession);
         setUser(newUser);
-        
+
         // Set loading to false once we've processed this event
         setLoading(false);
       }
@@ -66,7 +69,7 @@ export const useAuthSession = () => {
 
     // Clean up subscription on unmount
     return () => {
-      subscription.unsubscribe();
+      if (subscription) subscription.unsubscribe();
     };
   }, [initialized]);
 
@@ -74,6 +77,6 @@ export const useAuthSession = () => {
     session,
     user,
     loading,
-    initialized
+    initialized,
   };
 };

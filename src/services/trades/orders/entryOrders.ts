@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { type TradeResult, type EntryOrderParams } from '../types';
 
@@ -7,8 +6,6 @@ import { type TradeResult, type EntryOrderParams } from '../types';
  */
 export async function placeEntryOrder(params: EntryOrderParams): Promise<TradeResult> {
   try {
-    console.log('Placing entry order:', params);
-    
     const { data, error } = await supabase.functions.invoke('execute-trade', {
       body: {
         assetSymbol: params.symbol,
@@ -20,33 +17,29 @@ export async function placeEntryOrder(params: EntryOrderParams): Promise<TradeRe
         orderType: 'entry',
         stopLoss: params.stopLoss,
         takeProfit: params.takeProfit,
-        expirationDate: params.expiration
-      }
+        expirationDate: params.expiration,
+      },
     });
-    
+
     if (error) {
-      console.error('Error placing entry order:', error);
       return {
         success: false,
         message: error.message || 'Failed to place entry order',
-        status: 'failed'
+        status: 'failed',
       };
     }
-    
-    console.log('Entry order placed successfully:', data);
-    
+
     return {
       success: true,
       tradeId: data.tradeId,
       message: data.message || 'Entry order placed successfully',
-      status: 'pending'
+      status: 'pending',
     };
   } catch (error) {
-    console.error('Exception placing entry order:', error);
     return {
       success: false,
       message: error instanceof Error ? error.message : 'Unknown error occurred',
-      status: 'failed'
+      status: 'failed',
     };
   }
 }

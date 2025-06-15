@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/auth";
 import { KYCService } from "@/services/kyc/kycService";
-import { KYCDocument, KYCStatus, DocumentUploadData } from "@/services/kyc/types";
+import { type DocumentUploadData } from "@/services/kyc/types";
 import { useToast } from "@/hooks/use-toast";
 
 export const useKYC = () => {

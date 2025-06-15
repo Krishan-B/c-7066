@@ -10,56 +10,50 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const [marginLevelStatus, setMarginLevelStatus] = useState<string>('safe');
   const { user } = useAuth();
-  
-  const {
-    data: portfolioData,
-    isLoading,
-    error,
-    refetch
-  } = usePortfolioAPI(timeframe);
+
+  const { data: portfolioData, isLoading, error, refetch } = usePortfolioAPI(timeframe);
 
   // Set up real-time subscription to portfolio changes
   useEffect(() => {
     if (!user) return;
-    
+
     // Subscribe to portfolio changes
     const portfolioChannel = supabase
       .channel('portfolio_updates')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
           table: 'user_portfolio',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${user.id}`,
         },
-        payload => {
-          console.log('Portfolio update received:', payload);
+        (_payload) => {
           refetch();
         }
       )
-      .subscribe(status => {
-        console.log('Portfolio subscription status:', status);
+      .subscribe((status) => {
         setIsSubscribed(status === 'SUBSCRIBED');
-        
+
         if (status === 'SUBSCRIBED') {
           toast.success('Real-time portfolio updates activated');
         } else if (status === 'CHANNEL_ERROR') {
           toast.error('Error subscribing to real-time portfolio updates');
         }
       });
-    
+
     // Subscribe to trades changes that affect portfolio
     const tradesChannel = supabase
       .channel('trades_updates')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
           table: 'user_trades',
-          filter: `user_id=eq.${user.id}`
+          filter: `user_id=eq.${user.id}`,
         },
-        payload => {
-          console.log('Trade update received:', payload);
+        (payload) => {
           // Only refetch on meaningful status changes
           if (payload.new && typeof payload.new === 'object' && 'status' in payload.new) {
             const newStatus = payload.new.status;
@@ -70,19 +64,19 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
         }
       )
       .subscribe();
-    
+
     // Subscribe to account changes that affect portfolio metrics
     const accountChannel = supabase
       .channel('account_updates')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
           table: 'user_account',
-          filter: `id=eq.${user.id}`
+          filter: `id=eq.${user.id}`,
         },
-        payload => {
-          console.log('Account update received:', payload);
+        (payload) => {
           if (payload.new && typeof payload.new === 'object') {
             // Check if payload has the properties we need
             const newData = payload.new as Record<string, unknown>;
@@ -93,7 +87,7 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
               typeof newData.used_margin === 'number'
             ) {
               // Check margin level and update status
-              const marginLevel = newData.equity / (newData.used_margin || 1) * 100;
+              const marginLevel = (newData.equity / (newData.used_margin || 1)) * 100;
               const newRiskLevel = getRiskLevel(marginLevel);
               if (newRiskLevel !== marginLevelStatus) {
                 setMarginLevelStatus(newRiskLevel);
@@ -104,7 +98,7 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
                   toast.error('Margin call alert: add funds to avoid liquidation');
                 } else if (newRiskLevel === 'critical') {
                   toast.error('Critical alert: positions at risk of immediate liquidation', {
-                    duration: 10000
+                    duration: 10000,
                   });
                 }
               }
@@ -114,7 +108,7 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
         }
       )
       .subscribe();
-    
+
     // Cleanup subscription on unmount
     return () => {
       supabase.removeChannel(portfolioChannel);
@@ -128,7 +122,7 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
     refetch();
     toast.info('Refreshing portfolio data...');
   }, [refetch]);
-  
+
   return {
     portfolioData,
     timeframe,
@@ -137,6 +131,6 @@ export function useRealTimePortfolio(initialTimeframe: string = '1m') {
     error,
     isSubscribed,
     refreshPortfolio,
-    marginLevelStatus
+    marginLevelStatus,
   };
 }

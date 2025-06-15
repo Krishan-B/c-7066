@@ -1,6 +1,11 @@
 {
   "files": [],
-  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }, { "path": "./tests/tsconfig.json" }],
+  "include": ["src", "vite.config.ts"],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tests/tsconfig.json" }
+  ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

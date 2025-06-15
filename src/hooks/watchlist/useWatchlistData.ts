@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from '@/hooks/use-toast';
 import { type Asset } from '@/hooks/market/types';
 import { useQuery } from '@tanstack/react-query';
-import { usePolygonWebSocket } from "@/hooks/market/usePolygonWebSocket";
+import { usePolygonWebSocket } from '@/hooks/market/usePolygonWebSocket';
 import { fetchWatchlistData } from './fetchWatchlistData';
 import { type UseWatchlistDataReturn } from './types';
 
@@ -12,46 +11,45 @@ export const useWatchlistData = (): UseWatchlistDataReturn => {
   const [watchlist, setWatchlist] = useState<Asset[]>([]);
 
   // Use React Query for data fetching and caching
-  const { data: initialWatchlist = [], isLoading, error, refetch } = useQuery({
-    queryKey: ["watchlist-data"],
+  const {
+    data: initialWatchlist = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['watchlist-data'],
     queryFn: () => fetchWatchlistData(),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
-  
+
   // Extract symbols for WebSocket subscription
-  const symbols = watchlist.map(asset => asset.symbol);
-  
+  const symbols = watchlist.map((asset) => asset.symbol);
+
   // Initialize WebSocket connection for real-time updates
-  const { 
-    isConnected, 
-    lastUpdate,
-    connect,
-    subscribe,
-    error: wsError 
-  } = usePolygonWebSocket({ 
+  const { isConnected, lastUpdate, subscribe } = usePolygonWebSocket({
     symbols,
-    autoConnect: true
+    autoConnect: true,
   });
-  
+
   // Update watchlist with initial data
   useEffect(() => {
     if (initialWatchlist && initialWatchlist.length > 0) {
       setWatchlist(initialWatchlist);
     }
   }, [initialWatchlist]);
-  
+
   // Handle real-time updates
   useEffect(() => {
     if (lastUpdate) {
-      setWatchlist(prevWatchlist => {
-        return prevWatchlist.map(item => {
+      setWatchlist((prevWatchlist) => {
+        return prevWatchlist.map((item) => {
           if (item.symbol === lastUpdate.symbol) {
             return {
               ...item,
               price: lastUpdate.price,
               change_percentage: lastUpdate.change_percentage,
               volume: lastUpdate.volume,
-              last_updated: new Date().toISOString()
+              last_updated: new Date().toISOString(),
             };
           }
           return item;
@@ -59,7 +57,7 @@ export const useWatchlistData = (): UseWatchlistDataReturn => {
       });
     }
   }, [lastUpdate]);
-  
+
   // Update WebSocket subscriptions when symbols change
   useEffect(() => {
     if (isConnected && symbols.length > 0) {
@@ -70,23 +68,23 @@ export const useWatchlistData = (): UseWatchlistDataReturn => {
   // Handle refresh data
   const handleRefreshData = async () => {
     toast({
-      title: "Refreshing market data",
-      description: "Fetching the latest market data...",
+      title: 'Refreshing market data',
+      description: 'Fetching the latest market data...',
     });
-    
+
     try {
       await refetch();
-      
+
       toast({
-        title: "Data refreshed",
-        description: "Market data has been updated successfully.",
+        title: 'Data refreshed',
+        description: 'Market data has been updated successfully.',
       });
     } catch (error) {
-      console.error("Error refreshing data:", error);
+      console.error('Error refreshing data:', error);
       toast({
-        title: "Error",
-        description: "Failed to refresh market data. Please try again later.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to refresh market data. Please try again later.',
+        variant: 'destructive',
       });
     }
   };
@@ -96,6 +94,6 @@ export const useWatchlistData = (): UseWatchlistDataReturn => {
     isLoading,
     error,
     realtimeEnabled: isConnected,
-    handleRefreshData
+    handleRefreshData,
   };
 };

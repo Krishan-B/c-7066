@@ -1,24 +1,23 @@
-
-import { Shield, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useKYC } from "@/hooks/kyc/useKYC";
-import { useAuth } from "@/hooks/auth";
-import DocumentUpload from "@/components/kyc/DocumentUpload";
-import DocumentsList from "@/components/kyc/DocumentsList";
-import KYCStatusCard from "@/components/kyc/KYCStatusCard";
-import { DocumentUploadData } from "@/services/kyc/types";
+import { Shield, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useKYC } from '@/hooks/kyc/useKYC';
+import { useAuth } from '@/hooks/auth';
+import DocumentUpload from '@/components/kyc/DocumentUpload';
+import DocumentsList from '@/components/kyc/DocumentsList';
+import KYCStatusCard from '@/components/kyc/KYCStatusCard';
+import type { DocumentUploadData } from '@/services/kyc/types';
 
 const KYCPage = () => {
   const { user } = useAuth();
-  const { 
-    kycStatus, 
-    documents, 
-    isLoading, 
-    error, 
-    uploadDocument, 
-    deleteDocument, 
-    isUploading, 
-    isDeleting 
+  const {
+    kycStatus,
+    documents,
+    isLoading,
+    error,
+    uploadDocument,
+    deleteDocument,
+    isUploading,
+    isDeleting,
   } = useKYC();
 
   const handleUpload = (file: File, documentType: DocumentUploadData['document_type']) => {
@@ -31,9 +30,7 @@ const KYCPage = () => {
         <div className="max-w-md mx-auto">
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Please sign in to access KYC verification.
-            </AlertDescription>
+            <AlertDescription>Please sign in to access KYC verification.</AlertDescription>
           </Alert>
         </div>
       </div>
@@ -79,20 +76,13 @@ const KYCPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <DocumentUpload 
-            onUpload={handleUpload}
-            isUploading={isUploading}
-          />
-          
-          <DocumentsList 
-            documents={documents}
-            onDelete={deleteDocument}
-            isDeleting={isDeleting}
-          />
+          <DocumentUpload onUpload={handleUpload} isUploading={isUploading} />
+
+          <DocumentsList documents={documents} onDelete={deleteDocument} isDeleting={isDeleting} />
         </div>
-        
+
         <div className="lg:col-span-1">
-          <KYCStatusCard status={kycStatus} />
+          <KYCStatusCard status={kycStatus ?? null} />
         </div>
       </div>
 
@@ -100,8 +90,8 @@ const KYCPage = () => {
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Important:</strong> Ensure all documents are clear, well-lit, and show all four corners. 
-            Documents in foreign languages may require certified translations.
+            <strong>Important:</strong> Ensure all documents are clear, well-lit, and show all four
+            corners. Documents in foreign languages may require certified translations.
           </AlertDescription>
         </Alert>
       </div>

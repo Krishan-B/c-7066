@@ -1,6 +1,7 @@
 <!--
-1. For new code in this modern React/TypeScript Vite project, prefer Vitest as the test runner. It is faster, works better with modern tooling, and has a similar syntax to Jest.
-2. For legacy or existing tests that already use Jest, continue to use Jest until those files are migrated.
+1. For new code in this modern React/TypeScript Vite project, use Vitest as the test runner. It is fast, works well with modern tooling, and has a similar syntax to Jest.
+
+2. All tests should be migrated to Vitest. Jest is no longer used in this project.
 3. Always focus on one specific, actionable task at a time. Use only the immediate context (the open file, function, or explicit user comment) to generate code or test suggestions. Ignore unrelated action plan steps or project-wide goals unless explicitly asked.
 -->
 

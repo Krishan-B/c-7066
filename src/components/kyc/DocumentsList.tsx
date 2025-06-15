@@ -1,12 +1,21 @@
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { FileText, Trash2, Download, Clock, CheckCircle, XCircle } from "lucide-react";
-import { KYCDocument } from "@/services/kyc/types";
-import { KYCService } from "@/services/kyc/kycService";
-import { useToast } from "@/hooks/use-toast";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { FileText, Trash2, Download, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { type KYCDocument } from '@/services/kyc/types';
+import { KYCService } from '@/services/kyc/kycService';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface DocumentsListProps {
   documents: KYCDocument[];
@@ -21,11 +30,11 @@ const DocumentsList = ({ documents, onDelete, isDeleting }: DocumentsListProps) 
     try {
       const url = await KYCService.getDocumentUrl(document.document_url);
       window.open(url, '_blank');
-    } catch (error) {
+    } catch {
       toast({
-        title: "Download failed",
-        description: "Unable to download the document. Please try again.",
-        variant: "destructive",
+        title: 'Download failed',
+        description: 'Unable to download the document. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -58,7 +67,7 @@ const DocumentsList = ({ documents, onDelete, isDeleting }: DocumentsListProps) 
     passport: 'Passport',
     id_card: 'National ID Card',
     drivers_license: "Driver's License",
-    proof_of_address: 'Proof of Address'
+    proof_of_address: 'Proof of Address',
   };
 
   const formatFileSize = (bytes: number) => {
@@ -95,7 +104,10 @@ const DocumentsList = ({ documents, onDelete, isDeleting }: DocumentsListProps) 
       <CardContent>
         <div className="space-y-4">
           {documents.map((document) => (
-            <div key={document.id} className="flex items-center justify-between p-4 border rounded-lg">
+            <div
+              key={document.id}
+              className="flex items-center justify-between p-4 border rounded-lg"
+            >
               <div className="flex items-center space-x-4">
                 <FileText className="h-8 w-8 text-muted-foreground" />
                 <div>
@@ -103,9 +115,7 @@ const DocumentsList = ({ documents, onDelete, isDeleting }: DocumentsListProps) 
                     <h4 className="font-medium">{documentTypeLabels[document.document_type]}</h4>
                     <div className="flex items-center space-x-1">
                       {getStatusIcon(document.status)}
-                      <Badge variant={getStatusVariant(document.status)}>
-                        {document.status}
-                      </Badge>
+                      <Badge variant={getStatusVariant(document.status)}>{document.status}</Badge>
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -115,29 +125,19 @@ const DocumentsList = ({ documents, onDelete, isDeleting }: DocumentsListProps) 
                     Uploaded {new Date(document.uploaded_at).toLocaleDateString()}
                   </p>
                   {document.status === 'rejected' && document.rejection_reason && (
-                    <p className="text-xs text-red-600 mt-1">
-                      Reason: {document.rejection_reason}
-                    </p>
+                    <p className="text-xs text-red-600 mt-1">Reason: {document.rejection_reason}</p>
                   )}
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDownload(document)}
-                >
+                <Button variant="outline" size="sm" onClick={() => handleDownload(document)}>
                   <Download className="h-4 w-4" />
                 </Button>
-                
+
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={isDeleting}
-                    >
+                    <Button variant="outline" size="sm" disabled={isDeleting}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </AlertDialogTrigger>

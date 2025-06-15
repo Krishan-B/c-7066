@@ -1,11 +1,8 @@
-import * as React from "react";
-import { useAuth } from "@/hooks/auth";
-import AccountMetricsHeader from "./AccountMetricsHeader";
+import * as React from 'react';
+import { useAuth } from '@/hooks/auth';
+import AccountMetricsHeader from './AccountMetricsHeader';
 
-const MainNav = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLElement>) => {
+const MainNav = (_props: React.HTMLAttributes<HTMLElement>) => {
   const { user } = useAuth();
 
   // Don't display metrics if user is not logged in

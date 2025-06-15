@@ -1,15 +1,14 @@
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardHeader } from "@/components/ui/card";
-import { Wallet } from "lucide-react";
-import DepositForm from "@/components/wallet/DepositForm";
-import WithdrawForm from "@/components/wallet/WithdrawForm";
-import BalanceInfo from "@/components/wallet/BalanceInfo";
-import TransactionHistory from "@/components/wallet/TransactionHistory";
-// Add this if it's needed but missing
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardHeader } from '@/components/ui/card';
+import { Wallet } from 'lucide-react';
+import DepositForm from '@/components/wallet/DepositForm';
+import WithdrawForm from '@/components/wallet/WithdrawForm';
+import BalanceInfo from '@/components/wallet/BalanceInfo';
+import TransactionHistory from '@/components/wallet/TransactionHistory';
 
 const WalletPage = () => {
-  const [activeTab, setActiveTab] = useState("deposit");
+  const [_activeTab, setActiveTab] = useState('deposit');
 
   return (
     <div className="min-h-screen p-4 md:p-6">
@@ -30,21 +29,21 @@ const WalletPage = () => {
                   <TabsTrigger value="deposit">Deposit</TabsTrigger>
                   <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
                 </TabsList>
-              
+
                 <TabsContent value="deposit" className="mt-4 space-y-4">
                   <DepositForm />
                 </TabsContent>
-                
+
                 <TabsContent value="withdraw" className="mt-4 space-y-4">
                   <WithdrawForm />
                 </TabsContent>
               </Tabs>
             </CardHeader>
           </Card>
-          
+
           <BalanceInfo />
         </div>
-        
+
         <div className="mt-2">
           <TransactionHistory />
         </div>

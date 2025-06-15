@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
-import { KYCStatus } from "@/services/kyc/types";
+import { type KYCStatus } from "@/services/kyc/types";
 
 interface KYCStatusCardProps {
   status: KYCStatus | null;

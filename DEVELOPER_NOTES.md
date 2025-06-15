@@ -15,7 +15,7 @@
 
 ## Testing
 
-- Use Vitest for new tests; keep legacy Jest tests until migrated.
+- Use Vitest for all tests. Legacy Jest tests have been removed or migrated.
 - Maintain high test coverage and run tests in CI.
 
 ## Linting & Formatting

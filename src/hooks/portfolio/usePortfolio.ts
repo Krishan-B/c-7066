@@ -1,4 +1,3 @@
-
 import { usePortfolioState } from './usePortfolioState';
 import { usePortfolioActions } from './usePortfolioActions';
 import { usePortfolioAPI } from './usePortfolioAPI';
@@ -15,15 +14,10 @@ export const usePortfolio = () => {
     setTimeframe,
     setActiveTrades,
     setLoading,
-    setError
+    setError,
   } = usePortfolioState();
 
-  const {
-    data,
-    isLoading: apiLoading,
-    error: apiError,
-    refetch
-  } = usePortfolioAPI(timeframe);
+  const { data, isLoading: apiLoading, error: apiError, refetch } = usePortfolioAPI(timeframe);
 
   const actions = usePortfolioActions();
 
@@ -31,14 +25,26 @@ export const usePortfolio = () => {
   useEffect(() => {
     if (data) {
       setPortfolioData(data);
-      setActiveTrades((data?.assets?.length || 0) + (data?.closedPositions?.filter(p => !p.closeDate)?.length || 0));
+      setActiveTrades(
+        (data?.assets?.length || 0) +
+          (data?.closedPositions?.filter((p) => !p.closeDate)?.length || 0)
+      );
     }
     setLoading(apiLoading);
-    
+
     if (apiError && !stateError) {
       setError(apiError instanceof Error ? apiError : new Error(String(apiError)));
     }
-  }, [data, apiLoading, apiError]);
+  }, [
+    data,
+    apiLoading,
+    apiError,
+    setActiveTrades,
+    setError,
+    setLoading,
+    setPortfolioData,
+    stateError,
+  ]);
 
   return {
     portfolioData,

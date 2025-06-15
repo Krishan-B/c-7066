@@ -1,6 +1,5 @@
-
-import { supabase } from "@/integrations/supabase/client";
-import { type Asset } from "../types";
+import { supabase } from '@/integrations/supabase/client';
+import { type Asset } from '../types';
 
 /**
  * Check if there's recent market data in the database
@@ -12,14 +11,14 @@ export async function getRecentMarketData(marketTypes: string[]): Promise<Asset[
       .select('*')
       .in('market_type', marketTypes)
       .gt('last_updated', new Date(Date.now() - 60000 * 15).toISOString()); // Data not older than 15 minutes
-    
+
     // If we have enough recent data (at least 3 items per market type), use it
     const minExpectedItems = marketTypes.length * 3;
     if (!fetchError && existingData && existingData.length >= minExpectedItems) {
-      console.log(`Using cached data for ${marketTypes.join(', ')}`, existingData);
+      console.warn(`Using cached data for ${marketTypes.join(', ')}`, existingData);
       return existingData as Asset[];
     }
-    
+
     return null;
   } catch (error) {
     console.error('Error fetching recent market data:', error);
@@ -33,9 +32,8 @@ export async function getRecentMarketData(marketTypes: string[]): Promise<Asset[
 export async function updateMarketDataInDatabase(assets: Asset[]): Promise<void> {
   try {
     for (const asset of assets) {
-      await supabase
-        .from('market_data')
-        .upsert({
+      await supabase.from('market_data').upsert(
+        {
           symbol: asset.symbol,
           name: asset.name,
           price: asset.price,
@@ -44,9 +42,11 @@ export async function updateMarketDataInDatabase(assets: Asset[]): Promise<void>
           market_cap: asset.market_cap || 'N/A',
           market_type: asset.market_type,
           last_updated: new Date().toISOString(),
-        }, { onConflict: 'symbol' });
+        },
+        { onConflict: 'symbol' }
+      );
     }
-    console.log(`Updated ${assets.length} assets in the database`);
+    console.warn(`Updated ${assets.length} assets in the database`);
   } catch (error) {
     console.error('Error updating market data in database:', error);
   }

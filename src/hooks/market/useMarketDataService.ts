@@ -1,9 +1,8 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 import { type Asset } from './types';
-import { toast } from "@/hooks/use-toast";
+import { toast } from '@/hooks/use-toast';
 
 interface UseMarketDataServiceOptions {
   initialMarketType?: string;
@@ -20,43 +19,51 @@ export function useMarketDataService(options: UseMarketDataServiceOptions = {}) 
     initialMarketType = 'Crypto',
     initialSymbols = ['BTCUSD', 'ETHUSD'],
     refetchInterval = 60000, // 1 minute default
-    enabled = true
+    enabled = true,
   } = options;
 
   const [marketType, setMarketType] = useState<string>(initialMarketType);
   const [symbols, setSymbols] = useState<string[]>(initialSymbols);
 
-  const fetchMarketData = async ({ marketType, symbols }: { marketType: string, symbols: string[] }): Promise<Asset[]> => {
+  const fetchMarketData = async ({
+    marketType,
+    symbols,
+  }: {
+    marketType: string;
+    symbols: string[];
+  }): Promise<Asset[]> => {
     try {
-      console.log(`Fetching ${marketType} data for symbols: ${symbols.join(', ')}`);
-      
+      console.warn(`Fetching ${marketType} data for symbols: ${symbols.join(', ')}`);
+
       const { data, error } = await supabase.functions.invoke('market-data-service', {
-        body: { marketType, symbols }
+        body: { marketType, symbols },
       });
-      
+
       if (error) {
         console.error('Error fetching market data:', error);
         toast({
           title: 'Error',
           description: `Failed to fetch market data: ${error.message}`,
-          variant: 'destructive'
+          variant: 'destructive',
         });
         throw error;
       }
-      
+
       if (!data?.data || !Array.isArray(data.data)) {
         console.error('Invalid market data response:', data);
         return [];
       }
-      
-      console.log(`Successfully fetched ${data.data.length} market data items from ${data.source}`);
+
+      console.warn(
+        `Successfully fetched ${data.data.length} market data items from ${data.source}`
+      );
       return data.data as Asset[];
     } catch (error) {
       console.error('Error in market data service:', error);
       toast({
         title: 'Error',
         description: 'Failed to fetch market data from the service',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return [];
     }
@@ -74,7 +81,7 @@ export function useMarketDataService(options: UseMarketDataServiceOptions = {}) 
   const refreshData = async (forceRefresh = true) => {
     try {
       const { data: freshData, error } = await supabase.functions.invoke('market-data-service', {
-        body: { marketType, symbols, forceRefresh }
+        body: { marketType, symbols, forceRefresh },
       });
 
       if (error) {
@@ -96,7 +103,7 @@ export function useMarketDataService(options: UseMarketDataServiceOptions = {}) 
       toast({
         title: 'Error',
         description: 'Failed to refresh market data',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return null;
     }
@@ -116,6 +123,6 @@ export function useMarketDataService(options: UseMarketDataServiceOptions = {}) 
     refreshData,
     updateParams,
     marketType,
-    symbols
+    symbols,
   };
 }

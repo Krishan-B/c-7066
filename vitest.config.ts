@@ -14,7 +14,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     include: ['**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/build/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/build/**', 'tests/e2e/**'],
 
     // Enhanced test execution settings
     testTimeout: 30000,

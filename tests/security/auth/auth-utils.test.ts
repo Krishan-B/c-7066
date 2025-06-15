@@ -51,6 +51,28 @@ Object.defineProperty(window, 'location', {
 // Add this at the top of the file, after imports
 const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
+// Utility: create a valid AuthError mock
+function mockAuthError(message: string = 'Auth error'): any {
+  return {
+    name: 'AuthError',
+    message,
+    code: 'mock_code',
+    status: 400,
+    __isAuthError: true,
+    stack: '',
+  };
+}
+
+// Utility: create a valid User mock
+const mockUser: User = {
+  id: 'mock-user-id',
+  email: 'mock@example.com',
+  app_metadata: {},
+  aud: 'authenticated',
+  created_at: new Date().toISOString(),
+  user_metadata: {},
+};
+
 describe('Authentication Utils Security Tests', () => {
   // Mock storage objects for testing
   const mockLocalStorage = new Map<string, string>();
@@ -284,7 +306,7 @@ describe('Authentication Utils Security Tests', () => {
       }
     });
     it('should handle authentication errors securely', async () => {
-      const authError = new Error('Invalid credentials');
+      const authError = mockAuthError('Invalid credentials');
       vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
         data: { session: null, user: null },
         error: authError,
@@ -365,7 +387,7 @@ describe('Authentication Utils Security Tests', () => {
       });
     });
     it('should handle registration errors securely', async () => {
-      const registrationError = new Error('Email already exists');
+      const registrationError = mockAuthError('Email already exists');
       vi.mocked(supabase.auth.signUp).mockResolvedValue({
         data: { user: null, session: null },
         error: registrationError,
@@ -447,9 +469,9 @@ describe('Authentication Utils Security Tests', () => {
       expect(mockLocalStorage.has('supabase.auth.token')).toBe(false);
     });
     it('should handle refresh failures securely', async () => {
-      const refreshError = new Error('Invalid refresh token');
+      const refreshError = mockAuthError('Invalid refresh token');
       vi.mocked(supabase.auth.refreshSession).mockResolvedValue({
-        data: { session: null },
+        data: { session: null, user: null },
         error: refreshError,
       });
       const result = await refreshSession();
@@ -461,7 +483,7 @@ describe('Authentication Utils Security Tests', () => {
   describe('updateProfile Security Tests', () => {
     it('should sanitize profile data before update', async () => {
       vi.mocked(supabase.auth.updateUser).mockResolvedValue({
-        data: { user: null },
+        data: { user: mockUser },
         error: null,
       });
       const maliciousProfile = {
@@ -476,9 +498,9 @@ describe('Authentication Utils Security Tests', () => {
       });
     });
     it('should handle profile update errors securely', async () => {
-      const updateError = new Error('Profile update failed');
+      const updateError = mockAuthError('Profile update failed');
       vi.mocked(supabase.auth.updateUser).mockResolvedValue({
-        data: { user: null },
+        data: { user: mockUser },
         error: updateError,
       });
       const result = await updateProfile({ firstName: 'John' });
@@ -515,7 +537,7 @@ describe('Authentication Utils Security Tests', () => {
       });
     });
     it('should handle password reset errors securely', async () => {
-      const resetError = new Error('Email not found');
+      const resetError = mockAuthError('Email not found');
       vi.mocked(supabase.auth.resetPasswordForEmail).mockResolvedValue({
         data: {},
         error: resetError,
@@ -709,7 +731,7 @@ describe('Authentication Utils Security Tests', () => {
       });
 
       const listener = initAuthListeners(vi.fn());
-      listener.unsubscribe();
+      if (listener) listener.unsubscribe();
 
       expect(mockUnsubscribe).toHaveBeenCalled();
     });
@@ -739,7 +761,7 @@ describe('Authentication Utils Security Tests', () => {
     it('should handle error states consistently across functions', async () => {
       const networkError = new Error('Network error');
       vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
-        data: { session: null },
+        data: { session: null, user: null },
         error: networkError,
       });
       const signInResult = await signInWithEmail('test@example.com', 'password');

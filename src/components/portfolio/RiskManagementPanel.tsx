@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -16,12 +15,12 @@ interface RiskManagementPanelProps {
 
 const RiskManagementPanel = ({
   marginLevel,
-  equity,
+  equity: _equity, // Prefixing with underscore to indicate unused variable
   usedMargin,
-  marginStatus
+  marginStatus,
 }: RiskManagementPanelProps) => {
   const { text, color } = formatRiskLevel(marginStatus);
-  
+
   // Calculate progress color based on margin level
   const getProgressColor = () => {
     if (marginLevel > 100) return 'bg-green-500';
@@ -29,11 +28,11 @@ const RiskManagementPanel = ({
     if (marginLevel > 20) return 'bg-red-500';
     return 'bg-red-700';
   };
-  
+
   // Calculate liquidation threshold
   const liquidationThreshold = usedMargin * 0.2; // 20% of used margin
   const marginCallThreshold = usedMargin * 0.5; // 50% of used margin
-  
+
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -43,9 +42,7 @@ const RiskManagementPanel = ({
             {text}
           </Badge>
         </div>
-        <CardDescription>
-          Monitor your account risk levels and margin status
-        </CardDescription>
+        <CardDescription>Monitor your account risk levels and margin status</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Margin Level Indicator */}
@@ -64,7 +61,7 @@ const RiskManagementPanel = ({
             indicatorClassName={getProgressColor()}
           />
         </div>
-        
+
         {/* Risk Thresholds */}
         <div className="grid grid-cols-2 gap-3">
           <TooltipProvider>
@@ -83,7 +80,7 @@ const RiskManagementPanel = ({
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          
+
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -101,7 +98,7 @@ const RiskManagementPanel = ({
             </Tooltip>
           </TooltipProvider>
         </div>
-        
+
         {/* Risk Status */}
         <div className="flex items-start gap-2 p-3 rounded-md bg-muted text-sm">
           <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -109,11 +106,18 @@ const RiskManagementPanel = ({
             {marginStatus === RISK_LEVELS.SAFE ? (
               <p>Your account has a healthy margin level. You have room to open more positions.</p>
             ) : marginStatus === RISK_LEVELS.WARNING ? (
-              <p className="text-amber-500">Your margin level is getting low. Consider adding funds or closing some positions.</p>
+              <p className="text-amber-500">
+                Your margin level is getting low. Consider adding funds or closing some positions.
+              </p>
             ) : marginStatus === RISK_LEVELS.DANGER ? (
-              <p className="text-destructive">Margin call warning! Add funds or reduce positions to avoid liquidation.</p>
+              <p className="text-destructive">
+                Margin call warning! Add funds or reduce positions to avoid liquidation.
+              </p>
             ) : (
-              <p className="text-destructive font-bold">Liquidation risk! Your positions may be automatically closed if equity decreases further.</p>
+              <p className="text-destructive font-bold">
+                Liquidation risk! Your positions may be automatically closed if equity decreases
+                further.
+              </p>
             )}
           </div>
         </div>

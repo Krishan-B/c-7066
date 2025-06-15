@@ -1,4 +1,9 @@
-import { type ConnectionStatus, type WebSocketEvent, type WebSocketEventListener, type SubscriptionRequest } from './types';
+import {
+  type ConnectionStatus,
+  type WebSocketEvent,
+  type WebSocketEventListener,
+  type SubscriptionRequest,
+} from './types';
 import type { Asset } from '@/hooks/market/types';
 import { getAssetNameBySymbol } from '@/utils/assetNameLookup';
 
@@ -14,7 +19,7 @@ const eventListeners: Record<WebSocketEvent, WebSocketEventListener[]> = {
   message: [],
   open: [],
   close: [],
-  error: []
+  error: [],
 };
 
 // Subscription queue for requests made before connection is established
@@ -24,13 +29,15 @@ const subscriptionQueue: SubscriptionRequest[] = [];
  * Initialize Polygon WebSocket
  */
 export function initPolygonWebSocket(): boolean {
-  if (webSocket && (webSocket.readyState === WebSocket.OPEN || webSocket.readyState === WebSocket.CONNECTING)) {
+  if (
+    webSocket &&
+    (webSocket.readyState === WebSocket.OPEN || webSocket.readyState === WebSocket.CONNECTING)
+  ) {
     return true;
   }
 
   try {
     if (!apiKey) {
-      console.error('Polygon API key not set');
       return false;
     }
 
@@ -39,9 +46,8 @@ export function initPolygonWebSocket(): boolean {
     connectionStatus = 'connecting';
 
     webSocket.onopen = (event) => {
-      console.log('Polygon WebSocket connected');
       connectionStatus = 'open';
-      
+
       // Authenticate
       if (webSocket && webSocket.readyState === WebSocket.OPEN) {
         webSocket.send(JSON.stringify({ action: 'auth', params: apiKey }));
@@ -56,34 +62,32 @@ export function initPolygonWebSocket(): boolean {
           webSocket.send(JSON.stringify(request));
         }
       }
-      
+
       // Call event listeners
-      eventListeners.open.forEach(listener => listener(event));
+      eventListeners.open.forEach((listener) => listener(event));
     };
 
     webSocket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        eventListeners.message.forEach(listener => listener(data));
-      } catch (error) {
-        console.error('Error parsing message:', error);
+        eventListeners.message.forEach((listener) => listener(data));
+      } catch {
+        // Error handling for message parsing
       }
     };
 
     webSocket.onclose = (event) => {
-      console.log('Polygon WebSocket closed');
       connectionStatus = 'closed';
-      eventListeners.close.forEach(listener => listener(event));
+      eventListeners.close.forEach((listener) => listener(event));
     };
 
     webSocket.onerror = (event) => {
-      console.error('Polygon WebSocket error:', event);
-      eventListeners.error.forEach(listener => listener(event));
+      eventListeners.error.forEach((listener) => listener(event));
     };
 
     return true;
-  } catch (error) {
-    console.error('Error initializing Polygon WebSocket:', error);
+  } catch {
+    // Error handling for WebSocket initialization
     return false;
   }
 }
@@ -118,22 +122,21 @@ export function setPolygonWebSocketApiKey(key: string): void {
  */
 export function subscribeToSymbols(symbols: string[]): boolean {
   if (!symbols.length) return false;
-  
+
   const channelPrefix = 'Q.'; // Quote prefix for real-time quotes
-  const channels = symbols.map(symbol => `${channelPrefix}${symbol}`).join(',');
-  
+  const channels = symbols.map((symbol) => `${channelPrefix}${symbol}`).join(',');
+
   const request: SubscriptionRequest = {
     action: 'subscribe',
-    params: channels
+    params: channels,
   };
-  
+
   if (webSocket && connectionStatus === 'open') {
     webSocket.send(JSON.stringify(request));
     return true;
   } else {
     // Queue subscription for when connection is established
     subscriptionQueue.push(request);
-    console.log('WebSocket not connected yet, queueing subscription', symbols);
     return false;
   }
 }
@@ -143,18 +146,20 @@ export function subscribeToSymbols(symbols: string[]): boolean {
  */
 export function unsubscribeFromSymbols(symbols: string[]): boolean {
   if (!symbols.length) return false;
-  
+
   const channelPrefix = 'Q.'; // Quote prefix
-  const channels = symbols.map(symbol => `${channelPrefix}${symbol}`).join(',');
-  
+  const channels = symbols.map((symbol) => `${channelPrefix}${symbol}`).join(',');
+
   if (webSocket && connectionStatus === 'open') {
-    webSocket.send(JSON.stringify({
-      action: 'unsubscribe',
-      params: channels
-    }));
+    webSocket.send(
+      JSON.stringify({
+        action: 'unsubscribe',
+        params: channels,
+      })
+    );
     return true;
   }
-  
+
   return false;
 }
 
@@ -207,8 +212,11 @@ export function processPolygonMessage(data: unknown): Asset | null {
   return null;
 }
 
-function inferMarketTypeFromSymbol(symbol: string): 'Crypto' | 'Stock' | 'Forex' | 'Index' | 'Commodities' {
-  if (symbol.includes('-USD') || symbol === symbol.toUpperCase() && symbol.length > 3) return 'Crypto';
+function inferMarketTypeFromSymbol(
+  symbol: string
+): 'Crypto' | 'Stock' | 'Forex' | 'Index' | 'Commodities' {
+  if (symbol.includes('-USD') || (symbol === symbol.toUpperCase() && symbol.length > 3))
+    return 'Crypto';
   if (symbol.includes('/')) return 'Forex';
   if (symbol.startsWith('US') && symbol.length > 4) return 'Index';
   if (symbol === 'XAUUSD' || symbol === 'XAGUSD') return 'Commodities';
@@ -222,5 +230,5 @@ export const polygonWebSocket = {
   },
   get status() {
     return connectionStatus;
-  }
+  },
 };

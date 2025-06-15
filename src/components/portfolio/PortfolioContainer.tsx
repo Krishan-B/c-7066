@@ -1,53 +1,52 @@
-
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/auth";
-import { useNavigate } from "react-router-dom";
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { toast } from "sonner";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/auth';
+import { useNavigate } from 'react-router-dom';
+import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 // Import components
-import PortfolioSummary from "@/components/portfolio/PortfolioSummary";
-import PortfolioMetricsCards from "@/components/portfolio/PortfolioMetricsCards";
-import PerformanceChart from "@/components/portfolio/PerformanceChart";
-import PositionsSection from "@/components/portfolio/PositionsSection";
-import PortfolioSideSection from "@/components/portfolio/PortfolioSideSection";
-import RiskManagementPanel from "@/components/portfolio/RiskManagementPanel";
+import PortfolioSummary from '@/components/portfolio/PortfolioSummary';
+import PortfolioMetricsCards from '@/components/portfolio/PortfolioMetricsCards';
+import PerformanceChart from '@/components/portfolio/PerformanceChart';
+import PositionsSection from '@/components/portfolio/PositionsSection';
+import PortfolioSideSection from '@/components/portfolio/PortfolioSideSection';
+import RiskManagementPanel from '@/components/portfolio/RiskManagementPanel';
 
 // Import the real-time portfolio hook
-import { useRealTimePortfolio } from "@/hooks/portfolio/useRealTimePortfolio";
-import { type Asset } from "@/types/account";
+import { useRealTimePortfolio } from '@/hooks/portfolio/useRealTimePortfolio';
+import { type Asset } from '@/types/account';
 
 const PortfolioContainer = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
-  const { 
+
+  const {
     portfolioData,
-    timeframe, 
-    setTimeframe, 
+    timeframe,
+    setTimeframe,
     isLoading,
     error,
     isSubscribed,
     refreshPortfolio,
-    marginLevelStatus
+    marginLevelStatus,
   } = useRealTimePortfolio();
 
   // Portfolio action handlers
   const handleExportReport = () => {
-    toast.success("Portfolio report exported successfully");
-    console.log("Exporting portfolio report");
+    toast.success('Portfolio report exported successfully');
+    console.warn('Exporting portfolio report');
   };
 
   const handleTaxEvents = () => {
-    toast.info("Tax events feature will be available soon");
-    console.log("Showing tax events");
+    toast.info('Tax events feature will be available soon');
+    console.warn('Showing tax events');
   };
 
   const handleViewDetails = (asset: Asset) => {
-    console.log("Viewing details for asset:", asset);
+    console.warn('Viewing details for asset:', asset);
     // Implementation for viewing asset details
     // This could navigate to an asset detail page in the future
     toast.info(`Viewing details for ${asset.name}`);
@@ -61,10 +60,8 @@ const PortfolioContainer = () => {
             <CardTitle className="text-center">Sign In Required</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
-            <p className="text-center mb-4">
-              You need to sign in to view your portfolio
-            </p>
-            <Button onClick={() => navigate("/auth")}>Sign In</Button>
+            <p className="text-center mb-4">You need to sign in to view your portfolio</p>
+            <Button onClick={() => navigate('/auth')}>Sign In</Button>
           </CardContent>
         </Card>
       </div>
@@ -94,9 +91,9 @@ const PortfolioContainer = () => {
             <Alert variant="destructive" className="mb-4">
               <AlertTitle>Data Retrieval Error</AlertTitle>
               <AlertDescription>
-                {error instanceof Error 
-                  ? error.message 
-                  : "There was a problem loading your portfolio data. Please try again."}
+                {error instanceof Error
+                  ? error.message
+                  : 'There was a problem loading your portfolio data. Please try again.'}
               </AlertDescription>
             </Alert>
             <p className="text-center mb-6 text-muted-foreground">
@@ -107,7 +104,9 @@ const PortfolioContainer = () => {
                 <RefreshCw className="h-4 w-4" />
                 Retry
               </Button>
-              <Button variant="outline" onClick={() => navigate("/")}>Go to Dashboard</Button>
+              <Button variant="outline" onClick={() => navigate('/')}>
+                Go to Dashboard
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -126,11 +125,11 @@ const PortfolioContainer = () => {
     assets = [],
     closedPositions = [],
     allocationData = [],
-    performanceData = []
+    performanceData = [],
   } = portfolioData;
 
   // Calculate margin level for risk management
-  const equity = cashBalance + totalValue; 
+  const equity = cashBalance + totalValue;
   const marginLevel = lockedFunds > 0 ? (equity / lockedFunds) * 100 : 100;
 
   return (
@@ -141,15 +140,19 @@ const PortfolioContainer = () => {
             <h1 className="text-2xl font-bold mb-2">Portfolio</h1>
             <p className="text-muted-foreground">
               Track and manage your investments
-              {isSubscribed && <span className="ml-2 text-xs text-green-500 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">Live updates</span>}
+              {isSubscribed && (
+                <span className="ml-2 text-xs text-green-500 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
+                  Live updates
+                </span>
+              )}
             </p>
           </div>
-          
+
           <div className="flex mt-4 md:mt-0">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={refreshPortfolio} 
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={refreshPortfolio}
               className="flex items-center gap-2"
             >
               <RefreshCw className="h-4 w-4" />
@@ -159,7 +162,7 @@ const PortfolioContainer = () => {
         </div>
 
         {/* Portfolio Summary */}
-        <PortfolioSummary 
+        <PortfolioSummary
           balance={cashBalance}
           equity={equity}
           activeTrades={assets.length}
@@ -169,7 +172,7 @@ const PortfolioContainer = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div className="lg:col-span-2">
-            <PortfolioMetricsCards 
+            <PortfolioMetricsCards
               totalValue={totalValue}
               cashBalance={cashBalance}
               lockedFunds={lockedFunds}
@@ -179,9 +182,9 @@ const PortfolioContainer = () => {
               onTaxEvents={handleTaxEvents}
             />
           </div>
-          
+
           <div className="lg:col-span-1">
-            <RiskManagementPanel 
+            <RiskManagementPanel
               marginLevel={marginLevel}
               equity={equity}
               usedMargin={lockedFunds}
@@ -191,7 +194,7 @@ const PortfolioContainer = () => {
         </div>
 
         {/* Performance Chart */}
-        <PerformanceChart 
+        <PerformanceChart
           data={performanceData || []}
           timeframe={timeframe}
           onTimeframeChange={setTimeframe}
@@ -199,14 +202,14 @@ const PortfolioContainer = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3">
-            <PositionsSection 
-              assets={assets} 
+            <PositionsSection
+              assets={assets}
               closedPositions={closedPositions || []}
               onViewDetails={handleViewDetails}
             />
           </div>
-          
-          <PortfolioSideSection 
+
+          <PortfolioSideSection
             totalValue={totalValue}
             dayChange={dayChange || 0}
             dayChangePercentage={dayChangePercentage || 0}

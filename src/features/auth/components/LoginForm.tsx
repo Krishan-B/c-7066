@@ -39,7 +39,7 @@ const LoginForm = () => {
       const { session, error } = await signInWithEmail(email, password);
 
       if (error) {
-        setFormError(error.message);
+        setFormError(isErrorWithMessage(error) ? error.message : 'Login failed');
         return;
       }
 
@@ -47,8 +47,8 @@ const LoginForm = () => {
         // Navigate programmatically instead of forcing a page reload
         navigate('/dashboard', { replace: true });
       }
-    } catch (error: Error | unknown) {
-      setFormError('Unexpected error occurred');
+    } catch (error: unknown) {
+      setFormError(isErrorWithMessage(error) ? error.message : 'Unexpected error occurred');
       console.error('Login error:', error);
     } finally {
       setLoading(false);
@@ -87,5 +87,14 @@ const LoginForm = () => {
     </>
   );
 };
+
+function isErrorWithMessage(error: unknown): error is { message: string } {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message: unknown }).message === 'string'
+  );
+}
 
 export default LoginForm;
