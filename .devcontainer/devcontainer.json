@@ -13,7 +13,7 @@
   "runArgs": [
     "--memory=6g",
     "--memory-swap=8g",
-    "--cpus=3.5",
+    "--cpus=2",
     "--oom-kill-disable",
     "--security-opt=no-new-privileges:true"
   ],
