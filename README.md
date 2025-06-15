@@ -109,3 +109,35 @@ cross-cutting concerns. Key providers and hooks include:
 - Always wrap your app (or relevant subtree) with the required provider.
 - Use the provided custom hooks to access context values and actions.
 - See `DEVELOPER_NOTES.md` for more on context/provider and hook best practices.
+
+## Formatting & Linting Workflow
+
+- Code style is enforced using ESLint and Prettier.
+- Recommended VS Code extensions: ESLint, Prettier, Error Lens, Tailwind CSS IntelliSense (see .vscode/extensions.json).
+- Code is automatically linted and formatted on commit using Husky and lint-staged.
+- To manually lint and fix code, run:
+  - `npm run lint` to check for lint errors
+  - `npm run lint:fix` to auto-fix issues
+  - `npm run lint:ci` for CI environments
+- To format markdown and JSON files, use Prettier or run `npm run lint:fix`.
+- TypeScript type checks can be run with `npm run typecheck`.
+
+## Scripts
+
+| Script             | Description                                         |
+| ------------------ | --------------------------------------------------- |
+| `dev`              | Start the Vite development server                   |
+| `build`            | Build the app for production                        |
+| `build:dev`        | Build the app in development mode                   |
+| `lint`             | Run ESLint with cache                               |
+| `lint:fix`         | Run ESLint and auto-fix issues                      |
+| `lint:clear-cache` | Remove ESLint cache file                            |
+| `lint:ci`          | Run ESLint in CI mode (no cache, compact output)    |
+| `preview`          | Preview the production build                        |
+| `test`             | Run all tests with Vitest                           |
+| `test:coverage`    | Run tests and generate coverage report with Vitest  |
+| `test:ci`          | Run tests in CI mode with basic reporter            |
+| `test:security:ci` | Run security-related tests with coverage in CI      |
+| `ci:check`         | Run lint, typecheck, test, and build in CI          |
+| `prepare`          | Install Husky git hooks                             |
+| `typecheck`        | Run TypeScript type checking without emitting files |

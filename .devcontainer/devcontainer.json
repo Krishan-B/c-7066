@@ -82,7 +82,9 @@
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
         "github.copilot",
-        "vitest.explorer"
+        "vitest.explorer",
+        "GitHub.copilot-chat",
+        "github.vscode-github-actions"
       ]
     }
   },
