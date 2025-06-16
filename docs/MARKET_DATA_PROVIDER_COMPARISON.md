@@ -1,10 +1,10 @@
-# Market Data Provider Comparison for Trade-Pro
+# Market Data Provider Comparison
 
 Date: June 16, 2025
 
 This document compares Yahoo Finance, Alpha Vantage, Finnhub, and Polygon.io as potential market data providers for the Trade-Pro project, considering the specific asset list provided.
 
-## Asset List for Trade-Pro:
+## Asset List for Trade-Pro
 
 - **Stocks (30 major US equities):** AAPL, AMZN, GOOGL, TSLA, MSFT, META, NVDA, JPM, BAC, WFC, PFE, JNJ, PG, KO, PEP, WMT, XOM, CVX, INTC, AMD, NFLX, ADBE, CRM, V, MA, HD, BA, CAT, MCD, MRK.
 - **Indices (15 global indices):** US500 (S&P 500), US100 (NASDAQ 100), US30 (Dow Jones), UK100 (FTSE 100), DE40 (DAX 40), JP225 (Nikkei 225), FR40 (CAC 40), EU50 (EURO STOXX 50), HK50 (Hang Seng), AUS200 (ASX 200), CN50 (Shanghai Composite), ES35 (IBEX 35), IT40 (FTSE MIB), CA60 (S&P/TSX Composite), KS200 (KOSPI).
@@ -178,30 +178,30 @@ If the project **can allocate a budget for market data (Recommended for PRD alig
 
 **Recommendation Scenarios:**
 
-1.  **Scenario 1: Strict Adherence to PRD's current mention of "Yahoo Finance" AND No Budget:**
+1. **Scenario 1: Strict Adherence to PRD's current mention of "Yahoo Finance" AND No Budget:**
 
-    - **Proceed with Yahoo Finance (`yfinance`).**
-    - **Acknowledge and document all risks and limitations** (unreliability, delays, rate limits, no L2, limited intraday history).
-    - **Implement extensive mitigation strategies:** robust caching, request throttling, error handling, clear user disclaimers regarding data quality and delays.
-    - **Propose PRD amendments:** Modify sections on real-time expectations, L2 data (mark as not feasible or for future), and explicitly state reliance on unofficial API with its risks.
+   - **Proceed with Yahoo Finance (`yfinance`).**
+   - **Acknowledge and document all risks and limitations** (unreliability, delays, rate limits, no L2, limited intraday history).
+   - **Implement extensive mitigation strategies:** robust caching, request throttling, error handling, clear user disclaimers regarding data quality and delays.
+   - **Propose PRD amendments:** Modify sections on real-time expectations, L2 data (mark as not feasible or for future), and explicitly state reliance on unofficial API with its risks.
 
-2.  **Scenario 2: Flexibility to Choose Best Provider (Budget Dependent) to better meet PRD spirit:**
-    - **If Budget is Available & Commodities are Key:** A **paid Finnhub.io plan** seems like a strong contender, _provided_ its commodity coverage for your list is adequate and L2 data (if needed) is confirmed to be available and within budget. It offers a good balance of real-time capabilities and asset coverage.
-    - **If Budget is Available & Highest Quality US Stock/Forex/Crypto Data + L2 is Key (and Commodities can be sourced elsewhere or de-prioritized):** A **paid Polygon.io plan** is superior for these core assets. The commodity gap is the main issue here.
-    - **If Sticking to Free/Very Low Cost but want an Official API:** **Alpha Vantage (Free Tier)** could be used, but its rate limits are very challenging. It would require even more aggressive caching and severely limit "real-time" feel. Commodity coverage is also a question mark.
+2. **Scenario 2: Flexibility to Choose Best Provider (Budget Dependent) to better meet PRD spirit:**
+   - **If Budget is Available & Commodities are Key:** A **paid Finnhub.io plan** seems like a strong contender, _provided_ its commodity coverage for your list is adequate and L2 data (if needed) is confirmed to be available and within budget. It offers a good balance of real-time capabilities and asset coverage.
+   - **If Budget is Available & Highest Quality US Stock/Forex/Crypto Data + L2 is Key (and Commodities can be sourced elsewhere or de-prioritized):** A **paid Polygon.io plan** is superior for these core assets. The commodity gap is the main issue here.
+   - **If Sticking to Free/Very Low Cost but want an Official API:** **Alpha Vantage (Free Tier)** could be used, but its rate limits are very challenging. It would require even more aggressive caching and severely limit "real-time" feel. Commodity coverage is also a question mark.
 
 **Given the PRD's aim for a comprehensive, multi-asset platform, and the issues with free tiers, a paid solution is highly recommended for long-term viability and user experience.**
 
 **Immediate Next Step Recommendation:**
 
-1.  **Clarify PRD Ambiguities:** Get definitive answers on the criticality of:
-    - True real-time (vs. delayed) data.
-    - Level 2 Market Depth data.
-    - The 15 listed commodities (are they all hard requirements?)
-2.  **Determine Budget:** Understand if there is any budget for market data.
-3.  **Based on #1 and #2, select the primary data provider.**
-    - If the decision is to stick with Yahoo Finance (as per current PRD text), then the migration plan should focus on replacing existing sources with `yfinance` and building extensive mitigation layers.
-    - If a paid provider is chosen, the migration plan will involve integrating that provider's API.
+1. **Clarify PRD Ambiguities:** Get definitive answers on the criticality of:
+   - True real-time (vs. delayed) data.
+   - Level 2 Market Depth data.
+   - The 15 listed commodities (are they all hard requirements?)
+2. **Determine Budget:** Understand if there is any budget for market data.
+3. **Based on #1 and #2, select the primary data provider.**
+   - If the decision is to stick with Yahoo Finance (as per current PRD text), then the migration plan should focus on replacing existing sources with `yfinance` and building extensive mitigation layers.
+   - If a paid provider is chosen, the migration plan will involve integrating that provider's API.
 
 For the purpose of this exercise, if we assume the PRD is updated to allow a more reliable provider and a modest budget exists, **Finnhub.io (paid tier)** appears to offer the best balance across your listed asset classes, assuming its commodity coverage is verified as sufficient and L2 data is available if critical. It avoids the extreme cost of Polygon.io while being more reliable than Yahoo Finance or free tiers of Alpha Vantage.
 

@@ -1,3 +1,9 @@
+/**
+ * Vite configuration for Trade-Pro
+ * - Handles build and dev server settings
+ * - See PROJECT_CLEANUP_AND_CONFIG.md for details
+ */
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';

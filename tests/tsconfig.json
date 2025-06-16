@@ -1,26 +1,19 @@
 {
-  "extends": "../tsconfig.app.json",
   "compilerOptions": {
     "baseUrl": "..",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["vitest/globals", "@testing-library/jest-dom", "node"],
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "allowImportingTsExtensions": false,
-    "noEmit": false,
-    "jsx": "react-jsx",
-    "strict": true, // Enable strict mode
-    "skipLibCheck": true,
     "composite": true,
-    "declaration": true,
-    "declarationDir": "../types/tests",
-    "rootDir": ".",
-    "tsBuildInfoFile": "../tsconfig.tests.tsbuildinfo"
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "allowJs": true,
+    "strict": true,
+    "jsx": "react-jsx",
+    "types": ["vitest/globals", "@testing-library/jest-dom", "node"]
   },
-  "include": ["./**/*.ts", "./**/*.tsx"],
-  "exclude": ["../node_modules", "../dist", "../build"]
+  "include": ["../tests/**/*", "../**/*.test.ts", "../**/*.test.tsx", "../**/*.spec.ts", "../**/*.spec.tsx"],
+  "exclude": ["../node_modules", "../scripts/**/*"]
 }

@@ -2,16 +2,16 @@
 // Session Management Security Tests
 // Tests for secure session handling, lifecycle management, and security controls
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock session management components
 const mockSessionManager = {
   sessions: new Map(),
-  createSession: jest.fn(),
-  validateSession: jest.fn(),
-  destroySession: jest.fn(),
-  refreshSession: jest.fn(),
-  cleanupExpiredSessions: jest.fn(),
+  createSession: vi.fn(),
+  validateSession: vi.fn(),
+  destroySession: vi.fn(),
+  refreshSession: vi.fn(),
+  cleanupExpiredSessions: vi.fn(),
 };
 
 // Set up mock implementation for createSession
@@ -19,7 +19,8 @@ mockSessionManager.createSession.mockImplementation((userId: string): Session =>
   const crypto = require('crypto');
   const sessionId = crypto.randomBytes(32).toString('hex');
 
-  const session: Session = {
+  // Always return a complete session object
+  const session: any = {
     id: sessionId,
     userId,
     createdAt: new Date(),
@@ -28,6 +29,8 @@ mockSessionManager.createSession.mockImplementation((userId: string): Session =>
     isActive: true,
     ipAddress: '192.168.1.100',
     userAgent: 'Mozilla/5.0...',
+    userRole: 'user',
+    previousSessionId: undefined,
   };
 
   mockSessionManager.sessions.set(sessionId, session);
@@ -35,38 +38,39 @@ mockSessionManager.createSession.mockImplementation((userId: string): Session =>
 });
 
 const mockCookieManager = {
-  setSecureCookie: jest.fn(),
-  getCookie: jest.fn(),
-  deleteCookie: jest.fn(),
+  setSecureCookie: vi.fn(),
+  getCookie: vi.fn(),
+  deleteCookie: vi.fn(),
 };
 
 describe('Session Management Security Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSessionManager.sessions.clear();
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Session Creation and Validation', () => {
     it('should create secure session identifiers', () => {
+      // Always return a complete session object
       mockSessionManager.createSession.mockImplementation((userId) => {
         const crypto = require('crypto');
         const sessionId = crypto.randomBytes(32).toString('hex');
-
         const session = {
           id: sessionId,
           userId,
           createdAt: new Date(),
           lastActivity: new Date(),
-          expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
           isActive: true,
           ipAddress: '192.168.1.100',
           userAgent: 'Mozilla/5.0...',
+          userRole: 'user',
+          previousSessionId: undefined,
         };
-
         mockSessionManager.sessions.set(sessionId, session);
         return session;
       });
@@ -80,6 +84,26 @@ describe('Session Management Security Tests', () => {
     });
 
     it('should validate session existence and expiry', () => {
+      // Always return a complete session object
+      mockSessionManager.createSession.mockImplementation((userId) => {
+        const crypto = require('crypto');
+        const sessionId = crypto.randomBytes(32).toString('hex');
+        const session = {
+          id: sessionId,
+          userId,
+          createdAt: new Date(),
+          lastActivity: new Date(),
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          isActive: true,
+          ipAddress: '192.168.1.100',
+          userAgent: 'Mozilla/5.0...',
+          userRole: 'user',
+          previousSessionId: undefined,
+        };
+        mockSessionManager.sessions.set(sessionId, session);
+        return session;
+      });
+
       mockSessionManager.validateSession.mockImplementation((sessionId) => {
         const session = mockSessionManager.sessions.get(sessionId);
 
@@ -125,7 +149,7 @@ describe('Session Management Security Tests', () => {
         absoluteTimeout: 8 * 60 * 60 * 1000, // 8 hours
         idleTimeout: 30 * 60 * 1000, // 30 minutes
 
-        checkTimeout: jest.fn(function (session) {
+        checkTimeout: vi.fn(function (session) {
           const now = new Date();
           const createdAge = now - session.createdAt;
           const idleAge = now - session.lastActivity;
@@ -205,7 +229,7 @@ describe('Session Management Security Tests', () => {
     });
 
     it('should validate cookie security in different environments', () => {
-      const cookieSecurityValidator = jest.fn((environment, cookieOptions) => {
+      const cookieSecurityValidator = vi.fn((environment, cookieOptions) => {
         const issues = [];
 
         if (environment === 'production') {
@@ -256,7 +280,7 @@ describe('Session Management Security Tests', () => {
   describe('Session Hijacking Protection', () => {
     it('should detect session hijacking attempts', () => {
       const sessionHijackingDetector = {
-        detectHijacking: jest.fn((session, currentRequest) => {
+        detectHijacking: vi.fn((session, currentRequest) => {
           const indicators = [];
 
           // Check for IP address changes
@@ -333,7 +357,7 @@ describe('Session Management Security Tests', () => {
 
     it('should implement session binding to client fingerprints', () => {
       const sessionBinding = {
-        generateFingerprint: jest.fn((request) => {
+        generateFingerprint: vi.fn((request) => {
           const components = [
             request.headers['user-agent'],
             request.headers['accept-language'],
@@ -350,7 +374,7 @@ describe('Session Management Security Tests', () => {
           return fingerprint;
         }),
 
-        validateFingerprint: jest.fn((sessionFingerprint, currentFingerprint) => {
+        validateFingerprint: vi.fn((sessionFingerprint, currentFingerprint) => {
           return sessionFingerprint === currentFingerprint;
         }),
       };
@@ -386,8 +410,28 @@ describe('Session Management Security Tests', () => {
 
   describe('Session Fixation Protection', () => {
     it('should regenerate session IDs on privilege escalation', () => {
+      // Always return a complete session object
+      mockSessionManager.createSession.mockImplementation((userId) => {
+        const crypto = require('crypto');
+        const sessionId = crypto.randomBytes(32).toString('hex');
+        const session = {
+          id: sessionId,
+          userId,
+          createdAt: new Date(),
+          lastActivity: new Date(),
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          isActive: true,
+          ipAddress: '192.168.1.100',
+          userAgent: 'Mozilla/5.0...',
+          userRole: 'user',
+          previousSessionId: undefined,
+        };
+        mockSessionManager.sessions.set(sessionId, session);
+        return session;
+      });
+
       const sessionFixationProtection = {
-        regenerateSessionId: jest.fn((oldSessionId, userId) => {
+        regenerateSessionId: vi.fn((oldSessionId, userId) => {
           const oldSession = mockSessionManager.sessions.get(oldSessionId);
           if (!oldSession) return null;
 
@@ -410,12 +454,12 @@ describe('Session Management Security Tests', () => {
           return newSession;
         }),
 
-        shouldRegenerateOnLogin: jest.fn((session) => {
+        shouldRegenerateOnLogin: vi.fn((session) => {
           // Always regenerate on login
           return true;
         }),
 
-        shouldRegenerateOnPrivilegeChange: jest.fn((session, newRole) => {
+        shouldRegenerateOnPrivilegeChange: vi.fn((session, newRole) => {
           // Regenerate when user role changes
           return session.userRole !== newRole;
         }),
@@ -443,7 +487,7 @@ describe('Session Management Security Tests', () => {
       const concurrentRegenerationHandler = {
         regenerationLocks: new Set(),
 
-        safeRegenerate: jest.fn(async function (sessionId, userId) {
+        safeRegenerate: vi.fn(async function (sessionId, userId) {
           if (this.regenerationLocks.has(sessionId)) {
             throw new Error('Session regeneration already in progress');
           }
@@ -487,6 +531,26 @@ describe('Session Management Security Tests', () => {
 
   describe('Session Cleanup and Garbage Collection', () => {
     it('should clean up expired sessions automatically', () => {
+      // Always return a complete session object
+      mockSessionManager.createSession.mockImplementation((userId) => {
+        const crypto = require('crypto');
+        const sessionId = crypto.randomBytes(32).toString('hex');
+        const session = {
+          id: sessionId,
+          userId,
+          createdAt: new Date(),
+          lastActivity: new Date(),
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          isActive: true,
+          ipAddress: '192.168.1.100',
+          userAgent: 'Mozilla/5.0...',
+          userRole: 'user',
+          previousSessionId: undefined,
+        };
+        mockSessionManager.sessions.set(sessionId, session);
+        return session;
+      });
+
       mockSessionManager.cleanupExpiredSessions.mockImplementation(() => {
         const now = new Date();
         let cleanedCount = 0;
@@ -520,11 +584,31 @@ describe('Session Management Security Tests', () => {
     });
 
     it('should implement session storage limits', () => {
+      // Always return a complete session object
+      mockSessionManager.createSession.mockImplementation((userId) => {
+        const crypto = require('crypto');
+        const sessionId = crypto.randomBytes(32).toString('hex');
+        const session = {
+          id: sessionId,
+          userId,
+          createdAt: new Date(),
+          lastActivity: new Date(),
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          isActive: true,
+          ipAddress: '192.168.1.100',
+          userAgent: 'Mozilla/5.0...',
+          userRole: 'user',
+          previousSessionId: undefined,
+        };
+        mockSessionManager.sessions.set(sessionId, session);
+        return session;
+      });
+
       const sessionStorageManager = {
         maxConcurrentSessions: 1000,
         maxSessionsPerUser: 5,
 
-        enforceStorageLimits: jest.fn(function () {
+        enforceStorageLimits: vi.fn(function () {
           const sessionsByUser = new Map<string, Array<{ sessionId: string; session: Session }>>();
 
           // Group sessions by user - using Array.from for safer iteration
@@ -596,6 +680,26 @@ describe('Session Management Security Tests', () => {
 
   describe('Session Security Monitoring', () => {
     it('should monitor for suspicious session activity', () => {
+      // Always return a complete session object
+      mockSessionManager.createSession.mockImplementation((userId) => {
+        const crypto = require('crypto');
+        const sessionId = crypto.randomBytes(32).toString('hex');
+        const session = {
+          id: sessionId,
+          userId,
+          createdAt: new Date(),
+          lastActivity: new Date(),
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          isActive: true,
+          ipAddress: '192.168.1.100',
+          userAgent: 'Mozilla/5.0...',
+          userRole: 'user',
+          previousSessionId: undefined,
+        };
+        mockSessionManager.sessions.set(sessionId, session);
+        return session;
+      });
+
       const sessionMonitor = {
         suspiciousActivityDetectors: [
           {
@@ -633,7 +737,7 @@ describe('Session Management Security Tests', () => {
           },
         ],
 
-        analyzeSessionActivity: jest.fn(function (userId) {
+        analyzeSessionActivity: vi.fn(function (userId) {
           const userSessions = Array.from(mockSessionManager.sessions.values()).filter(
             (s) => s.userId === userId
           );

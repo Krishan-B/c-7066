@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import React from 'react';
 
 interface StatCardProps {
-  asset: {
+  data: {
     symbol: string;
     name: string;
     price: number;
@@ -26,6 +26,7 @@ interface StatCardProps {
   isLoading: boolean;
 }
 
+// Format price for display
 const formatPrice = (price: number) => {
   if (price < 10) {
     return price.toFixed(4);
@@ -36,8 +37,8 @@ const formatPrice = (price: number) => {
   return price.toLocaleString(undefined, { maximumFractionDigits: 0 });
 };
 
-const StatCard = ({ asset, icon: Icon, iconColor, isLoading }: StatCardProps) => {
-  const isPositive = asset.change_percentage >= 0;
+const StatCard = ({ data, icon: Icon, iconColor, isLoading }: StatCardProps) => {
+  const isPositive = data.change_percentage >= 0;
 
   return (
     <Card className="hover:shadow-md transition-shadow duration-200 bg-card border-border">
@@ -49,16 +50,16 @@ const StatCard = ({ asset, icon: Icon, iconColor, isLoading }: StatCardProps) =>
             </div>
             <div>
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                {asset.symbol}
+                {data.symbol}
               </h3>
-              <p className="text-xs text-muted-foreground truncate max-w-[80px]">{asset.name}</p>
+              <p className="text-xs text-muted-foreground truncate max-w-[80px]">{data.name}</p>
             </div>
           </div>
           <Badge
-            variant={isPositive ? 'default' : 'destructive'}
-            className={`text-xs ${isPositive ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200'}`}
+            variant={data.market_type === 'Crypto' ? 'default' : 'secondary'}
+            className="text-xs"
           >
-            {asset.market_type}
+            {data.market_type}
           </Badge>
         </div>
 
@@ -70,7 +71,7 @@ const StatCard = ({ asset, icon: Icon, iconColor, isLoading }: StatCardProps) =>
             </>
           ) : (
             <>
-              <p className="text-lg font-bold text-foreground">${formatPrice(asset.price)}</p>
+              <p className="text-lg font-bold text-foreground">${formatPrice(data.price)}</p>
               <div
                 className={`flex items-center gap-1 text-sm ${
                   isPositive ? 'text-green-600' : 'text-red-500'
@@ -83,7 +84,7 @@ const StatCard = ({ asset, icon: Icon, iconColor, isLoading }: StatCardProps) =>
                 )}
                 <span className="font-medium">
                   {isPositive ? '+' : ''}
-                  {asset.change_percentage.toFixed(2)}%
+                  {data.change_percentage.toFixed(2)}%
                 </span>
               </div>
             </>
@@ -125,57 +126,57 @@ const MarketStats = () => {
   // If we don't have real data yet, use placeholder values
   const assets = [
     {
-      ...(btcAsset || {
+      data: btcAsset || {
         symbol: 'BTC/USD',
         name: 'Bitcoin',
         price: 67543,
         change_percentage: 2.4,
         market_type: 'Crypto',
-      }),
+      },
       icon: Bitcoin,
       iconColor: 'text-orange-500',
     },
     {
-      ...(ethAsset || {
+      data: ethAsset || {
         symbol: 'ETH/USD',
         name: 'Ethereum',
         price: 3211,
         change_percentage: -1.2,
         market_type: 'Crypto',
-      }),
+      },
       icon: Zap,
       iconColor: 'text-blue-500',
     },
     {
-      ...(spyAsset || {
+      data: spyAsset || {
         symbol: 'SPY',
         name: 'S&P 500',
         price: 5204,
         change_percentage: 0.4,
         market_type: 'Stock',
-      }),
+      },
       icon: BarChart3,
       iconColor: 'text-green-500',
     },
     {
-      ...(goldAsset || {
+      data: goldAsset || {
         symbol: 'GLD',
         name: 'Gold',
         price: 2326,
         change_percentage: 1.3,
         market_type: 'Commodities',
-      }),
+      },
       icon: TrendingUp,
       iconColor: 'text-yellow-500',
     },
     {
-      ...(eurUsdAsset || {
+      data: eurUsdAsset || {
         symbol: 'EUR/USD',
         name: 'EUR/USD',
         price: 1.0934,
         change_percentage: -0.1,
         market_type: 'Forex',
-      }),
+      },
       icon: DollarSign,
       iconColor: 'text-purple-500',
     },
@@ -196,8 +197,8 @@ const MarketStats = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {assets.map((asset, index) => (
           <StatCard
-            key={asset.symbol || index}
-            asset={asset}
+            key={asset.data.symbol || index}
+            data={asset.data}
             icon={asset.icon}
             iconColor={asset.iconColor}
             isLoading={isLoading}

@@ -1,58 +1,36 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": false,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": false,
-    "jsx": "react-jsx",
-    "tsBuildInfoFile": "./tsconfig.app.tsbuildinfo",
-
-    /* Type Checking - Optimized for Performance */
-    "strict": true, // Enable strict mode
-
-    /* Paths */
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
-    /* Additional settings - Performance Optimized */
-    "allowJs": true,
-    "esModuleInterop": true, // Good for compatibility
-    "incremental": true,
-    "preserveWatchOutput": true,
-    "assumeChangesOnlyAffectDirectDependencies": true,
-    "skipLibCheck": true, // Explicitly keep skipLibCheck for faster builds if needed
-    "forceConsistentCasingInFileNames": true, // Enforce consistent casing
+    "outDir": "dist",
     "composite": true,
-    "declaration": true,
-    "declarationDir": "./types/app",
-    "rootDir": "src"
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    /* Bundler mode */
+    "allowSyntheticDefaultImports": true,
+    /* Linting */
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
-  "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "coverage",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "tests/**/*",
-    "supabase/functions/**/*",
-    "**/.cache/**/*",
-    "**/tmp/**/*",
-    "**/temp/**/*",
-    "**/.vscode-test/**/*",
-    "**/.history/**/*"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "tests", "vite.config.ts", "vitest.config.ts", "**/*.test.ts", "**/*.spec.ts"]
 }

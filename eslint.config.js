@@ -1,3 +1,9 @@
+/**
+ * ESLint configuration for Trade-Pro
+ * - Enforces code style and best practices
+ * - See PROJECT_CLEANUP_AND_CONFIG.md for details
+ */
+
 // Performance-optimized ESLint configuration
 import js from '@eslint/js';
 import globals from 'globals';

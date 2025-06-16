@@ -4,15 +4,15 @@ Date: June 16, 2025
 
 This document outlines the investigation into the Yahoo Finance API (leveraging the `yfinance` library where applicable as a reference for capabilities) to assess its suitability for the Trade-Pro project as per the Product Requirements Document (PRD).
 
-## Investigation Priorities:
+## Investigation Priorities
 
-1.  **Available asset classes and depth of data for each.**
-2.  Historical data availability.
-3.  API rate limits and any associated costs.
-4.  Real-time data capabilities and update frequency.
-5.  Specific data points available beyond OHLCV.
-6.  Data quality and reliability.
-7.  Ease of integration (with `yfinance` as a potential tool).
+1. **Available asset classes and depth of data for each.**
+2. Historical data availability.
+3. API rate limits and any associated costs.
+4. Real-time data capabilities and update frequency.
+5. Specific data points available beyond OHLCV.
+6. Data quality and reliability.
+7. Ease of integration (with `yfinance` as a potential tool).
 
 ---
 
@@ -343,34 +343,34 @@ The `yfinance` library, through its `Ticker` object (e.g., `ticker = yf.Ticker("
 
 This investigation assessed the Yahoo Finance API (with `yfinance` as a primary interface) against Trade-Pro's PRD requirements. Key findings are:
 
-1.  **Asset Coverage (PRD Alignment: Partial to Good):**
+1. **Asset Coverage (PRD Alignment: Partial to Good):**
 
-    - **Strengths:** Good coverage for Stocks, Indices, Forex, Cryptocurrencies (majors), Commodities (futures), ETFs, and Mutual Funds.
-    - **Gaps/Concerns:** Does not provide direct CFD pricing (simulation needed). Depth for some niche assets may vary. Symbol conventions need careful mapping.
+   - **Strengths:** Good coverage for Stocks, Indices, Forex, Cryptocurrencies (majors), Commodities (futures), ETFs, and Mutual Funds.
+   - **Gaps/Concerns:** Does not provide direct CFD pricing (simulation needed). Depth for some niche assets may vary. Symbol conventions need careful mapping.
 
-2.  **Historical Data (PRD Alignment: Partial to Good):**
+2. **Historical Data (PRD Alignment: Partial to Good):**
 
-    - **Strengths:** Meets 5-year daily/weekly/monthly OHLCV requirement for most assets.
-    - **Gaps/Concerns:** Significant limitation in historical depth for _intraday_ data (e.g., 1-min data only for ~7-30 days). If PRD needs long-term intraday history, this is a major gap.
+   - **Strengths:** Meets 5-year daily/weekly/monthly OHLCV requirement for most assets.
+   - **Gaps/Concerns:** Significant limitation in historical depth for _intraday_ data (e.g., 1-min data only for ~7-30 days). If PRD needs long-term intraday history, this is a major gap.
 
-3.  **API Rate Limits & Costs (PRD Alignment: Poor - High Risk):**
+3. **API Rate Limits & Costs (PRD Alignment: Poor - High Risk):**
 
-    - **Strengths:** Free of charge.
-    - **Gaps/Concerns:** No official/published rate limits. Relies on unofficial API endpoints. Users report temporary IP bans (e.g., ~2000 requests/hour/IP, <5/sec are anecdotal). This is a **major reliability risk** for a production system, especially with up to 1000 concurrent users. Aggressive caching and request throttling are mandatory but may not be foolproof.
+   - **Strengths:** Free of charge.
+   - **Gaps/Concerns:** No official/published rate limits. Relies on unofficial API endpoints. Users report temporary IP bans (e.g., ~2000 requests/hour/IP, <5/sec are anecdotal). This is a **major reliability risk** for a production system, especially with up to 1000 concurrent users. Aggressive caching and request throttling are mandatory but may not be foolproof.
 
-4.  **Real-time Capabilities (PRD Alignment: Poor to Fair):**
+4. **Real-time Capabilities (PRD Alignment: Poor to Fair):**
 
-    - **Strengths:** Provides frequently updated snapshot data for many assets.
-    - **Gaps/Concerns:** Not true real-time streaming. Data is often delayed (15-20 mins for some exchanges, varies for others). "Real-time" in PRD will be near real-time/delayed. Polling frequency is limited by rate limits. User expectations must be managed.
+   - **Strengths:** Provides frequently updated snapshot data for many assets.
+   - **Gaps/Concerns:** Not true real-time streaming. Data is often delayed (15-20 mins for some exchanges, varies for others). "Real-time" in PRD will be near real-time/delayed. Polling frequency is limited by rate limits. User expectations must be managed.
 
-5.  **Specific Data Points (PRD Alignment: Good, with one key exception):**
+5. **Specific Data Points (PRD Alignment: Good, with one key exception):**
 
-    - **Strengths:** Rich data available (bid/ask, 52-week H/L, market cap, P/E, EPS, dividends, news, fundamentals for equities, etc.), aligning with most PRD needs.
-    - **Gaps/Concerns:** **No Level 2 (Market Depth) data.** This is a critical gap if the PRD's "Market Depth (L2)" feature is essential. Availability of all points varies by asset type.
+   - **Strengths:** Rich data available (bid/ask, 52-week H/L, market cap, P/E, EPS, dividends, news, fundamentals for equities, etc.), aligning with most PRD needs.
+   - **Gaps/Concerns:** **No Level 2 (Market Depth) data.** This is a critical gap if the PRD's "Market Depth (L2)" feature is essential. Availability of all points varies by asset type.
 
-6.  **Data Quality & Reliability (PRD Alignment: Fair - Medium to High Risk):**
-    - **Strengths:** Generally acceptable for simulation and retail use, especially end-of-day data.
-    - **Gaps/Concerns:** Occasional inaccuracies, gaps, or fundamental data discrepancies. **High reliability risk** due to `yfinance` depending on unofficial APIs/scraping, which can break when Yahoo changes its site. No SLAs. Clear disclaimers are essential.
+6. **Data Quality & Reliability (PRD Alignment: Fair - Medium to High Risk):**
+   - **Strengths:** Generally acceptable for simulation and retail use, especially end-of-day data.
+   - **Gaps/Concerns:** Occasional inaccuracies, gaps, or fundamental data discrepancies. **High reliability risk** due to `yfinance` depending on unofficial APIs/scraping, which can break when Yahoo changes its site. No SLAs. Clear disclaimers are essential.
 
 **Overall Suitability Assessment:**
 
@@ -395,100 +395,100 @@ This plan outlines the steps to migrate the Trade-Pro project's market data fetc
 - The PRD will be reviewed for potential amendments regarding real-time expectations, L2 data, and risk acknowledgment, but this initial migration proceeds with the current PRD text.
 - The backend is capable of running Python scripts or services (e.g., via Supabase Edge Functions if they support Python, or a separate Python backend service/microservice).
 
-**Phase 1: Setup and Initial Integration (1-2 Weeks)**
+### Phase 1: Setup and Initial Integration (1-2 Weeks)
 
-1.  **Environment Setup:**
+1. **Environment Setup:**
 
-    - **Action:** Ensure Python environment is set up in the backend development/deployment environment.
-    - **Action:** Add `yfinance` to the project's Python dependencies (e.g., `requirements.txt`).
-    - **Tooling:** `pip install yfinance`
+   - **Action:** Ensure Python environment is set up in the backend development/deployment environment.
+   - **Action:** Add `yfinance` to the project's Python dependencies (e.g., `requirements.txt`).
+   - **Tooling:** `pip install yfinance`
 
-2.  **Core Data Fetching Service Development:**
+2. **Core Data Fetching Service Development:**
 
-    - **Action:** Design and implement a centralized backend service/module (`MarketDataService_YFinance`) responsible for all interactions with `yfinance`.
-    - **Action:** This service will encapsulate `yfinance` calls and include basic error handling (try-except blocks for network issues, `yfinance` specific errors).
-    - **Key Functions to Implement initially:**
-      - `get_historical_data(symbol, start_date, end_date, interval)`: For OHLCV data.
-      - `get_current_quote(symbol)`: For latest price, bid, ask, volume, day's high/low, previous close.
-      - `get_instrument_info(symbol)`: For fetching fundamental data, company info, 52-week H/L, etc. (maps to `ticker.info`).
-      - `get_news(symbol)`: For fetching recent news articles.
+   - **Action:** Design and implement a centralized backend service/module (`MarketDataService_YFinance`) responsible for all interactions with `yfinance`.
+   - **Action:** This service will encapsulate `yfinance` calls and include basic error handling (try-except blocks for network issues, `yfinance` specific errors).
+   - **Key Functions to Implement initially:**
+     - `get_historical_data(symbol, start_date, end_date, interval)`: For OHLCV data.
+     - `get_current_quote(symbol)`: For latest price, bid, ask, volume, day's high/low, previous close.
+     - `get_instrument_info(symbol)`: For fetching fundamental data, company info, 52-week H/L, etc. (maps to `ticker.info`).
+     - `get_news(symbol)`: For fetching recent news articles.
 
-3.  **Symbol Mapping:**
+3. **Symbol Mapping:**
 
-    - **Action:** Create a robust mapping utility to convert Trade-Pro's internal asset symbols (including the provided CFD-style symbols for indices and commodities) to the ticker symbols recognized by Yahoo Finance (e.g., `US500` -> `^GSPC`, `XAU/USD` -> `GC=F` or `XAUUSD=X`).
-    - **Action:** Store these mappings in a configurable way (e.g., a JSON file or database table).
+   - **Action:** Create a robust mapping utility to convert Trade-Pro's internal asset symbols (including the provided CFD-style symbols for indices and commodities) to the ticker symbols recognized by Yahoo Finance (e.g., `US500` -> `^GSPC`, `XAU/USD` -> `GC=F` or `XAUUSD=X`).
+   - **Action:** Store these mappings in a configurable way (e.g., a JSON file or database table).
 
-4.  **Basic Caching Layer (In-Memory or Simple File-Based for now):**
+4. **Basic Caching Layer (In-Memory or Simple File-Based for now):**
 
-    - **Action:** Implement an initial, simple caching mechanism within `MarketDataService_YFinance` to store results of `yfinance` calls for a short duration (e.g., 1-5 minutes for quotes, longer for historical data or info that changes less frequently).
-    - **Rationale:** Immediate step to reduce redundant API calls even during development.
+   - **Action:** Implement an initial, simple caching mechanism within `MarketDataService_YFinance` to store results of `yfinance` calls for a short duration (e.g., 1-5 minutes for quotes, longer for historical data or info that changes less frequently).
+   - **Rationale:** Immediate step to reduce redundant API calls even during development.
 
-5.  **Replace Existing Data Hooks/Services (Identify and Prioritize):**
-    - **Action:** Identify all current code sections using Alpha Vantage, Finnhub, or Polygon.io (as mentioned in the original Gap Assessment - `useMarketData.ts` etc.).
-    - **Action:** Prioritize replacing data fetching for a few key areas first (e.g., displaying stock prices on a watchlist, showing a basic chart for a single stock) to use the new `MarketDataService_YFinance`.
+5. **Replace Existing Data Hooks/Services (Identify and Prioritize):**
+   - **Action:** Identify all current code sections using Alpha Vantage, Finnhub, or Polygon.io (as mentioned in the original Gap Assessment - `useMarketData.ts` etc.).
+   - **Action:** Prioritize replacing data fetching for a few key areas first (e.g., displaying stock prices on a watchlist, showing a basic chart for a single stock) to use the new `MarketDataService_YFinance`.
 
-**Phase 2: Comprehensive Data Integration & Advanced Mitigation (3-4 Weeks)**
+### Phase 2: Comprehensive Data Integration & Advanced Mitigation (3-4 Weeks)
 
-1.  **Full Asset Class Integration:**
+1. **Full Asset Class Integration:**
 
-    - **Action:** Systematically update all parts of the application (charts, portfolio valuation, trading interface, analytics) to use `MarketDataService_YFinance` for all asset classes (Stocks, Indices, Commodities, Forex, Crypto) as per the defined symbol mappings.
-    - **Action:** Ensure all PRD-required data points (where available from Yahoo) are fetched and displayed.
+   - **Action:** Systematically update all parts of the application (charts, portfolio valuation, trading interface, analytics) to use `MarketDataService_YFinance` for all asset classes (Stocks, Indices, Commodities, Forex, Crypto) as per the defined symbol mappings.
+   - **Action:** Ensure all PRD-required data points (where available from Yahoo) are fetched and displayed.
 
-2.  **Robust Caching System:**
+2. **Robust Caching System:**
 
-    - **Action:** Design and implement a more sophisticated caching solution (e.g., Redis, Memcached, or Supabase database caching if suitable).
-    - **Action:** Define appropriate cache TTLs (Time-To-Live) for different data types (e.g., quotes: 1-15 mins depending on market activity/delay acceptance; historical data: 24 hours; instrument info: daily or weekly).
-    - **Action:** Implement cache invalidation strategies where necessary.
+   - **Action:** Design and implement a more sophisticated caching solution (e.g., Redis, Memcached, or Supabase database caching if suitable).
+   - **Action:** Define appropriate cache TTLs (Time-To-Live) for different data types (e.g., quotes: 1-15 mins depending on market activity/delay acceptance; historical data: 24 hours; instrument info: daily or weekly).
+   - **Action:** Implement cache invalidation strategies where necessary.
 
-3.  **Request Throttling and Queuing Mechanism:**
+3. **Request Throttling and Queuing Mechanism:**
 
-    - **Action:** Implement a request scheduler/manager in the backend to control the rate of outgoing calls to `yfinance`.
-    - **Action:** Enforce limits (e.g., configurable max requests per second/minute) to stay well below suspected Yahoo Finance rate limits (e.g., aim for <1 request per second on average, burst carefully).
-    - **Action:** Implement a queue for pending requests if the rate limit is approached.
+   - **Action:** Implement a request scheduler/manager in the backend to control the rate of outgoing calls to `yfinance`.
+   - **Action:** Enforce limits (e.g., configurable max requests per second/minute) to stay well below suspected Yahoo Finance rate limits (e.g., aim for <1 request per second on average, burst carefully).
+   - **Action:** Implement a queue for pending requests if the rate limit is approached.
 
-4.  **Advanced Error Handling and Retry Logic:**
+4. **Advanced Error Handling and Retry Logic:**
 
-    - **Action:** Enhance error handling in `MarketDataService_YFinance` to specifically identify potential rate limit errors (e.g., HTTP 429, 403, or specific `yfinance` exceptions indicating data fetch failures).
-    - **Action:** Implement exponential backoff and retry mechanisms for transient errors or suspected rate limiting.
-    - **Action:** Log all API errors and retry attempts for monitoring.
+   - **Action:** Enhance error handling in `MarketDataService_YFinance` to specifically identify potential rate limit errors (e.g., HTTP 429, 403, or specific `yfinance` exceptions indicating data fetch failures).
+   - **Action:** Implement exponential backoff and retry mechanisms for transient errors or suspected rate limiting.
+   - **Action:** Log all API errors and retry attempts for monitoring.
 
-5.  **Configuration Management:**
+5. **Configuration Management:**
 
-    - **Action:** Make API call parameters, cache settings, rate limits, and retry logic configurable (e.g., via environment variables or a configuration file).
+   - **Action:** Make API call parameters, cache settings, rate limits, and retry logic configurable (e.g., via environment variables or a configuration file).
 
-6.  **Historical Data Backfilling Strategy (Optional, if needed beyond `yfinance` limits):**
-    - **Action:** If longer intraday history is absolutely critical (and PRD isn't changed), investigate strategies for _gradually_ collecting and storing intraday data over time. This is complex and may not be fully achievable due to `yfinance` limitations on deep intraday history.
-    - **Focus:** Primarily rely on daily data for long-term history as it's more robustly available via `yfinance`.
+6. **Historical Data Backfilling Strategy (Optional, if needed beyond `yfinance` limits):**
+   - **Action:** If longer intraday history is absolutely critical (and PRD isn't changed), investigate strategies for _gradually_ collecting and storing intraday data over time. This is complex and may not be fully achievable due to `yfinance` limitations on deep intraday history.
+   - **Focus:** Primarily rely on daily data for long-term history as it's more robustly available via `yfinance`.
 
-**Phase 3: Testing, Optimization, and Documentation (2-3 Weeks)**
+### Phase 3: Testing, Optimization, and Documentation (2-3 Weeks)
 
-1.  **Thorough Testing:**
+1. **Thorough Testing:**
 
-    - **Action:** Test data fetching for all asset classes and symbols on the PRD list.
-    - **Action:** Verify data accuracy against Yahoo Finance website itself (spot checks).
-    - **Action:** Test error handling, caching, and rate limiting mechanisms under simulated load (where possible without actually spamming Yahoo).
+   - **Action:** Test data fetching for all asset classes and symbols on the PRD list.
+   - **Action:** Verify data accuracy against Yahoo Finance website itself (spot checks).
+   - **Action:** Test error handling, caching, and rate limiting mechanisms under simulated load (where possible without actually spamming Yahoo).
 
-2.  **Performance Optimization:**
+2. **Performance Optimization:**
 
-    - **Action:** Optimize frontend and backend data handling to minimize unnecessary requests and efficiently use cached data.
-    - **Action:** Analyze response times for data display.
+   - **Action:** Optimize frontend and backend data handling to minimize unnecessary requests and efficiently use cached data.
+   - **Action:** Analyze response times for data display.
 
-3.  **User Disclaimers and UI Updates:**
+3. **User Disclaimers and UI Updates:**
 
-    - **Action:** Implement clear UI disclaimers regarding data source (Yahoo Finance), potential delays (e.g., "Data delayed by up to 15-20 minutes"), and that the platform is for simulation purposes only.
-    - **Action:** Ensure UI gracefully handles situations where data might be temporarily unavailable.
+   - **Action:** Implement clear UI disclaimers regarding data source (Yahoo Finance), potential delays (e.g., "Data delayed by up to 15-20 minutes"), and that the platform is for simulation purposes only.
+   - **Action:** Ensure UI gracefully handles situations where data might be temporarily unavailable.
 
-4.  **Monitoring and Alerting (Basic):**
+4. **Monitoring and Alerting (Basic):**
 
-    - **Action:** Set up basic logging and monitoring for the health of `MarketDataService_YFinance`, focusing on API error rates and cache performance.
-    - **Action:** Consider alerts for high failure rates, which might indicate `yfinance` library issues or Yahoo API changes.
+   - **Action:** Set up basic logging and monitoring for the health of `MarketDataService_YFinance`, focusing on API error rates and cache performance.
+   - **Action:** Consider alerts for high failure rates, which might indicate `yfinance` library issues or Yahoo API changes.
 
-5.  **Documentation:**
-    - **Action:** Document the `MarketDataService_YFinance` architecture, caching strategy, rate limiting approach, and known limitations.
-    - **Action:** Update any relevant sections of the project's technical documentation.
-    - **Action:** Prepare a list of PRD sections that are impacted by the limitations of Yahoo Finance (e.g., real-time definition, L2 data, intraday history depth) for discussion with stakeholders.
+5. **Documentation:**
+   - **Action:** Document the `MarketDataService_YFinance` architecture, caching strategy, rate limiting approach, and known limitations.
+   - **Action:** Update any relevant sections of the project's technical documentation.
+   - **Action:** Prepare a list of PRD sections that are impacted by the limitations of Yahoo Finance (e.g., real-time definition, L2 data, intraday history depth) for discussion with stakeholders.
 
-**Contingency Planning:**
+### Contingency Planning
 
 - **`yfinance` Breakage:** Be prepared for `yfinance` to break if Yahoo changes its website/API. Monitor the `yfinance` library's GitHub repository for issues and updates. Have a plan for how the application will behave if data becomes unavailable (e.g., display cached data with warnings, temporarily disable trading features).
 - **Persistent Rate Limiting/Blocking:** If the application consistently gets blocked by Yahoo despite mitigation efforts, this will necessitate an urgent re-evaluation of the data source strategy (i.e., moving to a paid provider sooner than planned).

@@ -1,47 +1,76 @@
-
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { LineChart } from "lucide-react";
-import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
-import { motion } from "framer-motion";
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { LineChart } from 'lucide-react';
+import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher';
+import { motion } from 'framer-motion';
 
 const Header = () => {
   const navigate = useNavigate();
-  
+
   return (
-    <motion.header 
+    <motion.header
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
       className="border-b border-secondary/40 sticky top-0 z-50 bg-background shadow-sm"
     >
       <div className="container flex items-center justify-between py-3">
-        <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+        <button
+          className="flex items-center cursor-pointer bg-transparent border-none p-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+          onClick={() => navigate('/')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              navigate('/');
+            }
+          }}
+          aria-label="Navigate to home page"
+          type="button"
+        >
           <LineChart className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold ml-2 text-foreground">TradePro</h1>
-        </div>
-        
+        </button>
+
         <nav className="hidden md:flex items-center gap-6">
-          <Link to="#features" className="text-sm text-muted-foreground hover:text-foreground nav-link">Features</Link>
-          <Link to="#pricing" className="text-sm text-muted-foreground hover:text-foreground nav-link">Pricing</Link>
-          <Link to="#testimonials" className="text-sm text-muted-foreground hover:text-foreground nav-link">Testimonials</Link>
-          <Link to="#about" className="text-sm text-muted-foreground hover:text-foreground nav-link">About</Link>
+          <Link
+            to="#features"
+            className="text-sm text-muted-foreground hover:text-foreground nav-link"
+          >
+            Features
+          </Link>
+          <Link
+            to="#pricing"
+            className="text-sm text-muted-foreground hover:text-foreground nav-link"
+          >
+            Pricing
+          </Link>
+          <Link
+            to="#testimonials"
+            className="text-sm text-muted-foreground hover:text-foreground nav-link"
+          >
+            Testimonials
+          </Link>
+          <Link
+            to="#about"
+            className="text-sm text-muted-foreground hover:text-foreground nav-link"
+          >
+            About
+          </Link>
         </nav>
-        
+
         <div className="flex items-center gap-4">
           <ThemeSwitcher />
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigate("/auth")}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/auth')}
             className="whitespace-nowrap hover:border-primary hover:text-primary transition-colors duration-300"
           >
             Login
           </Button>
-          <Button 
-            size="sm" 
-            onClick={() => navigate("/auth?tab=signup")}
+          <Button
+            size="sm"
+            onClick={() => navigate('/auth?tab=signup')}
             className="whitespace-nowrap bg-primary hover:opacity-90 transition-opacity duration-300"
           >
             Sign Up

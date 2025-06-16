@@ -1,37 +1,9 @@
 {
   "name": "Trade Pro CFD - Optimized Workspace",
-  "image": "mcr.microsoft.com/devcontainers/node:20-bullseye",
-
-  // === RESOURCE OPTIMIZATION ===
-  // "customizations": {
-  //  "codespaces": {
-  //    "repositories": {
-  //      "Krishan-B/Trade-Pro": {
-  //        "permissions": {
-  //          "actions": "write",
-  //          "contents": "write",
-  //          "issues": "write",
-  //          "pull_requests": "write",
-  //          "discussions": "write",
-  //          "workflows": "write",
-  //          "security_events": "write",
-  //          "repository_projects": "write",
-  //          "packages": "write",
-  //          "deployments": "write",
-  //          "checks": "write",
-  //          "statuses": "write",
-  //          "pages": "write",
-  //          "administration": "write",
-  //          "secrets": "write",
-  //          "codespaces": "write"
-  //        }
-  //      }
-  //    }
-  //  }
-  // },
-
-  // === EXTENSIONS ===
-  // ...existing code...
+  "image": "mcr.microsoft.com/devcontainers/base:debian",
+  "hostRequirements": {
+    "storage": "32gb"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -85,7 +57,6 @@
         "bierner.markdown-mermaid",
         "cweijan.vscode-postgresql-client2"
       ],
-      // === VS CODE SETTINGS === // Moved settings block here
       "settings": {
         "terminal.integrated.shell.linux": "/bin/bash",
         "editor.formatOnSave": true,
@@ -115,39 +86,14 @@
       }
     }
   },
-
-  // === FEATURES ===
-  // ...existing code...
-  // The "settings" block that was previously here has been moved up.
-  // ...existing code...
-
   "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {},
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "dockerComposeVersion": "latest",
-      "dockerVersion": "latest"
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
     },
-    "ghcr.io/devcontainers/features/node:2": {
-      "version": "20",
-      "installNpmGlobally": true,
-      "npmGlobalPackages": [
-        "@types/node",
-        "@types/react",
-        "@types/react-dom",
-        "@types/jest",
-        "@types/cypress",
-        "@types/supabase-js"
-      ]
-    }
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-
-  // === LIFECYCLE HOOKS ===
   "postCreateCommand": "npm install -g pnpm && pnpm install --frozen-lockfile && pnpm run setup:dev",
   "postAttachCommand": "pnpm run dev",
-
-  // === PORT FORWARDING ===
   "forwardPorts": [3000, 5173, 6006, 5432, 5433],
   "portsAttributes": {
     "3000": { "label": "Application (Next.js Dev)" },
@@ -156,53 +102,11 @@
     "5432": { "label": "PostgreSQL (Supabase)" },
     "5433": { "label": "Supabase Studio" }
   },
-
-  // === VS CODE SETTINGS ===
-  "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash",
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "[typescript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[typescriptreact]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[javascript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[json]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "files.exclude": {
-      "**/.git": true,
-      "**/.DS_Store": true,
-      "**/node_modules": true,
-      "**/.next": true,
-      "**/dist": true,
-      "**/coverage": true
-    }
-  },
-
-  // === ENVIRONMENT VARIABLES ===
-  // "remoteEnv": {
-  //  "DATABASE_URL": "${localEnv:DATABASE_URL}",
-  //  "NEXTAUTH_SECRET": "${localEnv:NEXTAUTH_SECRET}",
-  //  "NEXTAUTH_URL": "https://localhost:3000"
-  // },
-
-  // === DOCKER CONFIGURATION ===
-  "runArgs": ["--init"],
-  "mounts": ["source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"],
   "overrideFeatureInstallOrder": [
     "ghcr.io/devcontainers/features/common-utils",
     "ghcr.io/devcontainers/features/git",
     "ghcr.io/devcontainers/features/github-cli"
   ],
-
-  // === WORKSPACE CONFIGURATION ===
   "workspaceFolder": "/workspaces/Trade-Pro",
   "shutdownAction": "stopContainer"
 }

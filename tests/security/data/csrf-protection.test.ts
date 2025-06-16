@@ -1,16 +1,16 @@
 // CSRF (Cross-Site Request Forgery) Protection Tests
 // Tests for CSRF token validation and protection mechanisms
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Define interfaces for better type safety
 type AnyFunction = (...args: any[]) => any;
 
 interface CSRFProtection {
-  generateToken: jest.Mock;
-  validateToken: jest.Mock;
-  isTokenRequired: jest.Mock;
-  getTokenFromRequest: jest.Mock;
+  generateToken: vi.Mock;
+  validateToken: vi.Mock;
+  isTokenRequired: vi.Mock;
+  getTokenFromRequest: vi.Mock;
 }
 
 interface Session {
@@ -26,8 +26,8 @@ interface SessionResult {
 
 interface SessionManager {
   sessions: Map<string, Session>;
-  createSessionWithCSRF: jest.Mock;
-  getCSRFToken: jest.Mock;
+  createSessionWithCSRF: vi.Mock;
+  getCSRFToken: vi.Mock;
 }
 
 interface Request {
@@ -42,8 +42,8 @@ interface Request {
 }
 
 interface Response {
-  status: jest.Mock;
-  json: jest.Mock;
+  status: vi.Mock;
+  json: vi.Mock;
 }
 
 interface Transaction {
@@ -54,8 +54,8 @@ interface Transaction {
 interface TokenRotation {
   lastRotation: Date;
   rotationInterval: number;
-  shouldRotateToken: jest.Mock;
-  rotateToken: jest.Mock;
+  shouldRotateToken: vi.Mock;
+  rotateToken: vi.Mock;
 }
 
 // This interface is not used but kept for reference
@@ -71,25 +71,25 @@ interface CSRFConfig {
   cookieName: string;
   excludedMethods: string[];
   excludedPaths: string[];
-  isPathExcluded: jest.Mock;
-  isMethodExcluded: jest.Mock;
+  isPathExcluded: vi.Mock;
+  isMethodExcluded: vi.Mock;
 }
 
 // Mock CSRF protection middleware
 const mockCSRFProtection: CSRFProtection = {
-  generateToken: jest.fn(),
-  validateToken: jest.fn(),
-  isTokenRequired: jest.fn(),
-  getTokenFromRequest: jest.fn(),
+  generateToken: vi.fn(),
+  validateToken: vi.fn(),
+  isTokenRequired: vi.fn(),
+  getTokenFromRequest: vi.fn(),
 };
 
 describe('CSRF Protection Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('CSRF Token Generation', () => {
@@ -134,7 +134,7 @@ describe('CSRF Protection Tests', () => {
       const mockSessionManager: SessionManager = {
         sessions: new Map<string, Session>(),
 
-        createSessionWithCSRF: jest.fn(function (
+        createSessionWithCSRF: vi.fn(function (
           this: SessionManager,
           userId: string
         ): SessionResult {
@@ -150,10 +150,7 @@ describe('CSRF Protection Tests', () => {
           return { sessionId, csrfToken };
         }),
 
-        getCSRFToken: jest.fn(function (
-          this: SessionManager,
-          sessionId: string
-        ): string | undefined {
+        getCSRFToken: vi.fn(function (this: SessionManager, sessionId: string): string | undefined {
           const session = this.sessions.get(sessionId);
           return session?.csrfToken;
         }),
@@ -208,7 +205,7 @@ describe('CSRF Protection Tests', () => {
 
     it('should handle token validation timing attacks', () => {
       // Simulate constant-time comparison
-      const constantTimeCompare = jest.fn((a: string, b: string): boolean => {
+      const constantTimeCompare = vi.fn((a: string, b: string): boolean => {
         if (a.length !== b.length) return false;
 
         let result = 0;
@@ -291,7 +288,7 @@ describe('CSRF Protection Tests', () => {
   describe('CSRF Protection for AJAX Requests', () => {
     it('should handle CSRF tokens in AJAX requests', () => {
       const mockAjaxHandler = {
-        prepareRequest: jest.fn((request: Request, csrfToken: string): Request => {
+        prepareRequest: vi.fn((request: Request, csrfToken: string): Request => {
           if (request.method !== 'GET') {
             request.headers = request.headers || {};
             request.headers['X-CSRF-Token'] = csrfToken;
@@ -316,22 +313,20 @@ describe('CSRF Protection Tests', () => {
         error: string;
       }
 
-      const mockCSRFMiddleware = jest.fn(
-        (request: Request, response: Response, next: () => void) => {
-          if (mockCSRFProtection.isTokenRequired(request.method || '')) {
-            const requestToken = mockCSRFProtection.getTokenFromRequest(request);
-            const sessionToken = request.session?.csrfToken;
+      const mockCSRFMiddleware = vi.fn((request: Request, response: Response, next: () => void) => {
+        if (mockCSRFProtection.isTokenRequired(request.method || '')) {
+          const requestToken = mockCSRFProtection.getTokenFromRequest(request);
+          const sessionToken = request.session?.csrfToken;
 
-            if (!mockCSRFProtection.validateToken(requestToken, sessionToken || '')) {
-              const statusFn = response.status(403);
-              (statusFn as any).json({ error: 'Invalid CSRF token' } as JsonResponse);
-              return;
-            }
+          if (!mockCSRFProtection.validateToken(requestToken, sessionToken || '')) {
+            const statusFn = response.status(403);
+            (statusFn as any).json({ error: 'Invalid CSRF token' } as JsonResponse);
+            return;
           }
-
-          next();
         }
-      );
+
+        next();
+      });
 
       // Mock objects
       mockCSRFProtection.isTokenRequired.mockReturnValue(true);
@@ -344,11 +339,11 @@ describe('CSRF Protection Tests', () => {
       };
 
       const mockResponse: Response = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn(),
       };
 
-      const mockNext = jest.fn();
+      const mockNext = vi.fn();
 
       mockCSRFMiddleware(mockRequest, mockResponse, mockNext);
 
@@ -366,7 +361,7 @@ describe('CSRF Protection Tests', () => {
         '/api/account/withdraw',
       ];
 
-      const mockTradeProtection = jest.fn((endpoint: string, method: string): boolean => {
+      const mockTradeProtection = vi.fn((endpoint: string, method: string): boolean => {
         return tradingEndpoints.some((ep) => endpoint.includes(ep)) && method !== 'GET';
       });
 
@@ -378,7 +373,7 @@ describe('CSRF Protection Tests', () => {
 
     it('should validate CSRF tokens for financial transactions', () => {
       const mockTransactionHandler = {
-        validateTransaction: jest.fn(
+        validateTransaction: vi.fn(
           (transaction: Transaction, csrfToken: string, sessionToken: string): boolean => {
             // High-value transactions require additional validation
             const isHighValue = transaction.amount > 10000;
@@ -424,12 +419,12 @@ describe('CSRF Protection Tests', () => {
         lastRotation: new Date(),
         rotationInterval: 30 * 60 * 1000, // 30 minutes
 
-        shouldRotateToken: jest.fn(function (this: TokenRotation): boolean {
+        shouldRotateToken: vi.fn(function (this: TokenRotation): boolean {
           const now = new Date();
           return now.getTime() - this.lastRotation.getTime() > this.rotationInterval;
         }),
 
-        rotateToken: jest.fn(function (this: TokenRotation, sessionId: string): string {
+        rotateToken: vi.fn(function (this: TokenRotation, sessionId: string): string {
           const newToken = mockCSRFProtection.generateToken() as string;
           this.lastRotation = new Date();
           return newToken;
@@ -449,7 +444,7 @@ describe('CSRF Protection Tests', () => {
 
     it('should invalidate tokens on session expiry', () => {
       const mockSessionInvalidation = {
-        invalidateSession: jest.fn((sessionId: string) => {
+        invalidateSession: vi.fn((sessionId: string) => {
           // When session is invalidated, CSRF token should also be invalidated
           return {
             sessionInvalidated: true,
@@ -473,14 +468,14 @@ describe('CSRF Protection Tests', () => {
       }
 
       const mockTokenExpiration = {
-        isTokenExpired: jest.fn(
+        isTokenExpired: vi.fn(
           (token: string, createdAt: Date, maxAge: number = 3600000): boolean => {
             // 1 hour default
             return Date.now() - createdAt.getTime() > maxAge;
           }
         ),
 
-        handleExpiredToken: jest.fn(() => {
+        handleExpiredToken: vi.fn(() => {
           return {
             error: 'CSRF token expired',
             code: 'CSRF_TOKEN_EXPIRED',
@@ -511,11 +506,11 @@ describe('CSRF Protection Tests', () => {
         excludedMethods: ['GET', 'HEAD', 'OPTIONS'],
         excludedPaths: ['/api/public', '/health'],
 
-        isPathExcluded: jest.fn(function (this: any, path) {
+        isPathExcluded: vi.fn(function (this: any, path) {
           return this.excludedPaths.some((excluded: string) => String(path).startsWith(excluded));
         }),
 
-        isMethodExcluded: jest.fn(function (this: any, method) {
+        isMethodExcluded: vi.fn(function (this: any, method) {
           return this.excludedMethods.includes(String(method).toUpperCase());
         }),
       };
@@ -538,28 +533,26 @@ describe('CSRF Protection Tests', () => {
         excludedPaths: string[];
       }
 
-      const mockConfigValidator = jest.fn(
-        (config: CSRFConfigToValidate): ConfigValidationResult => {
-          const issues: string[] = [];
+      const mockConfigValidator = vi.fn((config: CSRFConfigToValidate): ConfigValidationResult => {
+        const issues: string[] = [];
 
-          if (config.tokenLength < 16) {
-            issues.push('Token length should be at least 16 bytes');
-          }
-
-          if (!config.enabled && process.env.NODE_ENV === 'production') {
-            issues.push('CSRF protection should be enabled in production');
-          }
-
-          if (config.excludedPaths.includes('/api/admin')) {
-            issues.push('Admin endpoints should not be excluded from CSRF protection');
-          }
-
-          return {
-            valid: issues.length === 0,
-            issues,
-          };
+        if (config.tokenLength < 16) {
+          issues.push('Token length should be at least 16 bytes');
         }
-      );
+
+        if (!config.enabled && process.env.NODE_ENV === 'production') {
+          issues.push('CSRF protection should be enabled in production');
+        }
+
+        if (config.excludedPaths.includes('/api/admin')) {
+          issues.push('Admin endpoints should not be excluded from CSRF protection');
+        }
+
+        return {
+          valid: issues.length === 0,
+          issues,
+        };
+      });
 
       const secureConfig: CSRFConfigToValidate = {
         enabled: true,

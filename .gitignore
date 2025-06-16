@@ -187,3 +187,17 @@ lpt[0-9]
 
 # Generated type declarations
 types/app/
+
+# Compiled TypeScript files (exclude config files)
+**/*.d.ts
+**/*.js
+!*.config.js
+!eslint.config.js
+!postcss.config.js
+!tailwind.config.js
+!vitest.config.js
+!vite.config.js
+!lint-staged.config.cjs
+!.eslintrc.js
+!jest.config.js
+!playwright.config.js

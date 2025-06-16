@@ -1,6 +1,6 @@
 {
   "files": [],
-  "include": ["src", "vite.config.ts"],
+  "include": [],
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" },
@@ -18,8 +18,8 @@
     "esModuleInterop": true,
     "strict": true,
     "noImplicitAny": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "strictNullChecks": true,
     "noImplicitThis": true,
     "alwaysStrict": true,

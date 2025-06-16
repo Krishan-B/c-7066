@@ -1,7 +1,7 @@
 // Security Integration Tests
 // Tests for security headers, HTTPS enforcement, and overall security configuration
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Define interfaces for mocked objects and parameters
 interface MockHeaders {
@@ -64,10 +64,10 @@ interface MockConfig {
 
 // Mock HTTP client and security middleware
 const mockHttpClient = {
-  get: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
+  get: vi.fn(),
+  post: vi.fn(),
+  put: vi.fn(),
+  delete: vi.fn(),
 };
 
 const mockSecurityHeaders: MockHeaders = {
@@ -83,16 +83,16 @@ const mockSecurityHeaders: MockHeaders = {
 
 describe('Security Integration Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('Security Headers Validation', () => {
     it('should enforce Strict Transport Security (HSTS)', async () => {
-      const validateHSTS = jest.fn((headers: MockHeaders) => {
+      const validateHSTS = vi.fn((headers: MockHeaders) => {
         const hsts = headers['strict-transport-security'];
         if (!hsts) return { valid: false, error: 'HSTS header missing' };
 
@@ -117,7 +117,7 @@ describe('Security Integration Tests', () => {
     });
 
     it('should enforce Content Security Policy (CSP)', async () => {
-      const validateCSP = jest.fn((headers: MockHeaders) => {
+      const validateCSP = vi.fn((headers: MockHeaders) => {
         const csp = headers['content-security-policy'];
         if (!csp) return { valid: false, error: 'CSP header missing' };
 
@@ -144,7 +144,7 @@ describe('Security Integration Tests', () => {
     });
 
     it('should prevent clickjacking with X-Frame-Options', () => {
-      const validateFrameOptions = jest.fn((headers: MockHeaders) => {
+      const validateFrameOptions = vi.fn((headers: MockHeaders) => {
         const frameOptions = headers['x-frame-options'];
         return frameOptions === 'DENY' || frameOptions === 'SAMEORIGIN';
       });
@@ -159,7 +159,7 @@ describe('Security Integration Tests', () => {
     });
 
     it('should prevent MIME type sniffing', () => {
-      const validateContentTypeOptions = jest.fn((headers: MockHeaders) => {
+      const validateContentTypeOptions = vi.fn((headers: MockHeaders) => {
         return headers['x-content-type-options'] === 'nosniff';
       });
 
@@ -167,7 +167,7 @@ describe('Security Integration Tests', () => {
     });
 
     it('should enable XSS protection', () => {
-      const validateXSSProtection = jest.fn((headers: MockHeaders) => {
+      const validateXSSProtection = vi.fn((headers: MockHeaders) => {
         const xssProtection = headers['x-xss-protection'];
         return xssProtection === '1; mode=block' || xssProtection === '0';
       });
@@ -176,7 +176,7 @@ describe('Security Integration Tests', () => {
     });
 
     it('should configure referrer policy securely', () => {
-      const validateReferrerPolicy = jest.fn((headers: MockHeaders) => {
+      const validateReferrerPolicy = vi.fn((headers: MockHeaders) => {
         const referrerPolicy = headers['referrer-policy'] as string; // Added type assertion
         const secureOptions = [
           'no-referrer',
@@ -191,7 +191,7 @@ describe('Security Integration Tests', () => {
     });
 
     it('should restrict permissions with Permissions Policy', () => {
-      const validatePermissionsPolicy = jest.fn((headers: MockHeaders) => {
+      const validatePermissionsPolicy = vi.fn((headers: MockHeaders) => {
         const permissionsPolicy = headers['permissions-policy'];
         if (!permissionsPolicy) return false;
 
@@ -208,7 +208,7 @@ describe('Security Integration Tests', () => {
 
   describe('HTTPS Enforcement', () => {
     it('should redirect HTTP to HTTPS', async () => {
-      const mockRedirectHandler = jest.fn((url: string) => {
+      const mockRedirectHandler = vi.fn((url: string) => {
         if (url.startsWith('http://')) {
           return {
             status: 301,
@@ -226,7 +226,7 @@ describe('Security Integration Tests', () => {
     });
 
     it('should reject insecure requests', () => {
-      const mockSecureRequestValidator = jest.fn((request: MockRequest) => {
+      const mockSecureRequestValidator = vi.fn((request: MockRequest) => {
         const isSecure =
           request.protocol === 'https' || request.headers['x-forwarded-proto'] === 'https';
 
@@ -253,7 +253,7 @@ describe('Security Integration Tests', () => {
     });
 
     it('should validate SSL certificate', async () => {
-      const mockSSLValidator = jest.fn((hostname: string) => {
+      const mockSSLValidator = vi.fn((hostname: string) => {
         // Simulate SSL certificate validation
         const validCertificates: {
           [key: string]: { valid: boolean; issuer: string; expires: Date; subject: string };
@@ -288,7 +288,7 @@ describe('Security Integration Tests', () => {
 
   describe('Cookie Security', () => {
     it('should set secure cookie attributes', () => {
-      const mockCookieValidator = jest.fn((cookie: string) => {
+      const mockCookieValidator = vi.fn((cookie: string) => {
         const attributes = {
           secure: cookie.includes('Secure'),
           httpOnly: cookie.includes('HttpOnly'),
@@ -313,7 +313,7 @@ describe('Security Integration Tests', () => {
       const mockSessionManager = {
         sessions: new Map(),
 
-        createSession: jest.fn(function (userId: string) {
+        createSession: vi.fn(function (userId: string) {
           const sessionId = Math.random().toString(36).substring(2);
           const session = {
             id: sessionId,
@@ -327,7 +327,7 @@ describe('Security Integration Tests', () => {
           return session;
         }),
 
-        validateSession: jest.fn(function (sessionId: string) {
+        validateSession: vi.fn(function (sessionId: string) {
           const session = this.sessions.get(sessionId);
           if (!session) return { valid: false, error: 'Session not found' };
 
@@ -341,7 +341,7 @@ describe('Security Integration Tests', () => {
           return { valid: true, session };
         }),
 
-        destroySession: jest.fn(function (sessionId: string) {
+        destroySession: vi.fn(function (sessionId: string) {
           return this.sessions.delete(sessionId);
         }),
       };
@@ -366,7 +366,7 @@ describe('Security Integration Tests', () => {
       const mockSecurityLogger = {
         events: [] as any[], // Added type
 
-        logSecurityEvent: jest.fn(function (this: { events: any[] }, event: MockSecurityEvent) {
+        logSecurityEvent: vi.fn(function (this: { events: any[] }, event: MockSecurityEvent) {
           // Added this and event type
           const logEntry = {
             timestamp: new Date(),
@@ -382,7 +382,7 @@ describe('Security Integration Tests', () => {
           return logEntry;
         }),
 
-        getEvents: jest.fn(function (this: { events: any[] }, type?: string, severity?: string) {
+        getEvents: vi.fn(function (this: { events: any[] }, type?: string, severity?: string) {
           // Added this and param types
           let filtered = this.events;
 
@@ -421,7 +421,7 @@ describe('Security Integration Tests', () => {
       const mockAlertManager = {
         alerts: [] as any[], // Added type
 
-        triggerAlert: jest.fn(function (this: { alerts: any[] }, event: MockSecurityEvent) {
+        triggerAlert: vi.fn(function (this: { alerts: any[] }, event: MockSecurityEvent) {
           // Added this and event type
           if (event.severity === 'critical' || event.severity === 'high') {
             const alert = {
@@ -439,7 +439,7 @@ describe('Security Integration Tests', () => {
           return null;
         }),
 
-        getActiveAlerts: jest.fn(function (this: { alerts: any[] }) {
+        getActiveAlerts: vi.fn(function (this: { alerts: any[] }) {
           // Added this type
           return this.alerts.filter((a: { status: string }) => a.status === 'active');
         }),
@@ -475,7 +475,7 @@ describe('Security Integration Tests', () => {
   describe('Vulnerability Scanning Integration', () => {
     it('should detect known vulnerabilities', async () => {
       const mockVulnerabilityScanner = {
-        scan: jest.fn(async (target: string) => {
+        scan: vi.fn(async (target: string) => {
           // Simulate vulnerability scanning
           const commonVulns: MockVulnerability[] = [
             {
@@ -519,7 +519,7 @@ describe('Security Integration Tests', () => {
 
     it('should perform dependency vulnerability checks', async () => {
       const mockDependencyScanner = {
-        scanDependencies: jest.fn(async (packageFile: string) => {
+        scanDependencies: vi.fn(async (packageFile: string) => {
           // Simulate scanning package.json for vulnerable dependencies
           const vulnerableDependencies: MockDependencyVulnerability[] = [
             {
@@ -540,9 +540,8 @@ describe('Security Integration Tests', () => {
       };
 
       const cleanDeps = await mockDependencyScanner.scanDependencies('package.json');
-      const vulnerableDeps = await mockDependencyScanner.scanDependencies(
-        'vulnerable-package.json'
-      );
+      const vulnerableDeps =
+        await mockDependencyScanner.scanDependencies('vulnerable-package.json');
 
       expect(cleanDeps.vulnerable).toHaveLength(0);
       expect(vulnerableDeps.vulnerable.length).toBeGreaterThan(0);
@@ -552,7 +551,7 @@ describe('Security Integration Tests', () => {
 
   describe('Security Configuration Validation', () => {
     it('should validate environment security settings', () => {
-      const mockConfigValidator = jest.fn((config: MockConfig) => {
+      const mockConfigValidator = vi.fn((config: MockConfig) => {
         const checks = {
           httpsEnabled: config.FORCE_HTTPS === 'true',
           sessionSecure: config.SESSION_SECURE === 'true',
@@ -603,7 +602,7 @@ describe('Security Integration Tests', () => {
     });
 
     it('should validate database security configuration', () => {
-      const mockDBSecurityValidator = jest.fn((config: MockConfig) => {
+      const mockDBSecurityValidator = vi.fn((config: MockConfig) => {
         return {
           sslEnabled: config.ssl === true,
           connectionEncrypted: config.encrypt === true,
@@ -635,7 +634,7 @@ describe('Security Integration Tests', () => {
   describe('Penetration Testing Integration', () => {
     it('should simulate basic penetration testing scenarios', async () => {
       const mockPenTestRunner = {
-        runTests: jest.fn(async (target: string) => {
+        runTests: vi.fn(async (target: string) => {
           const tests = [
             {
               name: 'SQL Injection Test',

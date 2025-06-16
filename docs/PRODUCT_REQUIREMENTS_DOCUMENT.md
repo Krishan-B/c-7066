@@ -369,7 +369,8 @@ A risk-free trading environment that accurately simulates real market conditions
 
 #### 3.9.2 KYC Document Categories
 
-**1. ID Verification (Mandatory)**
+#### 1. ID Verification (Mandatory)
+
 Document Types:
 
 - Passport
@@ -377,7 +378,8 @@ Document Types:
 - Driver's License
 - Other ID Documents
 
-**2. Address Verification (Mandatory)**
+#### 2. Address Verification (Mandatory)
+
 Document Types:
 
 - Utility Bill
@@ -386,14 +388,14 @@ Document Types:
 - Local Authority Tax Bill
 - Other Address Proof
 
-**3. Other Documentation (Optional)**
+#### 3. Other Documentation (Optional)
 
 - Generic "Other" category
 - File upload or camera capture functionality
 - Comment field for document description
 - Additional supporting documents
 
-#### 3.9.3 KYC Workflow
+### 3.9.3 KYC Workflow
 
 **User Upload Process:**
 
@@ -652,7 +654,7 @@ positions (
 
 #### 4.3.1 Authentication Endpoints
 
-```
+```http
 POST /api/auth/register
 POST /api/auth/login
 POST /api/auth/logout
@@ -663,7 +665,7 @@ POST /api/auth/reset-password
 
 #### 4.3.2 Account Management Endpoints
 
-```
+```http
 GET /api/accounts/profile
 PUT /api/accounts/profile
 GET /api/accounts/balance
@@ -675,7 +677,7 @@ POST /api/accounts/reset (staff only)
 
 #### 4.3.5 KYC Management Endpoints
 
-```
+```http
 GET /api/kyc/status
 POST /api/kyc/upload
 GET /api/kyc/documents
@@ -685,7 +687,7 @@ PUT /api/kyc/documents/:id
 
 #### 4.3.6 Plexop Internal Tool Endpoints
 
-```
+```http
 GET /api/admin/users
 GET /api/admin/users/:id
 PUT /api/admin/users/:id/kyc-status
@@ -698,7 +700,7 @@ PUT /api/admin/accounts/:id/status
 
 #### 4.3.3 Trading Endpoints
 
-```
+```http
 POST /api/trading/orders
 PUT /api/trading/orders/:id
 DELETE /api/trading/orders/:id
@@ -709,7 +711,7 @@ PUT /api/trading/positions/:id/modify
 
 #### 4.3.4 Market Data Endpoints
 
-```
+```http
 GET /api/market/assets
 GET /api/market/assets/:symbol/price
 GET /api/market/assets/:symbol/history
@@ -933,7 +935,7 @@ DELETE /api/market/watchlist/:symbol
 
 ### 10.2 Priority Features
 
-**Phase 1: Core Foundation**
+#### Phase 1: Core Foundation
 
 - User authentication with Supabase
 - KYC document upload system
@@ -941,7 +943,7 @@ DELETE /api/market/watchlist/:symbol
 - Basic trading engine with restrictions
 - Yahoo Finance API integration
 
-**Phase 2: Trading Platform**
+#### Phase 2: Trading Platform
 
 - TradingView chart integration
 - Order management system
@@ -949,7 +951,7 @@ DELETE /api/market/watchlist/:symbol
 - Real-time price updates
 - Margin calculations
 
-**Phase 3: Advanced Features**
+#### Phase 3: Advanced Features
 
 - Portfolio analytics
 - Risk management tools

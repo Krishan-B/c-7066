@@ -1,3 +1,9 @@
+/**
+ * Vitest configuration for Trade-Pro
+ * - Test runner and coverage settings
+ * - See PROJECT_CLEANUP_AND_CONFIG.md for details
+ */
+
 import path from 'path';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react-swc';
