@@ -125,32 +125,32 @@ To restore full functionality at the cost of performance:
 
 1. **Enable auto-imports**:
 
-    ```json
-    "typescript.suggest.autoImports": true,
-    "javascript.suggest.autoImports": true
-    ```
+   ```json
+   "typescript.suggest.autoImports": true,
+   "javascript.suggest.autoImports": true
+   ```
 
 2. **Enable Git decorations**:
 
-    ```json
-    "git.decorations.enabled": true,
-    "git.autorefresh": true
-    ```
+   ```json
+   "git.decorations.enabled": true,
+   "git.autorefresh": true
+   ```
 
 3. **Enable all Copilot languages**:
 
-    ```json
-    "github.copilot.enable": {
-      "*": true
-    }
-    ```
+   ```json
+   "github.copilot.enable": {
+     "*": true
+   }
+   ```
 
 4. **Restore TypeScript strictness**:
 
-    ```json
-    "strict": true,
-    "noUnusedLocals": true
-    ```
+   ```json
+   "strict": true,
+   "noUnusedLocals": true
+   ```
 
 ## Monitoring Performance
 

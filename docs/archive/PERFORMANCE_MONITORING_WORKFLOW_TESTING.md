@@ -63,12 +63,12 @@ interface TestInterface {
 
 const testObj: TestInterface = {
   // Should show autocomplete for 'name' and 'value'
-}
+};
 
 // Test error detection
 const invalidObj: TestInterface = {
   // Should show red underlines for missing properties
-}
+};
 ```
 
 **Expected Results**:
@@ -84,8 +84,8 @@ const invalidObj: TestInterface = {
 
 ```typescript
 // Add intentional ESLint violations
-var unusedVariable = "test";  // Should show warning
-console.log("test")          // Should show semicolon error
+var unusedVariable = 'test'; // Should show warning
+console.log('test'); // Should show semicolon error
 ```
 
 **Expected Results**:
@@ -119,8 +119,10 @@ console.log("test")          // Should show semicolon error
 
 ```typescript
 // Messy formatting test
-const   test={name:"John",age:30,items:[1,2,3]};
-function badFormat(  param1:string,param2:number  ){return param1+param2;}
+const test = { name: 'John', age: 30, items: [1, 2, 3] };
+function badFormat(param1: string, param2: number) {
+  return param1 + param2;
+}
 ```
 
 **Action**: Right-click → "Format Document" or `Shift+Alt+F`
@@ -152,8 +154,8 @@ function badFormat(  param1:string,param2:number  ){return param1+param2;}
 
 ```typescript
 // Test Error Lens
-const test: string = 123;  // Type error
-undefinedFunction();       // Reference error
+const test: string = 123; // Type error
+undefinedFunction(); // Reference error
 ```
 
 **Expected Results**:
@@ -196,7 +198,7 @@ undefinedFunction();       // Reference error
 "typescript.suggest.completeFunctionCalls": true,
 "editor.quickSuggestions": {
     "other": "on",
-    "comments": "off", 
+    "comments": "off",
     "strings": "off"
 }
 ```

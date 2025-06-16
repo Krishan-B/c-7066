@@ -50,7 +50,7 @@
 
 1. **Update Codespace Settings** (via GitHub.com):
 
-   ```
+   ```text
    - Go to GitHub.com → Settings → Codespaces
    - Set "Default idle timeout" to 240 minutes (4 hours)
    - Set "Default retention period" to 30 days

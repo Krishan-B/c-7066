@@ -128,7 +128,7 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
         isValid:
           password.length >= 8 &&
           /[A-Z]/.test(password) &&
-          /[0-9]/.test(password) &&
+          /\d/.test(password) &&
           /[!@#$%^&*]/.test(password),
       }));
 
@@ -178,13 +178,22 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
       const validateOAuthCallback = vi.fn((provider, code, receivedState, expectedState) => ({
         isValid: receivedState === expectedState && code.length > 0,
         codeVerifier: receivedState === expectedState ? 'test-verifier' : undefined,
-        error:
-          receivedState !== expectedState
-            ? 'CSRF attack detected'
-            : !code
-              ? 'Authorization code missing'
-              : undefined,
+        error: getOAuthError(receivedState, expectedState, code),
       }));
+
+      function getOAuthError(
+        receivedState: string,
+        expectedState: string,
+        code?: string
+      ): string | undefined {
+        if (receivedState !== expectedState) {
+          return 'CSRF attack detected';
+        }
+        if (!code) {
+          return 'Authorization code missing';
+        }
+        return undefined;
+      }
 
       // Valid callback
       const validResult = validateOAuthCallback('google', 'auth-code', 'state', 'state');
@@ -217,7 +226,7 @@ describe('Phase 1B Security Implementation - Final Validation', () => {
           security: { stateLength: 32, nonceLength: 32, sessionTimeout: 3600 },
         },
         twoFactor: {
-          totp: {
+          top: {
             issuer: 'TradePro',
             algorithm: 'SHA1',
             digits: 6,

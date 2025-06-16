@@ -83,11 +83,11 @@ If the project is very large, consider adding more ignore patterns:
 {
   ignores: [
     // ... existing patterns
-    "tests/coverage/**",
-    "src/test/**",
-    "**/*.spec.ts",
-    "**/*.test.ts"
-  ]
+    'tests/coverage/**',
+    'src/test/**',
+    '**/*.spec.ts',
+    '**/*.test.ts',
+  ];
 }
 ```
 

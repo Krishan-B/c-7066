@@ -201,3 +201,9 @@ types/app/
 !.eslintrc.js
 !jest.config.js
 !playwright.config.js
+
+# Build cache and temporary files
+*.tsbuildinfo
+.eslintcache
+.cache/
+tsconfig.*.tsbuildinfo
