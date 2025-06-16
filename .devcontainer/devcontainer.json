@@ -3,133 +3,206 @@
   "image": "mcr.microsoft.com/devcontainers/node:20-bullseye",
 
   // === RESOURCE OPTIMIZATION ===
-  "hostRequirements": {
-    "cpus": 4,
-    "memory": "8gb",
-    "storage": "32gb"
-  },
+  // "customizations": {
+  //  "codespaces": {
+  //    "repositories": {
+  //      "Krishan-B/Trade-Pro": {
+  //        "permissions": {
+  //          "actions": "write",
+  //          "contents": "write",
+  //          "issues": "write",
+  //          "pull_requests": "write",
+  //          "discussions": "write",
+  //          "workflows": "write",
+  //          "security_events": "write",
+  //          "repository_projects": "write",
+  //          "packages": "write",
+  //          "deployments": "write",
+  //          "checks": "write",
+  //          "statuses": "write",
+  //          "pages": "write",
+  //          "administration": "write",
+  //          "secrets": "write",
+  //          "codespaces": "write"
+  //        }
+  //      }
+  //    }
+  //  }
+  // },
 
-  // === CONTAINER PERFORMANCE ===
-  "runArgs": [
-    "--memory=6g",
-    "--memory-swap=8g",
-    "--cpus=2",
-    "--oom-kill-disable",
-    "--security-opt=no-new-privileges:true"
-  ],
-
-  // === CODESPACE TIMEOUT PREVENTION ===
+  // === EXTENSIONS ===
+  // ...existing code...
   "customizations": {
-    "codespaces": {
-      "idleTimeout": "4h",
-      "retentionPeriod": "30d"
-    },
     "vscode": {
-      "settings": {
-        // Performance-first settings
-        "github.copilot.advanced.timeout": 1000,
-        "github.copilot.advanced.requestTimeout": 500,
-        "github.copilot.advanced.length": 50,
-        "github.copilot.advanced.listCount": 1,
-        "github.copilot.advanced.inlineSuggestCount": 1,
-        "typescript.tsserver.maxTsServerMemory": 1536,
-        "typescript.preferences.importModuleSpecifier": "relative",
-        "typescript.suggest.autoImports": false,
-        "typescript.updateImportsOnFileMove.enabled": "never",
-        "typescript.tsserver.useSyntaxServer": "always",
-        "typescript.experimental.tsserver.web.typeAcquisition.enabled": false,
-        "editor.formatOnSave": false,
-        "editor.minimap.enabled": false,
-        "editor.semanticHighlighting.enabled": false,
-        "editor.wordBasedSuggestions": "off",
-        "files.autoSave": "onFocusChange",
-        "files.exclude": {
-          "**/node_modules": true,
-          "**/dist": true,
-          "**/build": true,
-          "**/.git": true,
-          "**/coverage": true,
-          "**/.eslintcache": true,
-          "**/tsconfig.tsbuildinfo": true,
-          "**/*.log": true,
-          "**/.cache": true,
-          "**/test-results": true
-        },
-        "search.exclude": {
-          "**/node_modules": true,
-          "**/dist": true,
-          "**/build": true,
-          "**/coverage": true,
-          "**/.git": true,
-          "**/.eslintcache": true,
-          "**/tsconfig.tsbuildinfo": true,
-          "**/test-results": true
-        },
-        "extensions.autoUpdate": false,
-        "extensions.autoCheckUpdates": false,
-        "telemetry.telemetryLevel": "off",
-        "workbench.enableExperiments": false,
-        "workbench.settings.enableNaturalLanguageSearch": false,
-        "workbench.startupEditor": "none",
-        "git.decorations.enabled": false,
-        "git.enableStatusBarSync": false,
-        "git.autoRepositoryDetection": false,
-        "scm.diffDecorations": "none"
-      },
       "extensions": [
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
         "ms-vscode.vscode-typescript-next",
-        "bradlc.vscode-tailwindcss",
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
-        "github.copilot",
+        "bradlc.vscode-tailwindcss",
+        "Prisma.prisma",
+        "ms-azuretools.vscode-docker",
+        "GitHub.vscode-github-actions",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "donjayamanne.githistory",
+        "Gruntfuggly.todo-tree",
+        "streetsidesoftware.code-spell-checker",
+        "yoavbls.pretty-ts-errors",
+        "wayou.vscode-todo-highlight",
+        "vscode-icons-team.vscode-icons",
+        "aaron-bond.better-comments",
+        "christian-kohler.path-intellisense",
+        "formulahendry.auto-rename-tag",
+        "dsznajder.es7-react-js-snippets",
+        "xabikos.JavaScriptSnippets",
+        "firsttris.vscode-jest-runner",
+        "Orta.vscode-jest",
+        "ms-playwright.playwright",
         "vitest.explorer",
-        "GitHub.copilot-chat",
-        "github.vscode-github-actions"
+        "zixuanchen.vitest-explorer",
+        "Vue.volar",
+        "Vue.vscode-typescript-vue-plugin",
+        "msjsdiag.debugger-for-chrome",
+        "msjsdiag.vscode-react-native",
+        "syler.sass-indented",
+        "stylelint.vscode-stylelint",
+        "csstools.postcss",
+        "Supabase.supabase",
+        "GraphQL.vscode-graphql",
+        "apollographql.vscode-apollo",
+        "rangav.vscode-thunder-client",
+        "adpyke.codesnap",
+        "WallabyJs.quokka-vscode",
+        "WallabyJs.wallaby-vscode",
+        "SonarSource.sonarlint-vscode",
+        "redhat.vscode-yaml",
+        "ms-vscode.makefile-tools",
+        "shd101wyy.markdown-preview-enhanced",
+        "DavidAnson.vscode-markdownlint",
+        "yzhang.markdown-all-in-one",
+        "bierner.markdown-mermaid",
+        "cweijan.vscode-postgresql-client2"
+      ],
+      // === VS CODE SETTINGS === // Moved settings block here
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "files.exclude": {
+          "**/.git": true,
+          "**/.DS_Store": true,
+          "**/node_modules": true,
+          "**/.next": true,
+          "**/dist": true,
+          "**/coverage": true
+        }
+      }
+    }
+  },
+
+  // === FEATURES ===
+  // ...existing code...
+  // The "settings" block that was previously here has been moved up.
+  // ...existing code...
+
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {},
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "dockerComposeVersion": "latest",
+      "dockerVersion": "latest"
+    },
+    "ghcr.io/devcontainers/features/node:2": {
+      "version": "20",
+      "installNpmGlobally": true,
+      "npmGlobalPackages": [
+        "@types/node",
+        "@types/react",
+        "@types/react-dom",
+        "@types/jest",
+        "@types/cypress",
+        "@types/supabase-js"
       ]
     }
   },
 
-  // === LIFECYCLE OPTIMIZATION ===
-  "onCreateCommand": [
-    "npm config set cache /workspaces/c-7066/.npm",
-    "npm config set prefer-offline true",
-    "npm config set audit false",
-    "npm config set fund false",
-    "npm ci --cache /workspaces/c-7066/.npm --prefer-offline --no-audit --no-fund"
-  ],
-  "updateContentCommand": "npm ci --cache /workspaces/c-7066/.npm --prefer-offline --no-audit --no-fund",
-  "postCreateCommand": [
-    "git config --global init.defaultBranch main",
-    "git config --global core.autocrlf false",
-    "git config --global core.preloadindex true",
-    "git config --global core.fscache true",
-    "git config --global gc.auto 256",
-    "chmod +x .devcontainer/workspace-optimize.sh",
-    "./.devcontainer/workspace-optimize.sh",
-    "echo 'Workspace initialized and optimized successfully'"
-  ],
-  "postStartCommand": "./.devcontainer/workspace-optimize.sh",
+  // === LIFECYCLE HOOKS ===
+  "postCreateCommand": "npm install -g pnpm && pnpm install --frozen-lockfile && pnpm run setup:dev",
+  "postAttachCommand": "pnpm run dev",
 
-  // === FEATURES AND MOUNTS ===
-  "features": {
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "20",
-      "nodeGypDependencies": true
+  // === PORT FORWARDING ===
+  "forwardPorts": [3000, 5173, 6006, 5432, 5433],
+  "portsAttributes": {
+    "3000": { "label": "Application (Next.js Dev)" },
+    "5173": { "label": "Vite Dev Server" },
+    "6006": { "label": "Storybook" },
+    "5432": { "label": "PostgreSQL (Supabase)" },
+    "5433": { "label": "Supabase Studio" }
+  },
+
+  // === VS CODE SETTINGS ===
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "files.exclude": {
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/node_modules": true,
+      "**/.next": true,
+      "**/dist": true,
+      "**/coverage": true
     }
   },
 
-  "mounts": [
-    "source=c7066-node-modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
-    "source=c7066-npm-cache,target=${containerWorkspaceFolder}/.npm,type=volume",
-    "source=c7066-git-cache,target=/home/node/.gitconfig,type=volume"
+  // === ENVIRONMENT VARIABLES ===
+  // "remoteEnv": {
+  //  "DATABASE_URL": "${localEnv:DATABASE_URL}",
+  //  "NEXTAUTH_SECRET": "${localEnv:NEXTAUTH_SECRET}",
+  //  "NEXTAUTH_URL": "https://localhost:3000"
+  // },
+
+  // === DOCKER CONFIGURATION ===
+  "runArgs": ["--init"],
+  "mounts": ["source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"],
+  "overrideFeatureInstallOrder": [
+    "ghcr.io/devcontainers/features/common-utils",
+    "ghcr.io/devcontainers/features/git",
+    "ghcr.io/devcontainers/features/github-cli"
   ],
 
-  // === WORKSPACE PERSISTENCE ===
-  "workspaceFolder": "/workspaces/c-7066",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/c-7066,type=bind,consistency=cached",
-
-  // === SECURITY ===
-  "remoteUser": "root",
-  "containerUser": "root"
+  // === WORKSPACE CONFIGURATION ===
+  "workspaceFolder": "/workspaces/Trade-Pro",
+  "shutdownAction": "stopContainer"
 }
