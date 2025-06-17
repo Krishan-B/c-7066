@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+
 import { useToast } from '@/hooks/use-toast';
 import { type Asset } from '@/types/account';
 
@@ -35,7 +36,6 @@ export const usePortfolioActions = () => {
       });
 
       // Mock implementation - would navigate to asset detail page
-      // console.log('Viewing asset details:', asset);
     },
     [toast]
   );

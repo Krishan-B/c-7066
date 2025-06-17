@@ -1,4 +1,3 @@
-
 export interface BaseOrder {
   id: string;
   symbol: string;

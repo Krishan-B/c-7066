@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardHeader } from '@/components/ui/card';
 import { Wallet } from 'lucide-react';
-import DepositForm from '@/components/wallet/DepositForm';
-import WithdrawForm from '@/components/wallet/WithdrawForm';
+
+import { Card, CardHeader } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import BalanceInfo from '@/components/wallet/BalanceInfo';
+import DepositForm from '@/components/wallet/DepositForm';
 import TransactionHistory from '@/components/wallet/TransactionHistory';
+import WithdrawForm from '@/components/wallet/WithdrawForm';
 
 const WalletPage = () => {
   const [_activeTab, setActiveTab] = useState('deposit');
@@ -21,8 +22,8 @@ const WalletPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="col-span-1 lg:col-span-2 h-fit">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <Card className="col-span-1 h-fit lg:col-span-2">
             <CardHeader>
               <Tabs defaultValue="deposit" onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">

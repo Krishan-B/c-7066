@@ -1,7 +1,7 @@
+import React from 'react';
+import { Search } from 'lucide-react';
 
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Input } from '@/components/ui/input';
 
 interface MarketSearchProps {
   searchTerm: string;

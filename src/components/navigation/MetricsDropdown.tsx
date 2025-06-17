@@ -1,14 +1,14 @@
+import React from 'react';
+import { ChevronDown } from 'lucide-react';
 
-import React from "react";
-import { ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { type MetricItem as MetricItemType } from "@/types/account";
+} from '@/components/ui/dropdown-menu';
+import { type MetricItem as MetricItemType } from '@/types/account';
 
 interface MetricsDropdownProps {
   metrics: MetricItemType[];
@@ -19,26 +19,22 @@ const MetricsDropdown = ({ metrics, onClick }: MetricsDropdownProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="h-auto flex items-center hover:bg-transparent"
-        >
+        <Button variant="ghost" size="sm" className="flex h-auto items-center hover:bg-transparent">
           <ChevronDown className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-background w-[400px] p-4">
-        <div className="font-semibold text-lg mb-2 border-b pb-2">Account Details</div>
+      <DropdownMenuContent align="end" className="w-[400px] bg-background p-4">
+        <div className="mb-2 border-b pb-2 text-lg font-semibold">Account Details</div>
         <div className="space-y-4">
           {metrics.map((item, index) => (
-            <DropdownMenuItem 
-              key={index} 
+            <DropdownMenuItem
+              key={index}
               onClick={onClick}
-              className="flex flex-col items-start cursor-pointer p-0 focus:bg-transparent hover:bg-transparent"
+              className="flex cursor-pointer flex-col items-start p-0 hover:bg-transparent focus:bg-transparent"
             >
               <div className="flex w-full">
-                <span className="font-semibold text-base mr-3">{item.value}</span>
-                <span className="font-semibold text-base">{item.label}</span>
+                <span className="mr-3 text-base font-semibold">{item.value}</span>
+                <span className="text-base font-semibold">{item.label}</span>
               </div>
               <p className="text-sm text-muted-foreground">{item.tooltip}</p>
             </DropdownMenuItem>

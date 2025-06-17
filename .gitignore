@@ -1,3 +1,11 @@
+# Build cache
+*.tsbuildinfo
+tsconfig.*.tsbuildinfo
+
+# Temporary docs
+*COMPLETE.md
+*OPTIMIZATION*.md
+
 # Logs
 logs
 *.log

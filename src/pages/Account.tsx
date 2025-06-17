@@ -1,13 +1,14 @@
-import { User } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProfileForm } from "@/components/account/ProfileForm";
-import { PasswordForm } from "@/components/account/PasswordForm";
-import { SecuritySettings } from "@/components/account/SecuritySettings";
-import { NotificationPreferences } from "@/components/account/NotificationPreferences";
-import { AccountStatus } from "@/components/account/AccountStatus";
-import { AccountSecurity } from "@/components/account/AccountSecurity";
-// Add this if it's needed but missing
+import { User } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ProfileForm } from '@/components/account/ProfileForm';
+import { PasswordForm } from '@/components/account/PasswordForm';
+import { SecuritySettings } from '@/components/account/SecuritySettings';
+import { NotificationPreferences } from '@/components/account/NotificationPreferences';
+import { AccountStatus } from '@/components/account/AccountStatus';
+import { AccountSecurity } from '@/components/account/AccountSecurity';
+import MfaSetup from '@/features/auth/components/MfaSetup';
+import { GDPRDataManagement } from '@/components/account/GDPRDataManagement'; // Import GDPRDataManagement
 
 const Account = () => {
   return (
@@ -29,7 +30,7 @@ const Account = () => {
                 <TabsTrigger value="security">Security</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="profile" className="mt-6">
                 <Card>
                   <CardHeader>
@@ -41,7 +42,7 @@ const Account = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
-              
+
               <TabsContent value="security" className="mt-6 space-y-6">
                 <Card>
                   <CardHeader>
@@ -52,15 +53,29 @@ const Account = () => {
                     <PasswordForm />
                   </CardContent>
                 </Card>
+                {/* Integrate MfaSetup component here */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Multi-Factor Authentication</CardTitle>
+                    <CardDescription>
+                      Manage your MFA settings for enhanced security.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <MfaSetup />
+                  </CardContent>
+                </Card>
                 <SecuritySettings />
+                {/* Add GDPR Data Management section */}
+                <GDPRDataManagement />
               </TabsContent>
-              
+
               <TabsContent value="notifications" className="mt-6">
                 <NotificationPreferences />
               </TabsContent>
             </Tabs>
           </div>
-          
+
           <div className="space-y-6">
             <AccountStatus />
             <AccountSecurity />

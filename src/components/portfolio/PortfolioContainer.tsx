@@ -1,20 +1,19 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/auth';
+import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 
+import PerformanceChart from '@/components/portfolio/PerformanceChart';
+import PortfolioMetricsCards from '@/components/portfolio/PortfolioMetricsCards';
+import PortfolioSideSection from '@/components/portfolio/PortfolioSideSection';
 // Import components
 import PortfolioSummary from '@/components/portfolio/PortfolioSummary';
-import PortfolioMetricsCards from '@/components/portfolio/PortfolioMetricsCards';
-import PerformanceChart from '@/components/portfolio/PerformanceChart';
 import PositionsSection from '@/components/portfolio/PositionsSection';
-import PortfolioSideSection from '@/components/portfolio/PortfolioSideSection';
 import RiskManagementPanel from '@/components/portfolio/RiskManagementPanel';
-
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/hooks/auth';
 // Import the real-time portfolio hook
 import { useRealTimePortfolio } from '@/hooks/portfolio/useRealTimePortfolio';
 import { type Asset } from '@/types/account';
@@ -54,13 +53,13 @@ const PortfolioContainer = () => {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh]">
-        <Card className="max-w-md w-full">
+      <div className="flex min-h-[80vh] flex-col items-center justify-center">
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">Sign In Required</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
-            <p className="text-center mb-4">You need to sign in to view your portfolio</p>
+            <p className="mb-4 text-center">You need to sign in to view your portfolio</p>
             <Button onClick={() => navigate('/auth')}>Sign In</Button>
           </CardContent>
         </Card>
@@ -70,7 +69,7 @@ const PortfolioContainer = () => {
 
   if (isLoading || !portfolioData) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh]">
+      <div className="flex min-h-[80vh] flex-col items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="mt-4 text-muted-foreground">Loading portfolio data...</p>
       </div>
@@ -79,10 +78,10 @@ const PortfolioContainer = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[80vh] p-4">
-        <Card className="max-w-md w-full">
+      <div className="flex min-h-[80vh] flex-col items-center justify-center p-4">
+        <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-center text-destructive flex items-center justify-center gap-2">
+            <CardTitle className="flex items-center justify-center gap-2 text-center text-destructive">
               <AlertCircle className="h-5 w-5" />
               Error Loading Portfolio
             </CardTitle>
@@ -96,7 +95,7 @@ const PortfolioContainer = () => {
                   : 'There was a problem loading your portfolio data. Please try again.'}
               </AlertDescription>
             </Alert>
-            <p className="text-center mb-6 text-muted-foreground">
+            <p className="mb-6 text-center text-muted-foreground">
               This could be due to network connectivity issues or a temporary server problem.
             </p>
             <div className="flex gap-4">
@@ -134,21 +133,21 @@ const PortfolioContainer = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="mx-auto max-w-7xl p-6">
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Portfolio</h1>
+            <h1 className="mb-2 text-2xl font-bold">Portfolio</h1>
             <p className="text-muted-foreground">
               Track and manage your investments
               {isSubscribed && (
-                <span className="ml-2 text-xs text-green-500 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
+                <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-500 dark:bg-green-900/30">
                   Live updates
                 </span>
               )}
             </p>
           </div>
 
-          <div className="flex mt-4 md:mt-0">
+          <div className="mt-4 flex md:mt-0">
             <Button
               variant="outline"
               size="sm"
@@ -170,7 +169,7 @@ const PortfolioContainer = () => {
           pnlPercentage={totalPnLPercentage || 0}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <PortfolioMetricsCards
               totalValue={totalValue}
@@ -200,7 +199,7 @@ const PortfolioContainer = () => {
           onTimeframeChange={setTimeframe}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
           <div className="lg:col-span-3">
             <PositionsSection
               assets={assets}

@@ -1,6 +1,7 @@
-import { TrendingUp, TrendingDown, PieChart } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PieChart, TrendingDown, TrendingUp } from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const PortfolioCard = () => {
   // Mock portfolio data - replace with real data from your API
@@ -31,10 +32,10 @@ const PortfolioCard = () => {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-card to-card/80 border-border shadow-lg">
+    <Card className="border-border bg-gradient-to-br from-card to-card/80 shadow-lg">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-semibold flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-xl font-semibold">
             <PieChart className="h-5 w-5 text-primary" />
             Portfolio Overview
           </CardTitle>
@@ -79,7 +80,7 @@ const PortfolioCard = () => {
               <div key={asset.name} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-3 h-3 rounded-full bg-primary"
+                    className="h-3 w-3 rounded-full bg-primary"
                     style={{
                       backgroundColor: getAssetColor(asset.name),
                     }}
@@ -99,11 +100,11 @@ const PortfolioCard = () => {
 
         {/* Progress Bar */}
         <div className="space-y-2">
-          <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
             <div className="flex h-full">
-              <div className="bg-indigo-500 h-full" style={{ width: '65%' }}></div>
-              <div className="bg-green-500 h-full" style={{ width: '25%' }}></div>
-              <div className="bg-yellow-500 h-full" style={{ width: '10%' }}></div>
+              <div className="h-full bg-indigo-500" style={{ width: '65%' }}></div>
+              <div className="h-full bg-green-500" style={{ width: '25%' }}></div>
+              <div className="h-full bg-yellow-500" style={{ width: '10%' }}></div>
             </div>
           </div>
         </div>

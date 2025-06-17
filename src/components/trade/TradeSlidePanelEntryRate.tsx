@@ -1,5 +1,4 @@
-
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
 
 interface TradeSlidePanelEntryRateProps {
   orderRate: string;
@@ -29,7 +28,8 @@ export const TradeSlidePanelEntryRate = ({
         disabled={isExecuting}
       />
       <p className="text-xs text-muted-foreground">
-        Rate should be above {(currentPrice * 0.98).toFixed(4)} or below {(currentPrice * 1.02).toFixed(4)}
+        Rate should be above {(currentPrice * 0.98).toFixed(4)} or below{' '}
+        {(currentPrice * 1.02).toFixed(4)}
       </p>
     </div>
   );

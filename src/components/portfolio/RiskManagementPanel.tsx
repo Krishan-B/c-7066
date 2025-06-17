@@ -1,8 +1,9 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { AlertTriangle, Info, Shield, TrendingDown } from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, TrendingDown, Shield, Info } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatRiskLevel, RISK_LEVELS } from '@/utils/riskManagementUtils';
 
@@ -36,7 +37,7 @@ const RiskManagementPanel = ({
   return (
     <Card>
       <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Risk Management</CardTitle>
           <Badge variant={marginStatus === RISK_LEVELS.SAFE ? 'default' : 'destructive'}>
             {text}
@@ -47,7 +48,7 @@ const RiskManagementPanel = ({
       <CardContent className="space-y-4">
         {/* Margin Level Indicator */}
         <div className="space-y-2">
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               <span className="text-sm font-medium">Margin Level:</span>
@@ -67,8 +68,8 @@ const RiskManagementPanel = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex flex-col p-3 rounded-md border bg-muted/50">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="flex flex-col rounded-md border bg-muted/50 p-3">
+                  <div className="mb-1 flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-amber-500" />
                     <span className="text-xs">Margin Call</span>
                   </div>
@@ -84,8 +85,8 @@ const RiskManagementPanel = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex flex-col p-3 rounded-md border bg-muted/50">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="flex flex-col rounded-md border bg-muted/50 p-3">
+                  <div className="mb-1 flex items-center gap-2">
                     <TrendingDown className="h-4 w-4 text-destructive" />
                     <span className="text-xs">Liquidation</span>
                   </div>
@@ -100,8 +101,8 @@ const RiskManagementPanel = ({
         </div>
 
         {/* Risk Status */}
-        <div className="flex items-start gap-2 p-3 rounded-md bg-muted text-sm">
-          <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+        <div className="flex items-start gap-2 rounded-md bg-muted p-3 text-sm">
+          <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
           <div>
             {marginStatus === RISK_LEVELS.SAFE ? (
               <p>Your account has a healthy margin level. You have room to open more positions.</p>
@@ -114,7 +115,7 @@ const RiskManagementPanel = ({
                 Margin call warning! Add funds or reduce positions to avoid liquidation.
               </p>
             ) : (
-              <p className="text-destructive font-bold">
+              <p className="font-bold text-destructive">
                 Liquidation risk! Your positions may be automatically closed if equity decreases
                 further.
               </p>

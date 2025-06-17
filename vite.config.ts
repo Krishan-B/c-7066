@@ -1,65 +1,81 @@
 /**
- * Vite configuration for Trade-Pro
- * - Handles build and dev server settings
- * - See PROJECT_CLEANUP_AND_CONFIG.md for details
+ * Vite Configuration for Trade-Pro
+ * Optimized for React + TypeScript development with modern tooling
  */
 
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
 import path from 'path';
+import react from '@vitejs/plugin-react-swc';
+import { defineConfig } from 'vite';
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: '::',
+    host: '0.0.0.0',
     port: 8080,
+    open: false,
+    hmr: {
+      port: 8081,
+    },
+    watch: {
+      usePolling: true,
+    },
   },
-  plugins: [react()].filter(Boolean),
+  preview: {
+    host: '0.0.0.0',
+    port: 4173,
+  },
+  plugins: [
+    react({
+      tsDecorators: true,
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    types: ['@testing-library/jest-dom'],
-  },
   build: {
+    target: 'esnext',
+    minify: 'esbuild',
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 1000,
+    reportCompressedSize: false,
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-core': ['react', 'react-dom'],
-          'react-router': ['react-router-dom'],
-          'radix-core': [
+          'react-vendor': ['react', 'react-dom'],
+          'router-vendor': ['react-router-dom'],
+          'ui-vendor': [
             '@radix-ui/react-tabs',
             '@radix-ui/react-dialog',
             '@radix-ui/react-select',
             '@radix-ui/react-switch',
             '@radix-ui/react-tooltip',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-dropdown-menu',
           ],
-          'radix-forms': [
-            '@radix-ui/react-form',
-            '@radix-ui/react-checkbox',
-            '@radix-ui/react-radio-group',
-            '@radix-ui/react-toggle',
-          ],
+          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
           'chart-vendor': ['recharts'],
-          'data-vendor': ['@tanstack/react-query'],
-          'auth-vendor': ['@supabase/supabase-js'],
-          'date-utils': ['date-fns'],
-          'form-utils': ['react-hook-form', '@hookform/resolvers', 'zod'],
-          'ui-animations': ['framer-motion', 'tailwindcss-animate'],
+          'query-vendor': ['@tanstack/react-query'],
+          'supabase-vendor': ['@supabase/supabase-js'],
+          'animation-vendor': ['framer-motion'],
+          'utils-vendor': ['date-fns', 'clsx', 'tailwind-merge', 'class-variance-authority'],
         },
-        inlineDynamicImports: false,
-        chunkFileNames: '[name]-[hash].js',
       },
     },
-    target: 'esnext',
-    minify: 'esbuild',
-    cssCodeSplit: true,
-    chunkSizeWarningLimit: 800,
-    reportCompressedSize: false,
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@tanstack/react-query',
+      '@supabase/supabase-js',
+      'recharts',
+      'framer-motion',
+      'lucide-react',
+    ],
+  },
+  define: {
+    __DEV__: mode === 'development',
   },
 }));

@@ -1,9 +1,8 @@
-
-import OrderTypeSelector from "./OrderTypeSelector";
+import OrderTypeSelector from './OrderTypeSelector';
 
 interface TradeSlidePanelOrderTypeSelectorProps {
-  orderType: "market" | "entry";
-  setOrderType: (type: "market" | "entry") => void;
+  orderType: 'market' | 'entry';
+  setOrderType: (type: 'market' | 'entry') => void;
   isExecuting: boolean;
 }
 
@@ -15,7 +14,7 @@ export const TradeSlidePanelOrderTypeSelector = ({
   // Map slide panel types to OrderTypeSelector types for compatibility
   const handleOrderTypeChange = (type: string) => {
     // Only accept "market" or convert other types to "entry"
-    setOrderType(type === "market" ? "market" : "entry");
+    setOrderType(type === 'market' ? 'market' : 'entry');
   };
 
   return (

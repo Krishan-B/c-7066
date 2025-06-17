@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
-import { ThemeProviderContent } from '../../../src/components/theme/ThemeProviderContent';
 import { useContext } from 'react';
+import { render, screen } from '@testing-library/react';
+
 import { ThemeContext } from '../../../src/components/theme/theme-utils';
+import { ThemeProviderContent } from '../../../src/components/theme/ThemeProviderContent';
 
 beforeAll(() => {
   window.matchMedia =

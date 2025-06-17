@@ -1,4 +1,7 @@
 import React from 'react';
+import { ArrowDown, ArrowUp, Bell, Star } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -7,12 +10,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowUp, ArrowDown, Star, Bell } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
-import { formatCurrency, formatNumber } from '@/utils/formatUtils';
 import type { Asset } from '@/hooks/market/types';
+import { formatCurrency, formatNumber } from '@/utils/formatUtils';
 
 interface MarketListProps {
   isLoading: boolean;
@@ -61,8 +62,8 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
 
   if (isLoading) {
     return (
-      <div className="p-8 flex justify-center items-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="flex items-center justify-center p-8">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -90,13 +91,13 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
           <Table>
             <TableHeader className="bg-muted/40">
               <TableRow>
-                <TableHead className="font-semibold py-3 px-2 text-left">Symbol</TableHead>
-                <TableHead className="font-semibold py-3 px-2 text-left">Asset Name</TableHead>
-                <TableHead className="font-semibold py-3 px-2 text-right">24h Change</TableHead>
-                <TableHead className="font-semibold py-3 px-2 text-right">Day Range</TableHead>
-                <TableHead className="font-semibold py-3 px-2 text-right">Sell Price</TableHead>
-                <TableHead className="font-semibold py-3 px-2 text-right">Buy Price</TableHead>
-                <TableHead className="text-center py-3 px-2 w-[100px]">Actions</TableHead>
+                <TableHead className="px-2 py-3 text-left font-semibold">Symbol</TableHead>
+                <TableHead className="px-2 py-3 text-left font-semibold">Asset Name</TableHead>
+                <TableHead className="px-2 py-3 text-right font-semibold">24h Change</TableHead>
+                <TableHead className="px-2 py-3 text-right font-semibold">Day Range</TableHead>
+                <TableHead className="px-2 py-3 text-right font-semibold">Sell Price</TableHead>
+                <TableHead className="px-2 py-3 text-right font-semibold">Buy Price</TableHead>
+                <TableHead className="w-[100px] px-2 py-3 text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -108,17 +109,17 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
                     className="cursor-pointer border-b hover:bg-muted/30"
                     onClick={() => onSelectAsset(enhancedAsset)}
                   >
-                    <TableCell className="font-medium py-3 px-2">
+                    <TableCell className="px-2 py-3 font-medium">
                       <div className="flex items-center gap-2">
-                        <div className="rounded-full bg-primary/10 w-8 h-8 flex items-center justify-center text-xs text-primary font-bold">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                           {asset.symbol.substring(0, 2)}
                         </div>
                         <span>{asset.symbol}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="py-3 px-2">{asset.name}</TableCell>
+                    <TableCell className="px-2 py-3">{asset.name}</TableCell>
                     <TableCell
-                      className={`py-3 px-2 text-right ${asset.change_percentage >= 0 ? 'text-success' : 'text-destructive'}`}
+                      className={`px-2 py-3 text-right ${asset.change_percentage >= 0 ? 'text-success' : 'text-destructive'}`}
                     >
                       <span className="flex items-center justify-end">
                         {asset.change_percentage >= 0 ? (
@@ -129,21 +130,21 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
                         {formatNumber(Math.abs(asset.change_percentage), 2)}%
                       </span>
                     </TableCell>
-                    <TableCell className="py-3 px-2 text-right">
+                    <TableCell className="px-2 py-3 text-right">
                       <div className="flex items-center justify-end text-xs text-muted-foreground">
                         <span>{formatCurrency(enhancedAsset.day_low ?? 0)}</span>
                         <span className="mx-1">-</span>
                         <span>{formatCurrency(enhancedAsset.day_high ?? 0)}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="py-3 px-2 text-right font-mono text-destructive">
+                    <TableCell className="px-2 py-3 text-right font-mono text-destructive">
                       {formatCurrency(enhancedAsset.sell_price ?? 0)}
                     </TableCell>
-                    <TableCell className="py-3 px-2 text-right font-mono text-success">
+                    <TableCell className="px-2 py-3 text-right font-mono text-success">
                       {formatCurrency(enhancedAsset.buy_price ?? 0)}
                     </TableCell>
-                    <TableCell className="py-3 px-2">
-                      <div className="flex justify-center items-center gap-2">
+                    <TableCell className="px-2 py-3">
+                      <div className="flex items-center justify-center gap-2">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button

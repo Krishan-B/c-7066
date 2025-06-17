@@ -1,8 +1,14 @@
+import React from 'react';
+import { Search } from 'lucide-react';
 
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search } from "lucide-react";
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface PositionFilterProps {
   filterSymbol: string;
@@ -15,10 +21,10 @@ const PositionFilter = ({
   filterSymbol,
   filterPnl,
   onSymbolChange,
-  onPnlChange
+  onPnlChange,
 }: PositionFilterProps) => {
   return (
-    <div className="flex flex-col md:flex-row gap-4 mb-4">
+    <div className="mb-4 flex flex-col gap-4 md:flex-row">
       <div className="relative flex-1">
         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input

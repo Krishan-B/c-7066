@@ -1,10 +1,7 @@
-import { useEffect, useState } from "react";
-import { 
-  ThemeContext,
-  getInitialTheme,
-  applyThemeToDOM
-} from "./theme-utils";
-import type { Theme } from "./theme-utils";
+import { useEffect, useState } from 'react';
+
+import { applyThemeToDOM, getInitialTheme, ThemeContext } from './theme-utils';
+import type { Theme } from './theme-utils';
 
 interface ThemeProviderProps {
   children: React.ReactNode;
@@ -19,12 +16,8 @@ export function ThemeProviderContent({ children }: ThemeProviderProps) {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => (prev === "dark" ? "light" : "dark"));
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
 }

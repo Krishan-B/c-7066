@@ -1,5 +1,4 @@
-
-import { Slider } from "@/components/ui/slider";
+import { Slider } from '@/components/ui/slider';
 
 interface LeverageSliderProps {
   leverage: number[];
@@ -9,7 +8,7 @@ interface LeverageSliderProps {
 const LeverageSlider = ({ leverage, onLeverageChange }: LeverageSliderProps) => {
   return (
     <div className="mb-4">
-      <div className="flex justify-between mb-1">
+      <div className="mb-1 flex justify-between">
         <label className="text-sm text-muted-foreground">Leverage</label>
         <span className="text-sm font-medium">{leverage[0]}x</span>
       </div>
@@ -21,7 +20,7 @@ const LeverageSlider = ({ leverage, onLeverageChange }: LeverageSliderProps) => 
         value={leverage}
         onValueChange={onLeverageChange}
       />
-      <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
         <span>1x</span>
         <span>10x</span>
         <span>25x</span>

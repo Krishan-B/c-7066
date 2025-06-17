@@ -142,3 +142,16 @@ cross-cutting concerns. Key providers and hooks include:
 | `ci:check`         | Run lint, typecheck, test, and build in CI          |
 | `prepare`          | Install Husky git hooks                             |
 | `typecheck`        | Run TypeScript type checking without emitting files |
+
+## Social Login (Google, Apple)
+
+- Users can sign in or sign up using Google or Apple accounts via OAuth.
+- On the authentication page (`/auth`), click "Continue with Google" or "Continue with Apple" to start the OAuth flow.
+- After successful authentication, you will be redirected back to the app and logged in automatically.
+- The OAuth flow is powered by Supabase Auth and is fully integrated with the user management system.
+
+### Testing Social Login
+
+- End-to-end tests for Google and Apple login buttons and redirect flow are located in `tests/e2e/oauth-login.spec.ts`.
+- For CI, use test Google/Apple accounts or appropriate Playwright plugins/mocks for OAuth.
+- Manual testing: Click the social login buttons and verify successful login and redirection to the dashboard.

@@ -1,7 +1,7 @@
+import { useQuery } from '@tanstack/react-query';
+import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 
-import { ArrowUpIcon, ArrowDownIcon } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 interface CryptoData {
   id: string;
@@ -15,7 +15,9 @@ interface CryptoData {
 }
 
 const fetchCryptoData = async (): Promise<CryptoData[]> => {
-  const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false');
+  const response = await fetch(
+    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false'
+  );
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
@@ -31,14 +33,14 @@ const CryptoList = () => {
 
   if (isLoading) {
     return (
-      <div className="glass-card rounded-lg p-6 animate-pulse">
-        <div className="flex items-center space-x-4 mb-4">
+      <div className="glass-card animate-pulse rounded-lg p-6">
+        <div className="mb-4 flex items-center space-x-4">
           <div className="h-10 w-10 rounded-full bg-secondary"></div>
           <div className="flex-1 space-y-2">
-            <div className="h-4 bg-secondary rounded w-1/4"></div>
-            <div className="h-3 bg-secondary rounded w-1/6"></div>
+            <div className="h-4 w-1/4 rounded bg-secondary"></div>
+            <div className="h-3 w-1/6 rounded bg-secondary"></div>
           </div>
-          <div className="h-6 bg-secondary rounded w-16"></div>
+          <div className="h-6 w-16 rounded bg-secondary"></div>
         </div>
         <div className="space-y-3">
           {[...Array(5)].map((_, i) => (
@@ -46,15 +48,15 @@ const CryptoList = () => {
               <div className="flex items-center space-x-3">
                 <div className="h-8 w-8 rounded-full bg-secondary"></div>
                 <div className="space-y-1">
-                  <div className="h-3 bg-secondary rounded w-24"></div>
-                  <div className="h-2 bg-secondary rounded w-12"></div>
+                  <div className="h-3 w-24 rounded bg-secondary"></div>
+                  <div className="h-2 w-12 rounded bg-secondary"></div>
                 </div>
               </div>
               <div className="space-y-1">
-                <div className="h-3 bg-secondary rounded w-16"></div>
-                <div className="h-2 bg-secondary rounded w-10"></div>
+                <div className="h-3 w-16 rounded bg-secondary"></div>
+                <div className="h-2 w-10 rounded bg-secondary"></div>
               </div>
-              <div className="h-8 bg-secondary rounded w-16"></div>
+              <div className="h-8 w-16 rounded bg-secondary"></div>
             </div>
           ))}
         </div>
@@ -63,7 +65,7 @@ const CryptoList = () => {
   }
 
   return (
-    <div className="glass-card rounded-lg p-4 animate-fade-in">
+    <div className="glass-card animate-fade-in rounded-lg p-4">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -83,7 +85,7 @@ const CryptoList = () => {
                 <td className="py-3 pl-1 text-xs text-muted-foreground">{index + 1}</td>
                 <td className="py-3">
                   <div className="flex items-center gap-2">
-                    <img src={crypto.image} alt={crypto.name} className="w-6 h-6 rounded-full" />
+                    <img src={crypto.image} alt={crypto.name} className="h-6 w-6 rounded-full" />
                     <div>
                       <p className="font-medium">{crypto.name}</p>
                       <p className="text-xs text-muted-foreground">{crypto.symbol.toUpperCase()}</p>
@@ -93,22 +95,28 @@ const CryptoList = () => {
                 <td className="py-3 text-right">${crypto.current_price.toLocaleString()}</td>
                 <td className="py-3 text-right">
                   <span
-                    className={`flex items-center gap-1 justify-end ${
-                      crypto.price_change_percentage_24h >= 0 ? "text-success" : "text-warning"
+                    className={`flex items-center justify-end gap-1 ${
+                      crypto.price_change_percentage_24h >= 0 ? 'text-success' : 'text-warning'
                     }`}
                   >
                     {crypto.price_change_percentage_24h >= 0 ? (
-                      <ArrowUpIcon className="w-3 h-3" />
+                      <ArrowUpIcon className="h-3 w-3" />
                     ) : (
-                      <ArrowDownIcon className="w-3 h-3" />
+                      <ArrowDownIcon className="h-3 w-3" />
                     )}
                     {Math.abs(crypto.price_change_percentage_24h).toFixed(2)}%
                   </span>
                 </td>
-                <td className="py-3 text-right text-muted-foreground">${(crypto.market_cap / 1e9).toFixed(1)}B</td>
-                <td className="py-3 text-right text-muted-foreground">${(crypto.total_volume / 1e9).toFixed(1)}B</td>
+                <td className="py-3 text-right text-muted-foreground">
+                  ${(crypto.market_cap / 1e9).toFixed(1)}B
+                </td>
+                <td className="py-3 text-right text-muted-foreground">
+                  ${(crypto.total_volume / 1e9).toFixed(1)}B
+                </td>
                 <td className="py-3 text-center">
-                  <Button size="sm" variant="outline" className="h-7 px-2 text-xs">Trade</Button>
+                  <Button size="sm" variant="outline" className="h-7 px-2 text-xs">
+                    Trade
+                  </Button>
                 </td>
               </tr>
             ))}

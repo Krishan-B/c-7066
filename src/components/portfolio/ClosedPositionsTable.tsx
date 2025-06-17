@@ -1,7 +1,14 @@
+import React from 'react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 
-import React from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface ClosedPosition {
   id: string;
@@ -49,20 +56,24 @@ const ClosedPositionsTable = ({ positions }: ClosedPositionsTableProps) => {
                   <div>{position.closeDate}</div>
                 </div>
               </TableCell>
-              <TableCell className={`text-right ${position.pnl >= 0 ? 'text-success' : 'text-destructive'}`}>
+              <TableCell
+                className={`text-right ${position.pnl >= 0 ? 'text-success' : 'text-destructive'}`}
+              >
                 <div className="flex items-center justify-end">
-                  {position.pnl >= 0 
-                    ? <ArrowUp className="mr-1 h-4 w-4" />
-                    : <ArrowDown className="mr-1 h-4 w-4" />
-                  }
-                  ${Math.abs(position.pnl).toLocaleString()} ({Math.abs(position.pnlPercentage).toFixed(2)}%)
+                  {position.pnl >= 0 ? (
+                    <ArrowUp className="mr-1 h-4 w-4" />
+                  ) : (
+                    <ArrowDown className="mr-1 h-4 w-4" />
+                  )}
+                  ${Math.abs(position.pnl).toLocaleString()} (
+                  {Math.abs(position.pnlPercentage).toFixed(2)}%)
                 </div>
               </TableCell>
             </TableRow>
           ))}
           {positions.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+              <TableCell colSpan={6} className="py-4 text-center text-muted-foreground">
                 No positions match your filter criteria
               </TableCell>
             </TableRow>

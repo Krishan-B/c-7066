@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('User can enable two-factor authentication', async ({ page }) => {
   await page.goto('/login');

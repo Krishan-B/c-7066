@@ -1,8 +1,8 @@
 import {
-  type KYCDocument,
-  type UserKYCStatus,
   type DocumentUploadData,
+  type KYCDocument,
   type KYCStatus,
+  type UserKYCStatus,
 } from './types';
 
 export class KYCService {

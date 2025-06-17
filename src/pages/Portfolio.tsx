@@ -1,7 +1,7 @@
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
 
-import React from "react";
-import PortfolioContainer from "@/components/portfolio/PortfolioContainer";
-import { Helmet } from "react-helmet-async";
+import PortfolioContainer from '@/components/portfolio/PortfolioContainer';
 
 const Portfolio = () => {
   return (

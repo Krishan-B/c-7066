@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('User can register a new account', async ({ page }) => {
   await page.goto('/auth?tab=signup');

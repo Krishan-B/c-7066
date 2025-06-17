@@ -1,13 +1,15 @@
-import { Shield, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useKYC } from '@/hooks/kyc/useKYC';
-import { useAuth } from '@/hooks/auth';
-import EnhancedDocumentUpload from '@/components/kyc/EnhancedDocumentUpload';
+import type { DocumentCategory, DocumentType } from '@/services/kyc/types';
+import { AlertCircle, Shield } from 'lucide-react';
+
 import DocumentsList from '@/components/kyc/DocumentsList';
+import EnhancedDocumentUpload from '@/components/kyc/EnhancedDocumentUpload';
 import KYCStatusCard from '@/components/kyc/KYCStatusCard';
 import KYCVerificationBanner from '@/components/kyc/KYCVerificationBanner';
-import type { DocumentType, DocumentCategory } from '@/services/kyc/types';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/hooks/auth';
+import { useSessionTimeout } from '@/hooks/auth/useSessionTimeout';
+import { useKYC } from '@/hooks/kyc/useKYC';
 
 const KYCPage = () => {
   const { user } = useAuth();
@@ -21,6 +23,17 @@ const KYCPage = () => {
     isUploading,
     isDeleting,
   } = useKYC();
+
+  useSessionTimeout({
+    isAuthenticated: !!user,
+    onTimeout: () => {
+      window.location.href = '/auth';
+      alert('Your session has expired. Please log in again.');
+    },
+    onWarning: () => {
+      alert('Your session is about to expire. Please save your progress.');
+    },
+  });
 
   const handleUpload = (
     file: File,
@@ -38,8 +51,8 @@ const KYCPage = () => {
 
   if (!user) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-md mx-auto">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mx-auto max-w-md">
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>Please sign in to access KYC verification.</AlertDescription>
@@ -51,9 +64,9 @@ const KYCPage = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
         </div>
       </div>
     );
@@ -61,8 +74,8 @@ const KYCPage = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="max-w-md mx-auto">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mx-auto max-w-md">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -75,11 +88,11 @@ const KYCPage = () => {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
+    <div className="container mx-auto px-4 py-8 md:px-6">
       {/* Enhanced KYC Status Banner */}
       <KYCVerificationBanner forceShow={true} />
 
-      <div className="flex items-center gap-3 mb-6">
+      <div className="mb-6 flex items-center gap-3">
         <Shield className="h-8 w-8 text-primary" />
         <div>
           <h1 className="text-2xl font-bold">Identity Verification</h1>
@@ -89,8 +102,8 @@ const KYCPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
           {/* Enhanced Document Upload with Tabs */}
           <Tabs defaultValue="ID_VERIFICATION" className="w-full">
             <TabsList className="grid w-full grid-cols-3">

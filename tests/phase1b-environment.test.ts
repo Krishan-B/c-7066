@@ -1,3 +1,6 @@
+// Simple test to verify the environment
+import { describe, expect, it } from 'vitest';
+
 /**
  * PHASE 1B - Simple Test Execution
  * Direct execution without complex path resolution
@@ -5,9 +8,6 @@
 
 console.log('🚀 PHASE 1B - Simple Test Execution');
 console.log('='.repeat(50));
-
-// Simple test to verify the environment
-import { describe, it, expect } from 'vitest';
 
 describe('Phase 1B Environment Test', () => {
   it('should run basic vitest functionality', () => {

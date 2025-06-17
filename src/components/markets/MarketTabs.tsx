@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import MarketList from './MarketList';
 import type { Asset } from '@/hooks/market/types';
+
+import MarketList from './MarketList';
 
 interface MarketTabsProps {
   activeTab: string;
@@ -46,7 +47,7 @@ const MarketTabs = ({
       onValueChange={(value) => setActiveTab(value)}
       className="w-full"
     >
-      <TabsList className="grid w-full grid-cols-5 mb-4">
+      <TabsList className="mb-4 grid w-full grid-cols-5">
         <TabsTrigger value="Crypto" className="font-medium">
           Crypto
         </TabsTrigger>

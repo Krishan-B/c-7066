@@ -1,10 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { type Trade } from './types';
 import {
-  closePosition as closePositionService,
   cancelPendingOrder,
+  closePosition as closePositionService,
 } from '@/services/trades/orderService';
+import { toast } from 'sonner';
+
+import { type Trade } from './types';
 
 export const fetchTradesByStatus = async (status: string | string[]): Promise<Trade[]> => {
   try {

@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom';
 import { LineChart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -14,9 +14,9 @@ const Footer = () => {
   return (
     <footer className="mt-auto bg-secondary/10 py-12">
       <div className="container">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div>
-            <h3 className="font-bold mb-4">Platform</h3>
+            <h3 className="mb-4 font-bold">Platform</h3>
             <ul className="space-y-2">
               <li>
                 <button
@@ -45,14 +45,14 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h3 className="font-bold mb-4">Resources</h3>
+            <h3 className="mb-4 font-bold">Resources</h3>
             <ul className="space-y-2">
               <li>
                 <button
                   onClick={() => {
                     /* Navigate to blog when implemented */
                   }}
-                  className="text-sm text-muted-foreground hover:text-foreground bg-transparent border-none p-0 cursor-pointer"
+                  className="cursor-pointer border-none bg-transparent p-0 text-sm text-muted-foreground hover:text-foreground"
                 >
                   Blog
                 </button>
@@ -62,7 +62,7 @@ const Footer = () => {
                   onClick={() => {
                     /* Navigate to market research when implemented */
                   }}
-                  className="text-sm text-muted-foreground hover:text-foreground bg-transparent border-none p-0 cursor-pointer"
+                  className="cursor-pointer border-none bg-transparent p-0 text-sm text-muted-foreground hover:text-foreground"
                 >
                   Market Research
                 </button>
@@ -72,7 +72,7 @@ const Footer = () => {
                   onClick={() => {
                     /* Navigate to help center when implemented */
                   }}
-                  className="text-sm text-muted-foreground hover:text-foreground bg-transparent border-none p-0 cursor-pointer"
+                  className="cursor-pointer border-none bg-transparent p-0 text-sm text-muted-foreground hover:text-foreground"
                 >
                   Help Center
                 </button>
@@ -80,7 +80,7 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h3 className="font-bold mb-4">Company</h3>
+            <h3 className="mb-4 font-bold">Company</h3>
             <ul className="space-y-2">
               <li>
                 <button
@@ -95,7 +95,7 @@ const Footer = () => {
                   onClick={() => {
                     /* Navigate to careers when implemented */
                   }}
-                  className="text-sm text-muted-foreground hover:text-foreground bg-transparent border-none p-0 cursor-pointer"
+                  className="cursor-pointer border-none bg-transparent p-0 text-sm text-muted-foreground hover:text-foreground"
                 >
                   Careers
                 </button>
@@ -111,14 +111,14 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h3 className="font-bold mb-4">Legal</h3>
+            <h3 className="mb-4 font-bold">Legal</h3>
             <ul className="space-y-2">
               <li>
                 <button
                   onClick={() => {
                     /* Navigate to terms when implemented */
                   }}
-                  className="text-sm text-muted-foreground hover:text-foreground bg-transparent border-none p-0 cursor-pointer"
+                  className="cursor-pointer border-none bg-transparent p-0 text-sm text-muted-foreground hover:text-foreground"
                 >
                   Terms of Service
                 </button>
@@ -128,7 +128,7 @@ const Footer = () => {
                   onClick={() => {
                     /* Navigate to privacy policy when implemented */
                   }}
-                  className="text-sm text-muted-foreground hover:text-foreground bg-transparent border-none p-0 cursor-pointer"
+                  className="cursor-pointer border-none bg-transparent p-0 text-sm text-muted-foreground hover:text-foreground"
                 >
                   Privacy Policy
                 </button>
@@ -138,7 +138,7 @@ const Footer = () => {
                   onClick={() => {
                     /* Navigate to disclosures when implemented */
                   }}
-                  className="text-sm text-muted-foreground hover:text-foreground bg-transparent border-none p-0 cursor-pointer"
+                  className="cursor-pointer border-none bg-transparent p-0 text-sm text-muted-foreground hover:text-foreground"
                 >
                   Disclosures
                 </button>
@@ -147,10 +147,10 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-secondary/30 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center mb-4 md:mb-0">
+        <div className="mt-12 flex flex-col items-center justify-between border-t border-secondary/30 pt-8 md:flex-row">
+          <div className="mb-4 flex items-center md:mb-0">
             <button
-              className="flex items-center cursor-pointer bg-transparent border-none p-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+              className="flex cursor-pointer items-center rounded-sm border-none bg-transparent p-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -162,9 +162,9 @@ const Footer = () => {
               type="button"
             >
               <LineChart className="h-5 w-5 text-primary" />
-              <span className="text-sm font-bold ml-2">TradePro</span>
+              <span className="ml-2 text-sm font-bold">TradePro</span>
             </button>
-            <span className="text-sm text-muted-foreground ml-4">
+            <span className="ml-4 text-sm text-muted-foreground">
               © 2025 TradePro. All rights reserved.
             </span>
           </div>

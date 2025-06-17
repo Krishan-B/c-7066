@@ -1,10 +1,10 @@
+import { useCallback, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { ArrowUpRight, ChevronDown, Clock } from 'lucide-react';
 
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Clock, ArrowUpRight, ChevronDown } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
 
 interface NewsItem {
   id: string;
@@ -32,37 +32,37 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
   const fetchNews = useCallback(async () => {
     try {
       setIsLoading(true);
-      
+
       const { data, error } = await supabase.functions.invoke('fetch-market-news', {
-        body: { market_type: marketType }
+        body: { market_type: marketType },
       });
-      
+
       if (error) throw error;
-      
+
       if (data?.data) {
         setNews(data.data);
       }
     } catch (error) {
-      console.error("Error fetching market news:", error);
+      console.error('Error fetching market news:', error);
       toast({
-        title: "Error",
-        description: "Failed to load market news.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to load market news.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
   }, [marketType, toast]);
-  
+
   useEffect(() => {
     fetchNews();
   }, [fetchNews]);
-  
+
   const formatTime = (timestamp: string) => {
     const now = new Date();
     const pubDate = new Date(timestamp);
     const diffMinutes = Math.floor((now.getTime() - pubDate.getTime()) / (1000 * 60));
-    
+
     if (diffMinutes < 60) {
       return `${diffMinutes}m ago`;
     } else if (diffMinutes < 24 * 60) {
@@ -71,7 +71,7 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
       return `${Math.floor(diffMinutes / (60 * 24))}d ago`;
     }
   };
-  
+
   const getSentimentColor = (sentiment?: string) => {
     switch (sentiment) {
       case 'positive':
@@ -89,7 +89,7 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
       <Card className={className}>
         <CardContent className="p-4">
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
           </div>
         </CardContent>
       </Card>
@@ -99,7 +99,7 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
   return (
     <Card className={className}>
       <CardContent className="p-0">
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between border-b p-4">
           <h3 className="font-medium">Market News</h3>
           <Button variant="outline" size="sm" className="gap-1">
             <Clock className="h-3 w-3" />
@@ -107,27 +107,25 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
             <ChevronDown className="h-3 w-3" />
           </Button>
         </div>
-        
+
         <div className="max-h-[600px] overflow-y-auto">
           {news.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
-              No news available
-            </div>
+            <div className="py-8 text-center text-muted-foreground">No news available</div>
           ) : (
             <ul className="divide-y divide-border">
               {news.map((item) => (
                 <li key={item.id} className="p-4 hover:bg-muted/50">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium bg-secondary px-2 py-0.5 rounded">
+                      <span className="rounded bg-secondary px-2 py-0.5 text-xs font-medium">
                         {item.market_type}
                       </span>
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" /> {formatTime(item.published_at)}
                       </span>
                     </div>
-                    <h4 className="font-medium text-sm line-clamp-2">{item.title}</h4>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{item.summary}</p>
+                    <h4 className="line-clamp-2 text-sm font-medium">{item.title}</h4>
+                    <p className="line-clamp-2 text-xs text-muted-foreground">{item.summary}</p>
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">{item.source}</span>

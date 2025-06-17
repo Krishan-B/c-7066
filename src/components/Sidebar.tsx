@@ -1,20 +1,21 @@
-import { cn } from '@/lib/utils';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
+  BarChart3,
   LayoutDashboard,
   LineChart,
-  BarChart3,
+  ListCheck,
+  LogOut,
   Newspaper,
-  Wallet,
   Settings,
   UserCircle,
-  LogOut,
-  ListCheck,
+  Wallet,
 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { preloadRoute } from '@/utils/routePreload';
+import { NavLink, useNavigate } from 'react-router-dom';
+
 import { useToast } from '@/hooks/use-toast';
-import { motion } from 'framer-motion';
+import { useAuth } from '@/hooks/useAuth';
+import { cn } from '@/lib/utils';
+import { preloadRoute } from '@/utils/routePreload';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -38,10 +39,10 @@ const SidebarItem = ({ to, icon, label, delay = 0, onMouseEnter }: SidebarItemPr
       to={to}
       className={({ isActive }) =>
         cn(
-          'flex items-center py-2 px-4 rounded-md text-sm transition-all duration-300',
+          'flex items-center rounded-md px-4 py-2 text-sm transition-all duration-300',
           isActive
-            ? 'bg-primary/20 text-primary font-medium'
-            : 'hover:bg-primary/10 text-muted-foreground hover:text-primary'
+            ? 'bg-primary/20 font-medium text-primary'
+            : 'text-muted-foreground hover:bg-primary/10 hover:text-primary'
         )
       }
       onMouseEnter={onMouseEnter}
@@ -77,11 +78,11 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
   return (
     <aside
       className={cn(
-        'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border-r border-border z-10 w-64 transition-all duration-300 ease-in-out shadow-lg',
+        'fixed left-0 top-16 z-10 h-[calc(100vh-4rem)] w-64 border-r border-border bg-background shadow-lg transition-all duration-300 ease-in-out',
         isOpen ? 'translate-x-0' : '-translate-x-full'
       )}
     >
-      <div className="flex flex-col h-full p-4">
+      <div className="flex h-full flex-col p-4">
         <div className="flex-grow">
           <nav className="space-y-1">
             <SidebarItem
@@ -132,7 +133,7 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
           </nav>
 
           <div className="mt-8">
-            <p className="px-4 text-xs font-medium text-primary mb-2">ACCOUNT</p>
+            <p className="mb-2 px-4 text-xs font-medium text-primary">ACCOUNT</p>
             <nav className="space-y-1">
               <SidebarItem
                 to="/dashboard/profile"
@@ -151,9 +152,9 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.2, delay: 0.9 }}
                 onClick={handleLogout}
-                className="w-full flex items-center py-2 px-4 rounded-md text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-300 text-left"
+                className="flex w-full items-center rounded-md px-4 py-2 text-left text-sm text-muted-foreground transition-all duration-300 hover:bg-destructive/10 hover:text-destructive"
               >
-                <LogOut className="h-5 w-5 mr-3" />
+                <LogOut className="mr-3 h-5 w-5" />
                 Sign Out
               </motion.button>
             </nav>

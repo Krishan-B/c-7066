@@ -1,7 +1,7 @@
+import type { Asset } from '@/hooks/market/types';
 
-import type { Asset } from "@/hooks/market/types";
-import { AssetCategorySelector } from "./AssetCategorySelector";
-import { AssetSelector } from "./AssetSelector";
+import { AssetCategorySelector } from './AssetCategorySelector';
+import { AssetSelector } from './AssetSelector';
 
 interface TradeSlidePanelAssetSelectionProps {
   assetCategory: string;
@@ -23,8 +23,8 @@ export const TradeSlidePanelAssetSelection = ({
   marketData,
 }: TradeSlidePanelAssetSelectionProps) => {
   // Filter assets based on selected category
-  const filteredAssets = marketData.filter(asset => asset.market_type === assetCategory);
-  
+  const filteredAssets = marketData.filter((asset) => asset.market_type === assetCategory);
+
   return (
     <div className="space-y-4">
       {/* Asset Category Selection */}
@@ -33,7 +33,7 @@ export const TradeSlidePanelAssetSelection = ({
         setAssetCategory={onAssetCategoryChange}
         isExecuting={isExecuting}
       />
-      
+
       {/* Asset Selection */}
       <AssetSelector
         selectedAsset={selectedAsset}

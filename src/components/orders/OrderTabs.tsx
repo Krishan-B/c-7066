@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import OpenPositionsTable from './OpenPositionsTable';
-import PendingOrdersTable from './PendingOrdersTable';
-import ClosedTradesTable from './ClosedTradesTable';
-import OrderHistoryTable from './OrderHistoryTable';
+import { toast } from 'sonner';
+
 import { AdvancedOrderForm } from '@/components/trade/AdvancedOrderForm';
 import type { AdvancedOrderFormValues } from '@/components/trade/AdvancedOrderForm';
-import { toast } from 'sonner';
-import type { OrderTabsProps } from './OrderTabs.d';
-import { useTradeExecution } from '@/hooks/trades/useTradeExecution';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCombinedMarketData } from '@/hooks/market';
 import type { MarketType } from '@/hooks/market';
+import { useTradeExecution } from '@/hooks/trades/useTradeExecution';
+
+import ClosedTradesTable from './ClosedTradesTable';
+import OpenPositionsTable from './OpenPositionsTable';
+import OrderHistoryTable from './OrderHistoryTable';
+import type { OrderTabsProps } from './OrderTabs.d';
+import PendingOrdersTable from './PendingOrdersTable';
 
 const OrderTabs: React.FC<OrderTabsProps> = ({
   activeTab,
@@ -127,7 +129,7 @@ const OrderTabs: React.FC<OrderTabsProps> = ({
 
   return (
     <Tabs defaultValue={activeTab} value={activeTab} onValueChange={onTabChange}>
-      <TabsList className="mb-4 grid grid-cols-4 w-full md:w-auto">
+      <TabsList className="mb-4 grid w-full grid-cols-4 md:w-auto">
         <TabsTrigger value="open">Open Positions</TabsTrigger>
         <TabsTrigger value="pending">Pending Orders</TabsTrigger>
         <TabsTrigger value="closed">Closed Positions</TabsTrigger>

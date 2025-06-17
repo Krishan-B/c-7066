@@ -1,8 +1,9 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { LineChart } from 'lucide-react';
-import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher';
 import { motion } from 'framer-motion';
+import { LineChart } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+
+import { ThemeSwitcher } from '@/components/theme/ThemeSwitcher';
+import { Button } from '@/components/ui/button';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -12,11 +13,11 @@ const Header = () => {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="border-b border-secondary/40 sticky top-0 z-50 bg-background shadow-sm"
+      className="sticky top-0 z-50 border-b border-secondary/40 bg-background shadow-sm"
     >
       <div className="container flex items-center justify-between py-3">
         <button
-          className="flex items-center cursor-pointer bg-transparent border-none p-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-sm"
+          className="flex cursor-pointer items-center rounded-sm border-none bg-transparent p-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           onClick={() => navigate('/')}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -28,31 +29,31 @@ const Header = () => {
           type="button"
         >
           <LineChart className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold ml-2 text-foreground">TradePro</h1>
+          <h1 className="ml-2 text-2xl font-bold text-foreground">TradePro</h1>
         </button>
 
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden items-center gap-6 md:flex">
           <Link
             to="#features"
-            className="text-sm text-muted-foreground hover:text-foreground nav-link"
+            className="nav-link text-sm text-muted-foreground hover:text-foreground"
           >
             Features
           </Link>
           <Link
             to="#pricing"
-            className="text-sm text-muted-foreground hover:text-foreground nav-link"
+            className="nav-link text-sm text-muted-foreground hover:text-foreground"
           >
             Pricing
           </Link>
           <Link
             to="#testimonials"
-            className="text-sm text-muted-foreground hover:text-foreground nav-link"
+            className="nav-link text-sm text-muted-foreground hover:text-foreground"
           >
             Testimonials
           </Link>
           <Link
             to="#about"
-            className="text-sm text-muted-foreground hover:text-foreground nav-link"
+            className="nav-link text-sm text-muted-foreground hover:text-foreground"
           >
             About
           </Link>
@@ -64,14 +65,14 @@ const Header = () => {
             variant="outline"
             size="sm"
             onClick={() => navigate('/auth')}
-            className="whitespace-nowrap hover:border-primary hover:text-primary transition-colors duration-300"
+            className="whitespace-nowrap transition-colors duration-300 hover:border-primary hover:text-primary"
           >
             Login
           </Button>
           <Button
             size="sm"
             onClick={() => navigate('/auth?tab=signup')}
-            className="whitespace-nowrap bg-primary hover:opacity-90 transition-opacity duration-300"
+            className="whitespace-nowrap bg-primary transition-opacity duration-300 hover:opacity-90"
           >
             Sign Up
           </Button>

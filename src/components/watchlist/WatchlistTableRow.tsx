@@ -1,7 +1,8 @@
-import { ArrowUpIcon, ArrowDownIcon, StarIcon } from 'lucide-react';
+import { ArrowDownIcon, ArrowUpIcon, StarIcon } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import type { Asset } from '@/hooks/market/types';
+import { cn } from '@/lib/utils';
 
 interface WatchlistTableRowProps {
   asset: Asset;
@@ -13,40 +14,40 @@ const WatchlistTableRow = ({ asset, onSelect, className }: WatchlistTableRowProp
   return (
     <tr
       className={cn(
-        'border-b border-border text-sm hover:bg-muted/30 cursor-pointer transition-colors',
+        'cursor-pointer border-b border-border text-sm transition-colors hover:bg-muted/30',
         className
       )}
       onClick={() => onSelect(asset)}
     >
-      <td className="py-3 px-2">
+      <td className="px-2 py-3">
         <div className="flex items-center gap-2">
-          <StarIcon className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+          <StarIcon className="h-3 w-3 fill-yellow-500 text-yellow-500" />
           <div>
             <p>{asset.name}</p>
             <p className="text-xs text-muted-foreground">{asset.symbol}</p>
           </div>
         </div>
       </td>
-      <td className="py-3 px-2 text-right font-medium">
+      <td className="px-2 py-3 text-right font-medium">
         ${typeof asset.price === 'number' ? asset.price.toLocaleString() : asset.price}
       </td>
-      <td className="py-3 px-2 text-right">
+      <td className="px-2 py-3 text-right">
         <span
-          className={`flex items-center gap-1 justify-end ${
+          className={`flex items-center justify-end gap-1 ${
             asset.change_percentage >= 0 ? 'text-success' : 'text-warning'
           }`}
         >
           {asset.change_percentage >= 0 ? (
-            <ArrowUpIcon className="w-3 h-3" />
+            <ArrowUpIcon className="h-3 w-3" />
           ) : (
-            <ArrowDownIcon className="w-3 h-3" />
+            <ArrowDownIcon className="h-3 w-3" />
           )}
           {Math.abs(asset.change_percentage).toFixed(2)}%
         </span>
       </td>
-      <td className="py-3 px-2 text-right text-muted-foreground">{asset.market_type}</td>
-      <td className="py-3 px-2 text-right text-muted-foreground">{asset.volume}</td>
-      <td className="py-3 px-2 text-center">
+      <td className="px-2 py-3 text-right text-muted-foreground">{asset.market_type}</td>
+      <td className="px-2 py-3 text-right text-muted-foreground">{asset.volume}</td>
+      <td className="px-2 py-3 text-center">
         <Button size="sm" variant="outline" className="h-7 px-2">
           Trade
         </Button>

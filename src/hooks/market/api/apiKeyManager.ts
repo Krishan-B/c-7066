@@ -1,14 +1,13 @@
-
-import { setPolygonApiKey, hasPolygonApiKey } from "@/utils/api/polygon/client";
-import { setAlphaVantageApiKey, hasAlphaVantageApiKey } from "@/utils/api/alphaVantage/client";
-import { setFinnhubApiKey, hasFinnhubApiKey } from "@/utils/api/finnhub/client";
+import { hasAlphaVantageApiKey, setAlphaVantageApiKey } from '@/utils/api/alphaVantage/client';
+import { hasFinnhubApiKey, setFinnhubApiKey } from '@/utils/api/finnhub/client';
+import { hasPolygonApiKey, setPolygonApiKey } from '@/utils/api/polygon/client';
 
 // Define the data source enum
 export enum DataSource {
   POLYGON = 'polygon',
   FINNHUB = 'finnhub',
   ALPHA_VANTAGE = 'alpha_vantage',
-  EDGE_FUNCTION = 'edge_function'
+  EDGE_FUNCTION = 'edge_function',
 }
 
 // This utility handles API keys for different data providers
@@ -46,12 +45,12 @@ export const getApiKeyStatus = () => {
   return {
     polygon: hasPolygonApiKey(),
     alphaVantage: hasAlphaVantageApiKey(),
-    finnhub: hasFinnhubApiKey()
+    finnhub: hasFinnhubApiKey(),
   };
 };
 
 // Add the determineDataSource function
-export const determineDataSource = async (): Promise<{dataSource: DataSource}> => {
+export const determineDataSource = async (): Promise<{ dataSource: DataSource }> => {
   if (hasPolygonApiKey()) {
     return { dataSource: DataSource.POLYGON };
   } else if (hasFinnhubApiKey()) {

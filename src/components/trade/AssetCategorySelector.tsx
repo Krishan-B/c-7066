@@ -1,5 +1,4 @@
-
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 interface AssetCategorySelectorProps {
   assetCategory: string;
@@ -10,20 +9,20 @@ interface AssetCategorySelectorProps {
 export const AssetCategorySelector: React.FC<AssetCategorySelectorProps> = ({
   assetCategory,
   setAssetCategory,
-  isExecuting
+  isExecuting,
 }) => {
-  const categories = ["Crypto", "Stocks", "Forex", "Indices", "Commodities"];
+  const categories = ['Crypto', 'Stocks', 'Forex', 'Indices', 'Commodities'];
 
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Asset Class</label>
       <div className="flex flex-wrap gap-2">
-        {categories.map(category => (
+        {categories.map((category) => (
           <Button
             key={category}
             type="button"
             size="sm"
-            variant={assetCategory === category ? "default" : "outline"}
+            variant={assetCategory === category ? 'default' : 'outline'}
             onClick={() => setAssetCategory(category)}
             disabled={isExecuting}
           >

@@ -83,7 +83,8 @@ tests/
 **Example**:
 
 ```typescript
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import { calculatePnL } from '../src/utils/trading';
 
 describe('calculatePnL', () => {
@@ -140,8 +141,8 @@ describe('TradingDashboard Integration', () => {
 **Example**:
 
 ```typescript
-import { describe, it, expect } from 'vitest';
-import { createSecurityTestInputs, assertPasswordStrength } from '@/test/utils';
+import { assertPasswordStrength, createSecurityTestInputs } from '@/test/utils';
+import { describe, expect, it } from 'vitest';
 
 describe('Security Validation', () => {
   it('should reject malicious input', () => {
@@ -168,8 +169,8 @@ describe('Security Validation', () => {
 **Example**:
 
 ```typescript
-import { describe, it, expect } from 'vitest';
 import { measureTradingOperationPerformance } from '@/test/utils';
+import { describe, expect, it } from 'vitest';
 
 describe('Trading Performance', () => {
   it('should execute orders within SLA', async () => {
@@ -295,6 +296,7 @@ describe('TradeButton', () => {
 
 ```typescript
 import { renderHook } from '@/test/utils';
+
 import { useTradingData } from '../src/hooks/useTradingData';
 
 describe('useTradingData', () => {
@@ -422,7 +424,7 @@ it('should handle network errors gracefully', async () => {
 ### Performance Test Example
 
 ```typescript
-import { PerformanceTimer, expectPerformance } from '@/test/utils';
+import { expectPerformance, PerformanceTimer } from '@/test/utils';
 
 describe('Trading Performance', () => {
   it('should maintain performance under load', async () => {

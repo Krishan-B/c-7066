@@ -1,10 +1,10 @@
 import {
-  getStockQuote as getAlphaVantageStockQuote,
-  getForexRate as getAlphaVantageForexRate,
   getCryptoQuote as getAlphaVantageCryptoQuote,
-  transformStockData as transformAlphaVantageStockData,
-  transformForexData as transformAlphaVantageForexData,
+  getForexRate as getAlphaVantageForexRate,
+  getStockQuote as getAlphaVantageStockQuote,
   transformCryptoData as transformAlphaVantageCryptoData,
+  transformForexData as transformAlphaVantageForexData,
+  transformStockData as transformAlphaVantageStockData,
 } from '@/utils/api/alphaVantage';
 
 import { type Asset } from '../types';

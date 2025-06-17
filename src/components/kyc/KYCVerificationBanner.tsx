@@ -1,10 +1,11 @@
 import React from 'react';
-import { Shield, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { CheckCircle, Clock, Shield, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useKYC } from '@/hooks/kyc/useKYC';
+
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/auth';
+import { useKYC } from '@/hooks/kyc/useKYC';
 
 interface KYCVerificationBannerProps {
   forceShow?: boolean;
@@ -84,13 +85,13 @@ const KYCVerificationBanner: React.FC<KYCVerificationBannerProps> = ({ forceShow
   };
 
   return (
-    <div className="w-full mb-6">
+    <div className="mb-6 w-full">
       <Alert className={`${config.bgColor} border-2`} variant={config.variant}>
-        <div className="flex items-start justify-between w-full">
+        <div className="flex w-full items-start justify-between">
           <div className="flex items-start space-x-3">
             <Icon className={`h-5 w-5 ${config.iconColor} mt-0.5 flex-shrink-0`} />
-            <div className="flex-1 min-w-0">
-              <AlertTitle className="text-base font-semibold mb-1">{config.title}</AlertTitle>
+            <div className="min-w-0 flex-1">
+              <AlertTitle className="mb-1 text-base font-semibold">{config.title}</AlertTitle>
               <AlertDescription className="text-sm text-gray-700">
                 {config.description}
               </AlertDescription>
@@ -98,7 +99,7 @@ const KYCVerificationBanner: React.FC<KYCVerificationBannerProps> = ({ forceShow
           </div>
 
           {config.showAction && config.actionText && (
-            <div className="flex-shrink-0 ml-4">
+            <div className="ml-4 flex-shrink-0">
               <Button
                 onClick={handleActionClick}
                 variant={config.buttonVariant}

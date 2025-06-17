@@ -1,12 +1,11 @@
 /**
- * Vitest configuration for Trade-Pro
- * - Test runner and coverage settings
- * - See PROJECT_CLEANUP_AND_CONFIG.md for details
+ * Vitest Configuration for Trade-Pro
+ * Optimized testing setup with comprehensive coverage
  */
 
 import path from 'path';
-import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react-swc';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [react()],
@@ -20,32 +19,31 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     include: ['**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/build/**', 'tests/e2e/**'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/build/**',
+      'tests/e2e/**',
+      'playwright.config.ts',
+    ],
 
-    // Enhanced test execution settings
-    testTimeout: 30000,
-    hookTimeout: 30000,
-    maxConcurrency: 5,
+    // Test execution settings
+    testTimeout: 15000,
+    hookTimeout: 15000,
+    maxConcurrency: 4,
 
-    // Optimized typecheck configuration
-    typecheck: {
-      tsconfig: './tsconfig.app.json',
-      include: ['**/*.{test,spec}.{ts,tsx}'],
-      checker: 'tsc',
-    },
-
-    // Comprehensive coverage configuration
+    // Coverage configuration
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov', 'json'],
       reportsDirectory: './coverage',
       thresholds: {
-        statements: 75,
-        branches: 70,
-        functions: 75,
-        lines: 75,
+        statements: 80,
+        branches: 75,
+        functions: 80,
+        lines: 80,
       },
-      include: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts', '!src/test/**'],
+      include: ['src/**/*.{ts,tsx}'],
       exclude: [
         'node_modules/**',
         'dist/**',
@@ -55,36 +53,29 @@ export default defineConfig({
         '**/*.spec.*',
         '**/test/**',
         '**/tests/**',
-        '**/__tests__/**',
         'src/test/**',
         'src/vite-env.d.ts',
         'src/main.tsx',
+        '**/*.d.ts',
       ],
-      watermarks: {
-        statements: [70, 85],
-        functions: [70, 85],
-        branches: [65, 80],
-        lines: [70, 85],
-      },
     },
 
-    // Enhanced reporter configuration
-    reporters: ['verbose', 'json'],
+    // Reporter configuration
+    reporters: ['verbose'],
     outputFile: {
       json: './test-results.json',
     },
 
-    // Test isolation and cleanup
+    // Performance optimization
     isolate: true,
     pool: 'threads',
     poolOptions: {
       threads: {
         singleThread: false,
         minThreads: 1,
-        maxThreads: 4,
+        maxThreads: 3,
       },
     },
-    // Watch mode configuration
     watch: false,
   },
 });

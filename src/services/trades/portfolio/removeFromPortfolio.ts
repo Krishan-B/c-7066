@@ -1,36 +1,37 @@
+import { supabase } from '@/integrations/supabase/client';
 
-import { supabase } from "@/integrations/supabase/client";
-import { type PortfolioRemoveParams, type PortfolioUpdateResult } from "../types";
+import { type PortfolioRemoveParams, type PortfolioUpdateResult } from '../types';
 
 /**
  * Remove asset from user's portfolio
  */
-export async function removeFromPortfolio(params: PortfolioRemoveParams): Promise<PortfolioUpdateResult> {
+export async function removeFromPortfolio(
+  params: PortfolioRemoveParams
+): Promise<PortfolioUpdateResult> {
   try {
     const { userId, assetId } = params;
-    
+
     // Delete the portfolio entry
     const { error } = await supabase
       .from('user_portfolio')
       .delete()
       .eq('user_id', userId)
       .eq('asset_symbol', assetId); // Changed from asset_id to asset_symbol to match the database schema
-    
+
     if (error) {
       throw new Error(`Failed to remove asset from portfolio: ${error.message}`);
     }
-    
+
     return {
       success: true,
-      message: `Successfully removed ${assetId} from portfolio`
+      message: `Successfully removed ${assetId} from portfolio`,
     };
-    
   } catch (error) {
-    console.error("Portfolio remove error:", error);
-    
+    console.error('Portfolio remove error:', error);
+
     return {
       success: false,
-      message: error instanceof Error ? error.message : "Unknown error occurred"
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
     };
   }
 }

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('User can request a password reset', async ({ page }) => {
   await page.goto('/auth');

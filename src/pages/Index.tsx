@@ -1,18 +1,19 @@
-import { useEffect, useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useRef, useState } from 'react';
 import { RefreshCw, Wifi } from 'lucide-react';
-import MarketStatsEnhanced from '@/components/MarketStatsEnhanced';
-import WatchlistTable from '@/components/watchlist/WatchlistTable';
-import TradingViewChart from '@/components/TradingViewChart';
-import { TradeButton } from '@/components/trade';
-import PortfolioCard from '@/components/PortfolioCard';
-import { useToast } from '@/hooks/use-toast';
-import EnhancedNewsWidget from '@/components/EnhancedNewsWidget';
+
 import AlertsWidget from '@/components/AlertsWidget';
-import { Badge } from '@/components/ui/badge';
-import { useCombinedMarketData } from '@/hooks/market';
+import EnhancedNewsWidget from '@/components/EnhancedNewsWidget';
+import MarketStatsEnhanced from '@/components/MarketStatsEnhanced';
+import PortfolioCard from '@/components/PortfolioCard';
+import { TradeButton } from '@/components/trade';
 import QuickTradePanel from '@/components/trade/QuickTradePanel';
+import TradingViewChart from '@/components/TradingViewChart';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import WatchlistTable from '@/components/watchlist/WatchlistTable';
+import { useCombinedMarketData } from '@/hooks/market';
 import type { Asset } from '@/hooks/market/types';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [selectedAsset, setSelectedAsset] = useState<Asset>({
@@ -85,10 +86,10 @@ const Index = () => {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+      <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Market Overview</h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="mt-1 text-muted-foreground">
             Track, analyze and trade global markets in real-time
           </p>
         </div>
@@ -96,7 +97,7 @@ const Index = () => {
           {realtimeEnabled && (
             <Badge
               variant="default"
-              className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 px-3 py-1"
+              className="flex items-center gap-1.5 bg-green-500 px-3 py-1 hover:bg-green-600"
             >
               <Wifi className="h-3 w-3" />
               <span className="text-xs font-medium">Live Data</span>
@@ -105,7 +106,7 @@ const Index = () => {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 hover:bg-primary/10 hover:text-primary transition-colors"
+            className="gap-2 transition-colors hover:bg-primary/10 hover:text-primary"
             onClick={handleRefresh}
             disabled={isRefreshing}
           >
@@ -125,11 +126,11 @@ const Index = () => {
       </section>
 
       {/* Watchlist Section */}
-      <section className="bg-card border border-border rounded-lg p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
+      <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
+        <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-foreground">My Watchlist</h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="mt-1 text-sm text-muted-foreground">
               Click on any asset to view detailed chart
             </p>
           </div>
@@ -145,9 +146,9 @@ const Index = () => {
       </section>
 
       {/* Chart and Trading Panel */}
-      <div ref={chartSectionRef} className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2 glass-card rounded-lg p-4">
-          <div className="flex items-center justify-between mb-4">
+      <div ref={chartSectionRef} className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="glass-card rounded-lg p-4 lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center">
               <h2 className="text-xl font-semibold">{selectedAsset.name} Chart</h2>
               <div className="ml-4 text-sm">
@@ -191,13 +192,13 @@ const Index = () => {
       </div>
 
       {/* News and Alerts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="glass-card rounded-lg p-4">
-          <h2 className="text-xl font-semibold mb-4">Market News</h2>
+          <h2 className="mb-4 text-xl font-semibold">Market News</h2>
           <EnhancedNewsWidget />
         </div>
         <div className="glass-card rounded-lg p-4">
-          <h2 className="text-xl font-semibold mb-4">Market Alerts</h2>
+          <h2 className="mb-4 text-xl font-semibold">Market Alerts</h2>
           <AlertsWidget />
         </div>
       </div>

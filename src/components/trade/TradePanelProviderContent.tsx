@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
-import { TradeSlidePanel } from './TradeSlidePanel';
+
 import { TradePanelContext } from './trade-panel-utils';
+import { TradeSlidePanel } from './TradeSlidePanel';
 
 interface TradePanelProviderProps {
   children: ReactNode;
@@ -20,10 +21,7 @@ export function TradePanelProviderContent({ children }: TradePanelProviderProps)
   return (
     <TradePanelContext.Provider value={{ open, setOpen, openTradePanel, closeTradePanel }}>
       {children}
-      <TradeSlidePanel 
-        open={open}
-        onOpenChange={setOpen}
-      />
+      <TradeSlidePanel open={open} onOpenChange={setOpen} />
     </TradePanelContext.Provider>
   );
 }

@@ -1,13 +1,12 @@
-
-import { type Asset } from "@/hooks/market";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { type Asset } from '@/hooks/market';
 
 interface AssetSelectorProps {
   selectedAsset: string;
@@ -22,12 +21,12 @@ export const AssetSelector: React.FC<AssetSelectorProps> = ({
   setSelectedAsset,
   isExecuting,
   isLoading,
-  filteredAssets
+  filteredAssets,
 }) => {
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">Select Asset</label>
-      
+
       {isLoading ? (
         <Skeleton className="h-10 w-full" />
       ) : (

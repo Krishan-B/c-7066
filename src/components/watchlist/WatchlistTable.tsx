@@ -1,12 +1,14 @@
+import { AlertCircle, Wifi } from 'lucide-react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import type { Asset } from '@/hooks/market/types';
+import { useWatchlistData } from '@/hooks/useWatchlistData';
+
 import WatchlistHeader from './WatchlistHeader';
 import WatchlistLoading from './WatchlistLoading';
 import WatchlistTableHeader from './WatchlistTableHeader';
 import WatchlistTableRow from './WatchlistTableRow';
-import { useWatchlistData } from '@/hooks/useWatchlistData';
-import { Badge } from '@/components/ui/badge';
-import { Wifi, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import type { Asset } from '@/hooks/market/types';
 
 interface WatchlistTableProps {
   onAssetSelect: (asset: Asset) => void;
@@ -32,22 +34,22 @@ const WatchlistTable = ({ onAssetSelect }: WatchlistTableProps) => {
 
   if (!watchlist || watchlist.length === 0) {
     return (
-      <div className="text-center py-8">
+      <div className="py-8 text-center">
         <p className="text-muted-foreground">No assets in your watchlist yet.</p>
-        <p className="text-sm text-muted-foreground mt-1">Add some assets to get started!</p>
+        <p className="mt-1 text-sm text-muted-foreground">Add some assets to get started!</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <WatchlistHeader onRefresh={handleRefreshData} />
 
         {realtimeEnabled && (
           <Badge
             variant="default"
-            className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 px-3 py-1"
+            className="flex items-center gap-1.5 bg-green-500 px-3 py-1 hover:bg-green-600"
           >
             <Wifi className="h-3 w-3" />
             <span className="text-xs font-medium">Live Data</span>
@@ -55,7 +57,7 @@ const WatchlistTable = ({ onAssetSelect }: WatchlistTableProps) => {
         )}
       </div>
 
-      <div className="rounded-lg border bg-card overflow-hidden">
+      <div className="overflow-hidden rounded-lg border bg-card">
         <div className="overflow-x-auto">
           <table className="w-full">
             <WatchlistTableHeader />

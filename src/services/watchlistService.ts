@@ -1,11 +1,13 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export const getWatchlist = async (): Promise<unknown> => {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error("No session found");
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) throw new Error('No session found');
 
     const accessToken = String(session.access_token);
 
@@ -13,8 +15,8 @@ export const getWatchlist = async (): Promise<unknown> => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      }
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
 
     if (!response.ok) {
@@ -23,28 +25,29 @@ export const getWatchlist = async (): Promise<unknown> => {
 
     const data = await response.json();
     return data;
-
   } catch (error: unknown) {
-    console.error("Error fetching watchlist:", error);
+    console.error('Error fetching watchlist:', error);
     throw error;
   }
 };
 
 export const addToWatchlist = async (symbol: string): Promise<unknown> => {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error("No session found");
-    
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) throw new Error('No session found');
+
     // Fix TypeScript error by converting access_token to string
     const accessToken = String(session.access_token);
-    
+
     const response = await fetch(`${API_BASE_URL}/watchlist/add`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
+        Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({ symbol })
+      body: JSON.stringify({ symbol }),
     });
 
     if (!response.ok) {
@@ -54,26 +57,28 @@ export const addToWatchlist = async (symbol: string): Promise<unknown> => {
     const data = await response.json();
     return data;
   } catch (error: unknown) {
-    console.error("Error adding to watchlist:", error);
+    console.error('Error adding to watchlist:', error);
     throw error;
   }
 };
 
 export const removeFromWatchlist = async (symbol: string): Promise<unknown> => {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error("No session found");
-    
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) throw new Error('No session found');
+
     // Fix TypeScript error by converting access_token to string
     const accessToken = String(session.access_token);
-    
+
     const response = await fetch(`${API_BASE_URL}/watchlist/remove`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
+        Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({ symbol })
+      body: JSON.stringify({ symbol }),
     });
 
     if (!response.ok) {
@@ -83,7 +88,7 @@ export const removeFromWatchlist = async (symbol: string): Promise<unknown> => {
     const data = await response.json();
     return data;
   } catch (error: unknown) {
-    console.error("Error removing from watchlist:", error);
+    console.error('Error removing from watchlist:', error);
     throw error;
   }
 };

@@ -1,15 +1,14 @@
-
 import React from 'react';
 
 interface TradingViewChartProps {
   symbol?: string;
 }
 
-const TradingViewChart: React.FC<TradingViewChartProps> = ({ symbol = "BINANCE:BTCUSDT" }) => {
+const TradingViewChart: React.FC<TradingViewChartProps> = ({ symbol = 'BINANCE:BTCUSDT' }) => {
   return (
-    <div className="h-[500px] w-full relative z-10">
+    <div className="relative z-10 h-[500px] w-full">
       <div id="tradingview_chart" className="h-full w-full" />
-      <div className="w-full h-full absolute top-0 left-0">
+      <div className="absolute left-0 top-0 h-full w-full">
         {/* We're using the TradingView widget directly here */}
         <iframe
           title="Trading Chart"

@@ -1,6 +1,5 @@
-
-import AvailableBalance from "./AvailableBalance";
-import PaymentMethods from "./PaymentMethods";
+import AvailableBalance from './AvailableBalance';
+import PaymentMethods from './PaymentMethods';
 
 const BalanceInfo = () => {
   return (

@@ -1,10 +1,17 @@
+import React from 'react';
+import { AlertCircle, ShieldCheck } from 'lucide-react';
 
-import React from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { AlertCircle, ShieldCheck } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { type Trade } from "@/hooks/trades/types";
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { type Trade } from '@/hooks/trades/types';
 
 interface OrderHistoryTableProps {
   ordersHistory: Trade[];
@@ -12,7 +19,7 @@ interface OrderHistoryTableProps {
 
 const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({ ordersHistory }) => {
   return (
-    <div className="rounded-md border overflow-hidden">
+    <div className="overflow-hidden rounded-md border">
       <Table>
         <TableHeader className="bg-muted/60">
           <TableRow>
@@ -33,22 +40,30 @@ const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({ ordersHistory }) 
             // Determine display values based on the order data
             const statusDisplay = order.status === 'cancelled' ? 'Cancelled' : 'Expired';
             const reason = order.status === 'cancelled' ? 'User Cancelled' : 'Auto Expired';
-            
+
             return (
               <TableRow key={order.id} className="hover:bg-muted/40">
                 <TableCell className="font-medium">{order.asset_symbol}</TableCell>
                 <TableCell>
-                  <Badge variant={order.trade_type === 'buy' ? 'default' : 'destructive'}
-                    className={`${order.trade_type === 'buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}>
+                  <Badge
+                    variant={order.trade_type === 'buy' ? 'default' : 'destructive'}
+                    className={`${order.trade_type === 'buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}
+                  >
                     {order.trade_type === 'buy' ? 'Buy' : 'Sell'}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <span className="text-xs px-2 py-1 bg-muted rounded-full">
-                    {order.order_type === "entry" ? "Entry" : "Market"}
+                  <span className="rounded-full bg-muted px-2 py-1 text-xs">
+                    {order.order_type === 'entry' ? 'Entry' : 'Market'}
                   </span>
                 </TableCell>
-                <TableCell>${order.price_per_unit.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                <TableCell>
+                  $
+                  {order.price_per_unit.toLocaleString(undefined, {
+                    minimumFractionDigits: 4,
+                    maximumFractionDigits: 4,
+                  })}
+                </TableCell>
                 <TableCell>{order.units}</TableCell>
                 <TableCell>
                   <Badge variant="outline" className="bg-muted text-muted-foreground">
@@ -56,7 +71,7 @@ const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({ ordersHistory }) 
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {(order.stop_loss || order.take_profit) ? (
+                  {order.stop_loss || order.take_profit ? (
                     <div className="flex gap-1">
                       <TooltipProvider>
                         {order.stop_loss && (
@@ -85,19 +100,21 @@ const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({ ordersHistory }) 
                     <span className="text-muted-foreground">—</span>
                   )}
                 </TableCell>
-                <TableCell className="whitespace-nowrap">{new Date(order.created_at).toLocaleString()}</TableCell>
-                <TableCell className="whitespace-nowrap">{order.closed_at ? new Date(order.closed_at).toLocaleString() : '-'}</TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {new Date(order.created_at).toLocaleString()}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {order.closed_at ? new Date(order.closed_at).toLocaleString() : '-'}
+                </TableCell>
                 <TableCell>
-                  <span className="text-xs text-muted-foreground">
-                    {reason}
-                  </span>
+                  <span className="text-xs text-muted-foreground">{reason}</span>
                 </TableCell>
               </TableRow>
             );
           })}
           {ordersHistory.length === 0 && (
             <TableRow>
-              <TableCell colSpan={10} className="text-center py-6">
+              <TableCell colSpan={10} className="py-6 text-center">
                 No order history found
               </TableCell>
             </TableRow>

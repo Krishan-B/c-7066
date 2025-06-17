@@ -10,10 +10,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LineChart } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { LineChart, LogIn } from 'lucide-react';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import { useToast } from '@/hooks/use-toast';
+
+type OAuthProvider = 'google' | 'apple' | 'facebook';
 
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState('signin');
@@ -24,7 +27,6 @@ const AuthPage = () => {
 
   const from = location.state?.from || '/dashboard';
 
-  // Set default tab based on URL params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
@@ -33,7 +35,6 @@ const AuthPage = () => {
     }
   }, [location]);
 
-  // Check if user is already logged in
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -59,7 +60,6 @@ const AuthPage = () => {
 
     checkSession();
 
-    // Set up auth state listener
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
@@ -70,6 +70,34 @@ const AuthPage = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate, from, toast]);
+
+  const handleOAuthLogin = async (provider: OAuthProvider) => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        toast({
+          title: 'OAuth Login Error',
+          description: error.message,
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      let message = 'An unexpected error occurred.';
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      toast({
+        title: 'OAuth Login Error',
+        description: message,
+        variant: 'destructive',
+      });
+    }
+  };
 
   const navigateToHome = () => {
     navigate('/');
@@ -83,6 +111,20 @@ const AuthPage = () => {
       </div>
     );
   }
+
+  const SocialLoginButtons = () => (
+    <div className="space-y-2 mt-4">
+      <Button variant="outline" className="w-full" onClick={() => handleOAuthLogin('google')}>
+        <LogIn className="mr-2 h-4 w-4" /> Continue with Google
+      </Button>
+      <Button variant="outline" className="w-full" onClick={() => handleOAuthLogin('apple')}>
+        <LogIn className="mr-2 h-4 w-4" /> Continue with Apple
+      </Button>
+      <Button variant="outline" className="w-full" onClick={() => handleOAuthLogin('facebook')}>
+        <LogIn className="mr-2 h-4 w-4" /> Continue with Facebook
+      </Button>
+    </div>
+  );
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -120,10 +162,26 @@ const AuthPage = () => {
 
               <TabsContent value="signin">
                 <LoginForm />
+                <div className="my-4 flex items-center">
+                  <div className="flex-grow border-t border-muted"></div>
+                  <span className="mx-4 text-xs uppercase text-muted-foreground">
+                    Or continue with
+                  </span>
+                  <div className="flex-grow border-t border-muted"></div>
+                </div>
+                <SocialLoginButtons />
               </TabsContent>
 
               <TabsContent value="signup">
                 <RegisterForm />
+                <div className="my-4 flex items-center">
+                  <div className="flex-grow border-t border-muted"></div>
+                  <span className="mx-4 text-xs uppercase text-muted-foreground">
+                    Or sign up with
+                  </span>
+                  <div className="flex-grow border-t border-muted"></div>
+                </div>
+                <SocialLoginButtons />
               </TabsContent>
             </Tabs>
           </CardContent>

@@ -1,3 +1,7 @@
+import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -6,9 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 // Sample transaction data - in a real app, this would come from your API/database
@@ -62,7 +63,7 @@ const TransactionHistory = () => {
     switch (status) {
       case 'completed':
         return (
-          <Badge variant="outline" className="bg-success/10 text-success border-success/20">
+          <Badge variant="outline" className="border-success/20 bg-success/10 text-success">
             Completed
           </Badge>
         );
@@ -70,7 +71,7 @@ const TransactionHistory = () => {
         return (
           <Badge
             variant="outline"
-            className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+            className="border-yellow-500/20 bg-yellow-500/10 text-yellow-600"
           >
             Pending
           </Badge>
@@ -79,7 +80,7 @@ const TransactionHistory = () => {
         return (
           <Badge
             variant="outline"
-            className="bg-destructive/10 text-destructive border-destructive/20"
+            className="border-destructive/20 bg-destructive/10 text-destructive"
           >
             Failed
           </Badge>
@@ -113,14 +114,14 @@ const TransactionHistory = () => {
                   <div className="flex items-center gap-2">
                     {transaction.type === 'deposit' ? (
                       <>
-                        <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
                           <ArrowDownToLine className="h-4 w-4 text-green-600" />
                         </div>
                         <span>Deposit</span>
                       </>
                     ) : (
                       <>
-                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
                           <ArrowUpFromLine className="h-4 w-4 text-blue-600" />
                         </div>
                         <span>Withdraw</span>
@@ -136,10 +137,10 @@ const TransactionHistory = () => {
                 >
                   {transaction.type === 'deposit' ? '+' : '-'}${transaction.amount.toFixed(2)}
                 </TableCell>
-                <TableCell className="hidden sm:table-cell text-muted-foreground">
+                <TableCell className="hidden text-muted-foreground sm:table-cell">
                   {formatDate(transaction.date)}
                 </TableCell>
-                <TableCell className="hidden md:table-cell text-muted-foreground">
+                <TableCell className="hidden text-muted-foreground md:table-cell">
                   {transaction.paymentMethod}
                 </TableCell>
                 <TableCell>

@@ -1,34 +1,24 @@
-import { useState, useEffect, useMemo } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { 
-  Form, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormControl,
-} from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
+import { useEffect, useMemo, useState } from 'react';
+import { Info, Minus, Plus } from 'lucide-react';
+import { Controller, useForm } from 'react-hook-form';
+
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from "@/components/ui/tooltip";
-import { Info, Minus, Plus } from "lucide-react";
-import type { Asset } from "@/hooks/market/types";
-import { getLeverageForAssetType } from "@/utils/leverageUtils";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import type { Asset } from '@/hooks/market/types';
+import { getLeverageForAssetType } from '@/utils/leverageUtils';
 
 export interface AdvancedOrderFormValues {
-  orderType: "market" | "entry";
+  orderType: 'market' | 'entry';
   stopLoss: boolean;
   takeProfit: boolean;
   expirationDate: boolean;
@@ -48,7 +38,7 @@ export interface AdvancedOrderFormValues {
 interface AdvancedOrderFormProps {
   currentPrice: number;
   symbol: string;
-  onOrderSubmit: (values: AdvancedOrderFormValues, action: "buy" | "sell") => void;
+  onOrderSubmit: (values: AdvancedOrderFormValues, action: 'buy' | 'sell') => void;
   isLoading?: boolean;
   availableFunds?: number;
   assetCategory?: string;
@@ -56,7 +46,7 @@ interface AdvancedOrderFormProps {
   marketData?: Asset[];
 }
 
-const ASSET_CATEGORIES = ["Crypto", "Stocks", "Forex", "Indices", "Commodities"];
+const ASSET_CATEGORIES = ['Crypto', 'Stocks', 'Forex', 'Indices', 'Commodities'];
 
 export function AdvancedOrderForm({
   currentPrice,
@@ -64,7 +54,7 @@ export function AdvancedOrderForm({
   onOrderSubmit,
   isLoading = false,
   availableFunds = 10000,
-  assetCategory = "Crypto",
+  assetCategory = 'Crypto',
   onAssetCategoryChange,
   marketData = [],
 }: AdvancedOrderFormProps) {
@@ -75,29 +65,29 @@ export function AdvancedOrderForm({
 
   const form = useForm<AdvancedOrderFormValues>({
     defaultValues: {
-      orderType: "market",
+      orderType: 'market',
       stopLoss: false,
       takeProfit: false,
       expirationDate: false,
       orderRate: currentPrice?.toFixed(4),
-      units: "0.1",
+      units: '0.1',
       assetCategory: selectedAssetCategory,
       assetSymbol: selectedAsset,
     },
   });
 
   // Filter assets based on the selected category using useMemo
-  const filteredAssets = useMemo(() => 
-    marketData?.filter(asset => asset.market_type === selectedAssetCategory) ?? [],
+  const filteredAssets = useMemo(
+    () => marketData?.filter((asset) => asset.market_type === selectedAssetCategory) ?? [],
     [marketData, selectedAssetCategory]
   );
 
   // Watch form values for conditional rendering
-  const orderType = form.watch("orderType");
-  const hasStopLoss = form.watch("stopLoss");
-  const hasTakeProfit = form.watch("takeProfit");
-  const hasExpirationDate = form.watch("expirationDate");
-  const units = parseFloat(form.watch("units") || "0");
+  const orderType = form.watch('orderType');
+  const hasStopLoss = form.watch('stopLoss');
+  const hasTakeProfit = form.watch('takeProfit');
+  const hasExpirationDate = form.watch('expirationDate');
+  const units = parseFloat(form.watch('units') || '0');
 
   // Update prices every second (simulating real-time data)
   useEffect(() => {
@@ -108,7 +98,7 @@ export function AdvancedOrderForm({
       setBuyPrice(newPrice * 1.001);
       setSellPrice(newPrice * 0.999);
     }, 1000);
-    
+
     return () => clearInterval(interval);
   }, [currentPrice]);
 
@@ -117,29 +107,29 @@ export function AdvancedOrderForm({
     if (onAssetCategoryChange && selectedAssetCategory !== assetCategory) {
       onAssetCategoryChange(selectedAssetCategory);
     }
-    
-    form.setValue("assetCategory", selectedAssetCategory);
-    
+
+    form.setValue('assetCategory', selectedAssetCategory);
+
     // Reset asset selection when category changes
     const firstAsset = filteredAssets[0];
     if (firstAsset?.symbol) {
       setSelectedAsset(firstAsset.symbol);
-      form.setValue("assetSymbol", firstAsset.symbol);
+      form.setValue('assetSymbol', firstAsset.symbol);
     }
   }, [selectedAssetCategory, form, onAssetCategoryChange, assetCategory, filteredAssets]);
 
   // Calculate required funds based on units, price, and leverage
   const calculateRequiredFunds = () => {
     const leverage = getLeverageForAssetType(selectedAssetCategory);
-    return units * buyPrice / leverage;
-  }
-  
+    return (units * buyPrice) / leverage;
+  };
+
   const requiredFunds = calculateRequiredFunds();
   const canAfford = availableFunds >= requiredFunds;
 
   // Handler for order type change
-  const handleOrderTypeChange = (value: "market" | "entry") => {
-    form.setValue("orderType", value);
+  const handleOrderTypeChange = (value: 'market' | 'entry') => {
+    form.setValue('orderType', value);
   };
 
   // Handler for asset category change
@@ -150,19 +140,19 @@ export function AdvancedOrderForm({
   // Handler for asset selection change
   const handleAssetChange = (value: string) => {
     setSelectedAsset(value);
-    form.setValue("assetSymbol", value);
+    form.setValue('assetSymbol', value);
   };
 
   // Handler for form submission
-  const handleSubmit = (action: "buy" | "sell") => {
+  const handleSubmit = (action: 'buy' | 'sell') => {
     form.handleSubmit((values) => {
       onOrderSubmit(values, action);
     })();
   };
 
   return (
-    <div className="mt-6 p-4 border rounded-md">
-      <h3 className="text-lg font-medium mb-4">Create New Order</h3>
+    <div className="mt-6 rounded-md border p-4">
+      <h3 className="mb-4 text-lg font-medium">Create New Order</h3>
 
       <div className="space-y-4">
         {/* Asset Category Selection */}
@@ -206,13 +196,13 @@ export function AdvancedOrderForm({
         </div>
 
         {/* Real-time prices with Buy/Sell buttons */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="mb-6 grid grid-cols-2 gap-4">
           <div className="space-y-1">
             <div className="text-sm text-muted-foreground">Buy Price</div>
             <div className="text-lg font-medium">${buyPrice.toFixed(4)}</div>
-            <Button 
-              className="w-full bg-green-600 hover:bg-green-700 text-white mt-1"
-              onClick={() => handleSubmit("buy")}
+            <Button
+              className="mt-1 w-full bg-green-600 text-white hover:bg-green-700"
+              onClick={() => handleSubmit('buy')}
               disabled={isLoading || !canAfford}
             >
               Buy
@@ -221,9 +211,9 @@ export function AdvancedOrderForm({
           <div className="space-y-1">
             <div className="text-sm text-muted-foreground">Sell Price</div>
             <div className="text-lg font-medium">${sellPrice.toFixed(4)}</div>
-            <Button 
-              className="w-full bg-red-500 hover:bg-red-600 text-white mt-1"
-              onClick={() => handleSubmit("sell")}
+            <Button
+              className="mt-1 w-full bg-red-500 text-white hover:bg-red-600"
+              onClick={() => handleSubmit('sell')}
               disabled={isLoading || units <= 0}
             >
               Sell
@@ -234,20 +224,18 @@ export function AdvancedOrderForm({
         {/* Units Input */}
         <div className="space-y-2">
           <label className="text-sm font-medium">Units</label>
-          <Controller 
+          <Controller
             control={form.control}
             name="units"
             render={({ field }) => (
-              <Input 
-                {...field} 
-                type="number" 
-                step="0.01" 
-                className="w-full" 
-              />
+              <Input {...field} type="number" step="0.01" className="w-full" />
             )}
           />
           <div className="text-xs text-muted-foreground">
-            Funds required to open the position: <span className={`font-medium ${!canAfford ? 'text-red-500' : ''}`}>${requiredFunds.toFixed(2)}</span>
+            Funds required to open the position:{' '}
+            <span className={`font-medium ${!canAfford ? 'text-red-500' : ''}`}>
+              ${requiredFunds.toFixed(2)}
+            </span>
           </div>
           <div className="text-xs text-muted-foreground">
             Available: <span className="font-medium">${availableFunds.toFixed(2)}</span>
@@ -258,19 +246,19 @@ export function AdvancedOrderForm({
         <div className="space-y-2">
           <label className="text-sm font-medium">Order Type</label>
           <div className="flex gap-2">
-            <Button 
+            <Button
               type="button"
-              variant={orderType === "market" ? "default" : "outline"}
-              className={`flex-1 ${orderType === "market" ? "bg-primary text-primary-foreground" : ""}`}
-              onClick={() => handleOrderTypeChange("market")}
+              variant={orderType === 'market' ? 'default' : 'outline'}
+              className={`flex-1 ${orderType === 'market' ? 'bg-primary text-primary-foreground' : ''}`}
+              onClick={() => handleOrderTypeChange('market')}
             >
               Market order
             </Button>
-            <Button 
+            <Button
               type="button"
-              variant={orderType === "entry" ? "default" : "outline"}
-              className={`flex-1 ${orderType === "entry" ? "bg-yellow-500 text-white hover:bg-yellow-600" : ""}`}
-              onClick={() => handleOrderTypeChange("entry")}
+              variant={orderType === 'entry' ? 'default' : 'outline'}
+              className={`flex-1 ${orderType === 'entry' ? 'bg-yellow-500 text-white hover:bg-yellow-600' : ''}`}
+              onClick={() => handleOrderTypeChange('entry')}
             >
               Entry order
             </Button>
@@ -278,30 +266,25 @@ export function AdvancedOrderForm({
 
           {/* Order Type Description */}
           <p className="text-sm text-muted-foreground">
-            {orderType === "market" 
-              ? "A market order will be executed immediately at the next market price." 
-              : "An entry order will be executed when the market reaches the requested price."}
+            {orderType === 'market'
+              ? 'A market order will be executed immediately at the next market price.'
+              : 'An entry order will be executed when the market reaches the requested price.'}
           </p>
         </div>
 
         {/* Entry Order Rate (only for entry orders) */}
-        {orderType === "entry" && (
+        {orderType === 'entry' && (
           <div className="space-y-2">
             <label className="text-sm font-medium">Order rate:</label>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" type="button">
                 <Minus className="h-4 w-4" />
               </Button>
-              <Controller 
+              <Controller
                 control={form.control}
                 name="orderRate"
                 render={({ field }) => (
-                  <Input 
-                    {...field} 
-                    type="number" 
-                    step="0.0001" 
-                    className="text-center" 
-                  />
+                  <Input {...field} type="number" step="0.0001" className="text-center" />
                 )}
               />
               <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" type="button">
@@ -309,7 +292,8 @@ export function AdvancedOrderForm({
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Rate should be above {(currentPrice * 0.98).toFixed(4)} or below {(currentPrice * 1.02).toFixed(4)}
+              Rate should be above {(currentPrice * 0.98).toFixed(4)} or below{' '}
+              {(currentPrice * 1.02).toFixed(4)}
             </p>
           </div>
         )}
@@ -324,12 +308,9 @@ export function AdvancedOrderForm({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
-                  <div className="space-y-1 leading-none flex items-center">
+                  <div className="flex items-center space-y-1 leading-none">
                     <FormLabel className="font-medium">Stop Loss</FormLabel>
                     <TooltipProvider>
                       <Tooltip>
@@ -338,7 +319,8 @@ export function AdvancedOrderForm({
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="w-[200px] text-xs">
-                            A stop loss order will automatically close your position when the market reaches the specified price, helping to limit potential losses.
+                            A stop loss order will automatically close your position when the market
+                            reaches the specified price, helping to limit potential losses.
                           </p>
                         </TooltipContent>
                       </Tooltip>
@@ -350,27 +332,32 @@ export function AdvancedOrderForm({
 
             {/* Stop Loss Settings */}
             {hasStopLoss && (
-              <div className="pl-7 space-y-4">
+              <div className="space-y-4 pl-7">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Close rate:</label>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" type="button">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        type="button"
+                      >
                         <Minus className="h-4 w-4" />
                       </Button>
-                      <Controller 
+                      <Controller
                         control={form.control}
                         name="stopLossRate"
                         render={({ field }) => (
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.0001" 
-                            className="text-center" 
-                          />
+                          <Input {...field} type="number" step="0.0001" className="text-center" />
                         )}
                       />
-                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" type="button">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        type="button"
+                      >
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
@@ -378,29 +365,35 @@ export function AdvancedOrderForm({
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Close amount:</label>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" type="button">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        type="button"
+                      >
                         <Minus className="h-4 w-4" />
                       </Button>
-                      <Controller 
+                      <Controller
                         control={form.control}
                         name="stopLossAmount"
                         render={({ field }) => (
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.0001" 
-                            className="text-center" 
-                          />
+                          <Input {...field} type="number" step="0.0001" className="text-center" />
                         )}
                       />
-                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" type="button">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        type="button"
+                      >
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Rate should be between {(currentPrice * 0.9).toFixed(4)} and {(currentPrice * 0.95).toFixed(4)}
+                  Rate should be between {(currentPrice * 0.9).toFixed(4)} and{' '}
+                  {(currentPrice * 0.95).toFixed(4)}
                 </p>
               </div>
             )}
@@ -412,12 +405,9 @@ export function AdvancedOrderForm({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
-                  <div className="space-y-1 leading-none flex items-center">
+                  <div className="flex items-center space-y-1 leading-none">
                     <FormLabel className="font-medium">Take Profit</FormLabel>
                     <TooltipProvider>
                       <Tooltip>
@@ -426,7 +416,8 @@ export function AdvancedOrderForm({
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="w-[200px] text-xs">
-                            A take profit order will automatically close your position when the market reaches a specified price, allowing you to secure profits.
+                            A take profit order will automatically close your position when the
+                            market reaches a specified price, allowing you to secure profits.
                           </p>
                         </TooltipContent>
                       </Tooltip>
@@ -438,27 +429,32 @@ export function AdvancedOrderForm({
 
             {/* Take Profit Settings */}
             {hasTakeProfit && (
-              <div className="pl-7 space-y-4">
+              <div className="space-y-4 pl-7">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Close rate:</label>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" type="button">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        type="button"
+                      >
                         <Minus className="h-4 w-4" />
                       </Button>
-                      <Controller 
+                      <Controller
                         control={form.control}
                         name="takeProfitRate"
                         render={({ field }) => (
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.0001" 
-                            className="text-center" 
-                          />
+                          <Input {...field} type="number" step="0.0001" className="text-center" />
                         )}
                       />
-                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" type="button">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        type="button"
+                      >
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
@@ -466,35 +462,41 @@ export function AdvancedOrderForm({
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Close amount:</label>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" type="button">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        type="button"
+                      >
                         <Minus className="h-4 w-4" />
                       </Button>
-                      <Controller 
+                      <Controller
                         control={form.control}
                         name="takeProfitAmount"
                         render={({ field }) => (
-                          <Input 
-                            {...field} 
-                            type="number" 
-                            step="0.0001" 
-                            className="text-center" 
-                          />
+                          <Input {...field} type="number" step="0.0001" className="text-center" />
                         )}
                       />
-                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full" type="button">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 rounded-full"
+                        type="button"
+                      >
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Rate should be between {(currentPrice * 1.05).toFixed(4)} and {(currentPrice * 1.1).toFixed(4)}
+                  Rate should be between {(currentPrice * 1.05).toFixed(4)} and{' '}
+                  {(currentPrice * 1.1).toFixed(4)}
                 </p>
               </div>
             )}
 
             {/* Expiration Date (only for entry orders) */}
-            {orderType === "entry" && (
+            {orderType === 'entry' && (
               <>
                 <FormField
                   control={form.control}
@@ -502,12 +504,9 @@ export function AdvancedOrderForm({
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                       <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
-                      <div className="space-y-1 leading-none flex items-center">
+                      <div className="flex items-center space-y-1 leading-none">
                         <FormLabel className="font-medium">Expiration date</FormLabel>
                         <TooltipProvider>
                           <Tooltip>
@@ -528,7 +527,7 @@ export function AdvancedOrderForm({
 
                 {/* Expiration Date Settings */}
                 {hasExpirationDate && (
-                  <div className="pl-7 space-y-2">
+                  <div className="space-y-2 pl-7">
                     <label className="text-sm font-medium">Close the order at</label>
                     <div className="grid grid-cols-3 gap-2">
                       <Controller
@@ -576,7 +575,10 @@ export function AdvancedOrderForm({
                               <SelectValue placeholder="Year" />
                             </SelectTrigger>
                             <SelectContent>
-                              {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i).map((year) => (
+                              {Array.from(
+                                { length: 5 },
+                                (_, i) => new Date().getFullYear() + i
+                              ).map((year) => (
                                 <SelectItem key={year} value={year.toString()}>
                                   {year}
                                 </SelectItem>

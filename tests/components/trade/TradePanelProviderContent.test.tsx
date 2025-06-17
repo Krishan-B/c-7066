@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react';
-import { TradePanelProviderContent } from '../../../src/components/trade/TradePanelProviderContent';
 import { useContext } from 'react';
-import { TradePanelContext } from '../../../src/components/trade/trade-panel-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen } from '@testing-library/react';
+
+import { TradePanelContext } from '../../../src/components/trade/trade-panel-utils';
+import { TradePanelProviderContent } from '../../../src/components/trade/TradePanelProviderContent';
 
 const queryClient = new QueryClient();
 

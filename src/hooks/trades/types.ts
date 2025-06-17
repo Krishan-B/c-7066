@@ -37,7 +37,10 @@ export interface TradeManagement extends TradeManagementState {
   fetchOpenPositions: () => Promise<void>;
   fetchPendingOrders: () => Promise<void>;
   fetchClosedTrades: () => Promise<void>;
-  closePosition: (tradeId: string, currentPrice: number) => Promise<{
+  closePosition: (
+    tradeId: string,
+    currentPrice: number
+  ) => Promise<{
     success: boolean;
     message: string;
   }>;

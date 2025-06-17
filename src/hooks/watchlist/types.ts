@@ -1,4 +1,3 @@
-
 import { type Asset } from '@/hooks/market/types';
 
 export interface UseWatchlistDataReturn {

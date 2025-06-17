@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
-import { type TradeResult, type MarketOrderParams } from '../types';
+
+import { type MarketOrderParams, type TradeResult } from '../types';
 
 /**
  * Execute a market order through the Supabase edge function

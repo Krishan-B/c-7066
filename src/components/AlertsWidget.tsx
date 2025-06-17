@@ -1,10 +1,10 @@
+import { useCallback, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Activity, AlertTriangle, Bell, Newspaper, TrendingUp } from 'lucide-react';
 
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Bell, AlertTriangle, Newspaper, TrendingUp, Activity } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
 
 interface MarketAlert {
   id: string;
@@ -24,33 +24,33 @@ const AlertsWidget = () => {
   const fetchAlerts = useCallback(async () => {
     try {
       setIsLoading(true);
-      
+
       const { data, error } = await supabase.functions.invoke('market-alerts', {
         method: 'POST',
-        body: {}
+        body: {},
       });
-      
+
       if (error) throw error;
-      
+
       if (data?.data) {
         setAlerts(data.data);
       }
     } catch (error) {
-      console.error("Error fetching market alerts:", error);
+      console.error('Error fetching market alerts:', error);
       toast({
-        title: "Error",
-        description: "Failed to load market alerts.",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to load market alerts.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
   }, [toast]);
-  
+
   useEffect(() => {
     fetchAlerts();
   }, [fetchAlerts]);
-  
+
   const getAlertIcon = (type: string) => {
     switch (type) {
       case 'price_movement':
@@ -63,7 +63,7 @@ const AlertsWidget = () => {
         return <Bell className="h-4 w-4" />;
     }
   };
-  
+
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -73,14 +73,14 @@ const AlertsWidget = () => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <AlertTriangle className="h-5 w-5" />
             Market Alerts
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex justify-center py-4">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-primary"></div>
           </div>
         </CardContent>
       </Card>
@@ -90,7 +90,7 @@ const AlertsWidget = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg">
           <AlertTriangle className="h-5 w-5" />
           Market Alerts
         </CardTitle>
@@ -98,26 +98,29 @@ const AlertsWidget = () => {
       <CardContent className="p-0">
         <div className="max-h-[300px] overflow-y-auto">
           {alerts.length === 0 ? (
-            <div className="py-6 text-center text-muted-foreground">
-              No alerts at this time
-            </div>
+            <div className="py-6 text-center text-muted-foreground">No alerts at this time</div>
           ) : (
             <ul className="divide-y divide-border">
               {alerts.map((alert) => (
                 <li key={alert.id} className="p-4 hover:bg-muted/50">
                   <div className="flex items-start gap-3">
-                    <div className={`mt-0.5 rounded-full p-1.5 ${
-                      alert.importance === 'high' ? 'bg-destructive/20 text-destructive' : 
-                      'bg-muted text-muted-foreground'
-                    }`}>
+                    <div
+                      className={`mt-0.5 rounded-full p-1.5 ${
+                        alert.importance === 'high'
+                          ? 'bg-destructive/20 text-destructive'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
                       {getAlertIcon(alert.type)}
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="font-medium flex items-center gap-2">
+                      <div className="mb-1 flex items-center justify-between">
+                        <div className="flex items-center gap-2 font-medium">
                           {alert.name} ({alert.symbol})
                           {alert.importance === 'high' && (
-                            <Badge variant="destructive" className="text-[10px] h-5">Important</Badge>
+                            <Badge variant="destructive" className="h-5 text-[10px]">
+                              Important
+                            </Badge>
                           )}
                         </div>
                         <span className="text-xs text-muted-foreground">

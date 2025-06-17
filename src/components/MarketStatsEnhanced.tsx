@@ -1,17 +1,18 @@
+import React from 'react';
 import {
-  ArrowUpIcon,
   ArrowDownIcon,
+  ArrowUpIcon,
+  BarChart3,
   Bitcoin,
   DollarSign,
   TrendingUp,
-  BarChart3,
   Zap,
 } from 'lucide-react';
-import { useMarketData } from '@/hooks/market';
-import { Card, CardContent } from '@/components/ui/card';
+
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import React from 'react';
+import { useMarketData } from '@/hooks/market';
 
 interface StatCardProps {
   data: {
@@ -41,18 +42,18 @@ const StatCard = ({ data, icon: Icon, iconColor, isLoading }: StatCardProps) => 
   const isPositive = data.change_percentage >= 0;
 
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200 bg-card border-border">
+    <Card className="border-border bg-card transition-shadow duration-200 hover:shadow-md">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
+        <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className={`p-2 rounded-full bg-muted ${iconColor}`}>
+            <div className={`rounded-full bg-muted p-2 ${iconColor}`}>
               <Icon className="h-4 w-4" />
             </div>
             <div>
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {data.symbol}
               </h3>
-              <p className="text-xs text-muted-foreground truncate max-w-[80px]">{data.name}</p>
+              <p className="max-w-[80px] truncate text-xs text-muted-foreground">{data.name}</p>
             </div>
           </div>
           <Badge
@@ -194,7 +195,7 @@ const MarketStats = () => {
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {assets.map((asset, index) => (
           <StatCard
             key={asset.data.symbol || index}

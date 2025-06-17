@@ -1,19 +1,23 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Suspense, lazy, useEffect } from 'react';
-import { AuthProvider } from '@/components/AuthProvider';
-import { preloadRoutes } from '@/utils/routePreload';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { LoadingFallback } from '@/components/ui/loading-fallback';
-import Layout from '@/components/Layout';
-import { Toaster } from '@/components/ui/toaster';
-import { TradePanelProvider } from '@/components/trade/TradePanelProvider';
-import { ThemeProvider } from '@/components/theme';
-import { HelmetProvider } from 'react-helmet-async';
-
+import { lazy, Suspense, useEffect } from 'react';
+import Auth from '@/pages/Auth';
+import AuthCallback from '@/pages/AuthCallback';
+import Index from '@/pages/Index';
 // Critical components that should be eagerly loaded
 import Landing from '@/pages/Landing';
-import Index from '@/pages/Index';
-import Auth from '@/pages/Auth';
+import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage'; // Import PrivacyPolicyPage
+import UpdatePasswordPage from '@/pages/UpdatePasswordPage'; // Import the new page
+
+import { HelmetProvider } from 'react-helmet-async';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+
+import { AuthProvider } from '@/components/AuthProvider';
+import Layout from '@/components/Layout';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { ThemeProvider } from '@/components/theme';
+import { TradePanelProvider } from '@/components/trade/TradePanelProvider';
+import { LoadingFallback } from '@/components/ui/loading-fallback';
+import { Toaster } from '@/components/ui/toaster';
+import { preloadRoutes } from '@/utils/routePreload';
 
 // Lazy loaded page components with route-based chunking
 const Markets = lazy(() => import(/* webpackChunkName: "markets" */ '@/pages/Markets'));
@@ -42,6 +46,13 @@ export default function App() {
                 <Route path="/" element={<Landing />} />
                 {/* Auth page */}
                 <Route path="/auth" element={<Auth />} />
+                {/* OAuth callback page */}
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                {/* Password Update page */}
+                <Route path="/update-password" element={<UpdatePasswordPage />} />
+                {/* Privacy Policy page */}
+                <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+
                 {/* Protected routes inside Layout */}
                 <Route path="/dashboard" element={<Layout />}>
                   <Route index element={<Index />} />

@@ -1,10 +1,9 @@
-
 import { AdvancedRealTimeChart } from 'react-ts-tradingview-widgets';
 
 const CryptoChart = () => {
   return (
-    <div className="glass-card p-6 rounded-lg mb-8 animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
+    <div className="glass-card mb-8 animate-fade-in rounded-lg p-6">
+      <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-semibold">Bitcoin Price</h2>
       </div>
       <div className="h-[400px] w-full">

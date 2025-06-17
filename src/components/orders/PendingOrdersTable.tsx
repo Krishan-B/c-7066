@@ -1,4 +1,9 @@
 import React from 'react';
+import { AlertCircle, Clock, ShieldCheck, X } from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -7,13 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { X, Clock, AlertCircle, ShieldCheck } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { type Trade } from '@/hooks/trades/types';
 import { formatCurrency, formatNumber } from '@/utils/formatUtils';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface PendingOrdersTableProps {
   pendingOrders: Trade[];
@@ -28,7 +29,7 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="rounded-md border overflow-hidden">
+      <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -54,7 +55,7 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
   }
 
   return (
-    <div className="rounded-md border overflow-hidden">
+    <div className="overflow-hidden rounded-md border">
       <Table>
         <TableHeader className="bg-muted/60">
           <TableRow>
@@ -90,7 +91,7 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <span className="text-xs px-2 py-1 bg-muted rounded-full">
+                  <span className="rounded-full bg-muted px-2 py-1 text-xs">
                     {order.order_type === 'entry' ? 'Entry' : 'Market'}
                   </span>
                 </TableCell>
@@ -133,7 +134,7 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
                   {hasExpiration ? (
                     <div className="flex items-center">
                       <Clock
-                        className={`h-4 w-4 mr-1 ${isExpiringSoon ? 'text-amber-500' : 'text-muted-foreground'}`}
+                        className={`mr-1 h-4 w-4 ${isExpiringSoon ? 'text-amber-500' : 'text-muted-foreground'}`}
                       />
                       <span className={isExpiringSoon ? 'text-amber-500' : ''}>
                         {order.expiration_date
@@ -147,7 +148,7 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
                 </TableCell>
                 <TableCell className="text-center">
                   <Button variant="outline" size="sm" onClick={() => onCancelOrder(order.id)}>
-                    <X className="h-4 w-4 mr-1" /> Cancel
+                    <X className="mr-1 h-4 w-4" /> Cancel
                   </Button>
                 </TableCell>
               </TableRow>
@@ -155,7 +156,7 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
           })}
           {pendingOrders.length === 0 && (
             <TableRow>
-              <TableCell colSpan={9} className="text-center py-6">
+              <TableCell colSpan={9} className="py-6 text-center">
                 No pending orders found
               </TableCell>
             </TableRow>

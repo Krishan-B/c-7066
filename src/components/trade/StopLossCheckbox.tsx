@@ -1,13 +1,8 @@
+import { Info } from 'lucide-react';
 
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger 
-} from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface StopLossCheckboxProps {
   hasStopLoss: boolean;
@@ -24,7 +19,7 @@ export const StopLossCheckbox: React.FC<StopLossCheckboxProps> = ({
   isExecuting,
   checked,
   onCheckedChange,
-  disabled
+  disabled,
 }) => {
   // Use provided checked and onCheckedChange or fall back to hasStopLoss and setHasStopLoss
   const isChecked = checked ?? hasStopLoss;
@@ -33,15 +28,17 @@ export const StopLossCheckbox: React.FC<StopLossCheckboxProps> = ({
 
   return (
     <div className="flex items-start space-x-2">
-      <Checkbox 
-        id="stopLoss" 
+      <Checkbox
+        id="stopLoss"
         checked={isChecked}
         onCheckedChange={handleCheckedChange}
         disabled={isDisabled}
       />
       <div className="grid gap-1.5 leading-none">
         <div className="flex items-center gap-1">
-          <Label htmlFor="stopLoss" className="font-medium cursor-pointer">Stop Loss</Label>
+          <Label htmlFor="stopLoss" className="cursor-pointer font-medium">
+            Stop Loss
+          </Label>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
@@ -49,8 +46,8 @@ export const StopLossCheckbox: React.FC<StopLossCheckboxProps> = ({
               </TooltipTrigger>
               <TooltipContent side="right" align="start" className="max-w-[300px]">
                 <p className="text-sm">
-                  A stop loss order will automatically close your position when the price reaches a certain level,
-                  helping to limit potential losses.
+                  A stop loss order will automatically close your position when the price reaches a
+                  certain level, helping to limit potential losses.
                 </p>
               </TooltipContent>
             </Tooltip>

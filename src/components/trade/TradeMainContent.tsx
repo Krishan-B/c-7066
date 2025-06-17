@@ -1,24 +1,21 @@
-import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger 
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useCombinedMarketData, type MarketType } from "@/hooks/market";
-import { useTradeCalculations } from "@/hooks/trades/useTradeCalculations";
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { useCombinedMarketData, type MarketType } from '@/hooks/market';
+import { useTradeCalculations } from '@/hooks/trades/useTradeCalculations';
 
 interface SelectedAsset {
   name: string;
@@ -31,13 +28,13 @@ interface TradeMainContentProps {
   onAssetCategoryChange: (category: MarketType) => void;
   selectedAsset: SelectedAsset;
   onAssetSelect: (symbol: string) => void;
-  orderType: "market" | "entry";
-  setOrderType: (type: "market" | "entry") => void;
+  orderType: 'market' | 'entry';
+  setOrderType: (type: 'market' | 'entry') => void;
   units: string;
   setUnits: (units: string) => void;
-  onExecuteTrade: (action: "buy" | "sell") => void;
+  onExecuteTrade: (action: 'buy' | 'sell') => void;
   isExecuting: boolean;
-  tradeAction: "buy" | "sell";
+  tradeAction: 'buy' | 'sell';
   hasStopLoss: boolean;
   setHasStopLoss: (has: boolean) => void;
   hasTakeProfit: boolean;
@@ -56,7 +53,7 @@ interface TradeMainContentProps {
 // Numeric input validation function
 const validateNumericInput = (value: string): string => {
   const num = parseFloat(value);
-  if (isNaN(num) || num <= 0) return "0.01";
+  if (isNaN(num) || num <= 0) return '0.01';
   return value;
 };
 
@@ -78,53 +75,38 @@ export function TradeMainContent({
   setHasExpirationDate,
   orderRate,
   setOrderRate,
-  stopLossRate = "",
+  stopLossRate = '',
   setStopLossRate = () => {},
-  takeProfitRate = "",
+  takeProfitRate = '',
   setTakeProfitRate = () => {},
   setExpirationDate = () => {},
 }: TradeMainContentProps) {
   // Fetch market data for all categories
-  const { marketData, isLoading: isLoadingMarkets } = useCombinedMarketData(
-    [assetCategory], 
-    { refetchInterval: 30000 }
-  );
-  
+  const { marketData, isLoading: isLoadingMarkets } = useCombinedMarketData([assetCategory], {
+    refetchInterval: 30000,
+  });
+
   // Get current asset price
-  const currentAsset = marketData.find(asset => 
-    asset.symbol === selectedAsset.symbol
-  );
+  const currentAsset = marketData.find((asset) => asset.symbol === selectedAsset.symbol);
   const currentPrice = currentAsset?.price || 0;
-  
+
   // Filter assets based on selected category
-  const filteredAssets = marketData.filter(
-    asset => asset.market_type === assetCategory
-  );
-   // Asset categories
-  const assetCategories: MarketType[] = [
-    "Crypto",
-    "Stock",
-    "Forex",
-    "Index",
-    "Commodities"
-  ];
-  
+  const filteredAssets = marketData.filter((asset) => asset.market_type === assetCategory);
+  // Asset categories
+  const assetCategories: MarketType[] = ['Crypto', 'Stock', 'Forex', 'Index', 'Commodities'];
+
   // Calculate trade values
-  const { 
-    leverage, 
-    positionValue, 
-    requiredFunds 
-  } = useTradeCalculations(
+  const { leverage, positionValue, requiredFunds } = useTradeCalculations(
     units, // pass as string
     currentPrice,
     assetCategory,
     10000
   );
-  
+
   // Handle calendar date selection
   const handleDateSelect = (date: Date | undefined) => {
     if (!setExpirationDate) return; // Guard clause for optional prop
-    
+
     if (date) {
       const minDate = new Date();
       if (date < minDate) {
@@ -141,11 +123,7 @@ export function TradeMainContent({
       {/* Asset Category Selection */}
       <div className="space-y-2">
         <Label>Asset Category</Label>
-        <Select 
-          value={assetCategory} 
-          onValueChange={onAssetCategoryChange}
-          disabled={isExecuting}
-        >
+        <Select value={assetCategory} onValueChange={onAssetCategoryChange} disabled={isExecuting}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
@@ -162,8 +140,8 @@ export function TradeMainContent({
       {/* Asset Selection */}
       <div className="space-y-2">
         <Label>Select Asset</Label>
-        <Select 
-          value={selectedAsset.symbol} 
+        <Select
+          value={selectedAsset.symbol}
           onValueChange={onAssetSelect}
           disabled={isExecuting || isLoadingMarkets}
         >
@@ -190,15 +168,11 @@ export function TradeMainContent({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Current Price</Label>
-          <div className="text-xl font-medium">
-            ${currentPrice.toFixed(2)}
-          </div>
+          <div className="text-xl font-medium">${currentPrice.toFixed(2)}</div>
         </div>
         <div className="space-y-1">
           <Label>Leverage</Label>
-          <div className="text-xl font-medium">
-            {leverage}x
-          </div>
+          <div className="text-xl font-medium">{leverage}x</div>
         </div>
       </div>
 
@@ -208,27 +182,27 @@ export function TradeMainContent({
         <div className="flex space-x-2">
           <Button
             type="button"
-            variant={orderType === "market" ? "default" : "outline"}
+            variant={orderType === 'market' ? 'default' : 'outline'}
             className="flex-1"
-            onClick={() => setOrderType("market")}
+            onClick={() => setOrderType('market')}
             disabled={isExecuting}
           >
             Market Order
           </Button>
           <Button
             type="button"
-            variant={orderType === "entry" ? "default" : "outline"}
-            className={`flex-1 ${orderType === "entry" ? "bg-orange-500 hover:bg-orange-600" : ""}`}
-            onClick={() => setOrderType("entry")}
+            variant={orderType === 'entry' ? 'default' : 'outline'}
+            className={`flex-1 ${orderType === 'entry' ? 'bg-orange-500 hover:bg-orange-600' : ''}`}
+            onClick={() => setOrderType('entry')}
             disabled={isExecuting}
           >
             Entry Order
           </Button>
         </div>
         <p className="text-sm text-muted-foreground">
-          {orderType === "market" 
-            ? "Execute immediately at the current market price" 
-            : "Set the price at which you want your order to be executed"}
+          {orderType === 'market'
+            ? 'Execute immediately at the current market price'
+            : 'Set the price at which you want your order to be executed'}
         </p>
       </div>
 
@@ -251,7 +225,7 @@ export function TradeMainContent({
       </div>
 
       {/* Entry Price (for entry orders) */}
-      {orderType === "entry" && (
+      {orderType === 'entry' && (
         <div className="space-y-2">
           <Label htmlFor="entry-price">Entry Price</Label>
           <Input
@@ -282,7 +256,7 @@ export function TradeMainContent({
           />
         </div>
         {hasStopLoss && (
-          <div className="pl-6 space-y-2 border-l-2 border-muted-foreground/20">
+          <div className="space-y-2 border-l-2 border-muted-foreground/20 pl-6">
             <Label htmlFor="stop-loss-price">Stop Loss Price</Label>
             <Input
               id="stop-loss-price"
@@ -313,7 +287,7 @@ export function TradeMainContent({
           />
         </div>
         {hasTakeProfit && (
-          <div className="pl-6 space-y-2 border-l-2 border-muted-foreground/20">
+          <div className="space-y-2 border-l-2 border-muted-foreground/20 pl-6">
             <Label htmlFor="take-profit-price">Take Profit Price</Label>
             <Input
               id="take-profit-price"
@@ -333,7 +307,7 @@ export function TradeMainContent({
       </div>
 
       {/* Expiration Date (for entry orders) */}
-      {orderType === "entry" && (
+      {orderType === 'entry' && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="expiration">Expiration Date</Label>
@@ -345,19 +319,17 @@ export function TradeMainContent({
             />
           </div>
           {hasExpirationDate && (
-            <div className="pl-6 space-y-2 border-l-2 border-muted-foreground/20">
+            <div className="space-y-2 border-l-2 border-muted-foreground/20 pl-6">
               <Popover>
-                <PopoverTrigger asChild>                    <Button
-                    variant={"outline"}
+                <PopoverTrigger asChild>
+                  {' '}
+                  <Button
+                    variant={'outline'}
                     className="w-full justify-start text-left font-normal"
                     disabled={isExecuting}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {hasExpirationDate ? (
-                      format(new Date(), "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
+                    {hasExpirationDate ? format(new Date(), 'PPP') : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">

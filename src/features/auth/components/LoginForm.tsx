@@ -1,100 +1,177 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { validateSignIn } from '../utils/validation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { useToast } from '@/hooks/use-toast';
 import { signInWithEmail } from '@/utils/auth';
-import PasswordResetDialog from './PasswordResetDialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
+import { useAuthRateLimiting } from '@/utils/rateLimiter';
 
-// Import our components
-import EmailField from './login/EmailField';
-import PasswordField from './login/PasswordField';
-import RememberMeCheckbox from './login/RememberMeCheckbox';
-import LoginButton from './login/LoginButton';
-import ErrorAlert from './login/ErrorAlert';
+const formSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
 
-const LoginForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [formError, setFormError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
-
+export function LoginForm() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [rateLimitInfo, setRateLimitInfo] = useState<{
+    blocked: boolean;
+    waitTime: number;
+    attemptsLeft: number;
+  }>({
+    blocked: false,
+    waitTime: 0,
+    attemptsLeft: 5,
+  });
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError('');
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-    const errors = validateSignIn(email, password);
-    setFieldErrors(errors);
+  // Check for existing rate limit blocks
+  useAuthRateLimiting((waitTime) => {
+    setRateLimitInfo((prev) => ({
+      ...prev,
+      blocked: true,
+      waitTime,
+      attemptsLeft: 0,
+    }));
+  });
 
-    if (Object.keys(errors).length > 0) {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (rateLimitInfo.blocked) {
+      toast({
+        variant: 'destructive',
+        title: 'Access Blocked',
+        description: `Too many login attempts. Please try again in ${Math.ceil(
+          rateLimitInfo.waitTime / 60
+        )} minutes.`,
+      });
       return;
     }
 
+    setIsLoading(true);
     try {
-      setLoading(true);
-
-      const { session, error } = await signInWithEmail(email, password);
+      const { error, attemptsLeft } = await signInWithEmail(values.email, values.password);
 
       if (error) {
-        setFormError(isErrorWithMessage(error) ? error.message : 'Login failed');
+        // Update attempts remaining
+        setRateLimitInfo((prev) => ({
+          ...prev,
+          attemptsLeft: attemptsLeft || prev.attemptsLeft - 1,
+        }));
+
+        if ('code' in error && error.code === 'RATE_LIMIT_EXCEEDED') {
+          const rateLimitError = error as { waitTime: number };
+          setRateLimitInfo({
+            blocked: true,
+            waitTime: rateLimitError.waitTime,
+            attemptsLeft: 0,
+          });
+          toast({
+            variant: 'destructive',
+            title: 'Too Many Attempts',
+            description: error.message,
+          });
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: 'Invalid email or password.',
+          });
+        }
         return;
       }
 
-      if (session) {
-        // Navigate programmatically instead of forcing a page reload
-        navigate('/dashboard', { replace: true });
-      }
-    } catch (error: unknown) {
-      setFormError(isErrorWithMessage(error) ? error.message : 'Unexpected error occurred');
-      console.error('Login error:', error);
+      // Success
+      navigate('/dashboard');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <ErrorAlert message={formError} />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {rateLimitInfo.blocked && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Account temporarily locked. Please try again in{' '}
+              {Math.ceil(rateLimitInfo.waitTime / 60)} minutes.
+            </AlertDescription>
+          </Alert>
+        )}
 
-      <form onSubmit={handleSignIn} className="space-y-4" role="form">
-        <EmailField
-          email={email}
-          onChange={setEmail}
-          error={fieldErrors.email}
-          id="login-email"
-          data-testid="login-email"
+        {!rateLimitInfo.blocked && rateLimitInfo.attemptsLeft < 3 && (
+          <Alert variant="warning">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {rateLimitInfo.attemptsLeft} login attempts remaining before temporary lockout.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Enter your email"
+                  type="email"
+                  disabled={isLoading || rateLimitInfo.blocked}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
-        <PasswordField
-          password={password}
-          onChange={setPassword}
-          error={fieldErrors.password}
-          showForgotPassword={true}
-          onForgotPasswordClick={() => setResetPasswordOpen(true)}
-          id="login-password"
-          data-testid="login-password"
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Enter your password"
+                  type="password"
+                  disabled={isLoading || rateLimitInfo.blocked}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
-        <RememberMeCheckbox checked={rememberMe} onCheckedChange={setRememberMe} />
-
-        <LoginButton loading={loading} />
+        <Button type="submit" className="w-full" disabled={isLoading || rateLimitInfo.blocked}>
+          {isLoading ? 'Signing in...' : 'Sign In'}
+        </Button>
       </form>
-
-      <PasswordResetDialog open={resetPasswordOpen} onOpenChange={setResetPasswordOpen} />
-    </>
-  );
-};
-
-function isErrorWithMessage(error: unknown): error is { message: string } {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'message' in error &&
-    typeof (error as { message: unknown }).message === 'string'
+    </Form>
   );
 }
-
-export default LoginForm;

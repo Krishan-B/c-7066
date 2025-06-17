@@ -1,49 +1,47 @@
 {
   "recommendations": [
-    // AI-Powered Development Extensions  
+    // Essential Extensions Only (Optimized for Performance)
+    "usernamehw.errorlens",
+    "dbaeumer.vscode-eslint",
     "github.copilot",
     "github.copilot-chat",
-    
-    // Core Development Extensions
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode", 
     "ms-vscode.vscode-typescript-next",
+    "yzhang.markdown-all-in-one",
+    "davidanson.vscode-markdownlint",
+    "ms-playwright.playwright",
+    "ms-ossdata.vscode-postgresql",
+    "esbenp.prettier-vscode",
     "bradlc.vscode-tailwindcss",
-    "usernamehw.errorlens",
-    
-    // Git & GitHub Extensions
-    "eamodio.gitlens",
-    "github.vscode-pull-request-github",
-    "github.vscode-github-actions",
-    
-    // Database Extensions (for Supabase)
-    "ms-mssql.mssql",
-    "mtxr.sqltools",
-    
-    // Documentation Extensions
-    "yzhang.markdown-all-in-one"
-    
-    // Optional Extensions (uncomment if needed):
-    // "davidanson.vscode-markdownlint",  // Heavy documentation workflows
-    // "github.remotehub"                 // GitHub repo browsing
+    "vitest.explorer",
+    "aaron-bond.better-comments",
+    "streetsidesoftware.code-spell-checker"
   ],
-  
+
   "unwantedRecommendations": [
-    // Unused Technology Extensions
-    "vue.volar",
-    "firefox-devtools.vscode-firefox-debug",
-    "ms-edgedevtools.vscode-edge-devtools",
+    // Performance Heavy Extensions (DO NOT INSTALL)
+    "wallabyjs.wallaby-vscode",
+    "wallabyjs.quokka-vscode",
+    "sonarsource.sonarlint-vscode",
     "ms-azuretools.vscode-containers",
     "ms-azuretools.vscode-docker",
-    
-    // Redundant/Conflicting Extensions
-    "christian-kohler.npm-intellisense",
-    "coderabbit.coderabbit-vscode",
-    "github.codespaces",
-    "ms-vscode.azure-repos",
-    "ms-vscode.remote-repositories",
-    "ms-mssql.data-workspace-vscode",
-    "ms-mssql.sql-bindings-vscode", 
-    "ms-mssql.sql-database-projects-vscode"
+    "cweijan.vscode-postgresql-client2",
+    "cweijan.dbclient-jdbc",
+    "rangav.vscode-thunder-client",
+    "github.vscode-github-actions",
+
+    // Heavy Preview Extensions
+    "shd101wyy.markdown-preview-enhanced",
+    "bierner.markdown-mermaid",
+
+    // Utility Extensions (Install manually if needed)
+    "adpyke.codesnap",
+    "wayou.vscode-todo-highlight",
+    "gruntfuggly.todo-tree",
+    "vscode-icons-team.vscode-icons",
+
+    // Language Extensions (Not Used)
+    "redhat.vscode-yaml",
+    "ms-vscode.makefile-tools",
+    "syler.sass-indented"
   ]
 }

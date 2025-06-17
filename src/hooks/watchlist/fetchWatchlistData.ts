@@ -1,5 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
+
 import { type Asset } from '@/hooks/market/types';
+
 import { type WatchlistFetchOptions } from './types';
 
 export async function fetchWatchlistData(options: WatchlistFetchOptions = {}): Promise<Asset[]> {

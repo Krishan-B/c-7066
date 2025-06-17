@@ -1,5 +1,9 @@
-
-import { type OpenTrade, type PendingOrder, type ClosedTrade, type OrderHistory } from "@/types/orders";
+import {
+  type ClosedTrade,
+  type OpenTrade,
+  type OrderHistory,
+  type PendingOrder,
+} from '@/types/orders';
 
 // Sample orders data
 export const openTrades: OpenTrade[] = [
@@ -14,8 +18,8 @@ export const openTrades: OpenTrade[] = [
     marketRate: 68453.76,
     marketValue: 10268.06,
     totalPnl: 153.23,
-    stopLoss: 65500.00,
-    takeProfit: 71500.00,
+    stopLoss: 65500.0,
+    takeProfit: 71500.0,
     status: 'active',
     openDate: '2025-05-10 09:12:34',
     date: '2025-05-10 09:12:34',
@@ -31,8 +35,8 @@ export const openTrades: OpenTrade[] = [
     marketRate: 3392.18,
     marketValue: 4070.62,
     totalPnl: 11.21,
-    stopLoss: 3480.00,
-    takeProfit: 3300.00,
+    stopLoss: 3480.0,
+    takeProfit: 3300.0,
     status: 'active',
     openDate: '2025-05-09 16:45:22',
     date: '2025-05-09 16:45:22',
@@ -46,14 +50,14 @@ export const openTrades: OpenTrade[] = [
     units: 10,
     amount: 10,
     marketRate: 184.21,
-    marketValue: 1842.10,
-    totalPnl: 15.80,
-    stopLoss: 175.00,
-    takeProfit: 195.00,
+    marketValue: 1842.1,
+    totalPnl: 15.8,
+    stopLoss: 175.0,
+    takeProfit: 195.0,
     status: 'active',
     openDate: '2025-05-08 11:32:18',
     date: '2025-05-08 11:32:18',
-  }
+  },
 ];
 
 export const pendingOrders: PendingOrder[] = [
@@ -66,8 +70,8 @@ export const pendingOrders: PendingOrder[] = [
     units: 10,
     amount: 10,
     marketRate: 143.56,
-    stopLoss: 135.00,
-    takeProfit: 155.00,
+    stopLoss: 135.0,
+    takeProfit: 155.0,
     status: 'pending',
     orderDate: '2025-05-09 14:25:33',
     date: '2025-05-09 14:25:33',
@@ -81,12 +85,12 @@ export const pendingOrders: PendingOrder[] = [
     units: 5,
     amount: 5,
     marketRate: 173.45,
-    stopLoss: 180.00,
-    takeProfit: 165.00,
+    stopLoss: 180.0,
+    takeProfit: 165.0,
     status: 'pending',
     orderDate: '2025-05-08 10:18:42',
     date: '2025-05-08 10:18:42',
-  }
+  },
 ];
 
 export const closedTrades: ClosedTrade[] = [
@@ -101,8 +105,8 @@ export const closedTrades: ClosedTrade[] = [
     amount: 0.1,
     marketValue: 6788.05,
     totalPnl: 144.82,
-    stopLoss: 64000.00,
-    takeProfit: 69000.00,
+    stopLoss: 64000.0,
+    takeProfit: 69000.0,
     status: 'completed',
     openDate: '2025-04-29 09:20:31',
     closeDate: '2025-05-06 16:20:31',
@@ -118,14 +122,14 @@ export const closedTrades: ClosedTrade[] = [
     units: 1.5,
     amount: 1.5,
     marketValue: 5102.28,
-    totalPnl: 120.00,
-    stopLoss: 3200.00,
-    takeProfit: 3500.00,
+    totalPnl: 120.0,
+    stopLoss: 3200.0,
+    takeProfit: 3500.0,
     status: 'completed',
     openDate: '2025-04-28 14:15:22',
     closeDate: '2025-05-05 09:15:22',
     date: '2025-04-28 14:15:22',
-  }
+  },
 ];
 
 export const ordersHistory: OrderHistory[] = [
@@ -137,8 +141,8 @@ export const ordersHistory: OrderHistory[] = [
     direction: 'Buy',
     units: 8,
     amount: 8,
-    stopLoss: 175.00,
-    takeProfit: 190.00,
+    stopLoss: 175.0,
+    takeProfit: 190.0,
     status: 'canceled',
     orderDate: '2025-04-27 11:32:18',
     closeDate: '2025-05-04 13:45:07',
@@ -152,11 +156,11 @@ export const ordersHistory: OrderHistory[] = [
     direction: 'Sell',
     units: 3,
     amount: 3,
-    stopLoss: 175.00,
-    takeProfit: 160.00,
+    stopLoss: 175.0,
+    takeProfit: 160.0,
     status: 'canceled',
     orderDate: '2025-04-26 10:05:44',
     closeDate: '2025-05-03 11:05:44',
     date: '2025-04-26 10:05:44',
-  }
+  },
 ];
