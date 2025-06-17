@@ -1,12 +1,20 @@
-
-import { cn } from "@/lib/utils";
-import { NavLink } from "react-router-dom";
-import { LayoutDashboard, LineChart, BarChart3, Newspaper, Wallet, Settings, UserCircle, LogOut, ListCheck } from "lucide-react";
+import { cn } from '@/lib/utils';
+import { NavLink, useNavigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  LineChart,
+  BarChart3,
+  Newspaper,
+  Wallet,
+  Settings,
+  UserCircle,
+  LogOut,
+  ListCheck,
+} from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { preloadRoute } from "@/utils/routePreload";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { preloadRoute } from '@/utils/routePreload';
+import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -28,12 +36,14 @@ const SidebarItem = ({ to, icon, label, delay = 0, onMouseEnter }: SidebarItemPr
   >
     <NavLink
       to={to}
-      className={({ isActive }) => cn(
-        "flex items-center py-2 px-4 rounded-md text-sm transition-all duration-300",
-        isActive 
-          ? "bg-primary/20 text-primary font-medium" 
-          : "hover:bg-primary/10 text-muted-foreground hover:text-primary"
-      )}
+      className={({ isActive }) =>
+        cn(
+          'flex items-center py-2 px-4 rounded-md text-sm transition-all duration-300',
+          isActive
+            ? 'bg-primary/20 text-primary font-medium'
+            : 'hover:bg-primary/10 text-muted-foreground hover:text-primary'
+        )
+      }
       onMouseEnter={onMouseEnter}
     >
       <span className="mr-3">{icon}</span>
@@ -46,87 +56,97 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const handleLogout = async () => {
     try {
       await signOut();
       toast({
-        title: "Signed out successfully",
+        title: 'Signed out successfully',
       });
-      navigate("/");
+      navigate('/');
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error('Error signing out:', error);
       toast({
-        title: "Error signing out",
-        description: "There was a problem signing out",
-        variant: "destructive",
+        title: 'Error signing out',
+        description: 'There was a problem signing out',
+        variant: 'destructive',
       });
     }
   };
-  
+
   return (
-    <aside 
+    <aside
       className={cn(
-        "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-card/70 backdrop-blur-sm z-10 w-64 border-r border-secondary/50 transition-all duration-300 ease-in-out",
-        isOpen ? "translate-x-0" : "-translate-x-full"
+        'fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border-r border-border z-10 w-64 transition-all duration-300 ease-in-out shadow-lg',
+        isOpen ? 'translate-x-0' : '-translate-x-full'
       )}
     >
       <div className="flex flex-col h-full p-4">
         <div className="flex-grow">
           <nav className="space-y-1">
-            <SidebarItem 
-              to="/dashboard" 
-              icon={<LayoutDashboard className="h-5 w-5" />} 
-              label="Dashboard" 
-              delay={0.1} 
+            <SidebarItem
+              to="/dashboard"
+              icon={<LayoutDashboard className="h-5 w-5" />}
+              label="Dashboard"
+              delay={0.1}
             />
-            <SidebarItem 
-              to="/dashboard/markets" 
-              icon={<LineChart className="h-5 w-5" />} 
-              label="Markets" 
-              delay={0.2} 
+            <SidebarItem
+              to="/dashboard/markets"
+              icon={<LineChart className="h-5 w-5" />}
+              label="Markets"
+              delay={0.2}
               onMouseEnter={() => preloadRoute('markets')}
             />
-            <SidebarItem 
-              to="/dashboard/portfolio" 
-              icon={<BarChart3 className="h-5 w-5" />} 
-              label="Portfolio" 
+            <SidebarItem
+              to="/dashboard/portfolio"
+              icon={<BarChart3 className="h-5 w-5" />}
+              label="Portfolio"
               delay={0.3}
               onMouseEnter={() => preloadRoute('portfolio')}
               data-route="portfolio"
             />
-            <SidebarItem 
-              to="/dashboard/orders" 
-              icon={<ListCheck className="h-5 w-5" />} 
-              label="Orders" 
+            <SidebarItem
+              to="/dashboard/orders"
+              icon={<ListCheck className="h-5 w-5" />}
+              label="Orders"
               delay={0.4}
               onMouseEnter={() => preloadRoute('orders')}
               data-route="orders"
             />
-            <SidebarItem 
-              to="/dashboard/news" 
-              icon={<Newspaper className="h-5 w-5" />} 
-              label="News" 
+            <SidebarItem
+              to="/dashboard/news"
+              icon={<Newspaper className="h-5 w-5" />}
+              label="News"
               delay={0.5}
               onMouseEnter={() => preloadRoute('news')}
               data-route="news"
             />
-            <SidebarItem 
-              to="/dashboard/wallet" 
-              icon={<Wallet className="h-5 w-5" />} 
-              label="Wallet" 
+            <SidebarItem
+              to="/dashboard/wallet"
+              icon={<Wallet className="h-5 w-5" />}
+              label="Wallet"
               delay={0.6}
               onMouseEnter={() => preloadRoute('wallet')}
               data-route="wallet"
             />
           </nav>
-          
+
           <div className="mt-8">
             <p className="px-4 text-xs font-medium text-primary mb-2">ACCOUNT</p>
             <nav className="space-y-1">
-              <SidebarItem to="/dashboard/profile" icon={<UserCircle className="h-5 w-5" />} label="My Profile" delay={0.7} />
-              <SidebarItem to="/dashboard/account" icon={<Settings className="h-5 w-5" />} label="Settings" delay={0.8} />
-              <motion.button 
+              <SidebarItem
+                to="/dashboard/profile"
+                icon={<UserCircle className="h-5 w-5" />}
+                label="My Profile"
+                delay={0.7}
+              />
+              <SidebarItem
+                to="/dashboard/account"
+                icon={<Settings className="h-5 w-5" />}
+                label="Settings"
+                delay={0.8}
+              />
+              <motion.button
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.2, delay: 0.9 }}

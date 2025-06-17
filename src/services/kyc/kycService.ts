@@ -1,4 +1,9 @@
-import { type KYCDocument, type KYCStatus, type DocumentUploadData } from './types';
+import {
+  type KYCDocument,
+  type UserKYCStatus,
+  type DocumentUploadData,
+  type KYCStatus,
+} from './types';
 
 export class KYCService {
   static async uploadDocument(data: DocumentUploadData): Promise<KYCDocument> {
@@ -6,13 +11,13 @@ export class KYCService {
     // This would need to be implemented when KYC tables are added to the database
     const mockDocument: KYCDocument = {
       id: `doc_${Date.now()}`,
-      user_id: data.userId || 'mock-user-id',
+      user_id: 'mock-user-id',
       document_type: data.document_type,
-      document_url: data.fileUrl || 'mock-file-url',
-      file_name: data.fileName || data.file.name,
-      file_size: data.file.size,
-      mime_type: data.file.type,
-      status: 'pending',
+      category: data.category,
+      file_url: 'mock-file-url',
+      file_name: data.file.name,
+      status: 'PENDING',
+      comments: data.comments,
       uploaded_at: new Date().toISOString(),
     };
 
@@ -28,13 +33,14 @@ export class KYCService {
     return [];
   }
 
-  static async getKYCStatus(userId: string): Promise<KYCStatus> {
+  static async getKYCStatus(userId: string): Promise<UserKYCStatus> {
     // Mock implementation - returns pending status until KYC tables are created
-    const mockStatus: KYCStatus = {
+    const mockStatus: UserKYCStatus = {
       user_id: userId,
-      overall_status: 'pending',
-      identity_document_status: 'pending',
-      address_document_status: 'pending',
+      overall_status: 'PENDING',
+      id_verification_status: 'PENDING',
+      address_verification_status: 'PENDING',
+      other_documents_status: 'PENDING',
       updated_at: new Date().toISOString(),
     };
 
@@ -49,7 +55,7 @@ export class KYCService {
 
   static async updateDocumentStatus(
     documentId: string,
-    status: 'pending' | 'approved' | 'rejected',
+    status: KYCStatus,
     comments?: string
   ): Promise<void> {
     // Mock implementation - would update document status in database

@@ -34,12 +34,24 @@ const Index = () => {
   });
 
   useEffect(() => {
-    // Show welcome toast when dashboard loads
-    toast({
-      title: 'Welcome to TradePro',
-      description: 'Your dashboard is ready with real-time market data',
-      duration: 5000,
-    });
+    // Only show welcome toast if navigating to dashboard directly, not after login
+    const hasShownWelcome = sessionStorage.getItem('dashboard-welcome-shown');
+    const fromAuthState = window.history.state?.fromAuth;
+    const fromAuthReferrer = document.referrer.includes('/auth');
+    const fromAuthQuery = window.location.search.includes('from=auth');
+
+    const isFromAuth = fromAuthState ?? fromAuthReferrer ?? fromAuthQuery ?? false;
+
+    // Don't show welcome toast if user just logged in or if already shown this session
+    if (!hasShownWelcome && !isFromAuth) {
+      toast({
+        title: 'Welcome to TradePro',
+        description: 'Your dashboard is ready with real-time market data',
+        duration: 5000,
+      });
+
+      sessionStorage.setItem('dashboard-welcome-shown', 'true');
+    }
   }, [toast]);
 
   const handleAssetSelect = (asset: Asset) => {
@@ -70,7 +82,6 @@ const Index = () => {
       setIsRefreshing(false);
     }, 1000);
   };
-
   return (
     <div className="space-y-6">
       {/* Header Section */}
