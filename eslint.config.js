@@ -6,8 +6,15 @@
 
 // Performance-optimized ESLint configuration
 import js from '@eslint/js';
+import importPlugin from 'eslint-plugin-import';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import perfectionist from 'eslint-plugin-perfectionist';
+import promise from 'eslint-plugin-promise';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import security from 'eslint-plugin-security';
+// Added new plugins for enhanced linting
+import sonarjs from 'eslint-plugin-sonarjs';
 import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -95,6 +102,12 @@ export default tseslint.config(
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
       'unused-imports': unusedImports,
+      sonarjs,
+      security,
+      promise,
+      perfectionist,
+      import: importPlugin,
+      'jsx-a11y': jsxA11y,
     },
     settings: {
       react: {
@@ -156,7 +169,59 @@ export default tseslint.config(
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'prefer-const': 'warn',
       'no-var': 'error',
+
+      // SonarJS rules
+      'sonarjs/no-duplicate-string': 'warn',
+      'sonarjs/cognitive-complexity': ['warn', { max: 15 }],
+
+      // Security rules
+      'security/detect-object-injection': 'warn',
+
+      // Promise rules
+      'promise/always-return': 'warn',
+      'promise/no-return-wrap': 'warn',
+
+      // Perfectionist rules
+      'perfectionist/sort-objects': ['warn', { order: 'asc' }],
+
+      // Import rules
+      'import/no-unresolved': 'error',
+      'import/order': ['warn', { groups: ['builtin', 'external', 'internal'] }],
+
+      // JSX Accessibility rules
+      'jsx-a11y/alt-text': 'warn',
+      'jsx-a11y/anchor-is-valid': 'warn',
     },
+    overrides: [
+      {
+        files: ['client/src/**/*.{js,jsx,ts,tsx}'],
+        rules: {
+          'react-hooks/rules-of-hooks': 'error',
+          'react-hooks/exhaustive-deps': 'warn',
+          'jsx-a11y/no-static-element-interactions': 'warn',
+          'jsx-a11y/click-events-have-key-events': 'warn',
+        },
+      },
+      {
+        files: ['server/**/*.{js,ts}'],
+        rules: {
+          'security/detect-object-injection': 'error',
+          'promise/no-nesting': 'warn',
+          'promise/no-promise-in-callback': 'warn',
+        },
+      },
+      {
+        files: ['**/*.test.{js,ts,tsx}', '**/*.spec.{js,ts,tsx}'],
+        rules: {
+          'no-unused-expressions': 'off',
+          '@typescript-eslint/no-explicit-any': 'off',
+          'jest/no-disabled-tests': 'warn',
+          'jest/no-focused-tests': 'error',
+          'jest/no-identical-title': 'error',
+          'jest/valid-expect': 'error',
+        },
+      },
+    ],
   },
 
   // JavaScript files configuration

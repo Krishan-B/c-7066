@@ -15,11 +15,11 @@
   },
   "eslint.run": "onSave",
   "eslint.useFlatConfig": true,
-  "eslint.format.enable": false,
+  "eslint.format.enable": true,
   "eslint.debug": false,
   "eslint.trace.server": "off",
   "eslint.lintTask.enable": false,
-  "eslint.codeAction.showDocumentation": { "enable": false },
+  "eslint.codeAction.showDocumentation": { "enable": true },
 
   // ================================
   // TypeScript Configuration (Maximum Performance)
@@ -60,8 +60,10 @@
 
   // Editor Performance Optimizations
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
   },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "editor.formatOnPaste": false,
   "editor.formatOnType": false,

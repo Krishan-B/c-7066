@@ -1,1 +1,0 @@
-// This file was removed as part of project cleanup. The canonical Tailwind CSS configuration is now `tailwind.config.ts` (TypeScript). If you need to reconfigure Tailwind, edit `tailwind.config.ts` only.

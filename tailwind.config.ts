@@ -9,12 +9,7 @@ import tailwindcssAnimate from 'tailwindcss-animate';
 
 export default {
   darkMode: ['class'],
-  content: [
-    './client/index.html',
-    './client/src/**/*.{js,jsx,ts,tsx}',
-    './src/**/*.{js,jsx,ts,tsx}',
-    './index.html',
-  ],
+  content: ['./client/index.html', './client/src/**/*.{js,jsx,ts,tsx}'],
   prefix: '',
   theme: {
     container: {
