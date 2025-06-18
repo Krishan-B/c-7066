@@ -40,21 +40,17 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "allowJs": true,
-    "checkJs": true,
+    "allowJs": false,
+    "checkJs": false,
     "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/**/*.js",
-    "src/**/*.jsx",
     "tests/**/*.ts",
     "tests/**/*.tsx",
     "vite.config.ts",
-    "vitest.config.ts",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "vitest.config.ts"
   ],
-  "exclude": ["node_modules", "dist", "build", "coverage"]
+  "exclude": ["node_modules", "dist", "build", "coverage", "src/**/*.js", "src/**/*.jsx", "tests/**/*.js", "tests/**/*.jsx"]
 }

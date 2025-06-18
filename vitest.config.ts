@@ -3,15 +3,18 @@
  * Optimized testing setup with comprehensive coverage
  */
 
-import path from 'path';
-import react from '@vitejs/plugin-react-swc';
-import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+  server: {
+    host: '0.0.0.0',
+    port: 8080,
+    hmr: {
+      clientPort: 443,
+      protocol: 'wss',
+      host: 'ubiquitous-palm-tree-v6w5664v55jqcpgj7-8080.app.github.dev',
     },
   },
   test: {

@@ -1,0 +1,14 @@
+/**
+ * Server-side tsconfig.json
+ */
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "module": "NodeNext",
+    "target": "ES2022"
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "../client/**/*"]
+}

@@ -12,6 +12,32 @@
 A multi-asset simulated CFD trading platform that allows users to practice trading
 across multiple asset classes without risking real money.
 
+## Project Structure
+
+The project follows a clean, modular architecture:
+
+```
+/
+├── client/           # Frontend application
+│   ├── public/         # Static assets
+│   └── src/            # Client source code
+│       ├── assets/       # Images, fonts, etc.
+│       ├── components/   # React components
+│       ├── hooks/        # Custom hooks
+│       ├── pages/        # Page components
+│       └── ...
+├── server/           # Backend application
+│   ├── db.ts           # Database connection
+│   ├── index.ts        # Server entry point
+│   ├── routes.ts       # API routes
+│   └── ...
+├── shared/           # Shared code between client and server
+│   └── schema.ts       # Database schema and types
+├── drizzle.config.ts # Drizzle ORM configuration
+├── tsconfig.json     # TypeScript configuration
+└── ...
+```
+
 ## Features
 
 ### Core Trading Features
@@ -58,100 +84,17 @@ across multiple asset classes without risking real money.
 - P&L calculation
 - Risk management
 
-### API Services
+## TypeScript-Only Standard
 
-- Market data integration
-- Real-time price updates
-- Order execution
-- Account metrics
+This project enforces a strict TypeScript-only codebase. All source and test files must use `.ts` or `.tsx` extensions. JavaScript (`.js`, `.jsx`) files are not permitted in `src/` or `tests/` and will be ignored by the build and type checking process. See `tsconfig.json` for enforcement details.
 
-## Getting Started
+- If you find any `.js`/`.jsx` files in the codebase, convert them to TypeScript or remove them.
+- All new code and tests must be written in TypeScript.
 
-1. Register for an account
-2. Browse available markets
-3. Create a watchlist of assets you're interested in
-4. Execute your first trade using the Trade Panel
-5. Monitor your open positions
-6. Track your performance
+## June 2025 Maintenance & Cleanup
 
-## Default Leverage Settings
-
-- Stocks: 20:1 (5% margin)
-- Indices: 50:1 (2% margin)
-- Commodities: 50:1 (2% margin)
-- Forex: 100:1 (1% margin)
-- Crypto: 50:1 (2% margin)
-
-## Context & Provider Architecture
-
-This project uses React Context Providers and custom hooks for state management and
-cross-cutting concerns. Key providers and hooks include:
-
-### Theme Context
-
-- **File:** `src/components/theme/ThemeProviderContent.tsx`
-- **Usage:** Wrap your app with `<ThemeProvider>` to provide theme state and toggling.
-- **Access:** Use the `useTheme` hook from `src/components/theme/use-theme.ts`.
-
-### Trade Panel Context
-
-- **File:** `src/components/trade/TradePanelProviderContent.tsx`
-- **Usage:** Wrap relevant parts of your app with `<TradePanelProvider>`.
-- **Access:** Use the `useTradePanelContext` hook from `components/trade/use-trade-panel.ts`.
-
-### Auth Context
-
-- **File:** `src/components/AuthProvider.tsx` and `src/components/AuthContext.tsx`
-- **Usage:** Wrap your app with `<AuthProvider>` to provide authentication.
-- **Access:** Use the `useAuth` hook from `src/hooks/auth/useAuth.ts`.
-
-### Best Practices
-
-- Always wrap your app (or relevant subtree) with the required provider.
-- Use the provided custom hooks to access context values and actions.
-- See `DEVELOPER_NOTES.md` for more on context/provider and hook best practices.
-
-## Formatting & Linting Workflow
-
-- Code style is enforced using ESLint and Prettier.
-- Recommended VS Code extensions: ESLint, Prettier, Error Lens, Tailwind CSS IntelliSense (see .vscode/extensions.json).
-- Code is automatically linted and formatted on commit using Husky and lint-staged.
-- To manually lint and fix code, run:
-  - `npm run lint` to check for lint errors
-  - `npm run lint:fix` to auto-fix issues
-  - `npm run lint:ci` for CI environments
-- To format markdown and JSON files, use Prettier or run `npm run lint:fix`.
-- TypeScript type checks can be run with `npm run typecheck`.
-
-## Scripts
-
-| Script             | Description                                         |
-| ------------------ | --------------------------------------------------- |
-| `dev`              | Start the Vite development server                   |
-| `build`            | Build the app for production                        |
-| `build:dev`        | Build the app in development mode                   |
-| `lint`             | Run ESLint with cache                               |
-| `lint:fix`         | Run ESLint and auto-fix issues                      |
-| `lint:clear-cache` | Remove ESLint cache file                            |
-| `lint:ci`          | Run ESLint in CI mode (no cache, compact output)    |
-| `preview`          | Preview the production build                        |
-| `test`             | Run all tests with Vitest                           |
-| `test:coverage`    | Run tests and generate coverage report with Vitest  |
-| `test:ci`          | Run tests in CI mode with basic reporter            |
-| `test:security:ci` | Run security-related tests with coverage in CI      |
-| `ci:check`         | Run lint, typecheck, test, and build in CI          |
-| `prepare`          | Install Husky git hooks                             |
-| `typecheck`        | Run TypeScript type checking without emitting files |
-
-## Social Login (Google, Apple)
-
-- Users can sign in or sign up using Google or Apple accounts via OAuth.
-- On the authentication page (`/auth`), click "Continue with Google" or "Continue with Apple" to start the OAuth flow.
-- After successful authentication, you will be redirected back to the app and logged in automatically.
-- The OAuth flow is powered by Supabase Auth and is fully integrated with the user management system.
-
-### Testing Social Login
-
-- End-to-end tests for Google and Apple login buttons and redirect flow are located in `tests/e2e/oauth-login.spec.ts`.
-- For CI, use test Google/Apple accounts or appropriate Playwright plugins/mocks for OAuth.
-- Manual testing: Click the social login buttons and verify successful login and redirection to the dashboard.
+- Standardized the codebase to TypeScript-only. All `.js`/`.jsx` files are now excluded from source and tests.
+- Cleaned up duplicate Tailwind config files. Only `tailwind.config.ts` is used.
+- Ran `pnpm prune` and `pnpm update` to remove unused dependencies and update all packages.
+- Reviewed all scripts in `package.json` and confirmed all are currently relevant to Supabase, development, or tooling. No unused scripts were removed at this time.
+- Restructured the project to a cleaner client/server/shared architecture

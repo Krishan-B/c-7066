@@ -182,6 +182,13 @@ This document outlines the finalized tech stack, dependencies, performance rules
 - **Incremental**: Enabled for performance
 - **Path Mapping**: `@/*` for `./src/*`
 
+## TypeScript-Only Enforcement
+
+- All source and test code must be written in TypeScript (`.ts`, `.tsx`).
+- JavaScript files (`.js`, `.jsx`) are not allowed in `src/` or `tests/`.
+- The `tsconfig.json` is configured to exclude JS/JSX files and only process TypeScript files.
+- If you encounter legacy JS/JSX files, convert or remove them immediately.
+
 ## Dependency Management
 
 ### Version Strategy

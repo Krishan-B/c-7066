@@ -1,0 +1,15 @@
+/**
+ * Client-side tsconfig.json
+ */
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "../server/**/*", "../shared/**/*"]
+}

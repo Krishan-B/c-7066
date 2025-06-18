@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light mode variables */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 215 28% 17%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 14% 47%;
+    --accent: rgba(99, 102, 241, 0.1); /* Keep as rgba */
+    --accent-foreground: 239 84% 67%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 239 84% 67%;
+    --success: 158 80% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+  }
+
+  .dark {
+    /* Dark mode variables */
+    --background: 225 14% 8%;
+    --foreground: 210 17% 98%;
+    --card: 222 27% 14%;
+    --card-foreground: 210 17% 98%;
+    --popover: 222 27% 14%;
+    --popover-foreground: 210 17% 98%;
+    --primary: 240 59% 70%;
+    --primary-foreground: 210 17% 98%;
+    --secondary: 218 27% 16%;
+    --secondary-foreground: 210 17% 98%;
+    --muted: 218 27% 16%;
+    --muted-foreground: 217 10% 65%;
+    --accent: rgba(137, 137, 222, 0.2); /* Keep as rgba */
+    --accent-foreground: 240 59% 70%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 17% 98%;
+    --border: 218 27% 16%;
+    --input: 218 27% 16%;
+    --ring: 240 59% 70%;
+    --success: 135 35% 65%;
+    --success-foreground: 210 17% 98%;
+    --warning: 16 55% 63%;
+    --warning-foreground: 210 17% 98%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased transition-colors duration-300;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Ensure consistent transitions for theme switching */
+  * {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+}
+
+.glass-card {
+  @apply bg-secondary bg-opacity-20 backdrop-blur-lg border border-white border-opacity-10 shadow-lg;
+}
+
+.crypto-chart {
+  @apply h-[300px] w-full;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.hover-card {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.hover-card:hover {
+  @apply transform -translate-y-1 shadow-lg;
+}
+
+.gradient-bg {
+  @apply bg-gradient-to-br;
+  background-color: var(--background);
+  background-image: linear-gradient(to bottom right, rgba(99, 102, 241, 0.2), var(--background));
+}
+
+.glass-effect {
+  background-color: hsl(var(--secondary) / 0.2);
+  backdrop-filter: blur(8px);
+  border: 1px solid hsl(var(--border) / 0.4);
+}
+
+/* Animated underline for navigation links */
+.nav-link {
+  @apply relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full;
+}
