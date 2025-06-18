@@ -9,7 +9,12 @@ import tailwindcssAnimate from 'tailwindcss-animate';
 
 export default {
   darkMode: ['class'],
-  content: ['./client/index.html', './client/src/**/*.{ts,tsx}'],
+  content: [
+    './client/index.html',
+    './client/src/**/*.{js,jsx,ts,tsx}',
+    './src/**/*.{js,jsx,ts,tsx}',
+    './index.html',
+  ],
   prefix: '',
   theme: {
     container: {
@@ -21,10 +26,10 @@ export default {
     },
     extend: {
       colors: {
+        background: 'hsl(var(--background) / <alpha-value>)',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
@@ -109,5 +114,18 @@ export default {
       },
     },
   },
+  safelist: [
+    'bg-background',
+    'text-foreground',
+    'bg-card',
+    'bg-secondary',
+    'bg-primary',
+    'bg-muted',
+    'bg-accent',
+    'bg-popover',
+    'bg-destructive',
+    'bg-success',
+    'bg-warning',
+  ],
   plugins: [tailwindcssAnimate],
 } satisfies Config;

@@ -1,33 +1,33 @@
 import { lazy, Suspense, useEffect } from 'react';
-import Auth from '@/pages/Auth';
-import AuthCallback from '@/pages/AuthCallback';
-import Index from '@/pages/Index';
-// Critical components that should be eagerly loaded
-import Landing from '@/pages/Landing';
-import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage'; // Import PrivacyPolicyPage
-import UpdatePasswordPage from '@/pages/UpdatePasswordPage'; // Import the new page
-
 import { HelmetProvider } from 'react-helmet-async';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 
-import { AuthProvider } from '@/components/AuthProvider';
-import Layout from '@/components/Layout';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { ThemeProvider } from '@/components/theme';
-import { TradePanelProvider } from '@/components/trade/TradePanelProvider';
-import { LoadingFallback } from '@/components/ui/loading-fallback';
-import { Toaster } from '@/components/ui/toaster';
-import { preloadRoutes } from '@/utils/routePreload';
+import { AuthProvider } from './components/AuthProvider';
+import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+import { ThemeProvider } from './components/theme';
+import { TradePanelProvider } from './components/trade/TradePanelProvider';
+import { LoadingFallback } from './components/ui/loading-fallback';
+import { Toaster } from './components/ui/toaster';
+import Auth from './pages/Auth';
+import AuthCallback from './pages/AuthCallback';
+import Index from './pages/Index';
+// Critical components that should be eagerly loaded
+import Landing from './pages/Landing';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'; // Import PrivacyPolicyPage
+import UpdatePasswordPage from './pages/UpdatePasswordPage'; // Import the new page
+
+import { preloadRoutes } from './utils/routePreload';
 
 // Lazy loaded page components with route-based chunking
-const Markets = lazy(() => import(/* webpackChunkName: "markets" */ '@/pages/Markets'));
-const Portfolio = lazy(() => import(/* webpackChunkName: "portfolio" */ '@/pages/Portfolio'));
-const Orders = lazy(() => import(/* webpackChunkName: "orders" */ '@/pages/Orders'));
-const News = lazy(() => import(/* webpackChunkName: "news" */ '@/pages/News'));
-const Wallet = lazy(() => import(/* webpackChunkName: "wallet" */ '@/pages/Wallet'));
-const Account = lazy(() => import(/* webpackChunkName: "account" */ '@/pages/Account'));
-const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
-const KYCPage = lazy(() => import('@/pages/KYCPage'));
+const Markets = lazy(() => import(/* webpackChunkName: "markets" */ './pages/Markets'));
+const Portfolio = lazy(() => import(/* webpackChunkName: "portfolio" */ './pages/Portfolio'));
+const Orders = lazy(() => import(/* webpackChunkName: "orders" */ './pages/Orders'));
+const News = lazy(() => import(/* webpackChunkName: "news" */ './pages/News'));
+const Wallet = lazy(() => import(/* webpackChunkName: "wallet" */ './pages/Wallet'));
+const Account = lazy(() => import(/* webpackChunkName: "account" */ './pages/Account'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const KYCPage = lazy(() => import('./pages/KYCPage'));
 
 export default function App() {
   useEffect(() => {
