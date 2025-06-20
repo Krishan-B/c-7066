@@ -247,7 +247,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                   type="text" 
                   className="flex-1 text-center border-y border-input bg-background py-2"
                   placeholder="Enter rate"
-                  value={entryOrderRate}
+                  value={entryOrderRate || currentPrice.toFixed(4)}
                   onChange={(e) => setEntryOrderRate(e.target.value)}
                 />
                 <button 
