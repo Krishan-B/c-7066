@@ -1,8 +1,10 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, DollarSign, Activity, PieChart, Clock } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Activity, PieChart, Clock, ArrowRight, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import MarketOverview from "@/components/MarketOverview";
 import PortfolioCard from "@/components/PortfolioCard";
 import WatchlistTable from "@/components/watchlist/WatchlistTable";
@@ -12,6 +14,8 @@ import KYCBanner from "@/components/kyc/KYCBanner";
 import { useState } from "react";
 
 const Index = () => {
+  const navigate = useNavigate();
+  
   // State for selected asset in QuickTradePanel
   const [selectedAsset, setSelectedAsset] = useState({
     name: "EUR/USD",
@@ -36,6 +40,27 @@ const Index = () => {
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       {/* KYC Banner */}
       <KYCBanner />
+      
+      {/* Action Buttons */}
+      <div className="flex flex-wrap gap-3 md:gap-4 mb-6">
+        <Button 
+          size="lg" 
+          onClick={() => navigate("/dashboard/markets")}
+          className="whitespace-nowrap bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-all duration-300"
+        >
+          Trade Now
+          <ChevronRight className="ml-2 h-4 w-4" />
+        </Button>
+        <Button 
+          variant="outline" 
+          size="lg" 
+          onClick={() => navigate("/dashboard/wallet")}
+          className="hover:border-primary hover:text-primary transition-all duration-300"
+        >
+          Deposit
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
       
       {/* Portfolio Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
