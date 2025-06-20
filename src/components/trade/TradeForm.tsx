@@ -1,5 +1,8 @@
 
 import { useState, useEffect } from "react";
+import { z } from 'zod';
+import { tradeInputSchema } from "../../lib/validationSchemas";
+import { useInterval } from "../../hooks/useCleanup";
 import { Asset } from "@/hooks/useMarketData";
 import { OrderTypeSelector } from "@/components/trade";
 import { TradeSummary } from "@/components/trade";
@@ -49,21 +52,24 @@ const TradeForm = ({
   const [hasTakeProfit, setHasTakeProfit] = useState(false);
   const [buyPrice, setBuyPrice] = useState(currentPrice * 1.001);
   const [sellPrice, setSellPrice] = useState(currentPrice * 0.999);
-  
-  // Update buy/sell prices when current price changes
+  const [stopLossRate, setStopLossRate] = useState("");
+  const [takeProfitRate, setTakeProfitRate] = useState("");
+  const [entryOrderRate, setEntryOrderRate] = useState("");
+
+  const [formErrors, setFormErrors] = useState<z.ZodFormattedError | null>(null);
+
+  // Initial price setting based on currentPrice
   useEffect(() => {
     setBuyPrice(currentPrice * 1.001);
     setSellPrice(currentPrice * 0.999);
-    
-    // Simulate real-time price movement
-    const interval = setInterval(() => {
-      const random = Math.random() * 0.002 - 0.001;
-      setBuyPrice(prev => prev * (1 + random));
-      setSellPrice(prev => prev * (1 + random));
-    }, 2000);
-    
-    return () => clearInterval(interval);
   }, [currentPrice]);
+
+  // useInterval for continuous price updates
+  useInterval(() => {
+    const random = Math.random() * 0.002 - 0.001; // -0.1% to +0.1%
+    setBuyPrice(prev => prev * (1 + random));
+    setSellPrice(prev => prev * (1 + random));
+  }, 2000);
   
   // Filter assets based on selected category
   const filteredAssets = marketData?.filter(a => a.market_type === assetCategory) || [];
@@ -91,8 +97,56 @@ const TradeForm = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(units, orderType, [leverage]);
+    setFormErrors(null); // Clear previous errors
+
+    const validationData: any = {
+      units,
+    };
+
+    if (orderType === "entry") {
+      validationData.rate = entryOrderRate;
+    }
+    if (hasStopLoss) {
+      validationData.stopLoss = stopLossRate;
+    }
+    if (hasTakeProfit) {
+      validationData.takeProfit = takeProfitRate;
+    }
+
+    const validationResult = tradeInputSchema.safeParse(validationData);
+
+    if (!validationResult.success) {
+      setFormErrors(validationResult.error.flatten().fieldErrors as any);
+      return;
+    }
+
+    // Clear errors if validation is successful
+    setFormErrors(null);
+    onSubmit(units, orderType, leverage);
   };
+
+  // Add a useEffect for real-time validation
+  useEffect(() => {
+    const validationData: any = {
+      units,
+    };
+    if (orderType === "entry") {
+      validationData.rate = entryOrderRate;
+    }
+    if (hasStopLoss) {
+      validationData.stopLoss = stopLossRate;
+    }
+    if (hasTakeProfit) {
+      validationData.takeProfit = takeProfitRate;
+    }
+
+    const validationResult = tradeInputSchema.safeParse(validationData);
+    if (!validationResult.success) {
+      setFormErrors(validationResult.error.flatten().fieldErrors as any);
+    } else {
+      setFormErrors(null);
+    }
+  }, [units, orderType, entryOrderRate, hasStopLoss, stopLossRate, hasTakeProfit, takeProfitRate]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 py-2">
@@ -121,6 +175,7 @@ const TradeForm = ({
         canAfford={canAfford}
         availableFunds={availableFunds}
       />
+      {formErrors?.units && <p className="text-red-500 text-xs mt-1">{formErrors.units[0]}</p>}
       
       {/* Order Type Selection */}
       <OrderTypeSelector
@@ -145,7 +200,8 @@ const TradeForm = ({
               type="text" 
               className="flex-1 text-center border-y border-input bg-background py-2"
               placeholder="Enter rate"
-              defaultValue={currentPrice.toFixed(4)}
+              value={entryOrderRate}
+              onChange={(e) => setEntryOrderRate(e.target.value)}
             />
             <button 
               type="button" 
@@ -155,6 +211,7 @@ const TradeForm = ({
               +
             </button>
           </div>
+          {formErrors?.rate && <p className="text-red-500 text-xs mt-1">{formErrors.rate[0]}</p>}
           <p className="text-xs text-muted-foreground mt-1">
             Rate should be above {(currentPrice * 0.98).toFixed(4)} or below {(currentPrice * 1.02).toFixed(4)}
           </p>
@@ -186,6 +243,8 @@ const TradeForm = ({
                   type="text" 
                   className="flex-1 text-center border-y border-input bg-background py-2"
                   placeholder="Rate"
+                  value={stopLossRate}
+                  onChange={(e) => setStopLossRate(e.target.value)}
                 />
                 <button 
                   type="button" 
@@ -195,6 +254,7 @@ const TradeForm = ({
                   +
                 </button>
               </div>
+              {formErrors?.stopLoss && <p className="text-red-500 text-xs mt-1">{formErrors.stopLoss[0]}</p>}
             </div>
             <div>
               <label className="text-sm text-muted-foreground mb-1 block">Close amount:</label>
@@ -252,6 +312,8 @@ const TradeForm = ({
                   type="text" 
                   className="flex-1 text-center border-y border-input bg-background py-2"
                   placeholder="Rate"
+                  value={takeProfitRate}
+                  onChange={(e) => setTakeProfitRate(e.target.value)}
                 />
                 <button 
                   type="button" 
@@ -261,6 +323,7 @@ const TradeForm = ({
                   +
                 </button>
               </div>
+              {formErrors?.takeProfit && <p className="text-red-500 text-xs mt-1">{formErrors.takeProfit[0]}</p>}
             </div>
             <div>
               <label className="text-sm text-muted-foreground mb-1 block">Close amount:</label>
@@ -312,6 +375,7 @@ const TradeForm = ({
         canAfford={canAfford}
         buyPrice={buyPrice}
         sellPrice={sellPrice}
+        disabled={!!formErrors || isExecuting}
       />
     </form>
   );
