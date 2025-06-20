@@ -27,7 +27,7 @@ export const leverageService = {
     }
 
     const { data, error } = await query
-      .order('symbol', { ascending: false, nullsLast: true })
+      .order('symbol', { ascending: false, nullsFirst: false })
       .limit(1)
       .single();
 
