@@ -3,10 +3,11 @@ import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Activity } from "lucide-react";
 import PositionsTable from "@/components/portfolio/PositionsTable";
 import ClosedPositionsTable from "@/components/portfolio/ClosedPositionsTable";
 import PositionFilter from "@/components/portfolio/PositionFilter";
+import RealTimePositionTracker from "@/components/positions/RealTimePositionTracker";
 import { Asset, ClosedPosition } from "@/types/account";
 
 interface PositionsSectionProps {
@@ -40,6 +41,7 @@ const PositionsSection = ({
     <Tabs defaultValue="open" className="w-full">
       <TabsList className="mb-4">
         <TabsTrigger value="open">Open Positions</TabsTrigger>
+        <TabsTrigger value="realtime">Real-time Tracking</TabsTrigger>
         <TabsTrigger value="closed">Closed Positions</TabsTrigger>
       </TabsList>
       
@@ -60,6 +62,10 @@ const PositionsSection = ({
             />
           </CardContent>
         </Card>
+      </TabsContent>
+
+      <TabsContent value="realtime">
+        <RealTimePositionTracker />
       </TabsContent>
       
       <TabsContent value="closed">

@@ -260,12 +260,57 @@ export type Database = {
           },
         ]
       }
+      position_updates: {
+        Row: {
+          created_at: string
+          id: string
+          market_session: string | null
+          pnl_change: number
+          position_id: string | null
+          price_update: number
+          timestamp: string
+          unrealized_pnl: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          market_session?: string | null
+          pnl_change: number
+          position_id?: string | null
+          price_update: number
+          timestamp?: string
+          unrealized_pnl: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          market_session?: string | null
+          pnl_change?: number
+          position_id?: string | null
+          price_update?: number
+          timestamp?: string
+          unrealized_pnl?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_updates_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       positions: {
         Row: {
           asset_class: string
           close_price: number | null
           closed_at: string | null
           current_price: number
+          daily_pnl: number | null
           direction: string
           entry_price: number
           id: string
@@ -273,12 +318,17 @@ export type Database = {
           margin_used: number
           opened_at: string
           order_id: string | null
+          pip_difference: number | null
+          pip_value: number | null
           position_value: number
           realized_pnl: number | null
+          session_pnl: number | null
           status: string
           stop_loss: number | null
+          swap_charges: number | null
           symbol: string
           take_profit: number | null
+          total_fees: number | null
           units: number
           unrealized_pnl: number | null
           user_id: string
@@ -288,6 +338,7 @@ export type Database = {
           close_price?: number | null
           closed_at?: string | null
           current_price: number
+          daily_pnl?: number | null
           direction: string
           entry_price: number
           id?: string
@@ -295,12 +346,17 @@ export type Database = {
           margin_used: number
           opened_at?: string
           order_id?: string | null
+          pip_difference?: number | null
+          pip_value?: number | null
           position_value: number
           realized_pnl?: number | null
+          session_pnl?: number | null
           status?: string
           stop_loss?: number | null
+          swap_charges?: number | null
           symbol: string
           take_profit?: number | null
+          total_fees?: number | null
           units: number
           unrealized_pnl?: number | null
           user_id: string
@@ -310,6 +366,7 @@ export type Database = {
           close_price?: number | null
           closed_at?: string | null
           current_price?: number
+          daily_pnl?: number | null
           direction?: string
           entry_price?: number
           id?: string
@@ -317,12 +374,17 @@ export type Database = {
           margin_used?: number
           opened_at?: string
           order_id?: string | null
+          pip_difference?: number | null
+          pip_value?: number | null
           position_value?: number
           realized_pnl?: number | null
+          session_pnl?: number | null
           status?: string
           stop_loss?: number | null
+          swap_charges?: number | null
           symbol?: string
           take_profit?: number | null
+          total_fees?: number | null
           units?: number
           unrealized_pnl?: number | null
           user_id?: string
@@ -689,6 +751,19 @@ export type Database = {
           p_units: number
         }
         Returns: number
+      }
+      calculate_realtime_pnl: {
+        Args: { p_position_id: string; p_new_price: number }
+        Returns: {
+          unrealized_pnl: number
+          daily_pnl: number
+          pip_difference: number
+          pip_value: number
+        }[]
+      }
+      update_position_realtime: {
+        Args: { p_position_id: string; p_new_price: number }
+        Returns: boolean
       }
     }
     Enums: {
