@@ -9,57 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      account_metrics: {
-        Row: {
-          available_funds: number
-          balance: number
-          bonus: number
-          equity: number
-          id: string
-          last_updated: string
-          margin_level: number
-          open_positions_count: number
-          pending_orders_count: number
-          realized_pnl: number
-          total_exposure: number
-          unrealized_pnl: number
-          used_margin: number
-          user_id: string
-        }
-        Insert: {
-          available_funds?: number
-          balance?: number
-          bonus?: number
-          equity?: number
-          id?: string
-          last_updated?: string
-          margin_level?: number
-          open_positions_count?: number
-          pending_orders_count?: number
-          realized_pnl?: number
-          total_exposure?: number
-          unrealized_pnl?: number
-          used_margin?: number
-          user_id: string
-        }
-        Update: {
-          available_funds?: number
-          balance?: number
-          bonus?: number
-          equity?: number
-          id?: string
-          last_updated?: string
-          margin_level?: number
-          open_positions_count?: number
-          pending_orders_count?: number
-          realized_pnl?: number
-          total_exposure?: number
-          unrealized_pnl?: number
-          used_margin?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
       asset_leverage_config: {
         Row: {
           asset_class: string
@@ -278,33 +227,6 @@ export type Database = {
           symbol?: string
           timestamp?: string | null
           volume?: string
-        }
-        Relationships: []
-      }
-      order_history: {
-        Row: {
-          action: string
-          details: Json | null
-          id: string
-          order_id: string
-          timestamp: string
-          user_id: string
-        }
-        Insert: {
-          action: string
-          details?: Json | null
-          id?: string
-          order_id: string
-          timestamp?: string
-          user_id: string
-        }
-        Update: {
-          action?: string
-          details?: Json | null
-          id?: string
-          order_id?: string
-          timestamp?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -743,158 +665,6 @@ export type Database = {
         }
         Relationships: []
       }
-      trading_orders: {
-        Row: {
-          asset_class: string
-          cancelled_at: string | null
-          created_at: string
-          direction: string
-          executed_at: string | null
-          execution_price: number | null
-          expiration_date: string | null
-          fees: number | null
-          id: string
-          leverage_ratio: number
-          margin_required: number
-          order_type: string
-          position_value: number
-          rejected_reason: string | null
-          requested_price: number
-          slippage: number | null
-          status: string
-          stop_loss_price: number | null
-          symbol: string
-          take_profit_price: number | null
-          units: number
-          user_id: string
-        }
-        Insert: {
-          asset_class: string
-          cancelled_at?: string | null
-          created_at?: string
-          direction: string
-          executed_at?: string | null
-          execution_price?: number | null
-          expiration_date?: string | null
-          fees?: number | null
-          id?: string
-          leverage_ratio?: number
-          margin_required: number
-          order_type: string
-          position_value: number
-          rejected_reason?: string | null
-          requested_price: number
-          slippage?: number | null
-          status?: string
-          stop_loss_price?: number | null
-          symbol: string
-          take_profit_price?: number | null
-          units: number
-          user_id: string
-        }
-        Update: {
-          asset_class?: string
-          cancelled_at?: string | null
-          created_at?: string
-          direction?: string
-          executed_at?: string | null
-          execution_price?: number | null
-          expiration_date?: string | null
-          fees?: number | null
-          id?: string
-          leverage_ratio?: number
-          margin_required?: number
-          order_type?: string
-          position_value?: number
-          rejected_reason?: string | null
-          requested_price?: number
-          slippage?: number | null
-          status?: string
-          stop_loss_price?: number | null
-          symbol?: string
-          take_profit_price?: number | null
-          units?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
-      trading_positions: {
-        Row: {
-          asset_class: string
-          current_price: number
-          daily_pnl: number | null
-          direction: string
-          entry_price: number
-          id: string
-          last_updated: string
-          leverage_ratio: number
-          margin_used: number
-          opened_at: string
-          order_id: string | null
-          position_value: number
-          status: string
-          stop_loss_price: number | null
-          symbol: string
-          take_profit_price: number | null
-          total_fees: number | null
-          units: number
-          unrealized_pnl: number | null
-          user_id: string
-        }
-        Insert: {
-          asset_class: string
-          current_price: number
-          daily_pnl?: number | null
-          direction: string
-          entry_price: number
-          id?: string
-          last_updated?: string
-          leverage_ratio?: number
-          margin_used: number
-          opened_at?: string
-          order_id?: string | null
-          position_value: number
-          status?: string
-          stop_loss_price?: number | null
-          symbol: string
-          take_profit_price?: number | null
-          total_fees?: number | null
-          units: number
-          unrealized_pnl?: number | null
-          user_id: string
-        }
-        Update: {
-          asset_class?: string
-          current_price?: number
-          daily_pnl?: number | null
-          direction?: string
-          entry_price?: number
-          id?: string
-          last_updated?: string
-          leverage_ratio?: number
-          margin_used?: number
-          opened_at?: string
-          order_id?: string | null
-          position_value?: number
-          status?: string
-          stop_loss_price?: number | null
-          symbol?: string
-          take_profit_price?: number | null
-          total_fees?: number | null
-          units?: number
-          unrealized_pnl?: number | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "trading_positions_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "trading_orders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_account: {
         Row: {
           available_funds: number
@@ -1092,15 +862,6 @@ export type Database = {
         }
         Returns: number
       }
-      calculate_position_pnl_realtime: {
-        Args: {
-          p_direction: string
-          p_entry_price: number
-          p_current_price: number
-          p_units: number
-        }
-        Returns: number
-      }
       calculate_realtime_pnl: {
         Args: { p_position_id: string; p_new_price: number }
         Returns: {
@@ -1109,14 +870,6 @@ export type Database = {
           pip_difference: number
           pip_value: number
         }[]
-      }
-      execute_market_order: {
-        Args: { p_order_id: string; p_execution_price: number }
-        Returns: boolean
-      }
-      update_account_metrics: {
-        Args: { p_user_id: string }
-        Returns: undefined
       }
       update_position_leverage: {
         Args: { p_position_id: string; p_leverage?: number }
