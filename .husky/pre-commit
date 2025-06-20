@@ -1,4 +1,0 @@
-#!/usr/bin/env sh
-
-# Run lint-staged only if there are staged files
-[ -n "$(git diff --cached --name-only)" ] && npx lint-staged
