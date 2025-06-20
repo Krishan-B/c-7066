@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,8 +28,13 @@ export const useEnhancedOrders = () => {
       const enhancedOrders: EnhancedOrder[] = (data || []).map(order => ({
         ...order,
         order_type: order.order_type as EnhancedOrderType,
-        order_category: (order.order_category || 'primary') as 'primary' | 'stop_loss' | 'take_profit' | 'trailing_stop',
-        direction: order.direction as 'buy' | 'sell'
+        order_category: ((order as any).order_category || 'primary') as 'primary' | 'stop_loss' | 'take_profit' | 'trailing_stop',
+        direction: order.direction as 'buy' | 'sell',
+        stop_loss_price: (order as any).stop_loss_price,
+        take_profit_price: (order as any).take_profit_price,
+        trailing_stop_distance: (order as any).trailing_stop_distance,
+        order_group_id: (order as any).order_group_id,
+        parent_order_id: (order as any).parent_order_id
       }));
 
       setOrders(enhancedOrders);
