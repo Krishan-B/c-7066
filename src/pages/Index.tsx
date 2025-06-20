@@ -9,8 +9,29 @@ import WatchlistTable from "@/components/watchlist/WatchlistTable";
 import NewsWidget from "@/components/NewsWidget";
 import QuickTradePanel from "@/components/QuickTradePanel";
 import KYCBanner from "@/components/kyc/KYCBanner";
+import { useState } from "react";
 
 const Index = () => {
+  // State for selected asset in QuickTradePanel
+  const [selectedAsset, setSelectedAsset] = useState({
+    name: "EUR/USD",
+    symbol: "EURUSD",
+    price: 1.0850,
+    change_percentage: 0.15,
+    market_type: "forex"
+  });
+
+  // Handler for when an asset is selected from the watchlist
+  const handleAssetSelect = (asset: any) => {
+    setSelectedAsset({
+      name: asset.name,
+      symbol: asset.symbol,
+      price: asset.price,
+      change_percentage: asset.change_percentage,
+      market_type: asset.market_type
+    });
+  };
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       {/* KYC Banner */}
@@ -81,10 +102,10 @@ const Index = () => {
       {/* Secondary Content */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <div className="col-span-4">
-          <WatchlistTable />
+          <WatchlistTable onAssetSelect={handleAssetSelect} />
         </div>
         <div className="col-span-3 space-y-4">
-          <QuickTradePanel />
+          <QuickTradePanel asset={selectedAsset} />
           <NewsWidget />
         </div>
       </div>
