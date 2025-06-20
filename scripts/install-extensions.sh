@@ -7,7 +7,6 @@ ESSENTIAL_EXTENSIONS=(
     "dbaeumer.vscode-eslint"                    # ESLint - Code quality
     "esbenp.prettier-vscode"                    # Prettier - Code formatting
     "bradlc.vscode-tailwindcss-intellisense"   # Tailwind CSS IntelliSense
-    "supabase.vscode-supabase-extension"       # Supabase integration
     "github.copilot"                           # GitHub Copilot
     "github.copilot-chat"                      # GitHub Copilot Chat
 )

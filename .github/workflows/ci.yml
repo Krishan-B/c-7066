@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      - name: Start Supabase
+        run: npx supabase start
+
+      - name: Wait for Supabase to be healthy
+        run: |
+          chmod +x ./scripts/assert-local-db-health.sh
+          ./scripts/assert-local-db-health.sh
+
+      - name: Stop Supabase
+        if: always()
+        run: npx supabase stop
