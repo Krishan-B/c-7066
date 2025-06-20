@@ -180,7 +180,7 @@ const TradingPanel = ({ isOpen, onClose, selectedAsset, availableFunds }: Tradin
               <Checkbox
                 id="stopLoss"
                 checked={enableStopLoss}
-                onCheckedChange={setEnableStopLoss}
+                onCheckedChange={(checked) => setEnableStopLoss(checked === true)}
               />
               <Label htmlFor="stopLoss">Stop Loss</Label>
             </div>
@@ -201,7 +201,7 @@ const TradingPanel = ({ isOpen, onClose, selectedAsset, availableFunds }: Tradin
               <Checkbox
                 id="takeProfit"
                 checked={enableTakeProfit}
-                onCheckedChange={setEnableTakeProfit}
+                onCheckedChange={(checked) => setEnableTakeProfit(checked === true)}
               />
               <Label htmlFor="takeProfit">Take Profit</Label>
             </div>

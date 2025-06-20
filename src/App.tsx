@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "./components/theme/ThemeProvider";
+import { ThemeProvider } from "./components/ThemeProvider";
 import { AuthProvider } from "./components/AuthProvider";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import ProtectedRoute from "./components/ProtectedRoute";

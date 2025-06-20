@@ -66,7 +66,8 @@ export class TradingEngineService {
         await this.executeMarketOrder(data.id, orderData.requested_price);
       }
 
-      return data;
+      // Cast to proper type
+      return data as TradingOrder;
     } catch (error) {
       ErrorHandler.show(error, 'place order');
       return null;
@@ -125,10 +126,10 @@ export class TradingEngineService {
           .single();
 
         if (insertError) throw insertError;
-        return newAccount;
+        return newAccount as AccountMetrics;
       }
 
-      return data;
+      return data as AccountMetrics;
     } catch (error) {
       ErrorHandler.show(error, 'get account metrics');
       return null;
@@ -149,7 +150,7 @@ export class TradingEngineService {
         .order('opened_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as TradingPosition[];
     } catch (error) {
       ErrorHandler.show(error, 'get open positions');
       return [];
@@ -170,7 +171,7 @@ export class TradingEngineService {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as TradingOrder[];
     } catch (error) {
       ErrorHandler.show(error, 'get pending orders');
       return [];
@@ -267,7 +268,7 @@ export class TradingEngineService {
         .limit(100);
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as OrderHistory[];
     } catch (error) {
       ErrorHandler.show(error, 'get order history');
       return [];
