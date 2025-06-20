@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      asset_leverage_config: {
+        Row: {
+          asset_class: string
+          created_at: string
+          id: string
+          maintenance_margin: number
+          margin_call_level: number
+          max_leverage: number
+          min_margin_requirement: number
+          symbol: string | null
+          updated_at: string
+        }
+        Insert: {
+          asset_class: string
+          created_at?: string
+          id?: string
+          maintenance_margin: number
+          margin_call_level?: number
+          max_leverage: number
+          min_margin_requirement: number
+          symbol?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asset_class?: string
+          created_at?: string
+          id?: string
+          maintenance_margin?: number
+          margin_call_level?: number
+          max_leverage?: number
+          min_margin_requirement?: number
+          symbol?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       historical_market_data: {
         Row: {
           close_price: number
@@ -92,6 +128,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      margin_calculations: {
+        Row: {
+          calculated_at: string
+          free_margin: number
+          id: string
+          initial_margin: number
+          leverage_used: number
+          maintenance_margin: number
+          margin_level: number
+          position_id: string | null
+          used_margin: number
+          user_id: string
+        }
+        Insert: {
+          calculated_at?: string
+          free_margin: number
+          id?: string
+          initial_margin: number
+          leverage_used: number
+          maintenance_margin: number
+          margin_level: number
+          position_id?: string | null
+          used_margin: number
+          user_id: string
+        }
+        Update: {
+          calculated_at?: string
+          free_margin?: number
+          id?: string
+          initial_margin?: number
+          leverage_used?: number
+          maintenance_margin?: number
+          margin_level?: number
+          position_id?: string | null
+          used_margin?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "margin_calculations_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       market_data: {
         Row: {
@@ -314,7 +397,11 @@ export type Database = {
           direction: string
           entry_price: number
           id: string
+          initial_margin: number | null
           last_updated: string
+          leverage_ratio: number | null
+          maintenance_margin: number | null
+          margin_level: number | null
           margin_used: number
           opened_at: string
           order_id: string | null
@@ -342,7 +429,11 @@ export type Database = {
           direction: string
           entry_price: number
           id?: string
+          initial_margin?: number | null
           last_updated?: string
+          leverage_ratio?: number | null
+          maintenance_margin?: number | null
+          margin_level?: number | null
           margin_used: number
           opened_at?: string
           order_id?: string | null
@@ -370,7 +461,11 @@ export type Database = {
           direction?: string
           entry_price?: number
           id?: string
+          initial_margin?: number | null
           last_updated?: string
+          leverage_ratio?: number | null
+          maintenance_margin?: number | null
+          margin_level?: number | null
           margin_used?: number
           opened_at?: string
           order_id?: string | null
@@ -743,6 +838,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_position_margin: {
+        Args: {
+          p_asset_class: string
+          p_symbol: string
+          p_position_value: number
+          p_leverage?: number
+        }
+        Returns: {
+          max_leverage: number
+          initial_margin: number
+          maintenance_margin: number
+          margin_level: number
+          leverage_used: number
+        }[]
+      }
       calculate_position_pnl: {
         Args: {
           p_direction: string
@@ -760,6 +870,10 @@ export type Database = {
           pip_difference: number
           pip_value: number
         }[]
+      }
+      update_position_leverage: {
+        Args: { p_position_id: string; p_leverage?: number }
+        Returns: boolean
       }
       update_position_realtime: {
         Args: { p_position_id: string; p_new_price: number }
