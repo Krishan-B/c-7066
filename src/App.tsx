@@ -25,7 +25,7 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="tradepro-theme">
+      <ThemeProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />

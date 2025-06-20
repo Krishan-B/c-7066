@@ -3,11 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, DollarSign, Activity, PieChart, Clock } from "lucide-react";
-import { MarketOverview } from "@/components/MarketOverview";
-import { PortfolioCard } from "@/components/PortfolioCard";
-import { WatchlistTable } from "@/components/WatchlistTable";
-import { NewsWidget } from "@/components/NewsWidget";
-import { QuickTradePanel } from "@/components/QuickTradePanel";
+import MarketOverview from "@/components/MarketOverview";
+import PortfolioCard from "@/components/PortfolioCard";
+import WatchlistTable from "@/components/watchlist/WatchlistTable";
+import NewsWidget from "@/components/NewsWidget";
+import QuickTradePanel from "@/components/QuickTradePanel";
 import KYCBanner from "@/components/kyc/KYCBanner";
 
 const Index = () => {

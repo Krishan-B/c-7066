@@ -24,7 +24,7 @@ export const useKYC = () => {
         .order('uploaded_at', { ascending: false });
 
       if (error) throw error;
-      setDocuments(data || []);
+      setDocuments((data || []) as KYCDocument[]);
     } catch (error) {
       console.error('Error fetching KYC documents:', error);
       toast({
