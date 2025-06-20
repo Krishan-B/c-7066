@@ -1,8 +1,10 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, DollarSign, Activity, PieChart, Clock } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Activity, PieChart, Clock, ArrowRight, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import MarketOverview from "@/components/MarketOverview";
 import PortfolioCard from "@/components/PortfolioCard";
 import WatchlistTable from "@/components/watchlist/WatchlistTable";
@@ -12,6 +14,8 @@ import KYCBanner from "@/components/kyc/KYCBanner";
 import { useState } from "react";
 
 const Index = () => {
+  const navigate = useNavigate();
+  
   // State for selected asset in QuickTradePanel
   const [selectedAsset, setSelectedAsset] = useState({
     name: "EUR/USD",
