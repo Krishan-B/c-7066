@@ -2,11 +2,11 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/AuthProvider";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { TradePanelProvider } from "./components/trade/TradePanelProvider";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Landing from "./pages/Landing";
@@ -21,12 +21,12 @@ import Auth from "./pages/Auth";
 import ProfilePage from "./pages/ProfilePage";
 import Account from "./pages/Account";
 import KYC from "./pages/KYC";
-
-const queryClient = new QueryClient();
+import Analytics from "./pages/Analytics";
+import Leverage from "./pages/Leverage";
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <ErrorBoundary>
       <ThemeProvider>
         <TooltipProvider>
           <TradePanelProvider>
@@ -65,6 +65,13 @@ function App() {
                       </Layout>
                     </ProtectedRoute>
                   } />
+                  <Route path="/dashboard/enhanced-orders" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <EnhancedOrders />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
                   <Route path="/dashboard/wallet" element={
                     <ProtectedRoute>
                       <Layout>
@@ -76,6 +83,20 @@ function App() {
                     <ProtectedRoute>
                       <Layout>
                         <News />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/dashboard/analytics" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Analytics />
+                      </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/dashboard/leverage" element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Leverage />
                       </Layout>
                     </ProtectedRoute>
                   } />
@@ -106,7 +127,7 @@ function App() {
           </TradePanelProvider>
         </TooltipProvider>
       </ThemeProvider>
-    </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

@@ -9,31 +9,49 @@ interface MarketHoursConfig {
 }
 
 export const marketConfig: Record<string, MarketHoursConfig> = {
-  "Crypto": {
+  "crypto": {
     openTime: 0,
     closeTime: 24,
     isOpen24Hours: true,
     openDays: [0, 1, 2, 3, 4, 5, 6] // Open every day
   },
-  "Forex": {
+  "forex": {
     openTime: 22, // Sunday 10 PM UTC
     closeTime: 21, // Friday 9 PM UTC
     isOpen24Hours: false,
     openDays: [0, 1, 2, 3, 4, 5] // Sunday to Friday
   },
-  "Stock": {
+  "stock": {
     openTime: 13, // 9 AM EST = 1 PM UTC
     closeTime: 20, // 4 PM EST = 8 PM UTC
     isOpen24Hours: false,
     openDays: [1, 2, 3, 4, 5] // Monday to Friday
   },
-  "Index": {
+  "stocks": {
     openTime: 13, // 9 AM EST = 1 PM UTC
     closeTime: 20, // 4 PM EST = 8 PM UTC
     isOpen24Hours: false,
     openDays: [1, 2, 3, 4, 5] // Monday to Friday
   },
-  "Commodity": {
+  "index": {
+    openTime: 13, // 9 AM EST = 1 PM UTC
+    closeTime: 20, // 4 PM EST = 8 PM UTC
+    isOpen24Hours: false,
+    openDays: [1, 2, 3, 4, 5] // Monday to Friday
+  },
+  "indices": {
+    openTime: 13, // 9 AM EST = 1 PM UTC
+    closeTime: 20, // 4 PM EST = 8 PM UTC
+    isOpen24Hours: false,
+    openDays: [1, 2, 3, 4, 5] // Monday to Friday
+  },
+  "commodity": {
+    openTime: 14, // 10 AM EST = 2 PM UTC
+    closeTime: 21, // 5 PM EST = 9 PM UTC
+    isOpen24Hours: false,
+    openDays: [1, 2, 3, 4, 5] // Monday to Friday
+  },
+  "commodities": {
     openTime: 14, // 10 AM EST = 2 PM UTC
     closeTime: 21, // 5 PM EST = 9 PM UTC
     isOpen24Hours: false,
@@ -42,13 +60,16 @@ export const marketConfig: Record<string, MarketHoursConfig> = {
 };
 
 export const isMarketOpen = (marketType: string): boolean => {
+  // Normalize market type to lowercase for case-insensitive matching
+  const normalizedType = marketType.toLowerCase();
+  
   // Default to closed if market type is unknown
-  if (!marketConfig[marketType]) {
+  if (!marketConfig[normalizedType]) {
     console.warn(`Unknown market type: ${marketType}`);
     return false;
   }
   
-  const config = marketConfig[marketType];
+  const config = marketConfig[normalizedType];
   
   // 24/7 markets are always open
   if (config.isOpen24Hours) {
@@ -69,11 +90,13 @@ export const isMarketOpen = (marketType: string): boolean => {
 };
 
 export const getMarketHoursMessage = (marketType: string): string => {
-  if (!marketConfig[marketType]) {
+  const normalizedType = marketType.toLowerCase();
+  
+  if (!marketConfig[normalizedType]) {
     return "Trading hours information unavailable";
   }
   
-  const config = marketConfig[marketType];
+  const config = marketConfig[normalizedType];
   
   if (config.isOpen24Hours) {
     return "This market trades 24/7, every day of the week.";

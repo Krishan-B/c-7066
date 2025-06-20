@@ -1,7 +1,7 @@
 
 import { cn } from "@/lib/utils";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, LineChart, BarChart3, Newspaper, ShoppingCart, Wallet, Settings, UserCircle, LogOut, ListCheck } from "lucide-react";
+import { LayoutDashboard, LineChart, BarChart3, Newspaper, Wallet, Settings, UserCircle, LogOut, ListCheck, TrendingUp, Zap } from "lucide-react";
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -64,7 +64,7 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
   return (
     <aside 
       className={cn(
-        "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-card/70 backdrop-blur-sm z-10 w-64 border-r border-secondary/50 transition-all duration-300 ease-in-out",
+        "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-card/70 backdrop-blur-sm z-10 w-64 border-r border-secondary/50 transition-all duration-300 ease-in-out md:translate-x-0",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >
@@ -75,19 +75,21 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
             <SidebarItem to="/dashboard/markets" icon={<LineChart className="h-5 w-5" />} label="Markets" delay={0.2} />
             <SidebarItem to="/dashboard/portfolio" icon={<BarChart3 className="h-5 w-5" />} label="Portfolio" delay={0.3} />
             <SidebarItem to="/dashboard/orders" icon={<ListCheck className="h-5 w-5" />} label="Orders" delay={0.4} />
-            <SidebarItem to="/dashboard/news" icon={<Newspaper className="h-5 w-5" />} label="News" delay={0.5} />
-            <SidebarItem to="/dashboard/wallet" icon={<Wallet className="h-5 w-5" />} label="Wallet" delay={0.6} />
+            <SidebarItem to="/dashboard/analytics" icon={<TrendingUp className="h-5 w-5" />} label="Analytics" delay={0.5} />
+            <SidebarItem to="/dashboard/leverage" icon={<Zap className="h-5 w-5" />} label="Leverage" delay={0.6} />
+            <SidebarItem to="/dashboard/news" icon={<Newspaper className="h-5 w-5" />} label="News" delay={0.7} />
+            <SidebarItem to="/dashboard/wallet" icon={<Wallet className="h-5 w-5" />} label="Wallet" delay={0.8} />
           </nav>
           
           <div className="mt-8">
             <p className="px-4 text-xs font-medium text-primary mb-2">ACCOUNT</p>
             <nav className="space-y-1">
-              <SidebarItem to="/dashboard/profile" icon={<UserCircle className="h-5 w-5" />} label="My Profile" delay={0.7} />
-              <SidebarItem to="/dashboard/account" icon={<Settings className="h-5 w-5" />} label="Settings" delay={0.8} />
+              <SidebarItem to="/dashboard/profile" icon={<UserCircle className="h-5 w-5" />} label="My Profile" delay={0.9} />
+              <SidebarItem to="/dashboard/account" icon={<Settings className="h-5 w-5" />} label="Settings" delay={1.0} />
               <motion.button 
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.2, delay: 0.9 }}
+                transition={{ duration: 0.2, delay: 1.1 }}
                 onClick={handleLogout}
                 className="w-full flex items-center py-2 px-4 rounded-md text-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-300 text-left"
               >
