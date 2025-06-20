@@ -1,53 +1,109 @@
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/components/AuthProvider";
-import ProtectedRoute from "@/components/ProtectedRoute";
-import Layout from "@/components/Layout";
 import { Toaster } from "@/components/ui/toaster";
-import { TradePanelProvider } from "@/components/trade/TradePanelProvider";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./components/AuthProvider";
+import { ThemeProvider } from "./components/ThemeProvider";
+import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Landing from "./pages/Landing";
+import Index from "./pages/Index";
+import Markets from "./pages/Markets";
+import Portfolio from "./pages/Portfolio";
+import Orders from "./pages/Orders";
+import Wallet from "./pages/Wallet";
+import News from "./pages/News";
+import Auth from "./pages/Auth";
+import ProfilePage from "./pages/ProfilePage";
+import Account from "./pages/Account";
+import KYC from "./pages/KYC";
 
-// Pages
-import Index from "@/pages/Index";
-import Auth from "@/pages/Auth";
-import Markets from "@/pages/Markets";
-import Portfolio from "@/pages/Portfolio";
-import Orders from "@/pages/Orders";
-import News from "@/pages/News";
-import Wallet from "@/pages/Wallet";
-import Account from "@/pages/Account";
-import ProfilePage from "@/pages/ProfilePage";
-import Landing from "@/pages/Landing";
+const queryClient = new QueryClient();
 
-export default function App() {
+function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <TradePanelProvider>
-          <Router>
-            <Routes>
-              {/* Landing page is now the root */}
-              <Route path="/" element={<Landing />} />
-              {/* Auth page */}
-              <Route path="/auth" element={<Auth />} />
-              {/* Protected routes inside Layout */}
-              <Route path="/dashboard" element={<Layout />}>
-                <Route index element={<Index />} />
-                <Route path="markets" element={<Markets />} />
-                <Route path="portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
-                <Route path="orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-                <Route path="news" element={<News />} />
-                <Route path="wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
-                <Route path="account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
-                <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
-              </Route>
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Router>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="tradepro-theme">
+        <TooltipProvider>
           <Toaster />
-        </TradePanelProvider>
-      </AuthProvider>
-    </ThemeProvider>
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Index />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/markets" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Markets />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/portfolio" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Portfolio />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/orders" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Orders />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/wallet" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Wallet />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/news" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <News />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <ProfilePage />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/account" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Account />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+                <Route path="/kyc" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <KYC />
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
+
+export default App;

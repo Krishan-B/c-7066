@@ -1,147 +1,91 @@
 
-import { useEffect, useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
-import MarketStats from "@/components/MarketStats";
-import WatchlistTable from "@/components/watchlist/WatchlistTable";
-import TradingViewChart from "@/components/TradingViewChart";
-import { QuickTradePanel, TradeButton } from "@/components/trade";
-import PortfolioCard from "@/components/PortfolioCard";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
-import AlertsWidget from "@/components/AlertsWidget";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { TrendingUp, TrendingDown, DollarSign, Activity, PieChart, Clock } from "lucide-react";
+import { MarketOverview } from "@/components/MarketOverview";
+import { PortfolioCard } from "@/components/PortfolioCard";
+import { WatchlistTable } from "@/components/WatchlistTable";
+import { NewsWidget } from "@/components/NewsWidget";
+import { QuickTradePanel } from "@/components/QuickTradePanel";
+import KYCBanner from "@/components/kyc/KYCBanner";
 
 const Index = () => {
-  const [selectedAsset, setSelectedAsset] = useState({
-    name: "Bitcoin",
-    symbol: "BTCUSD",
-    price: 67543.21,
-    change_percentage: 2.4,
-    change: 2.4,
-    market_type: "Crypto"
-  });
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const chartSectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Show welcome toast when dashboard loads
-    toast({
-      title: "Welcome to TradePro",
-      description: "Your dashboard is ready with real-time market data",
-      duration: 5000,
-    });
-  }, [toast]);
-
-  const handleAssetSelect = (asset: any) => {
-    setSelectedAsset(asset);
-    
-    // Scroll to chart section
-    if (chartSectionRef.current) {
-      chartSectionRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-    
-    toast({
-      title: `${asset.name} selected`,
-      description: "Chart and trade panel updated",
-      duration: 2000,
-    });
-  };
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    
-    // Simulate refresh delay
-    setTimeout(() => {
-      toast({
-        title: "Data refreshed",
-        description: "Latest market data has been loaded",
-        duration: 2000,
-      });
-      setIsRefreshing(false);
-    }, 1000);
-  };
-
   return (
-    <div className="p-4 md:p-6">
-      <div className="flex flex-col lg:flex-row justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Market Overview</h1>
-          <p className="text-muted-foreground">Track, analyze and trade global markets</p>
-        </div>
-        <div className="flex items-center space-x-2 mt-4 lg:mt-0">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-2"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
-          </Button>
-          <TradeButton size="sm" />
-        </div>
-      </div>
-      
-      {/* Market Stats */}
-      <MarketStats />
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      {/* KYC Banner */}
+      <KYCBanner />
       
       {/* Portfolio Overview */}
-      <div className="mb-6">
-        <PortfolioCard />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">$45,231.89</div>
+            <p className="text-xs text-muted-foreground">
+              +20.1% from last month
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Today's P&L</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">+$2,350</div>
+            <p className="text-xs text-muted-foreground">
+              +15.3% since yesterday
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Open Positions</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">12</div>
+            <p className="text-xs text-muted-foreground">
+              3 winning, 1 losing
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Portfolio Diversity</CardTitle>
+            <PieChart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">7</div>
+            <p className="text-xs text-muted-foreground">
+              Asset classes
+            </p>
+          </CardContent>
+        </Card>
       </div>
-      
-      {/* Watchlist */}
-      <div className="glass-card rounded-lg p-4 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">My Watchlist</h2>
-          <Button variant="ghost" size="sm">
-            Add Asset
-          </Button>
+
+      {/* Main Content */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div className="col-span-4">
+          <PortfolioCard />
         </div>
-        <WatchlistTable onAssetSelect={handleAssetSelect} />
-      </div>
-      
-      {/* Chart and Trading Panel */}
-      <div ref={chartSectionRef} className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2 glass-card rounded-lg p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <h2 className="text-xl font-semibold">{selectedAsset.name} Chart</h2>
-              <div className="ml-4 text-sm">
-                <span className={`${selectedAsset.change >= 0 ? 'text-success' : 'text-warning'} font-medium`}>
-                  {selectedAsset.change >= 0 ? '+' : ''}{selectedAsset.change}%
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              <Button variant="ghost" size="sm">1D</Button>
-              <Button variant="ghost" size="sm">1W</Button>
-              <Button variant="ghost" size="sm" className="bg-secondary text-foreground">1M</Button>
-              <Button variant="ghost" size="sm">1Y</Button>
-              <Button variant="ghost" size="sm">ALL</Button>
-            </div>
-          </div>
-          <TradingViewChart symbol={selectedAsset.symbol} />
-        </div>
-        
-        <div className="lg:col-span-1">
-          <QuickTradePanel asset={selectedAsset} />
+        <div className="col-span-3">
+          <MarketOverview />
         </div>
       </div>
-      
-      {/* News and Alerts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="glass-card rounded-lg p-4">
-          <h2 className="text-xl font-semibold mb-4">Market News</h2>
-          <EnhancedNewsWidget />
+
+      {/* Secondary Content */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div className="col-span-4">
+          <WatchlistTable />
         </div>
-        <div className="glass-card rounded-lg p-4">
-          <h2 className="text-xl font-semibold mb-4">Market Alerts</h2>
-          <AlertsWidget />
+        <div className="col-span-3 space-y-4">
+          <QuickTradePanel />
+          <NewsWidget />
         </div>
       </div>
     </div>

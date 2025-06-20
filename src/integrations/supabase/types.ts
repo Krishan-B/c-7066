@@ -45,6 +45,54 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_documents: {
+        Row: {
+          category: string
+          comments: string | null
+          created_at: string | null
+          document_type: string
+          file_name: string | null
+          file_url: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string | null
+          uploaded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category: string
+          comments?: string | null
+          created_at?: string | null
+          document_type: string
+          file_name?: string | null
+          file_url: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          uploaded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: string
+          comments?: string | null
+          created_at?: string | null
+          document_type?: string
+          file_name?: string | null
+          file_url?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string | null
+          uploaded_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       market_data: {
         Row: {
           change_percentage: number
@@ -98,6 +146,196 @@ export type Database = {
           volume?: string
         }
         Relationships: []
+      }
+      orders: {
+        Row: {
+          asset_class: string
+          cancelled_at: string | null
+          created_at: string
+          direction: string
+          executed_at: string | null
+          execution_price: number | null
+          expiration_date: string | null
+          id: string
+          margin_required: number
+          order_type: string
+          position_value: number
+          rejected_reason: string | null
+          requested_price: number
+          status: string
+          stop_loss: number | null
+          symbol: string
+          take_profit: number | null
+          units: number
+          user_id: string
+        }
+        Insert: {
+          asset_class: string
+          cancelled_at?: string | null
+          created_at?: string
+          direction: string
+          executed_at?: string | null
+          execution_price?: number | null
+          expiration_date?: string | null
+          id?: string
+          margin_required: number
+          order_type: string
+          position_value: number
+          rejected_reason?: string | null
+          requested_price: number
+          status?: string
+          stop_loss?: number | null
+          symbol: string
+          take_profit?: number | null
+          units: number
+          user_id: string
+        }
+        Update: {
+          asset_class?: string
+          cancelled_at?: string | null
+          created_at?: string
+          direction?: string
+          executed_at?: string | null
+          execution_price?: number | null
+          expiration_date?: string | null
+          id?: string
+          margin_required?: number
+          order_type?: string
+          position_value?: number
+          rejected_reason?: string | null
+          requested_price?: number
+          status?: string
+          stop_loss?: number | null
+          symbol?: string
+          take_profit?: number | null
+          units?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      position_history: {
+        Row: {
+          action: string
+          id: string
+          margin_impact: number | null
+          notes: string | null
+          pnl: number | null
+          position_id: string
+          price: number
+          timestamp: string
+          units: number | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          id?: string
+          margin_impact?: number | null
+          notes?: string | null
+          pnl?: number | null
+          position_id: string
+          price: number
+          timestamp?: string
+          units?: number | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          id?: string
+          margin_impact?: number | null
+          notes?: string | null
+          pnl?: number | null
+          position_id?: string
+          price?: number
+          timestamp?: string
+          units?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_history_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      positions: {
+        Row: {
+          asset_class: string
+          close_price: number | null
+          closed_at: string | null
+          current_price: number
+          direction: string
+          entry_price: number
+          id: string
+          last_updated: string
+          margin_used: number
+          opened_at: string
+          order_id: string | null
+          position_value: number
+          realized_pnl: number | null
+          status: string
+          stop_loss: number | null
+          symbol: string
+          take_profit: number | null
+          units: number
+          unrealized_pnl: number | null
+          user_id: string
+        }
+        Insert: {
+          asset_class: string
+          close_price?: number | null
+          closed_at?: string | null
+          current_price: number
+          direction: string
+          entry_price: number
+          id?: string
+          last_updated?: string
+          margin_used: number
+          opened_at?: string
+          order_id?: string | null
+          position_value: number
+          realized_pnl?: number | null
+          status?: string
+          stop_loss?: number | null
+          symbol: string
+          take_profit?: number | null
+          units: number
+          unrealized_pnl?: number | null
+          user_id: string
+        }
+        Update: {
+          asset_class?: string
+          close_price?: number | null
+          closed_at?: string | null
+          current_price?: number
+          direction?: string
+          entry_price?: number
+          id?: string
+          last_updated?: string
+          margin_used?: number
+          opened_at?: string
+          order_id?: string | null
+          position_value?: number
+          realized_pnl?: number | null
+          status?: string
+          stop_loss?: number | null
+          symbol?: string
+          take_profit?: number | null
+          units?: number
+          unrealized_pnl?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "positions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       price_alerts: {
         Row: {
@@ -159,6 +397,114 @@ export type Database = {
           id?: string
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      risk_metrics: {
+        Row: {
+          available_margin: number | null
+          correlation_risk: number | null
+          diversification_score: number | null
+          id: string
+          last_calculated: string
+          margin_level: number | null
+          max_position_size: number | null
+          portfolio_var: number | null
+          risk_score: number | null
+          total_exposure: number | null
+          used_margin: number | null
+          user_id: string
+        }
+        Insert: {
+          available_margin?: number | null
+          correlation_risk?: number | null
+          diversification_score?: number | null
+          id?: string
+          last_calculated?: string
+          margin_level?: number | null
+          max_position_size?: number | null
+          portfolio_var?: number | null
+          risk_score?: number | null
+          total_exposure?: number | null
+          used_margin?: number | null
+          user_id: string
+        }
+        Update: {
+          available_margin?: number | null
+          correlation_risk?: number | null
+          diversification_score?: number | null
+          id?: string
+          last_calculated?: string
+          margin_level?: number | null
+          max_position_size?: number | null
+          portfolio_var?: number | null
+          risk_score?: number | null
+          total_exposure?: number | null
+          used_margin?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trade_analytics: {
+        Row: {
+          avg_loss: number | null
+          avg_win: number | null
+          created_at: string
+          id: string
+          losing_trades: number | null
+          max_drawdown: number | null
+          net_pnl: number | null
+          period_end: string
+          period_start: string
+          profit_factor: number | null
+          sharpe_ratio: number | null
+          total_fees: number | null
+          total_pnl: number | null
+          total_trades: number | null
+          updated_at: string
+          user_id: string
+          win_rate: number | null
+          winning_trades: number | null
+        }
+        Insert: {
+          avg_loss?: number | null
+          avg_win?: number | null
+          created_at?: string
+          id?: string
+          losing_trades?: number | null
+          max_drawdown?: number | null
+          net_pnl?: number | null
+          period_end: string
+          period_start: string
+          profit_factor?: number | null
+          sharpe_ratio?: number | null
+          total_fees?: number | null
+          total_pnl?: number | null
+          total_trades?: number | null
+          updated_at?: string
+          user_id: string
+          win_rate?: number | null
+          winning_trades?: number | null
+        }
+        Update: {
+          avg_loss?: number | null
+          avg_win?: number | null
+          created_at?: string
+          id?: string
+          losing_trades?: number | null
+          max_drawdown?: number | null
+          net_pnl?: number | null
+          period_end?: string
+          period_start?: string
+          profit_factor?: number | null
+          sharpe_ratio?: number | null
+          total_fees?: number | null
+          total_pnl?: number | null
+          total_trades?: number | null
+          updated_at?: string
+          user_id?: string
+          win_rate?: number | null
+          winning_trades?: number | null
         }
         Relationships: []
       }
@@ -335,7 +681,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_position_pnl: {
+        Args: {
+          p_direction: string
+          p_entry_price: number
+          p_current_price: number
+          p_units: number
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
