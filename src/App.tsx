@@ -1,132 +1,103 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "./components/theme/ThemeProvider";
 import { AuthProvider } from "./components/AuthProvider";
-import { ThemeProvider } from "./components/ThemeProvider";
-import { TradePanelProvider } from "./components/trade/TradePanelProvider";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Markets from "./pages/Markets";
 import Portfolio from "./pages/Portfolio";
 import Orders from "./pages/Orders";
-import EnhancedOrders from "./pages/EnhancedOrders";
-import Wallet from "./pages/Wallet";
-import News from "./pages/News";
-import Auth from "./pages/Auth";
-import ProfilePage from "./pages/ProfilePage";
-import Account from "./pages/Account";
-import KYC from "./pages/KYC";
 import Analytics from "./pages/Analytics";
 import Leverage from "./pages/Leverage";
+import Account from "./pages/Account";
+import Trading from "./pages/Trading";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider>
-        <TooltipProvider>
-          <TradePanelProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+            <TooltipProvider>
               <AuthProvider>
                 <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Index />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/markets" element={
-                    <ProtectedRoute>
-                      <Layout>
+                  <Route path="/" element={<Index />} />
+                  <Route
+                    path="/markets"
+                    element={
+                      <ProtectedRoute>
                         <Markets />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/portfolio" element={
-                    <ProtectedRoute>
-                      <Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/trading"
+                    element={
+                      <ProtectedRoute>
+                        <Trading />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/portfolio"
+                    element={
+                      <ProtectedRoute>
                         <Portfolio />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/orders" element={
-                    <ProtectedRoute>
-                      <Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/orders"
+                    element={
+                      <ProtectedRoute>
                         <Orders />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/enhanced-orders" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <EnhancedOrders />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/wallet" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Wallet />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/news" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <News />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/analytics" element={
-                    <ProtectedRoute>
-                      <Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/analytics"
+                    element={
+                      <ProtectedRoute>
                         <Analytics />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/leverage" element={
-                    <ProtectedRoute>
-                      <Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/leverage"
+                    element={
+                      <ProtectedRoute>
                         <Leverage />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/profile" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <ProfilePage />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/account" element={
-                    <ProtectedRoute>
-                      <Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/account"
+                    element={
+                      <ProtectedRoute>
                         <Account />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/kyc" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <KYC />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
+                      </ProtectedRoute>
+                    }
+                  />
                 </Routes>
+                <Toaster />
               </AuthProvider>
-            </BrowserRouter>
-          </TradePanelProvider>
-        </TooltipProvider>
-      </ThemeProvider>
+            </TooltipProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
     </ErrorBoundary>
   );
 }
