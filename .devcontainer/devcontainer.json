@@ -79,8 +79,8 @@
     },
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "postCreateCommand": "npm install -g pnpm && pnpm install --frozen-lockfile && pnpm run setup:dev",
-  "postAttachCommand": "pnpm run dev",
+  "postCreateCommand": "npm ci && npm run setup:dev",
+  "postAttachCommand": "npm run dev",
   "forwardPorts": [3000, 5173, 6006, 5432, 5433],
   "portsAttributes": {
     "3000": { "label": "Application (Next.js Dev)" },

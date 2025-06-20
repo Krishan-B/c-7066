@@ -1,16 +1,18 @@
-export type TradeDirection = 'buy' | 'sell';
+import { type DirectionEnum, type OrderStatusEnum, type OrderTypeEnum } from '@/types/schema';
+
+import { type MarketType } from '../market/types';
 
 export interface Trade {
   id: string;
   asset_symbol: string;
   asset_name: string;
-  market_type: string;
+  market_type: MarketType;
   units: number;
   price_per_unit: number;
   total_amount: number;
-  trade_type: 'buy' | 'sell';
-  order_type: 'market' | 'entry';
-  status: 'open' | 'pending' | 'closed' | 'cancelled';
+  trade_type: DirectionEnum;
+  order_type: OrderTypeEnum;
+  status: OrderStatusEnum;
   stop_loss: number | null;
   take_profit: number | null;
   expiration_date: string | null;

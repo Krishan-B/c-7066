@@ -1,15 +1,23 @@
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders } from "./utils/cors.ts";
-import { 
+import {
+  checkRateLimit,
+  createErrorResponse,
+  createSuccessResponse,
+  handleCORS,
+  marketDataSchemas,
+  validateInput,
+} from '../_shared/security.ts';
+import {
+  fetchAlphaVantageForexData,
+  fetchCoinGeckoData,
+  fetchYahooFinanceData,
   updateDatabaseWithMarketData,
-  fetchYahooFinanceData, 
-  fetchAlphaVantageForexData, 
-  fetchCoinGeckoData 
-} from "./api/data-sources.ts";
-import { checkCachedData } from "./utils/cache-helper.ts";
-import type { Asset } from "./types.ts";
+} from './api/data-sources.ts';
+import type { Asset } from './types.ts';
+import { checkCachedData } from './utils/cache-helper.ts';
+import { corsHeaders } from './utils/cors.ts';
 
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
@@ -20,36 +28,58 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return handleCORS();
+  }
+
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return createErrorResponse('Method not allowed', 405);
   }
 
   try {
-    const { marketType, symbols, forceRefresh } = await req.json();
-    console.log(`Fetching ${marketType} data for symbols: ${symbols}`);
-    
-    if (!marketType) {
-      throw new Error("Market type is required");
+    // Rate limiting - Allow 100 requests per minute per IP for market data service
+    const clientIP =
+      req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimitResult = checkRateLimit(`market-data-${clientIP}`, 100, 1);
+
+    if (!rateLimitResult.allowed) {
+      return createErrorResponse('Rate limit exceeded. Please try again later.', 429);
     }
+
+    // Parse and validate request body
+    let requestData;
+    try {
+      requestData = await req.json();
+    } catch (error) {
+      return createErrorResponse('Invalid JSON in request body', 400);
+    }
+
+    // Validate input using our security framework
+    const validation = validateInput(requestData, marketDataSchemas.getMultipleMarketData);
+
+    if (!validation.isValid) {
+      return createErrorResponse('Validation failed', 400, { errors: validation.errors });
+    }
+
+    const { marketType, symbols, forceRefresh } = validation.sanitizedData;
+    console.log(`Fetching ${marketType} data for symbols: ${symbols}`);
 
     // Check if we have recent data (within last 15 minutes) unless force refresh is specified
     if (!forceRefresh) {
       const cachedData = await checkCachedData(supabase, marketType, symbols);
       if (cachedData) {
-        return new Response(JSON.stringify({ 
-          success: true, 
+        return createSuccessResponse({
           data: cachedData,
-          source: 'cache'
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
+          source: 'cache',
+          rateLimitRemaining: rateLimitResult.remainingRequests,
         });
       }
     }
-    
+
     // Determine which source to use based on market type
     let marketData: Asset[] = [];
-    
-    switch(marketType.toLowerCase()) {
+
+    switch (marketType.toLowerCase()) {
       case 'stock':
       case 'stocks':
         marketData = await fetchYahooFinanceData(symbols);
@@ -70,27 +100,33 @@ serve(async (req: Request) => {
         marketData = await fetchAlphaVantageForexData(symbols); // Alpha Vantage also supports commodities
         break;
       default:
-        throw new Error(`Unsupported market type: ${marketType}`);
+        return createErrorResponse(`Unsupported market type: ${marketType}`, 400);
     }
-    
+
     // Update the database with the fetched data
     await updateDatabaseWithMarketData(supabase, marketData, marketType);
 
-    // Return the fetched market data
-    return new Response(JSON.stringify({ 
-      success: true, 
+    // Return the fetched market data with enhanced response
+    return createSuccessResponse({
       data: marketData,
-      source: 'api'
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
+      source: 'api',
+      marketType: marketType,
+      count: marketData.length,
+      rateLimitRemaining: rateLimitResult.remainingRequests,
     });
   } catch (error: unknown) {
-    console.error("Error fetching market data:", error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    return new Response(JSON.stringify({ success: false, error: errorMessage }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    });
+    console.error('Error fetching market data:', error);
+
+    // Enhanced error handling - don't expose internal details
+    if (error instanceof Error) {
+      if (error.message.includes('fetch')) {
+        return createErrorResponse('External service unavailable', 503);
+      }
+      if (error.message.includes('timeout')) {
+        return createErrorResponse('Request timeout', 408);
+      }
+    }
+
+    return createErrorResponse('Internal server error', 500);
   }
 });

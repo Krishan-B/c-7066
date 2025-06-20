@@ -12,9 +12,8 @@
     "ms-ossdata.vscode-postgresql",
     "esbenp.prettier-vscode",
     "bradlc.vscode-tailwindcss",
-    "vitest.explorer",
     "aaron-bond.better-comments",
-    "streetsidesoftware.code-spell-checker"
+    "vitest.explorer"
   ],
 
   "unwantedRecommendations": [

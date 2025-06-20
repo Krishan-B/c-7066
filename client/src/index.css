@@ -59,7 +59,9 @@
 
   body {
     @apply bg-background text-foreground antialiased transition-colors duration-300;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
 
   /* Ensure consistent transitions for theme switching */
@@ -71,7 +73,7 @@
 }
 
 .glass-card {
-  @apply bg-secondary bg-opacity-20 backdrop-blur-lg border border-white border-opacity-10 shadow-lg;
+  @apply bg-secondary bg-opacity-20 border-opacity-10 border border-white shadow-lg backdrop-blur-lg;
 }
 
 .crypto-chart {
@@ -79,7 +81,8 @@
 }
 
 @keyframes pulse-subtle {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -96,7 +99,7 @@
 }
 
 .hover-card:hover {
-  @apply transform -translate-y-1 shadow-lg;
+  @apply -translate-y-1 transform shadow-lg;
 }
 
 .gradient-bg {
@@ -113,5 +116,5 @@
 
 /* Animated underline for navigation links */
 .nav-link {
-  @apply relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full;
+  @apply after:bg-primary relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:transition-all after:duration-300 hover:after:w-full;
 }

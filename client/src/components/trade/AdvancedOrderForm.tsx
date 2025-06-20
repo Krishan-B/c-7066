@@ -14,11 +14,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import type { Asset } from '@/hooks/market/types';
+import type { Asset, MarketType } from '@/hooks/market/types';
+import { ORDER_TYPES, type DirectionEnum, type OrderTypeEnum } from '@/types/schema';
 import { getLeverageForAssetType } from '@/utils/leverageUtils';
+import { formatMarketTypeForDisplay, normalizeMarketType } from '@/utils/marketTypeUtils';
 
 export interface AdvancedOrderFormValues {
-  orderType: 'market' | 'entry';
+  orderType: OrderTypeEnum;
   stopLoss: boolean;
   takeProfit: boolean;
   expirationDate: boolean;
@@ -31,22 +33,22 @@ export interface AdvancedOrderFormValues {
   expirationMonth?: string;
   expirationYear?: string;
   units: string;
-  assetCategory?: string;
+  assetCategory?: MarketType;
   assetSymbol?: string;
 }
 
 interface AdvancedOrderFormProps {
   currentPrice: number;
   symbol: string;
-  onOrderSubmit: (values: AdvancedOrderFormValues, action: 'buy' | 'sell') => void;
+  onOrderSubmit: (values: AdvancedOrderFormValues, action: DirectionEnum) => void;
   isLoading?: boolean;
   availableFunds?: number;
-  assetCategory?: string;
-  onAssetCategoryChange?: (category: string) => void;
+  assetCategory?: MarketType;
+  onAssetCategoryChange?: (category: MarketType) => void;
   marketData?: Asset[];
 }
 
-const ASSET_CATEGORIES = ['Crypto', 'Stocks', 'Forex', 'Indices', 'Commodities'];
+const ASSET_CATEGORIES: MarketType[] = ['crypto', 'stock', 'forex', 'index', 'commodity'];
 
 export function AdvancedOrderForm({
   currentPrice,
@@ -128,7 +130,7 @@ export function AdvancedOrderForm({
   const canAfford = availableFunds >= requiredFunds;
 
   // Handler for order type change
-  const handleOrderTypeChange = (value: 'market' | 'entry') => {
+  const handleOrderTypeChange = (value: OrderTypeEnum) => {
     form.setValue('orderType', value);
   };
 
@@ -198,7 +200,7 @@ export function AdvancedOrderForm({
         {/* Real-time prices with Buy/Sell buttons */}
         <div className="mb-6 grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <div className="text-sm text-muted-foreground">Buy Price</div>
+            <div className="text-muted-foreground text-sm">Buy Price</div>
             <div className="text-lg font-medium">${buyPrice.toFixed(4)}</div>
             <Button
               className="mt-1 w-full bg-green-600 text-white hover:bg-green-700"
@@ -209,7 +211,7 @@ export function AdvancedOrderForm({
             </Button>
           </div>
           <div className="space-y-1">
-            <div className="text-sm text-muted-foreground">Sell Price</div>
+            <div className="text-muted-foreground text-sm">Sell Price</div>
             <div className="text-lg font-medium">${sellPrice.toFixed(4)}</div>
             <Button
               className="mt-1 w-full bg-red-500 text-white hover:bg-red-600"
@@ -231,13 +233,13 @@ export function AdvancedOrderForm({
               <Input {...field} type="number" step="0.01" className="w-full" />
             )}
           />
-          <div className="text-xs text-muted-foreground">
+          <div className="text-muted-foreground text-xs">
             Funds required to open the position:{' '}
             <span className={`font-medium ${!canAfford ? 'text-red-500' : ''}`}>
               ${requiredFunds.toFixed(2)}
             </span>
           </div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-muted-foreground text-xs">
             Available: <span className="font-medium">${availableFunds.toFixed(2)}</span>
           </div>
         </div>
@@ -248,32 +250,32 @@ export function AdvancedOrderForm({
           <div className="flex gap-2">
             <Button
               type="button"
-              variant={orderType === 'market' ? 'default' : 'outline'}
-              className={`flex-1 ${orderType === 'market' ? 'bg-primary text-primary-foreground' : ''}`}
-              onClick={() => handleOrderTypeChange('market')}
+              variant={orderType === ORDER_TYPES.MARKET ? 'default' : 'outline'}
+              className={`flex-1 ${orderType === ORDER_TYPES.MARKET ? 'bg-primary text-primary-foreground' : ''}`}
+              onClick={() => handleOrderTypeChange(ORDER_TYPES.MARKET)}
             >
               Market order
             </Button>
             <Button
               type="button"
-              variant={orderType === 'entry' ? 'default' : 'outline'}
-              className={`flex-1 ${orderType === 'entry' ? 'bg-yellow-500 text-white hover:bg-yellow-600' : ''}`}
-              onClick={() => handleOrderTypeChange('entry')}
+              variant={orderType === ORDER_TYPES.LIMIT ? 'default' : 'outline'}
+              className={`flex-1 ${orderType === ORDER_TYPES.LIMIT ? 'bg-yellow-500 text-white hover:bg-yellow-600' : ''}`}
+              onClick={() => handleOrderTypeChange(ORDER_TYPES.LIMIT)}
             >
               Entry order
             </Button>
           </div>
 
           {/* Order Type Description */}
-          <p className="text-sm text-muted-foreground">
-            {orderType === 'market'
+          <p className="text-muted-foreground text-sm">
+            {orderType === ORDER_TYPES.MARKET
               ? 'A market order will be executed immediately at the next market price.'
-              : 'An entry order will be executed when the market reaches the requested price.'}
+              : 'A limit order will be executed when the market reaches the requested price.'}
           </p>
         </div>
 
-        {/* Entry Order Rate (only for entry orders) */}
-        {orderType === 'entry' && (
+        {/* Limit Order Rate (only for limit orders) */}
+        {orderType === ORDER_TYPES.LIMIT && (
           <div className="space-y-2">
             <label className="text-sm font-medium">Order rate:</label>
             <div className="flex items-center gap-2">
@@ -291,7 +293,7 @@ export function AdvancedOrderForm({
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Rate should be above {(currentPrice * 0.98).toFixed(4)} or below{' '}
               {(currentPrice * 1.02).toFixed(4)}
             </p>
@@ -306,7 +308,7 @@ export function AdvancedOrderForm({
               control={form.control}
               name="stopLoss"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormItem className="flex flex-row items-start space-y-0 space-x-3">
                   <FormControl>
                     <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
@@ -315,7 +317,7 @@ export function AdvancedOrderForm({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger className="ml-1">
-                          <Info className="h-4 w-4 text-muted-foreground" />
+                          <Info className="text-muted-foreground h-4 w-4" />
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="w-[200px] text-xs">
@@ -391,7 +393,7 @@ export function AdvancedOrderForm({
                     </div>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Rate should be between {(currentPrice * 0.9).toFixed(4)} and{' '}
                   {(currentPrice * 0.95).toFixed(4)}
                 </p>
@@ -403,7 +405,7 @@ export function AdvancedOrderForm({
               control={form.control}
               name="takeProfit"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormItem className="flex flex-row items-start space-y-0 space-x-3">
                   <FormControl>
                     <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
@@ -412,7 +414,7 @@ export function AdvancedOrderForm({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger className="ml-1">
-                          <Info className="h-4 w-4 text-muted-foreground" />
+                          <Info className="text-muted-foreground h-4 w-4" />
                         </TooltipTrigger>
                         <TooltipContent>
                           <p className="w-[200px] text-xs">
@@ -488,21 +490,21 @@ export function AdvancedOrderForm({
                     </div>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Rate should be between {(currentPrice * 1.05).toFixed(4)} and{' '}
                   {(currentPrice * 1.1).toFixed(4)}
                 </p>
               </div>
             )}
 
-            {/* Expiration Date (only for entry orders) */}
-            {orderType === 'entry' && (
+            {/* Expiration Date (only for limit orders) */}
+            {orderType === ORDER_TYPES.LIMIT && (
               <>
                 <FormField
                   control={form.control}
                   name="expirationDate"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormItem className="flex flex-row items-start space-y-0 space-x-3">
                       <FormControl>
                         <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
@@ -511,7 +513,7 @@ export function AdvancedOrderForm({
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger className="ml-1">
-                              <Info className="h-4 w-4 text-muted-foreground" />
+                              <Info className="text-muted-foreground h-4 w-4" />
                             </TooltipTrigger>
                             <TooltipContent>
                               <p className="w-[200px] text-xs">

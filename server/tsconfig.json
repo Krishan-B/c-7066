@@ -6,8 +6,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "./dist",
-    "module": "NodeNext",
-    "target": "ES2022"
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "node"
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "../client/**/*"]

@@ -16,39 +16,9 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { useCombinedMarketData, type MarketType } from '@/hooks/market';
 import { useTradeCalculations } from '@/hooks/trades/useTradeCalculations';
-
-interface SelectedAsset {
-  name: string;
-  symbol: string;
-  market_type: MarketType;
-}
-
-interface TradeMainContentProps {
-  assetCategory: MarketType;
-  onAssetCategoryChange: (category: MarketType) => void;
-  selectedAsset: SelectedAsset;
-  onAssetSelect: (symbol: string) => void;
-  orderType: 'market' | 'entry';
-  setOrderType: (type: 'market' | 'entry') => void;
-  units: string;
-  setUnits: (units: string) => void;
-  onExecuteTrade: (action: 'buy' | 'sell') => void;
-  isExecuting: boolean;
-  tradeAction: 'buy' | 'sell';
-  hasStopLoss: boolean;
-  setHasStopLoss: (has: boolean) => void;
-  hasTakeProfit: boolean;
-  setHasTakeProfit: (has: boolean) => void;
-  hasExpirationDate: boolean;
-  setHasExpirationDate: (has: boolean) => void;
-  orderRate: string;
-  setOrderRate: (rate: string) => void;
-  stopLossRate?: string;
-  setStopLossRate?: (rate: string) => void;
-  takeProfitRate?: string;
-  setTakeProfitRate?: (rate: string) => void;
-  setExpirationDate?: (date: string | undefined) => void;
-}
+import { ORDER_TYPES } from '@/types/schema';
+import type { TradeMainContentProps } from '@/types/trade';
+import { formatMarketTypeForDisplay, normalizeMarketType } from '@/utils/marketTypeUtils';
 
 // Numeric input validation function
 const validateNumericInput = (value: string): string => {
@@ -91,9 +61,21 @@ export function TradeMainContent({
   const currentPrice = currentAsset?.price || 0;
 
   // Filter assets based on selected category
-  const filteredAssets = marketData.filter((asset) => asset.market_type === assetCategory);
-  // Asset categories
-  const assetCategories: MarketType[] = ['Crypto', 'Stock', 'Forex', 'Index', 'Commodities'];
+  const filteredAssets = marketData.filter(
+    (asset) => normalizeMarketType(asset.market_type) === normalizeMarketType(assetCategory)
+  );
+  // Asset categories from the database schema
+  const assetCategories: MarketType[] = [
+    'crypto',
+    'stock',
+    'forex',
+    'index',
+    'commodity',
+    'etf',
+    'bond',
+    'futures',
+    'option',
+  ];
 
   // Calculate trade values
   const { leverage, positionValue, requiredFunds } = useTradeCalculations(
@@ -130,7 +112,7 @@ export function TradeMainContent({
           <SelectContent>
             {assetCategories.map((category) => (
               <SelectItem key={category} value={category}>
-                {category}
+                {formatMarketTypeForDisplay(category)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -180,27 +162,28 @@ export function TradeMainContent({
       <div className="space-y-2">
         <Label>Order Type</Label>
         <div className="flex space-x-2">
+          {' '}
           <Button
             type="button"
-            variant={orderType === 'market' ? 'default' : 'outline'}
+            variant={orderType === ORDER_TYPES.MARKET ? 'default' : 'outline'}
             className="flex-1"
-            onClick={() => setOrderType('market')}
+            onClick={() => setOrderType(ORDER_TYPES.MARKET)}
             disabled={isExecuting}
           >
             Market Order
           </Button>
           <Button
             type="button"
-            variant={orderType === 'entry' ? 'default' : 'outline'}
-            className={`flex-1 ${orderType === 'entry' ? 'bg-orange-500 hover:bg-orange-600' : ''}`}
-            onClick={() => setOrderType('entry')}
+            variant={orderType === ORDER_TYPES.LIMIT ? 'default' : 'outline'}
+            className="flex-1"
+            onClick={() => setOrderType(ORDER_TYPES.LIMIT)}
             disabled={isExecuting}
           >
-            Entry Order
+            Limit Order
           </Button>
         </div>
-        <p className="text-sm text-muted-foreground">
-          {orderType === 'market'
+        <p className="text-muted-foreground text-sm">
+          {orderType === ORDER_TYPES.MARKET
             ? 'Execute immediately at the current market price'
             : 'Set the price at which you want your order to be executed'}
         </p>
@@ -218,16 +201,16 @@ export function TradeMainContent({
           min="0.01"
           disabled={isExecuting}
         />
-        <div className="text-xs text-muted-foreground">
+        <div className="text-muted-foreground text-xs">
           <div>Position Value: ${positionValue.toFixed(2)}</div>
           <div>Required Margin: ${requiredFunds.toFixed(2)}</div>
         </div>
       </div>
 
-      {/* Entry Price (for entry orders) */}
-      {orderType === 'entry' && (
+      {/* Limit Price (for limit orders) */}
+      {orderType === ORDER_TYPES.LIMIT && (
         <div className="space-y-2">
-          <Label htmlFor="entry-price">Entry Price</Label>
+          <Label htmlFor="entry-price">Limit Price</Label>
           <Input
             id="entry-price"
             type="number"
@@ -238,7 +221,7 @@ export function TradeMainContent({
             min="0.01"
             disabled={isExecuting}
           />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             The price at which your order will be executed
           </p>
         </div>
@@ -256,7 +239,7 @@ export function TradeMainContent({
           />
         </div>
         {hasStopLoss && (
-          <div className="space-y-2 border-l-2 border-muted-foreground/20 pl-6">
+          <div className="border-muted-foreground/20 space-y-2 border-l-2 pl-6">
             <Label htmlFor="stop-loss-price">Stop Loss Price</Label>
             <Input
               id="stop-loss-price"
@@ -268,7 +251,7 @@ export function TradeMainContent({
               min="0.01"
               disabled={isExecuting}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Your position will be closed automatically if price reaches this level
             </p>
           </div>
@@ -287,7 +270,7 @@ export function TradeMainContent({
           />
         </div>
         {hasTakeProfit && (
-          <div className="space-y-2 border-l-2 border-muted-foreground/20 pl-6">
+          <div className="border-muted-foreground/20 space-y-2 border-l-2 pl-6">
             <Label htmlFor="take-profit-price">Take Profit Price</Label>
             <Input
               id="take-profit-price"
@@ -299,15 +282,15 @@ export function TradeMainContent({
               min="0.01"
               disabled={isExecuting}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Your position will be closed automatically when this price is reached
             </p>
           </div>
         )}
       </div>
 
-      {/* Expiration Date (for entry orders) */}
-      {orderType === 'entry' && (
+      {/* Expiration Date (for limit orders) */}
+      {orderType === ORDER_TYPES.LIMIT && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="expiration">Expiration Date</Label>
@@ -319,7 +302,7 @@ export function TradeMainContent({
             />
           </div>
           {hasExpirationDate && (
-            <div className="space-y-2 border-l-2 border-muted-foreground/20 pl-6">
+            <div className="border-muted-foreground/20 space-y-2 border-l-2 pl-6">
               <Popover>
                 <PopoverTrigger asChild>
                   {' '}
@@ -340,7 +323,7 @@ export function TradeMainContent({
                   />
                 </PopoverContent>
               </Popover>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Order will be cancelled if not executed by this date
               </p>
             </div>

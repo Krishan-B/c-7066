@@ -1,21 +1,25 @@
 import { supabase } from '@/integrations/supabase/client';
 
-import { type Asset } from '../types';
+import { normalizeMarketTypes } from '@/utils/marketTypeUtils';
+
+import { type Asset, type MarketType } from '../types';
 
 /**
  * Fetch market data from the market-data-service edge function
  */
 export async function fetchMarketDataService(
-  marketTypes: string[],
+  marketTypes: (MarketType | string)[],
   symbolMap?: Record<string, string[]>
 ): Promise<Asset[]> {
+  // Normalize all market types to ensure consistent format
+  const normalizedMarketTypes = normalizeMarketTypes(marketTypes as string[]);
   console.warn('Fetching data from Market Data Service');
 
   try {
     // If no specific symbols are provided, fetch all for each market type
     const allResults: Asset[] = [];
 
-    for (const marketType of marketTypes) {
+    for (const marketType of normalizedMarketTypes) {
       // Get symbols for this market type or use default
       const symbols = symbolMap?.[marketType] || getDefaultSymbols(marketType);
 
@@ -63,3 +67,8 @@ function getDefaultSymbols(marketType: string): string[] {
       return [];
   }
 }
+
+/**
+ * Alias for backward compatibility
+ */
+export const fetchMultipleMarketData = fetchMarketDataService;

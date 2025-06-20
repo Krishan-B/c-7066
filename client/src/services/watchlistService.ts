@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// Use Supabase instead of a separate API server
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 export const getWatchlist = async (): Promise<unknown> => {
   try {

@@ -8,6 +8,20 @@
       "isBackground": false,
       "label": "Basic Tests",
       "type": "shell"
+    },
+    {
+      "label": "Monitor Extension Host",
+      "type": "shell",
+      "command": "chmod +x ${workspaceFolder}/scripts/fix-extension-host.sh && ${workspaceFolder}/scripts/fix-extension-host.sh",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
     }
   ]
 }

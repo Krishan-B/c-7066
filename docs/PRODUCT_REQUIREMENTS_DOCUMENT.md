@@ -517,12 +517,20 @@ Document Types:
 
 - **Framework**: React.js 18+ with TypeScript
 - **State Management**: Redux Toolkit or Zustand
-- **UI Library**: shadcn/ui
+- **UI Library**: ✅ **shadcn/ui + Radix UI** (CONFIRMED - Implemented & Active)
 - **Charting**: TradingView Charting Library
 - **Real-time**: Socket.io client
 - **Build Tool**: Vite
 - **Testing**: Jest + React Testing Library
 - **Deployment**: Vercel
+
+**UI Framework Decision (Updated June 19, 2025):**
+
+- **Selected:** shadcn/ui with Radix UI primitives
+- **Status:** Fully implemented with 18+ components active
+- **Rationale:** TypeScript-native, modern architecture, superior customization
+- **Components Used:** Button, Card, Dialog, Alert, Tabs, Forms, Navigation, etc.
+- **Theme System:** Complete with CSS variables and dark/light mode support
 
 #### 4.2.2 Backend Requirements
 

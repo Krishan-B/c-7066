@@ -1,100 +1,183 @@
-<!--
-1. For new code in this modern React/TypeScript Vite project, use Vitest as the test runner. It is fast, works well with modern tooling, and has a similar syntax to Jest.
+# Supabase CLI
 
-2. All tests should be migrated to Vitest. Jest is no longer used in this project.
-3. Always focus on one specific, actionable task at a time. Use only the immediate context (the open file, function, or explicit user comment) to generate code or test suggestions. Ignore unrelated action plan steps or project-wide goals unless explicitly asked.
--->
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
-# Trading Pro - Simulated CFD Trading Platform
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
-[![CI](https://github.com/Krishan-B/c-7066/actions/workflows/ci.yml/badge.svg)](https://github.com/Krishan-B/c-7066/actions/workflows/ci.yml)
+This repository contains all the functionality for Supabase CLI.
 
-A multi-asset simulated CFD trading platform that allows users to practice trading
-across multiple asset classes without risking real money.
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
-## Project Structure
+## Getting started
 
-The project follows a clean, modular architecture:
+### Install the CLI
 
-```
-/
-├── client/           # Frontend application
-│   ├── public/         # Static assets
-│   └── src/            # Client source code
-│       ├── assets/       # Images, fonts, etc.
-│       ├── components/   # React components
-│       ├── hooks/        # Custom hooks
-│       ├── pages/        # Page components
-│       └── ...
-├── server/           # Backend application
-│   ├── db.ts           # Database connection
-│   ├── index.ts        # Server entry point
-│   ├── routes.ts       # API routes
-│   └── ...
-├── shared/           # Shared code between client and server
-│   └── schema.ts       # Database schema and types
-├── drizzle.config.ts # Drizzle ORM configuration
-├── tsconfig.json     # TypeScript configuration
-└── ...
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+
+```bash
+npm i supabase --save-dev
 ```
 
-## Features
+To install the beta release channel:
 
-### Core Trading Features
+```bash
+npm i supabase@beta --save-dev
+```
 
-- Simulated CFD trading across 5 asset classes:
-  - Cryptocurrency
-  - Stocks
-  - Forex
-  - Indices
-  - Commodities
-- Real-time market data integration
-- Advanced order types (Market and Pending/Entry)
-- Leverage-based trading with asset-specific leverage rules
-- Take profit and stop loss management
-- Position tracking and P&L calculation
-- Comprehensive account metrics
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
 
-### User Management
+```
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+```
 
-- User registration and authentication
-- Secure profile management
-- Paper trading accounts with initial balance
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
 
-### Portfolio Management
+<details>
+  <summary><b>macOS</b></summary>
 
-- Real-time portfolio tracking
-- Position management
-- Trade history and reporting
-- Performance analytics
+  Available via [Homebrew](https://brew.sh). To install:
 
-## Technical Implementation
+  ```sh
+  brew install supabase/tap/supabase
+  ```
 
-### Database Structure
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
 
-- User accounts and profiles
-- Trading positions and orders
-- Portfolio management
-- Market data
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
 
-### Trading Engine
+<details>
+  <summary><b>Windows</b></summary>
 
-- Order processing system
-- Position management
-- P&L calculation
-- Risk management
+  Available via [Scoop](https://scoop.sh). To install:
 
-## TypeScript-Only Standard
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
 
-This project enforces a strict TypeScript-only codebase. All source and test files must use `.ts` or `.tsx` extensions. JavaScript (`.js`, `.jsx`) files are not permitted in `src/` or `tests/` and will be ignored by the build and type checking process. See `tsconfig.json` for enforcement details.
+  To upgrade:
 
-- If you find any `.js`/`.jsx` files in the codebase, convert them to TypeScript or remove them.
-- All new code and tests must be written in TypeScript.
+  ```powershell
+  scoop update supabase
+  ```
+</details>
 
-## June 2025 Maintenance & Cleanup
+<details>
+  <summary><b>Linux</b></summary>
 
-- Standardized the codebase to TypeScript-only. All `.js`/`.jsx` files are now excluded from source and tests.
-- Cleaned up duplicate Tailwind config files. Only `tailwind.config.ts` is used.
-- Ran `pnpm prune` and `pnpm update` to remove unused dependencies and update all packages.
-- Reviewed all scripts in `package.json` and confirmed all are currently relevant to Supabase, development, or tooling. No unused scripts were removed at this time.
-- Restructured the project to a cleaner client/server/shared architecture
+  Available via [Homebrew](https://brew.sh) and Linux packages.
+
+  #### via Homebrew
+
+  To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+
+  #### via Linux packages
+
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
+
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
+
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
+
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
+
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
+
+<details>
+  <summary><b>Other Platforms</b></summary>
+
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
+
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
+
+  Add a symlink to the binary in `$PATH` for easier access:
+
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
+
+  This works on other non-standard Linux distros.
+</details>
+
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
+
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
+
+  ```bash
+  pkgx install supabase
+  ```
+
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
+
+### Run the CLI
+
+```bash
+supabase bootstrap
+```
+
+Or using npx:
+
+```bash
+npx supabase bootstrap
+```
+
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+
+## Docs
+
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+
+## Breaking changes
+
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+
+## Developing
+
+To run from source:
+
+```sh
+# Go >= 1.22
+go run . help
+```

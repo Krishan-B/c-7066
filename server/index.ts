@@ -4,16 +4,29 @@ import express from 'express';
 
 import { env } from './config';
 import { setupRoutes } from './routes';
+// Import monitoring routes
+import monitorRoutes from './routes/monitor';
 
 // Initialize express app
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === 'production' ? process.env.CORS_ORIGIN : 'http://localhost:8080',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Set up API routes
 setupRoutes(app);
+
+// Add monitoring routes
+app.use('/api/monitor', monitorRoutes);
 
 // Serve static files in production
 if (env.NODE_ENV === 'production') {

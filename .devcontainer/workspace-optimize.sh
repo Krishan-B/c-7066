@@ -55,12 +55,23 @@ rm -rf playwright-report 2>/dev/null || true
 
 # === NPM OPTIMIZATION ===
 echo "📦 Optimizing npm configuration..."
-npm config set cache /workspaces/c-7066/.npm
+# Set optimal npm performance configs
+npm config set cache-min 3600
 npm config set prefer-offline true
 npm config set audit false
 npm config set fund false
 npm config set update-notifier false
-npm config set bin-links false
+npm config set fetch-retries 3
+npm config set fetch-retry-factor 2
+npm config set fetch-retry-mintimeout 10000
+npm config set fetch-retry-maxtimeout 60000
+
+# Clean and verify npm installation
+npm cache verify
+npm cache clean --force
+
+# Install dependencies with optimized settings
+npm ci --prefer-offline --no-audit --no-fund
 
 # === GIT OPTIMIZATION ===
 echo "🔧 Optimizing git configuration..."

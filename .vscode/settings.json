@@ -4,6 +4,32 @@
   // =============================================================================
 
   // ================================
+  // Extension Host Stability Settings
+  // ================================
+  "extensions.autoUpdate": false,
+  "extensions.ignoreRecommendations": true,
+  "extensions.autoCheckUpdates": false,
+  "extensions.closeExtensionHostProcess": false,
+  "workbench.enableExperiments": false,
+  "telemetry.telemetryLevel": "off",
+
+  // ================================
+  // Memory & Performance Optimization
+  // ================================
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "coverage/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "coverage": true
+  },
+
+  // ================================
   // ESLint Configuration (Performance Optimized)
   // ================================
   "eslint.enable": true,
@@ -27,36 +53,17 @@
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "typescript.suggest.autoImports": true,
   "typescript.updateImportsOnFileMove.enabled": "prompt",
-  "typescript.disableAutomaticTypeAcquisition": false,
-  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
   "typescript.workspaceSymbols.scope": "currentProject",
-  "typescript.suggest.includeCompletionsForImportStatements": true,
-  "typescript.suggest.includeCompletionsForModuleExports": true,
-  "typescript.surveys.enabled": false,
-  "typescript.tsc.autoDetect": "on",
-  "typescript.preferences.reactjsxruntime": "react-jsx",
-  "typescript.format.enable": false,
-  "typescript.validate.enable": true,
-  "typescript.suggestionActions.enabled": false,
-  "typescript.experimental.tsserver.web.typeAcquisition.enabled": false,
-  "typescript.experimental.tsserver.web.projectWideIntellisense.enabled": false,
-  "typescript.experimental.tsserver.web.projectWideIntellisense.suppressSemanticErrors": true,
-  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
-  "typescript.tsserver.maxTsServerMemory": 2048,
-  "typescript.tsserver.useSyntaxServer": "never",
-  "typescript.tsserver.maxTsServerProcesses": 1,
+  "typescript.tsserver.maxTsServerMemory": 3072,
+  "typescript.tsserver.useSyntaxServer": "auto",
+  "typescript.tsserver.maxTsServerProcesses": 2,
   "typescript.tsserver.watchOptions": {
-    "watchFile": "useFsEventsOnParentDirectory",
+    "watchFile": "useFsEvents",
     "watchDirectory": "useFsEvents",
     "fallbackPolling": "dynamicPriorityPolling"
   },
-
-  // JavaScript Performance Optimizations
-  "javascript.preferences.importModuleSpecifier": "non-relative",
-  "javascript.suggest.autoImports": false,
-  "javascript.updateImportsOnFileMove.enabled": "never",
-  "javascript.suggest.includeCompletionsForImportStatements": false,
-  "javascript.suggest.includeCompletionsForModuleExports": false,
 
   // Editor Performance Optimizations
   "editor.codeActionsOnSave": {
@@ -76,400 +83,29 @@
   "editor.suggest.showFunctions": true,
   "editor.suggest.showVariables": true,
   "editor.tabCompletion": "on",
-  "editor.quickSuggestions": {
-    "other": "on",
-    "comments": "off",
-    "strings": "on"
-  },
-  "editor.suggestSelection": "first",
-  "editor.acceptSuggestionOnCommitCharacter": true,
-  "editor.acceptSuggestionOnEnter": "on",
-  "editor.suggest.filterGraceful": false,
-  "editor.suggest.shareSuggestSelections": false,
-  "editor.wordBasedSuggestions": "off",
+
+  // Package Manager Settings
+  "npm.packageManager": "npm",
+  "npm.lockfile.version": 2,
+  "npm.runInTerminal": true,
+  "npm.autoDetect": "off",
+
+  // Workbench Performance Settings
+  "workbench.editor.closeOnFileDelete": true,
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.highlightModifiedTabs": false,
+  "workbench.editor.limit.enabled": true,
+  "workbench.editor.limit.value": 10,
 
   // File System Performance Optimizations
   "files.exclude": {
     "**/node_modules": true,
     "**/dist": true,
-    "**/build": true,
+    "coverage": true,
     "**/.git": true,
-    "**/coverage": true,
-    "**/.eslintcache": true,
-    "**/tsconfig*.tsbuildinfo": true,
-    "**/*.log": true,
-    "**/.cache": true
-  },
-  "search.exclude": {
-    "**/node_modules": true,
-    "**/node_modules/*/**": true,
-    "**/.pnpm/**": true,
-    "**/dist": true,
-    "**/build": true,
-    "**/coverage": true,
-    "**/.git": true,
-    "**/.eslintcache": true,
-    "**/tsconfig*.tsbuildinfo": true,
-    "**/.next/**": true,
-    "**/test-results/**": true,
-    "**/.turbo/**": true,
-    "**/.vite/**": true,
-    "**/playwright-report/**": true,
-    "**/*.min.*": true,
-    "**/vendor/**": true
-  },
-  "files.watcherExclude": {
-    "**/.git/objects/**": true,
-    "**/.git/subtree-cache/**": true,
-    "**/node_modules/**": true,
-    "**/node_modules/*/**": true,
-    "**/.pnpm/**": true,
-    "**/dist/**": true,
-    "**/build/**": true,
-    "**/coverage/**": true,
-    "**/.next/**": true,
-    "**/test-results/**": true,
-    "**/tmp/**": true,
-    "**/.cache/**": true,
-    "**/.turbo/**": true,
-    "**/.vite/**": true,
-    "**/playwright-report/**": true,
-    "**/*.min.js": true,
-    "**/*.min.css": true,
-    "**/vendor/**": true
-  },
-  "files.autoSave": "off",
-  "files.autoSaveDelay": 1000,
-  "files.maxMemoryForLargeFilesMB": 4096,
-
-  // Search and Performance Settings
-  "search.maxResults": 2000,
-  "search.smartCase": true,
-  "search.useGlobalIgnoreFiles": true,
-  "search.useParentIgnoreFiles": true,
-
-  // ================================
-  // PRETTIER CODE FORMATTER Configuration
-  // ================================
-  "prettier.enable": true,
-  "prettier.requireConfig": true,
-  "prettier.useEditorConfig": true,
-  "prettier.resolveGlobalModules": false,
-  "prettier.withNodeModules": false,
-  "prettier.documentSelectors": ["**/*.{js,jsx,ts,tsx,json,md,yml,yaml}"],
-
-  // ================================
-  // TAILWIND CSS INTELLISENSE Configuration
-  // ================================
-  "tailwindCSS.includeLanguages": {
-    "typescript": "html",
-    "typescriptreact": "html",
-    "javascript": "html",
-    "javascriptreact": "html"
-  },
-  "tailwindCSS.experimental.configFile": "tailwind.config.js",
-  "tailwindCSS.experimental.classRegex": [
-    "tw`([^`]*)",
-    "tw=\"([^\"]*)",
-    "tw={\"([^\"}]*)",
-    "tw\\.\\w+`([^`]*)",
-    "tw\\(.*?\\)`([^`]*)",
-    ["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
-    ["classnames\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"],
-    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
-    ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
-  ],
-  "tailwindCSS.validate": true,
-  "tailwindCSS.colorDecorators": true,
-  "tailwindCSS.suggestions": true,
-  "tailwindCSS.hovers": true,
-  "tailwindCSS.codeActions": true,
-  "tailwindCSS.rootFontSize": 16,
-  "tailwindCSS.lint.cssConflict": "warning",
-  "tailwindCSS.lint.invalidApply": "error",
-  "tailwindCSS.lint.invalidConfigPath": "error",
-  "tailwindCSS.lint.invalidScreen": "error",
-  "tailwindCSS.lint.invalidTailwindDirective": "error",
-  "tailwindCSS.lint.invalidVariant": "error",
-  "tailwindCSS.lint.recommendedVariantOrder": "warning",
-
-  // ================================
-  // VITEST Configuration
-  // ================================
-  "vitest.enable": false,
-  "vitest.commandLine": "npx vitest",
-  "vitest.include": ["**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
-  "vitest.exclude": ["**/node_modules/**", "**/dist/**", "**/cypress/**", "**/.{idea,git,cache,output,temp}/**"],
-  "vitest.workspaceConfig": "./vitest.config.ts",
-  "vitest.debuggerPort": "9229",
-  "vitest.debuggerAutoAttach": "smart",
-
-  // ================================
-  // PLAYWRIGHT TEST Configuration
-  // ================================
-  "playwright.reuseBrowser": false,
-  "playwright.runInBand": false,
-  "playwright.connectWsEndpoint": "",
-  "playwright.env": {},
-  "playwright.showTrace": false,
-
-  // ================================
-  // ERROR LENS Configuration
-  // ================================
-  "errorLens.enabled": true,
-  "errorLens.enabledDiagnosticLevels": ["error", "warning"],
-  "errorLens.delay": 500,
-  "errorLens.onSave": true,
-  "errorLens.followCursor": "closestProblem",
-  "errorLens.gutterIconsEnabled": true,
-  "errorLens.statusBarIconsEnabled": true,
-  "errorLens.errorColor": "rgba(240, 71, 71, 0.3)",
-  "errorLens.warningColor": "rgba(255, 193, 7, 0.3)",
-  "errorLens.infoColor": "rgba(54, 162, 235, 0.3)",
-  "errorLens.hintColor": "rgba(153, 153, 153, 0.3)",
-
-  // ================================
-  // POSTGRESQL Configuration
-  // ================================
-  "postgresql.format.enable": true,
-  "postgresql.format.uppercase": false,
-  "postgresql.format.keywordCase": "lower",
-  "postgresql.connections": [],
-  "postgresql.maxItemsInExplorer": 100,
-
-  // ================================
-  // MARKDOWN ALL IN ONE Configuration
-  // ================================
-  "markdown.math.enabled": true,
-  "markdown.extension.toc.levels": "1..6",
-  "markdown.extension.toc.orderedList": false,
-  "markdown.extension.toc.plaintext": false,
-  "markdown.extension.toc.updateOnSave": true,
-  "markdown.extension.preview.autoShowPreviewToSide": false,
-  "markdown.extension.orderedList.autoRenumber": true,
-  "markdown.extension.orderedList.marker": "ordered",
-  "markdown.extension.italic.indicator": "*",
-  "markdown.extension.bold.indicator": "**",
-  "markdown.extension.completion.respectVscodeSearchExclude": true,
-
-  // ================================
-  // MARKDOWNLINT Configuration
-  // ================================
-  "markdownlint.config": {
-    "MD013": false,
-    "MD033": false,
-    "MD041": false
-  },
-  "markdownlint.focusMode": false,
-  "markdownlint.run": "onSave",
-
-  // ================================
-  // BETTER COMMENTS Configuration
-  // ================================
-  "better-comments.multilineComments": true,
-  "better-comments.highlightPlainText": false,
-  "better-comments.tags": [
-    {
-      "tag": "!",
-      "color": "#FF2D00",
-      "strikethrough": false,
-      "underline": false,
-      "backgroundColor": "transparent",
-      "bold": false,
-      "italic": false
-    },
-    {
-      "tag": "?",
-      "color": "#3498DB",
-      "strikethrough": false,
-      "underline": false,
-      "backgroundColor": "transparent",
-      "bold": false,
-      "italic": false
-    },
-    {
-      "tag": "//",
-      "color": "#474747",
-      "strikethrough": true,
-      "underline": false,
-      "backgroundColor": "transparent",
-      "bold": false,
-      "italic": false
-    },
-    {
-      "tag": "todo",
-      "color": "#FF8C00",
-      "strikethrough": false,
-      "underline": false,
-      "backgroundColor": "transparent",
-      "bold": false,
-      "italic": false
-    },
-    {
-      "tag": "*",
-      "color": "#98C379",
-      "strikethrough": false,
-      "underline": false,
-      "backgroundColor": "transparent",
-      "bold": false,
-      "italic": false
-    }
-  ],
-
-  // ================================
-  // CODE SPELL CHECKER Configuration
-  // ================================
-  "cSpell.enabled": true,
-  "cSpell.enabledFileTypes": {
-    "typescript": true,
-    "typescriptreact": true,
-    "javascript": true,
-    "javascriptreact": true,
-    "markdown": true,
-    "json": true,
-    "jsonc": true
-  },
-  "cSpell.language": "en",
-  "cSpell.words": [
-    "tradepro",
-    "supabase",
-    "tailwindcss",
-    "vite",
-    "vitest",
-    "playwright",
-    "eslint",
-    "prettier",
-    "radix",
-    "lucide",
-    "framer",
-    "tanstack",
-    "hookform",
-    "copilot",
-    "zustand",
-    "clsx",
-    "cva"
-  ],
-  "cSpell.ignorePaths": ["node_modules", ".vscode", ".git", "dist", "build", "coverage", "*.min.*"],
-
-  // ================================
-  // DATABASE CLIENT TOOLS FIX
-  // ================================
-  "sqltools.useNodeRuntime": true,
-  "sqltools.disableReleaseNotifications": true,
-  "sqltools.connections": [],
-  "sqltools.showStatusbar": false,
-
-  // ================================
-  // WORKSPACE TRUST & SECURITY
-  // ================================
-  "security.workspace.trust.enabled": true,
-  "security.workspace.trust.startupPrompt": "never",
-  "security.workspace.trust.banner": "never",
-  "security.workspace.trust.emptyWindow": false,
-  "security.workspace.trust.untrustedFiles": "open",
-
-  // ================================
-  // RENDERER ERROR FIXES
-  // ================================
-  "window.titleBarStyle": "custom",
-  "window.enableMenuBarMnemonics": false,
-  "window.customMenuBarAltFocus": false,
-
-  // Process Management
-  "extensions.experimental.useUtilityProcess": true,
-  "typescript.tsserver.useSeparateSyntaxServer": false,
-
-  // Memory Management
-  "editor.bracketPairColorization.enabled": false,
-  "editor.guides.bracketPairs": false,
-  "editor.semanticTokenColorCustomizations": {},
-
-  // Performance Optimization
-  "workbench.settings.enableNaturalLanguageSearch": false,
-  "workbench.enableExperiments": false,
-  "workbench.commandPalette.experimental.suggestCommands": false,
-
-  // Error Recovery
-  "extensions.autoCheckUpdates": false,
-  "extensions.autoUpdate": false,
-  "update.enableWindowsBackgroundUpdates": false,
-  "update.mode": "none",
-
-  // GitHub Copilot Chat Fixes (Database Tool Validation Errors)
-  "github.copilot.chat.experimental.codeGeneration": false,
-  "github.copilot.chat.experimental.databaseSupport": false,
-  "github.copilot.chat.experimental.contextFiltering": "strict",
-  "github.copilot.chat.experimental.toolSupport": false,
-  "github.copilot.chat.experimental.databaseIntegration": false,
-  "github.copilot.advanced.debug.useElectronFetch": false,
-  "github.copilot.advanced.debug.overrideProxyUrl": "",
-  "github.copilot.advanced.length": 1000,
-  "github.copilot.advanced.listCount": 3,
-
-  // ================================
-  // PORT FORWARDING OPTIMIZATION
-  // ================================
-  "remote.autoForwardPorts": false,
-  "remote.autoForwardPortsSource": "process",
-  "remote.forwardOnOpen": false,
-  "remote.restoreForwardedPorts": true,
-  "remote.localPortHost": "localhost",
-  "remote.otherPortsAttributes": {
-    "onAutoForward": "ignore"
-  },
-  "remote.portsAttributes": {
-    "3000": {
-      "label": "React Dev Server",
-      "onAutoForward": "notify"
-    },
-    "5173": {
-      "label": "Vite Dev Server",
-      "onAutoForward": "notify"
-    },
-    "8080": {
-      "label": "Trade-Pro Main Server",
-      "onAutoForward": "openBrowser"
-    },
-    "4173": {
-      "label": "Vite Preview",
-      "onAutoForward": "notify"
-    },
-    "9229": {
-      "label": "Node Debug Port",
-      "onAutoForward": "ignore"
-    },
-    "54321": {
-      "label": "Supabase Local API",
-      "onAutoForward": "ignore"
-    },
-    "54322": {
-      "label": "Supabase DB",
-      "onAutoForward": "ignore"
-    },
-    "54323": {
-      "label": "Supabase Studio",
-      "onAutoForward": "notify"
-    },
-    "54324": {
-      "label": "Supabase Inbucket",
-      "onAutoForward": "ignore"
-    },
-    "54325": {
-      "label": "Supabase Edge Functions",
-      "onAutoForward": "ignore"
-    },
-    "54326": {
-      "label": "Supabase Realtime",
-      "onAutoForward": "ignore"
-    }
-  },
-
-  // File System Performance
-  "files.hotExit": "onExitAndWindowClose",
-
-  // ================================
-  // EXTENSION SYNCING CONFIGURATION
-  // ================================
-  "settingsSync.ignoredExtensions": [],
-  "settingsSync.ignoredSettings": []
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true
+  }
 }

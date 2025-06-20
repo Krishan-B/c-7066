@@ -7,6 +7,8 @@ import type { MarketType } from '@/hooks/market';
 import { useAccountMetrics } from '@/hooks/portfolio/useAccountMetrics';
 import { useTradeExecution } from '@/hooks/trades/useTradeExecution';
 import { useToast } from '@/hooks/use-toast';
+import { ORDER_TYPES, type DirectionEnum, type OrderTypeEnum } from '@/types/schema';
+import { formatMarketTypeForDisplay, normalizeMarketType } from '@/utils/marketTypeUtils';
 
 // Import refactored components
 import { TradeMainContent } from './TradeMainContent';
@@ -27,15 +29,15 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   const { toast } = useToast();
 
   // State variables
-  const [assetCategory, setAssetCategory] = useState<MarketType>('Crypto');
+  const [assetCategory, setAssetCategory] = useState<MarketType>('crypto');
   const [selectedAsset, setSelectedAsset] = useState<SelectedAsset>({
     name: 'Bitcoin',
     symbol: 'BTCUSD',
-    market_type: 'Crypto',
+    market_type: 'crypto',
   });
-  const [orderType, setOrderType] = useState<'market' | 'entry'>('market');
+  const [orderType, setOrderType] = useState<OrderTypeEnum>(ORDER_TYPES.MARKET);
   const [units, setUnits] = useState('0.01');
-  const [tradeAction, setTradeAction] = useState<'buy' | 'sell'>('buy');
+  const [tradeAction, setTradeAction] = useState<DirectionEnum>('buy');
   const [hasStopLoss, setHasStopLoss] = useState(false);
   const [hasTakeProfit, setHasTakeProfit] = useState(false);
   const [hasExpirationDate, setHasExpirationDate] = useState(false);
@@ -58,13 +60,13 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
   const currentAssetPrice =
     marketData.find((asset) => asset.symbol === selectedAsset.symbol)?.price || 0;
 
-  // Market type specific defaults
-  const defaultAssets: Record<MarketType, SelectedAsset> = {
-    Crypto: { name: 'Bitcoin', symbol: 'BTCUSD', market_type: 'Crypto' },
-    Stock: { name: 'Apple Inc.', symbol: 'AAPL', market_type: 'Stock' },
-    Forex: { name: 'EUR/USD', symbol: 'EURUSD', market_type: 'Forex' },
-    Index: { name: 'S&P 500', symbol: 'SPX', market_type: 'Index' },
-    Commodities: { name: 'Gold', symbol: 'XAUUSD', market_type: 'Commodities' },
+  // Market type specific defaults with normalized types
+  const defaultAssets: Partial<Record<MarketType, SelectedAsset>> = {
+    crypto: { name: 'Bitcoin', symbol: 'BTCUSD', market_type: 'crypto' },
+    stock: { name: 'Apple Inc.', symbol: 'AAPL', market_type: 'stock' },
+    forex: { name: 'EUR/USD', symbol: 'EURUSD', market_type: 'forex' },
+    index: { name: 'S&P 500', symbol: 'SPX', market_type: 'index' },
+    commodity: { name: 'Gold', symbol: 'XAUUSD', market_type: 'commodity' },
   };
 
   const handleAssetCategoryChange = (category: MarketType) => {
@@ -126,9 +128,9 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
       return;
     }
 
-    // Calculate entry price for entry orders
+    // Calculate entry price for limit orders
     let entryPrice;
-    if (orderType === 'entry') {
+    if (orderType === ORDER_TYPES.LIMIT) {
       entryPrice = parseFloat(orderRate);
       if (!entryPrice || entryPrice <= 0) {
         toast({
@@ -189,7 +191,7 @@ export function TradeSlidePanel({ open, onOpenChange }: TradeSlidePanelProps) {
       <SheetContent side="left" className="w-full border-r sm:max-w-md">
         <SheetHeader className="mb-6">
           <SheetTitle className="text-xl">New Trade</SheetTitle>
-          <SheetClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+          <SheetClose className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none">
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </SheetClose>

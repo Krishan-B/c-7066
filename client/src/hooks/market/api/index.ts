@@ -1,7 +1,9 @@
-// Export the data source enum and API key management functions
-export { DataSource, setApiKey } from './apiKeyManager';
+// SECURITY FIX: Removed client-side API key management exports
+export { DataSource, getAvailableDataSources, determineDataSource } from './apiKeyManager';
 
-// Export data fetching handlers
-export { fetchFinnhubData } from './finnhubHandler';
-export { fetchAlphaVantageData } from './alphaVantageHandler';
+// Export secure data fetching handlers (Edge Functions only)
 export { fetchEdgeFunctionData } from './edgeFunctionHandler';
+export { fetchMarketDataService as fetchMultipleMarketData } from './marketDataServiceHandler';
+
+// DEPRECATED: Direct API handlers removed for security
+// All data now flows through secure Supabase Edge Functions

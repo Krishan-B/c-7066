@@ -199,15 +199,15 @@ This document outlines the finalized tech stack, dependencies, performance rules
 
 ### Security Rules
 
-1. **Audit**: Run `pnpm audit` regularly
-2. **Updates**: Check `pnpm outdated` weekly
-3. **Lockfile**: Always commit `pnpm-lock.yaml`
+1. **Audit**: Run `npm audit` regularly
+2. **Updates**: Check `npm outdated` weekly
+3. **Lockfile**: Always commit `package-lock.json`
 4. **Node Version**: Minimum Node 18.0.0
 
 ### Package Manager
 
-- **Primary**: PNPM 9.0+ for performance
-- **Fallback**: NPM 8.0+ if needed
+- **Primary**: NPM 10.0+ for consistency
+- **Lock File**: package-lock.json required
 - **Workspace**: Single workspace setup
 
 ## Build Optimization

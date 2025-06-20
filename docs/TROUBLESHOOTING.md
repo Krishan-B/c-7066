@@ -19,17 +19,17 @@ Both `client/tsconfig.json` and `server/tsconfig.json` had circular references:
 Now you should be able to run the development setup with:
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 Or run client and server separately:
 
 ```bash
 # In one terminal:
-pnpm dev:client
+npm run dev:client
 
 # In another terminal:
-pnpm dev:server
+npm run dev:server
 ```
 
 ## Port Usage

@@ -10,6 +10,6 @@ module.exports = {
   'server/**/*.{js,jsx,ts,tsx}': ['eslint --fix --max-warnings=0 --no-warn-ignored'],
   // Format markdown and JSON files
   '*.{md,json}': ['prettier --write'],
-  // Type check TypeScript files (using pnpm to avoid npm warnings)
-  'src/**/*.{ts,tsx}': () => 'pnpm exec tsc --noEmit',
+  // Type check TypeScript files
+  'src/**/*.{ts,tsx}': () => 'npx tsc --noEmit',
 };

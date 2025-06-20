@@ -1,8 +1,5 @@
-
 /**
  * CORS headers for cross-origin requests
+ * UPDATED: Now importing from shared security module
  */
-export const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+export { securityHeaders as corsHeaders } from '../../_shared/security.ts';

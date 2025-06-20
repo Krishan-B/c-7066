@@ -11,7 +11,7 @@ The Trade-Pro workspace has been successfully rebuilt with an optimized tech sta
 - **React 18.3.1** - Modern UI library with concurrent features
 - **TypeScript 5.8.3** - Type safety and development experience
 - **Vite 6.3.5** - Fast build tool with SWC transpilation
-- **PNPM 9.0+** - Efficient package management
+- **npm 10.0+** - Efficient package management
 
 ### UI & Styling
 
@@ -112,7 +112,7 @@ npm run deps:update     # Update dependencies
 - **Strict TypeScript** configuration
 - **ESLint** rules for React/TypeScript
 - **Husky** git hooks for quality gates
-- **PNPM** for secure dependency management
+- **npm** for secure dependency management
 
 ## Configuration Files Status
 
