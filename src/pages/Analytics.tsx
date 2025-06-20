@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import LeverageAnalytics from '@/components/analytics/LeverageAnalytics';
-import MarginOptimizer from '@/components/analytics/MarginOptimizer';
+import RiskMetrics from '@/components/analytics/RiskMetrics';
+import PerformanceAnalytics from '@/components/analytics/PerformanceAnalytics';
+import ReportingDashboard from '@/components/analytics/ReportingDashboard';
 
 const Analytics = () => {
   return (
@@ -10,22 +11,27 @@ const Analytics = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Enhanced Analytics</h1>
         <p className="text-muted-foreground mt-2">
-          Advanced analytics for asset-specific leverage ratios and margin optimization
+          Risk metrics, performance analytics, and comprehensive reporting
         </p>
       </div>
       
-      <Tabs defaultValue="leverage" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="leverage">Leverage Analytics</TabsTrigger>
-          <TabsTrigger value="optimizer">Margin Optimizer</TabsTrigger>
+      <Tabs defaultValue="risk" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="risk">Risk Metrics</TabsTrigger>
+          <TabsTrigger value="performance">Performance Analytics</TabsTrigger>
+          <TabsTrigger value="reporting">Reporting</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="leverage" className="space-y-6">
-          <LeverageAnalytics />
+        <TabsContent value="risk" className="space-y-6">
+          <RiskMetrics />
         </TabsContent>
         
-        <TabsContent value="optimizer" className="space-y-6">
-          <MarginOptimizer />
+        <TabsContent value="performance" className="space-y-6">
+          <PerformanceAnalytics />
+        </TabsContent>
+        
+        <TabsContent value="reporting" className="space-y-6">
+          <ReportingDashboard />
         </TabsContent>
       </Tabs>
     </div>
