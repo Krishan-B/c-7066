@@ -1,11 +1,14 @@
 
-import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { useState, useEffect, ReactNode } from "react";
 import { Navigation } from "./Navigation";
 import Sidebar from "./Sidebar";
 import { motion } from "framer-motion";
 
-const Layout = () => {
+interface LayoutProps {
+  children: ReactNode;
+}
+
+const Layout = ({ children }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   
@@ -39,7 +42,7 @@ const Layout = () => {
           className={`flex-1 px-4 py-6 transition-all duration-300 ease-in-out ${isSidebarOpen && !isMobile ? 'md:ml-64' : 'ml-0'}`}
         >
           <div className="max-w-7xl mx-auto">
-            <Outlet />
+            {children}
           </div>
         </motion.main>
       </div>
