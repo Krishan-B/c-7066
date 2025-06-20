@@ -43,56 +43,56 @@ function App() {
                       </Layout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/markets" element={
+                  <Route path="/dashboard/markets" element={
                     <ProtectedRoute>
                       <Layout>
                         <Markets />
                       </Layout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/portfolio" element={
+                  <Route path="/dashboard/portfolio" element={
                     <ProtectedRoute>
                       <Layout>
                         <Portfolio />
                       </Layout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/orders" element={
+                  <Route path="/dashboard/orders" element={
                     <ProtectedRoute>
                       <Layout>
                         <Orders />
                       </Layout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/wallet" element={
+                  <Route path="/dashboard/wallet" element={
                     <ProtectedRoute>
                       <Layout>
                         <Wallet />
                       </Layout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/news" element={
+                  <Route path="/dashboard/news" element={
                     <ProtectedRoute>
                       <Layout>
                         <News />
                       </Layout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/profile" element={
+                  <Route path="/dashboard/profile" element={
                     <ProtectedRoute>
                       <Layout>
                         <ProfilePage />
                       </Layout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/account" element={
+                  <Route path="/dashboard/account" element={
                     <ProtectedRoute>
                       <Layout>
                         <Account />
                       </Layout>
                     </ProtectedRoute>
                   } />
-                  <Route path="/kyc" element={
+                  <Route path="/dashboard/kyc" element={
                     <ProtectedRoute>
                       <Layout>
                         <KYC />
