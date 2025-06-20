@@ -122,7 +122,7 @@ const TradeForm = ({
 
     // Clear errors if validation is successful
     setFormErrors(null);
-    onSubmit(units, orderType, [leverage]);
+    onSubmit(units, orderType, leverage);
   };
 
   // Add a useEffect for real-time validation
