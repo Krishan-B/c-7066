@@ -1,0 +1,26 @@
+# Prettier ignore file
+node_modules/
+dist/
+build/
+coverage/
+.next/
+.nuxt/
+.vercel/
+.netlify/
+
+# Logs
+*.log
+
+# Dependencies
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
+# Generated files
+*.d.ts
+.env*
+
+# Supabase
+supabase/.temp/
+supabase/functions/_shared/
