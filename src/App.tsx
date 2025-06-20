@@ -30,7 +30,7 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
-          <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+          <ThemeProvider>
             <TooltipProvider>
               <AuthProvider>
                 <Routes>
