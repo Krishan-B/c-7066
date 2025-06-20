@@ -56,7 +56,7 @@ const TradeForm = ({
   const [takeProfitRate, setTakeProfitRate] = useState("");
   const [entryOrderRate, setEntryOrderRate] = useState("");
 
-  const [formErrors, setFormErrors] = useState<z.ZodErrorMessages | null>(null);
+  const [formErrors, setFormErrors] = useState<z.ZodFormattedError | null>(null);
 
   // Initial price setting based on currentPrice
   useEffect(() => {
