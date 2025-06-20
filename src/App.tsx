@@ -22,7 +22,6 @@ import ProfilePage from "./pages/ProfilePage";
 import Account from "./pages/Account";
 import KYC from "./pages/KYC";
 import Analytics from "./pages/Analytics";
-import Leverage from "./pages/Leverage";
 
 function App() {
   return (
@@ -61,7 +60,7 @@ function App() {
                   <Route path="/dashboard/orders" element={
                     <ProtectedRoute>
                       <Layout>
-                        <Orders />
+                        <Portfolio />
                       </Layout>
                     </ProtectedRoute>
                   } />
@@ -90,13 +89,6 @@ function App() {
                     <ProtectedRoute>
                       <Layout>
                         <Analytics />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/leverage" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Leverage />
                       </Layout>
                     </ProtectedRoute>
                   } />

@@ -41,27 +41,6 @@ const Index = () => {
       {/* KYC Banner */}
       <KYCBanner />
       
-      {/* Action Buttons */}
-      <div className="flex flex-wrap gap-3 md:gap-4 mb-6">
-        <Button 
-          size="lg" 
-          onClick={() => navigate("/dashboard/markets")}
-          className="whitespace-nowrap bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-all duration-300"
-        >
-          Trade Now
-          <ChevronRight className="ml-2 h-4 w-4" />
-        </Button>
-        <Button 
-          variant="outline" 
-          size="lg" 
-          onClick={() => navigate("/dashboard/wallet")}
-          className="hover:border-primary hover:text-primary transition-all duration-300"
-        >
-          Deposit
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-      
       {/* Portfolio Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
