@@ -14,6 +14,7 @@ import Index from "./pages/Index";
 import Markets from "./pages/Markets";
 import Portfolio from "./pages/Portfolio";
 import Orders from "./pages/Orders";
+import EnhancedOrders from "./pages/EnhancedOrders";
 import Wallet from "./pages/Wallet";
 import News from "./pages/News";
 import Auth from "./pages/Auth";
