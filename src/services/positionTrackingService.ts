@@ -1,41 +1,18 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
 
-export interface Position {
-  id: string;
-  user_id: string;
-  symbol: string;
-  asset_class: string;
-  direction: 'buy' | 'sell';
-  units: number;
-  entry_price: number;
-  current_price: number;
-  position_value: number;
-  margin_used: number;
-  unrealized_pnl: number;
-  daily_pnl: number;
-  session_pnl: number;
-  total_fees: number;
-  swap_charges: number;
-  pip_value: number;
-  pip_difference: number;
-  stop_loss: number | null;
-  take_profit: number | null;
-  status: string;
-  opened_at: string;
-  last_updated: string;
+// Use the database types directly to ensure compatibility
+type DatabasePosition = Database['public']['Tables']['positions']['Row'];
+type DatabasePositionUpdate = Database['public']['Tables']['position_updates']['Row'];
+
+export interface Position extends DatabasePosition {
+  // All properties are inherited from DatabasePosition which matches Supabase exactly
 }
 
-export interface PositionUpdate {
-  id: string;
-  position_id: string;
-  user_id: string;
-  price_update: number;
-  pnl_change: number;
-  unrealized_pnl: number;
-  timestamp: string;
-  market_session: string;
+export interface PositionUpdate extends DatabasePositionUpdate {
+  // All properties are inherited from DatabasePositionUpdate which matches Supabase exactly
 }
 
 export const positionTrackingService = {
@@ -48,7 +25,7 @@ export const positionTrackingService = {
       .order('opened_at', { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as Position[];
   },
 
   async updatePositionPrice(positionId: string, newPrice: number): Promise<boolean> {
@@ -80,7 +57,7 @@ export const positionTrackingService = {
       .limit(limit);
 
     if (error) throw error;
-    return data || [];
+    return (data || []) as PositionUpdate[];
   },
 
   subscribeToPositionUpdates(
