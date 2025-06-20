@@ -1,5 +1,9 @@
 
 import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { z } from 'zod';
+import { tradeInputSchema } from "../../lib/validationSchemas";
+import { useInterval } from "../../hooks/useCleanup";
 import { Button } from "@/components/ui/button";
 import { CreditCard } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -38,6 +42,10 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   const [hasExpirationDate, setHasExpirationDate] = useState(false);
   const [buyPrice, setBuyPrice] = useState(0);
   const [sellPrice, setSellPrice] = useState(0);
+  const [entryOrderRate, setEntryOrderRate] = useState("");
+  const [stopLossRate, setStopLossRate] = useState("");
+  const [takeProfitRate, setTakeProfitRate] = useState("");
+  const [formErrors, setFormErrors] = useState<z.ZodErrorMessages | null>(null);
   const { toast } = useToast();
   
   // Get available funds from account metrics
@@ -68,17 +76,12 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
     setSellPrice(currentPrice * 0.999); // 0.1% lower
   }, [currentPrice]);
 
-  // Auto-refresh prices
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      // Add a small random variation to simulate live price movement
-      const variation = Math.random() * 0.002 - 0.001; // -0.1% to +0.1%
-      setBuyPrice(prevBuy => prevBuy * (1 + variation));
-      setSellPrice(prevSell => prevSell * (1 + variation));
-    }, 1000);
-    
-    return () => clearInterval(intervalId);
-  }, []);
+  // useInterval for local price simulation
+  useInterval(() => {
+    const variation = Math.random() * 0.002 - 0.001; // -0.1% to +0.1%
+    setBuyPrice(prevBuy => prevBuy * (1 + variation));
+    setSellPrice(prevSell => prevSell * (1 + variation));
+  }, 1000);
   
   // Calculate values based on units
   const parsedUnits = parseFloat(units) || 0;
@@ -90,6 +93,33 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   // Check if user can afford the trade
   const canAfford = availableFunds >= requiredFunds;
 
+  const validateInputs = () => {
+    const validationData: any = {
+      units,
+    };
+    if (orderType === "entry") {
+      validationData.rate = entryOrderRate;
+    }
+    if (hasStopLoss) {
+      validationData.stopLoss = stopLossRate;
+    }
+    if (hasTakeProfit) {
+      validationData.takeProfit = takeProfitRate;
+    }
+    const validationResult = tradeInputSchema.safeParse(validationData);
+    if (!validationResult.success) {
+      setFormErrors(validationResult.error.flatten().fieldErrors as any);
+      return false;
+    }
+    setFormErrors(null);
+    return true;
+  };
+
+  // Real-time validation
+  useEffect(() => {
+    validateInputs();
+  }, [units, orderType, entryOrderRate, hasStopLoss, stopLossRate, hasTakeProfit, takeProfitRate]);
+
   const handleTabChange = (value: string) => {
     if (value === "buy" || value === "sell") {
       setActiveTab(value);
@@ -97,6 +127,9 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   };
 
   const handleSubmit = async (action: "buy" | "sell") => {
+    if (!validateInputs()) {
+      return;
+    }
     if (!marketIsOpen && orderType === "market") {
       toast({
         title: "Market Closed",
@@ -166,7 +199,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
               <Button 
                 className="w-full bg-success hover:bg-success/90 text-white"
                 onClick={() => handleSubmit("buy")}
-                disabled={isExecuting || (orderType === "market" && !marketIsOpen) || !canAfford || parsedUnits <= 0}
+                disabled={!!formErrors || isExecuting || (orderType === "market" && !marketIsOpen) || !canAfford || parsedUnits <= 0}
               >
                 {isExecuting && activeTab === "buy" ? "Processing..." : "Buy"}
               </Button>
@@ -182,6 +215,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
             canAfford={canAfford}
             availableFunds={availableFunds}
           />
+          {formErrors?.units && <p className="text-red-500 text-xs mt-1">{formErrors.units[0]}</p>}
           
           {/* Order Type Selection */}
           <OrderTypeSelector
@@ -213,7 +247,8 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                   type="text" 
                   className="flex-1 text-center border-y border-input bg-background py-2"
                   placeholder="Enter rate"
-                  defaultValue={currentPrice.toFixed(4)}
+                  value={entryOrderRate}
+                  onChange={(e) => setEntryOrderRate(e.target.value)}
                 />
                 <button 
                   type="button" 
@@ -223,6 +258,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                   +
                 </button>
               </div>
+              {formErrors?.rate && <p className="text-red-500 text-xs mt-1">{formErrors.rate[0]}</p>}
               <p className="text-xs text-muted-foreground mt-1">
                 Rate should be above {(currentPrice * 0.98).toFixed(4)} or below {(currentPrice * 1.02).toFixed(4)}
               </p>
@@ -253,6 +289,8 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                     type="text" 
                     className="flex-1 text-center border-y border-input bg-background py-2"
                     placeholder="Rate"
+                    value={stopLossRate}
+                    onChange={(e) => setStopLossRate(e.target.value)}
                   />
                   <button 
                     type="button" 
@@ -262,6 +300,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                     +
                   </button>
                 </div>
+                {formErrors?.stopLoss && <p className="text-red-500 text-xs mt-1">{formErrors.stopLoss[0]}</p>}
               </div>
               <div>
                 <label className="text-sm text-muted-foreground mb-1 block">Close amount:</label>
@@ -317,6 +356,8 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                     type="text" 
                     className="flex-1 text-center border-y border-input bg-background py-2"
                     placeholder="Rate"
+                    value={takeProfitRate}
+                    onChange={(e) => setTakeProfitRate(e.target.value)}
                   />
                   <button 
                     type="button" 
@@ -326,6 +367,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                     +
                   </button>
                 </div>
+                {formErrors?.takeProfit && <p className="text-red-500 text-xs mt-1">{formErrors.takeProfit[0]}</p>}
               </div>
               <div>
                 <label className="text-sm text-muted-foreground mb-1 block">Close amount:</label>
@@ -405,7 +447,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
               <Button 
                 className="w-full bg-warning hover:bg-warning/90 text-white"
                 onClick={() => handleSubmit("sell")}
-                disabled={isExecuting || (orderType === "market" && !marketIsOpen) || parsedUnits <= 0}
+                disabled={!!formErrors || isExecuting || (orderType === "market" && !marketIsOpen) || parsedUnits <= 0}
               >
                 {isExecuting && activeTab === "sell" ? "Processing..." : "Sell"}
               </Button>
@@ -421,6 +463,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
             canAfford={true} // Always allow selling
             availableFunds={availableFunds}
           />
+          {formErrors?.units && <p className="text-red-500 text-xs mt-1">{formErrors.units[0]}</p>}
           
           {/* Order Type Selection */}
           <OrderTypeSelector
@@ -452,7 +495,8 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                   type="text" 
                   className="flex-1 text-center border-y border-input bg-background py-2"
                   placeholder="Enter rate"
-                  defaultValue={currentPrice.toFixed(4)}
+                  value={entryOrderRate}
+                  onChange={(e) => setEntryOrderRate(e.target.value)}
                 />
                 <button 
                   type="button" 
@@ -462,6 +506,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                   +
                 </button>
               </div>
+              {formErrors?.rate && <p className="text-red-500 text-xs mt-1">{formErrors.rate[0]}</p>}
               <p className="text-xs text-muted-foreground mt-1">
                 Rate should be above {(currentPrice * 0.98).toFixed(4)} or below {(currentPrice * 1.02).toFixed(4)}
               </p>
@@ -492,6 +537,8 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                     type="text" 
                     className="flex-1 text-center border-y border-input bg-background py-2"
                     placeholder="Rate"
+                    value={stopLossRate}
+                    onChange={(e) => setStopLossRate(e.target.value)}
                   />
                   <button 
                     type="button" 
@@ -501,6 +548,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                     +
                   </button>
                 </div>
+                {formErrors?.stopLoss && <p className="text-red-500 text-xs mt-1">{formErrors.stopLoss[0]}</p>}
               </div>
               <div>
                 <label className="text-sm text-muted-foreground mb-1 block">Close amount:</label>
@@ -556,6 +604,8 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                     type="text" 
                     className="flex-1 text-center border-y border-input bg-background py-2"
                     placeholder="Rate"
+                    value={takeProfitRate}
+                    onChange={(e) => setTakeProfitRate(e.target.value)}
                   />
                   <button 
                     type="button" 
@@ -565,6 +615,7 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
                     +
                   </button>
                 </div>
+                {formErrors?.takeProfit && <p className="text-red-500 text-xs mt-1">{formErrors.takeProfit[0]}</p>}
               </div>
               <div>
                 <label className="text-sm text-muted-foreground mb-1 block">Close amount:</label>
