@@ -8,6 +8,8 @@ import { TrendingUp, Plus } from "lucide-react";
 import OrderTabs from "@/components/orders/OrderTabs";
 
 const Orders = () => {
+  const [activeTab, setActiveTab] = useState("open");
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between">
@@ -74,7 +76,7 @@ const Orders = () => {
         </Card>
       </div>
 
-      <OrderTabs />
+      <OrderTabs activeTab={activeTab} onTabChange={setActiveTab} />
     </div>
   );
 };
