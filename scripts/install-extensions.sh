@@ -9,6 +9,7 @@ ESSENTIAL_EXTENSIONS=(
     "bradlc.vscode-tailwindcss-intellisense"   # Tailwind CSS IntelliSense
     "github.copilot"                           # GitHub Copilot
     "github.copilot-chat"                      # GitHub Copilot Chat
+    "vscode-icons-team.vscode-icons"           # VSCode Icons
 )
 
 # Performance & Quality Extensions (Optional)

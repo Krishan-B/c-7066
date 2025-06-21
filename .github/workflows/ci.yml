@@ -24,10 +24,10 @@ jobs:
       - name: Start Supabase
         run: npx supabase start
 
-      - name: Wait for Supabase to be healthy
+      - name: Run comprehensive health checks
         run: |
-          chmod +x ./scripts/assert-local-db-health.sh
-          ./scripts/assert-local-db-health.sh
+          chmod +x ./scripts/health-check-all.sh
+          ./scripts/health-check-all.sh
 
       - name: Stop Supabase
         if: always()
