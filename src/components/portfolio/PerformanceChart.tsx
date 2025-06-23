@@ -1,19 +1,20 @@
-
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  ChartContainer, 
-  ChartTooltipContent
-} from "@/components/ui/chart";
-import { 
-  LineChart, 
-  Line, 
-  ResponsiveContainer, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  CartesianGrid 
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 interface PerformanceData {
@@ -27,17 +28,24 @@ interface PerformanceChartProps {
   onTimeframeChange: (value: string) => void;
 }
 
-const PerformanceChart = ({ 
-  data, 
-  timeframe, 
-  onTimeframeChange 
+const PerformanceChart = ({
+  data,
+  timeframe,
+  onTimeframeChange,
 }: PerformanceChartProps) => {
-  
-  const renderTooltipContent = (props: any) => {
-    if (!props.active || !props.payload || !props.payload.length) {
+  // Use the correct type for Recharts custom tooltip content: (props: object) => React.ReactNode
+  // Recharts passes a generic object, so use Record<string, unknown> for type safety
+  const renderTooltipContent = (props: Record<string, unknown>) => {
+    // Type guard for expected shape
+    if (!("active" in props) || !("payload" in props)) return null;
+    const { active, payload } = props as {
+      active?: boolean;
+      payload?: Array<{ name: string; value: number }>;
+    };
+    if (!active || !payload || !payload.length) {
       return null;
     }
-    
+
     return (
       <ChartTooltipContent
         {...props}
@@ -45,7 +53,7 @@ const PerformanceChart = ({
         formatter={(value, name) => (
           <div className="flex items-center justify-between gap-2">
             <span>{name}</span>
-            <span className="font-medium">${value.toLocaleString()}</span>
+            <span className="font-medium">${value?.toLocaleString()}</span>
           </div>
         )}
       />
@@ -75,11 +83,15 @@ const PerformanceChart = ({
         <ChartContainer config={{ series: {} }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="#333"
+              />
               <XAxis dataKey="date" stroke="#666" />
-              <YAxis 
-                stroke="#666" 
-                tickFormatter={(value) => `$${(value/1000).toFixed(0)}K`}
+              <YAxis
+                stroke="#666"
+                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
               />
               <Tooltip content={renderTooltipContent} />
               <Line

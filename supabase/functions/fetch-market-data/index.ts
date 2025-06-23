@@ -1,15 +1,39 @@
-
+// deno-lint-ignore-file no-explicit-any
+// @ts-expect-error: Deno Deploy/Edge Function context
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// @ts-expect-error: Deno Deploy/Edge Function context
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
+
+// Asset type for generated market data
+interface MarketAsset {
+  symbol: string;
+  name: string;
+  price: number;
+  change_percentage: number;
+  volume: string;
+  market_cap?: string;
+  market_type: string;
+}
+
+declare const Deno: {
+  env: { get(key: string): string | undefined };
 };
 
 // Initialize Supabase client
-const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+const supabaseUrl =
+  typeof Deno !== "undefined" && Deno.env.get
+    ? Deno.env.get("SUPABASE_URL") || ""
+    : "";
+const supabaseServiceKey =
+  typeof Deno !== "undefined" && Deno.env.get
+    ? Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
+    : "";
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Asset market data generators
@@ -18,7 +42,7 @@ const assetGenerators = {
   Index: generateIndexData,
   Commodity: generateCommodityData,
   Forex: generateForexData,
-  Crypto: generateCryptoData
+  Crypto: generateCryptoData,
 };
 
 /**
@@ -26,35 +50,38 @@ const assetGenerators = {
  */
 serve(async (req: Request) => {
   // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     // Get the market type from the request
     const { market } = await req.json();
-    
+
     if (!market) {
       throw new Error("Market type is required");
     }
 
     // Generate market data for the specified market
     const marketData = generateMarketData(market);
-    
+
     // Update the database with the generated data
     await updateDatabaseWithMarketData(marketData);
 
     // Return the generated market data
     return new Response(JSON.stringify({ success: true, data: marketData }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
     console.error("Error fetching market data:", error);
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ success: false, error: error.message }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      }
+    );
   }
 });
 
@@ -65,7 +92,7 @@ function generateMarketData(market: string) {
   if (!assetGenerators[market]) {
     throw new Error(`Invalid market type: ${market}`);
   }
-  
+
   const assetDefinitions = assetGenerators[market]();
   return generatePriceFluctuations(assetDefinitions, market);
 }
@@ -73,11 +100,10 @@ function generateMarketData(market: string) {
 /**
  * Updates the database with the generated market data
  */
-async function updateDatabaseWithMarketData(marketData: any[]) {
+async function updateDatabaseWithMarketData(marketData: MarketAsset[]) {
   for (const asset of marketData) {
-    await supabase
-      .from('market_data')
-      .upsert({
+    await supabase.from("market_data").upsert(
+      {
         symbol: asset.symbol,
         name: asset.name,
         price: asset.price,
@@ -86,37 +112,44 @@ async function updateDatabaseWithMarketData(marketData: any[]) {
         market_cap: asset.market_cap,
         market_type: asset.market_type,
         last_updated: new Date().toISOString(),
-      }, { onConflict: 'symbol' });
+      },
+      { onConflict: "symbol" }
+    );
   }
 }
 
 /**
  * Generates realistic price fluctuations for assets
  */
-function generatePriceFluctuations(assets: any[], marketType: string) {
-  return assets.map(asset => {
+function generatePriceFluctuations(
+  assets: { symbol: string; name: string; base: number }[],
+  marketType: string
+): MarketAsset[] {
+  return assets.map((asset) => {
     // Generate a random price fluctuation between -3% and +3%
     const randomFluctuation = (Math.random() * 6 - 3) / 100;
-    
+
     // Calculate the new price with the random fluctuation
     const price = parseFloat((asset.base * (1 + randomFluctuation)).toFixed(2));
-    
+
     // Calculate the change percentage (-3% to +3%)
     const changePercentage = parseFloat((randomFluctuation * 100).toFixed(2));
-    
+
     // Generate volume (in billions or millions) based on market capitalization
-    const volumeValue = price > 1000 
-      ? (Math.random() * 10 + 5).toFixed(1) + 'B' 
-      : (Math.random() * 50 + 10).toFixed(1) + 'M';
-    
+    const volumeValue =
+      price > 1000
+        ? (Math.random() * 10 + 5).toFixed(1) + "B"
+        : (Math.random() * 50 + 10).toFixed(1) + "M";
+
     // Generate market cap for stocks and crypto
-    const marketCap = (marketType === 'Stock' || marketType === 'Crypto') 
-      ? (price * (Math.random() * 10 + 1) * 1e9).toLocaleString('en-US', {
-          style: 'currency',
-          currency: 'USD',
-          maximumFractionDigits: 0,
-        })
-      : undefined;
+    const marketCap =
+      marketType === "Stock" || marketType === "Crypto"
+        ? (price * (Math.random() * 10 + 1) * 1e9).toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+            maximumFractionDigits: 0,
+          })
+        : undefined;
 
     // Return the asset with updated values
     return {
@@ -126,7 +159,7 @@ function generatePriceFluctuations(assets: any[], marketType: string) {
       change_percentage: changePercentage,
       volume: volumeValue,
       market_cap: marketCap,
-      market_type: marketType
+      market_type: marketType,
     };
   });
 }
@@ -227,7 +260,7 @@ function generateForexData() {
     { symbol: "USDCAD", name: "US Dollar / Canadian Dollar", base: 1.366 },
     { symbol: "USDCHF", name: "US Dollar / Swiss Franc", base: 0.908 },
     { symbol: "EURGBP", name: "Euro / British Pound", base: 0.861 },
-    { symbol: "NZDUSD", name: "New Zealand Dollar / US Dollar", base: 0.610 },
+    { symbol: "NZDUSD", name: "New Zealand Dollar / US Dollar", base: 0.61 },
     { symbol: "EURJPY", name: "Euro / Japanese Yen", base: 171.5 },
     { symbol: "GBPJPY", name: "British Pound / Japanese Yen", base: 199.3 },
     { symbol: "AUDJPY", name: "Australian Dollar / Japanese Yen", base: 103.2 },

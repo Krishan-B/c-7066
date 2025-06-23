@@ -1,17 +1,23 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
-import { Eye, EyeOff, AlertCircle, ArrowRight, Check } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { countries } from "@/lib/countries";
-import { validateSignUp } from "../utils/validation";
+import { AlertCircle, ArrowRight, Check, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { usePasswordStrength } from "../hooks/usePasswordStrength";
+import { validateSignUp } from "../utils/validation";
 
 const RegisterForm = () => {
   const [firstName, setFirstName] = useState("");
@@ -22,28 +28,32 @@ const RegisterForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [country, setCountry] = useState("");
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  
-  const { passwordStrength, getPasswordStrengthLabel, getPasswordStrengthColor } = usePasswordStrength(password);
-  
+
+  const {
+    passwordStrength,
+    getPasswordStrengthLabel,
+    getPasswordStrengthColor,
+  } = usePasswordStrength(password);
+
   const navigate = useNavigate();
   const { toast } = useToast();
 
   // Utility function to clean up auth state
   const cleanupAuthState = () => {
-    localStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem("supabase.auth.token");
     Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      if (key.startsWith("supabase.auth.") || key.includes("sb-")) {
         localStorage.removeItem(key);
       }
     });
     Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      if (key.startsWith("supabase.auth.") || key.includes("sb-")) {
         sessionStorage.removeItem(key);
       }
     });
@@ -52,7 +62,7 @@ const RegisterForm = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
-    
+
     const errors = validateSignUp(
       firstName,
       lastName,
@@ -62,30 +72,32 @@ const RegisterForm = () => {
       password,
       confirmPassword
     );
-    
+
     setFieldErrors(errors);
-    
+
     if (Object.keys(errors).length > 0) {
       return;
     }
-    
+
     try {
       setLoading(true);
-      
+
       // Clean up any existing auth state
       cleanupAuthState();
-      
+
       // First attempt to sign out globally in case there's an existing session
       try {
-        await supabase.auth.signOut({ scope: 'global' });
+        await supabase.auth.signOut({ scope: "global" });
       } catch (error) {
         // Ignore errors during cleanup
       }
-      
-      const formattedPhoneNumber = phoneNumber ? `${countryCode}${phoneNumber}` : '';
-      
+
+      const formattedPhoneNumber = phoneNumber
+        ? `${countryCode}${phoneNumber}`
+        : "";
+
       console.log("Attempting to sign up with:", { email });
-      
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -94,40 +106,44 @@ const RegisterForm = () => {
             first_name: firstName,
             last_name: lastName,
             country: country,
-            phone_number: formattedPhoneNumber
-          }
-        }
+            phone_number: formattedPhoneNumber,
+          },
+        },
       });
-      
+
       if (error) throw error;
-      
+
       console.log("Signup successful:", data);
-      
+
       toast({
         title: "Account created successfully",
-        description: "Please check your email for verification and then log in"
+        description: "Please check your email for verification and then log in",
       });
-      
+
       // Use navigate instead of window.location to avoid full page reload
       navigate("/auth");
-      
-    } catch (error: any) {
+    } catch (error) {
+      // Use type guard for error
       console.error("Signup error:", error);
       let errorMessage = "An error occurred during sign up";
-      
-      if (error.message) {
-        if (error.message.includes("email")) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "message" in error &&
+        typeof (error as { message?: string }).message === "string"
+      ) {
+        const message = (error as { message: string }).message;
+        if (message.includes("email")) {
           errorMessage = "This email is already in use";
         } else {
-          errorMessage = error.message;
+          errorMessage = message;
         }
       }
-      
       setFormError(errorMessage);
       toast({
         title: "Error",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -142,31 +158,33 @@ const RegisterForm = () => {
           <AlertDescription>{formError}</AlertDescription>
         </Alert>
       )}
-      
+
       <form onSubmit={handleSignUp} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="first-name">First Name</Label>
-            <Input 
-              id="first-name" 
-              type="text" 
-              placeholder="John" 
-              value={firstName} 
-              onChange={e => setFirstName(e.target.value)}
+            <Input
+              id="first-name"
+              type="text"
+              placeholder="John"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
               className={fieldErrors.firstName ? "border-destructive" : ""}
             />
             {fieldErrors.firstName && (
-              <p className="text-destructive text-sm">{fieldErrors.firstName}</p>
+              <p className="text-destructive text-sm">
+                {fieldErrors.firstName}
+              </p>
             )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="last-name">Last Name</Label>
-            <Input 
-              id="last-name" 
-              type="text" 
-              placeholder="Doe" 
-              value={lastName} 
-              onChange={e => setLastName(e.target.value)}
+            <Input
+              id="last-name"
+              type="text"
+              placeholder="Doe"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
               className={fieldErrors.lastName ? "border-destructive" : ""}
             />
             {fieldErrors.lastName && (
@@ -177,18 +195,15 @@ const RegisterForm = () => {
 
         <div className="space-y-2">
           <Label htmlFor="country">Country</Label>
-          <Select
-            value={country}
-            onValueChange={setCountry}
-          >
-            <SelectTrigger 
+          <Select value={country} onValueChange={setCountry}>
+            <SelectTrigger
               id="country"
               className={fieldErrors.country ? "border-destructive" : ""}
             >
               <SelectValue placeholder="Select your country" />
             </SelectTrigger>
             <SelectContent className="max-h-80">
-              {countries.map(c => (
+              {countries.map((c) => (
                 <SelectItem key={c.code} value={c.code}>
                   {c.name}
                 </SelectItem>
@@ -203,45 +218,44 @@ const RegisterForm = () => {
         <div className="space-y-2">
           <Label htmlFor="phone-number">Phone Number</Label>
           <div className="flex">
-            <Select
-              value={countryCode}
-              onValueChange={setCountryCode}
-            >
-              <SelectTrigger 
-                className="w-[100px] rounded-r-none"
-              >
+            <Select value={countryCode} onValueChange={setCountryCode}>
+              <SelectTrigger className="w-[100px] rounded-r-none">
                 <SelectValue>{countryCode}</SelectValue>
               </SelectTrigger>
               <SelectContent className="max-h-80">
-                {countries.map(c => (
+                {countries.map((c) => (
                   <SelectItem key={c.code} value={c.dialCode}>
                     {c.dialCode} ({c.code})
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Input 
-              id="phone-number" 
-              type="tel" 
-              placeholder="1234567890" 
-              value={phoneNumber} 
-              onChange={e => setPhoneNumber(e.target.value)}
-              className={`flex-1 rounded-l-none ${fieldErrors.phoneNumber ? "border-destructive" : ""}`}
+            <Input
+              id="phone-number"
+              type="tel"
+              placeholder="1234567890"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className={`flex-1 rounded-l-none ${
+                fieldErrors.phoneNumber ? "border-destructive" : ""
+              }`}
             />
           </div>
           {fieldErrors.phoneNumber && (
-            <p className="text-destructive text-sm">{fieldErrors.phoneNumber}</p>
+            <p className="text-destructive text-sm">
+              {fieldErrors.phoneNumber}
+            </p>
           )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="signup-email">Email</Label>
-          <Input 
-            id="signup-email" 
-            type="email" 
-            placeholder="your.email@example.com" 
-            value={email} 
-            onChange={e => setEmail(e.target.value)}
+          <Input
+            id="signup-email"
+            type="email"
+            placeholder="your.email@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className={fieldErrors.email ? "border-destructive" : ""}
           />
           {fieldErrors.email && (
@@ -252,13 +266,15 @@ const RegisterForm = () => {
         <div className="space-y-2">
           <Label htmlFor="signup-password">Password</Label>
           <div className="relative">
-            <Input 
-              id="signup-password" 
-              type={showPassword ? "text" : "password"} 
-              placeholder="••••••••" 
-              value={password} 
-              onChange={e => setPassword(e.target.value)}
-              className={fieldErrors.password ? "border-destructive pr-10" : "pr-10"}
+            <Input
+              id="signup-password"
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={
+                fieldErrors.password ? "border-destructive pr-10" : "pr-10"
+              }
             />
             <Button
               type="button"
@@ -281,15 +297,22 @@ const RegisterForm = () => {
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
                 <span>Password strength:</span>
-                <span className={
-                  passwordStrength <= 25 ? "text-destructive" :
-                  passwordStrength <= 75 ? "text-warning" :
-                  "text-success"
-                }>
+                <span
+                  className={
+                    passwordStrength <= 25
+                      ? "text-destructive"
+                      : passwordStrength <= 75
+                      ? "text-warning"
+                      : "text-success"
+                  }
+                >
                   {getPasswordStrengthLabel()}
                 </span>
               </div>
-              <Progress value={passwordStrength} className={getPasswordStrengthColor()} />
+              <Progress
+                value={passwordStrength}
+                className={getPasswordStrengthColor()}
+              />
             </div>
           )}
         </div>
@@ -297,13 +320,17 @@ const RegisterForm = () => {
         <div className="space-y-2">
           <Label htmlFor="confirm-password">Confirm Password</Label>
           <div className="relative">
-            <Input 
-              id="confirm-password" 
-              type={showConfirmPassword ? "text" : "password"} 
-              placeholder="••••••••" 
-              value={confirmPassword} 
-              onChange={e => setConfirmPassword(e.target.value)}
-              className={fieldErrors.confirmPassword ? "border-destructive pr-10" : "pr-10"}
+            <Input
+              id="confirm-password"
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className={
+                fieldErrors.confirmPassword
+                  ? "border-destructive pr-10"
+                  : "pr-10"
+              }
             />
             <Button
               type="button"
@@ -320,7 +347,9 @@ const RegisterForm = () => {
             </Button>
           </div>
           {fieldErrors.confirmPassword && (
-            <p className="text-destructive text-sm">{fieldErrors.confirmPassword}</p>
+            <p className="text-destructive text-sm">
+              {fieldErrors.confirmPassword}
+            </p>
           )}
           {password && confirmPassword && password === confirmPassword && (
             <div className="flex items-center text-success text-xs mt-1">
@@ -329,12 +358,10 @@ const RegisterForm = () => {
           )}
         </div>
 
-        <Button 
-          type="submit" 
-          className="w-full" 
-          disabled={loading}
-        >
-          {loading ? "Creating account..." : (
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? (
+            "Creating account..."
+          ) : (
             <span className="flex items-center">
               Sign Up
               <ArrowRight className="ml-2 h-4 w-4" />

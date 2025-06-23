@@ -1,0 +1,16 @@
+name: Nightly Diagnostics Health Check
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # Runs every day at 03:00 UTC
+
+jobs:
+  longlines:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run diagnose:longlines

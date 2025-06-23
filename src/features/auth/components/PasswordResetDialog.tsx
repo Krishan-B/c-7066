@@ -1,11 +1,4 @@
-
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Mail } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,13 +7,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Mail } from "lucide-react";
+import { useState } from "react";
 
 interface PasswordResetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const PasswordResetDialog = ({ open, onOpenChange }: PasswordResetDialogProps) => {
+const PasswordResetDialog = ({
+  open,
+  onOpenChange,
+}: PasswordResetDialogProps) => {
   const [resetEmail, setResetEmail] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,26 +34,33 @@ const PasswordResetDialog = ({ open, onOpenChange }: PasswordResetDialogProps) =
       toast({
         title: "Error",
         description: "Please enter your email address",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
     try {
       setLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/auth?tab=updatePassword`
+        redirectTo: `${window.location.origin}/auth?tab=updatePassword`,
       });
       if (error) throw error;
       setResetEmailSent(true);
       toast({
         title: "Reset link sent",
-        description: "Check your email for password reset instructions"
+        description: "Check your email for password reset instructions",
       });
-    } catch (error: any) {
+    } catch (error) {
+      // Use type guard for error
       toast({
         title: "Error",
-        description: error.message || "Failed to send reset link",
-        variant: "destructive"
+        description:
+          error &&
+          typeof error === "object" &&
+          "message" in error &&
+          typeof (error as { message?: string }).message === "string"
+            ? (error as { message: string }).message
+            : "Failed to send reset link",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -64,40 +73,38 @@ const PasswordResetDialog = ({ open, onOpenChange }: PasswordResetDialogProps) =
         <DialogHeader>
           <DialogTitle>Reset Password</DialogTitle>
           <DialogDescription>
-            {!resetEmailSent 
-              ? "Enter your email address and we'll send you a link to reset your password." 
-              : "Check your email for the password reset link."
-            }
+            {!resetEmailSent
+              ? "Enter your email address and we'll send you a link to reset your password."
+              : "Check your email for the password reset link."}
           </DialogDescription>
         </DialogHeader>
-        
+
         {!resetEmailSent ? (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="reset-email">Email</Label>
-              <Input 
-                id="reset-email" 
-                type="email" 
-                placeholder="your.email@example.com" 
-                value={resetEmail} 
-                onChange={e => setResetEmail(e.target.value)} 
-                required 
+              <Input
+                id="reset-email"
+                type="email"
+                placeholder="your.email@example.com"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                required
               />
             </div>
-            
+
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                disabled={loading}
-              >
-                {loading ? "Sending..." : (
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  "Sending..."
+                ) : (
                   <span className="flex items-center">
                     <Mail className="mr-2 h-4 w-4" />
                     Send Reset Link

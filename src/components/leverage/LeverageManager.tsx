@@ -1,10 +1,9 @@
-
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, Calculator, BarChart3 } from 'lucide-react';
-import LeverageCalculator from './LeverageCalculator';
-import MarginTracker from './MarginTracker';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BarChart3, Calculator, Settings } from "lucide-react";
+import { useState } from "react";
+import LeverageCalculator from "./LeverageCalculator";
+import MarginTracker from "./MarginTracker";
 
 interface LeverageManagerProps {
   assetClass?: string;
@@ -12,14 +11,25 @@ interface LeverageManagerProps {
   positionValue?: number;
 }
 
-const LeverageManager = ({ 
-  assetClass = 'crypto',
-  symbol = 'BTC',
-  positionValue = 1000
-}: LeverageManagerProps) => {
-  const [calculationResult, setCalculationResult] = useState<any>(null);
+interface MarginCalculation {
+  initial_margin: number;
+  maintenance_margin: number;
+  margin_level: number;
+  max_leverage: number;
+  leverage_used: number;
+  required_funds: number;
+  available_margin: number;
+}
 
-  const handleCalculationChange = (calculation: any) => {
+const LeverageManager = ({
+  assetClass = "crypto",
+  symbol = "BTC",
+  positionValue = 1000,
+}: LeverageManagerProps) => {
+  const [calculationResult, setCalculationResult] =
+    useState<MarginCalculation | null>(null);
+
+  const handleCalculationChange = (calculation: MarginCalculation) => {
     setCalculationResult(calculation);
   };
 
@@ -36,7 +46,7 @@ const LeverageManager = ({
             Margin Tracker
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="calculator" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <LeverageCalculator
@@ -45,7 +55,7 @@ const LeverageManager = ({
               positionValue={positionValue}
               onCalculationChange={handleCalculationChange}
             />
-            
+
             {/* Calculation Summary */}
             {calculationResult && (
               <Card>
@@ -58,33 +68,55 @@ const LeverageManager = ({
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <div className="text-sm text-blue-600 font-medium">Leverage Applied</div>
+                      <div className="text-sm text-blue-600 font-medium">
+                        Leverage Applied
+                      </div>
                       <div className="text-xl font-bold text-blue-800">
                         {calculationResult.leverage_used}:1
                       </div>
                     </div>
                     <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <div className="text-sm text-green-600 font-medium">Margin Efficiency</div>
+                      <div className="text-sm text-green-600 font-medium">
+                        Margin Efficiency
+                      </div>
                       <div className="text-xl font-bold text-green-800">
-                        {((calculationResult.leverage_used / calculationResult.max_leverage) * 100).toFixed(1)}%
+                        {(
+                          (calculationResult.leverage_used /
+                            calculationResult.max_leverage) *
+                          100
+                        ).toFixed(1)}
+                        %
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Maximum Available:</span>
-                      <span className="font-medium">{calculationResult.max_leverage}:1</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Margin Requirement:</span>
+                      <span className="text-sm text-muted-foreground">
+                        Maximum Available:
+                      </span>
                       <span className="font-medium">
-                        {((1 / calculationResult.leverage_used) * 100).toFixed(2)}%
+                        {calculationResult.max_leverage}:1
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Position Multiplier:</span>
-                      <span className="font-medium">×{calculationResult.leverage_used}</span>
+                      <span className="text-sm text-muted-foreground">
+                        Margin Requirement:
+                      </span>
+                      <span className="font-medium">
+                        {((1 / calculationResult.leverage_used) * 100).toFixed(
+                          2
+                        )}
+                        %
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        Position Multiplier:
+                      </span>
+                      <span className="font-medium">
+                        ×{calculationResult.leverage_used}
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -92,7 +124,7 @@ const LeverageManager = ({
             )}
           </div>
         </TabsContent>
-        
+
         <TabsContent value="tracker" className="space-y-6">
           <MarginTracker />
         </TabsContent>

@@ -1,11 +1,10 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { AlertTriangle, Shield, TrendingDown, Target } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { AlertTriangle, Shield, Target, TrendingDown } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 interface RiskMetric {
   id: string;
@@ -25,23 +24,17 @@ const RiskMetrics = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      fetchRiskMetrics();
-    }
-  }, [user]);
-
-  const fetchRiskMetrics = async () => {
+  const fetchRiskMetrics = useCallback(async () => {
     try {
       const { data, error } = await supabase
-        .from('risk_metrics')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('last_calculated', { ascending: false })
+        .from("risk_metrics")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("last_calculated", { ascending: false })
         .limit(1)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error && error.code !== "PGRST116") {
         throw error;
       }
 
@@ -50,7 +43,7 @@ const RiskMetrics = () => {
       } else {
         // Generate mock data if no risk metrics exist
         setRiskMetrics({
-          id: 'mock-1',
+          id: "mock-1",
           total_exposure: 45000,
           used_margin: 8500,
           available_margin: 16500,
@@ -59,26 +52,46 @@ const RiskMetrics = () => {
           max_position_size: 12000,
           correlation_risk: 0.35,
           diversification_score: 0.72,
-          risk_score: 6.8
+          risk_score: 6.8,
         });
       }
     } catch (error) {
-      console.error('Error fetching risk metrics:', error);
+      console.error("Error fetching risk metrics:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchRiskMetrics();
+    }
+  }, [user, fetchRiskMetrics]);
 
   const getRiskLevel = (score: number) => {
-    if (score <= 3) return { level: 'Low', color: 'bg-green-100 text-green-800', icon: Shield };
-    if (score <= 6) return { level: 'Medium', color: 'bg-yellow-100 text-yellow-800', icon: Target };
-    return { level: 'High', color: 'bg-red-100 text-red-800', icon: AlertTriangle };
+    if (score <= 3)
+      return {
+        level: "Low",
+        color: "bg-green-100 text-green-800",
+        icon: Shield,
+      };
+    if (score <= 6)
+      return {
+        level: "Medium",
+        color: "bg-yellow-100 text-yellow-800",
+        icon: Target,
+      };
+    return {
+      level: "High",
+      color: "bg-red-100 text-red-800",
+      icon: AlertTriangle,
+    };
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
     }).format(amount);
   };
@@ -89,7 +102,7 @@ const RiskMetrics = () => {
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => (
+            {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-32 bg-gray-200 rounded"></div>
             ))}
           </div>
@@ -134,7 +147,9 @@ const RiskMetrics = () => {
             <div className="text-2xl font-bold text-blue-600">
               {formatCurrency(riskMetrics.portfolio_var)}
             </div>
-            <div className="text-xs text-muted-foreground">95% confidence, 1 day</div>
+            <div className="text-xs text-muted-foreground">
+              95% confidence, 1 day
+            </div>
           </CardContent>
         </Card>
 
@@ -147,7 +162,9 @@ const RiskMetrics = () => {
             <div className="text-2xl font-bold text-green-600">
               {(riskMetrics.diversification_score * 100).toFixed(1)}%
             </div>
-            <div className="text-xs text-muted-foreground">Portfolio spread</div>
+            <div className="text-xs text-muted-foreground">
+              Portfolio spread
+            </div>
           </CardContent>
         </Card>
 
@@ -160,7 +177,9 @@ const RiskMetrics = () => {
             <div className="text-2xl font-bold text-orange-600">
               {(riskMetrics.correlation_risk * 100).toFixed(1)}%
             </div>
-            <div className="text-xs text-muted-foreground">Position correlation</div>
+            <div className="text-xs text-muted-foreground">
+              Position correlation
+            </div>
           </CardContent>
         </Card>
 
@@ -173,7 +192,9 @@ const RiskMetrics = () => {
             <div className="text-2xl font-bold text-purple-600">
               {riskMetrics.risk_score.toFixed(1)}/10
             </div>
-            <div className="text-xs text-muted-foreground">Overall risk level</div>
+            <div className="text-xs text-muted-foreground">
+              Overall risk level
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -188,10 +209,16 @@ const RiskMetrics = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Used Margin</span>
-                <span className="font-medium">{formatCurrency(riskMetrics.used_margin)}</span>
+                <span className="font-medium">
+                  {formatCurrency(riskMetrics.used_margin)}
+                </span>
               </div>
-              <Progress 
-                value={(riskMetrics.used_margin / (riskMetrics.used_margin + riskMetrics.available_margin)) * 100} 
+              <Progress
+                value={
+                  (riskMetrics.used_margin /
+                    (riskMetrics.used_margin + riskMetrics.available_margin)) *
+                  100
+                }
                 className="h-2"
               />
             </div>
@@ -199,21 +226,27 @@ const RiskMetrics = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Available Margin</span>
-                <span className="font-medium">{formatCurrency(riskMetrics.available_margin)}</span>
+                <span className="font-medium">
+                  {formatCurrency(riskMetrics.available_margin)}
+                </span>
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Margin Level</span>
-                <span className="font-medium">{riskMetrics.margin_level.toFixed(2)}%</span>
+                <span className="font-medium">
+                  {riskMetrics.margin_level.toFixed(2)}%
+                </span>
               </div>
             </div>
 
             <div className="pt-2 border-t">
               <div className="flex justify-between">
                 <span className="text-sm font-medium">Total Exposure</span>
-                <span className="font-bold">{formatCurrency(riskMetrics.total_exposure)}</span>
+                <span className="font-bold">
+                  {formatCurrency(riskMetrics.total_exposure)}
+                </span>
               </div>
             </div>
           </CardContent>
@@ -226,22 +259,25 @@ const RiskMetrics = () => {
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-sm">Maximum Position Size</span>
-              <span className="font-medium">{formatCurrency(riskMetrics.max_position_size)}</span>
+              <span className="font-medium">
+                {formatCurrency(riskMetrics.max_position_size)}
+              </span>
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span>Current Largest Position</span>
-                <span className="font-medium">{formatCurrency(riskMetrics.max_position_size * 0.6)}</span>
+                <span className="font-medium">
+                  {formatCurrency(riskMetrics.max_position_size * 0.6)}
+                </span>
               </div>
-              <Progress 
-                value={60} 
-                className="h-2"
-              />
+              <Progress value={60} className="h-2" />
             </div>
 
             <div className="pt-2 border-t space-y-2">
-              <div className="text-sm text-muted-foreground">Risk Recommendations</div>
+              <div className="text-sm text-muted-foreground">
+                Risk Recommendations
+              </div>
               <ul className="text-xs space-y-1">
                 <li className="flex items-center gap-2">
                   <div className="w-1 h-1 bg-green-500 rounded-full"></div>

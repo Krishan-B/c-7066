@@ -1,18 +1,13 @@
-
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  ChartContainer, 
-  ChartTooltipContent
-} from "@/components/ui/chart";
-import { 
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  Bar,
   BarChart,
-  Bar, 
-  ResponsiveContainer, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  CartesianGrid 
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 interface MonthlyData {
@@ -25,12 +20,16 @@ interface MonthlyReturnsProps {
 }
 
 const MonthlyReturns = ({ data }: MonthlyReturnsProps) => {
-  
-  const renderTooltipContent = (props: any) => {
-    if (!props.active || !props.payload || !props.payload.length) {
+  const renderTooltipContent = (props: Record<string, unknown>) => {
+    if (!("active" in props) || !("payload" in props)) return null;
+    const { active, payload } = props as {
+      active?: boolean;
+      payload?: Array<{ name: string; value: number }>;
+    };
+    if (!active || !payload || !payload.length) {
       return null;
     }
-    
+
     return (
       <ChartTooltipContent
         {...props}
@@ -38,7 +37,7 @@ const MonthlyReturns = ({ data }: MonthlyReturnsProps) => {
         formatter={(value, name) => (
           <div className="flex items-center justify-between gap-2">
             <span>{name}</span>
-            <span className="font-medium">${value.toLocaleString()}</span>
+            <span className="font-medium">${value?.toLocaleString()}</span>
           </div>
         )}
       />
@@ -54,17 +53,21 @@ const MonthlyReturns = ({ data }: MonthlyReturnsProps) => {
         <ChartContainer config={{ series: {} }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.slice(-6)}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="#333"
+              />
               <XAxis dataKey="date" />
-              <YAxis 
-                tickFormatter={(value) => `${(value/1000).toFixed(0)}K`}
+              <YAxis
+                tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
               />
               <Tooltip content={renderTooltipContent} />
-              <Bar 
-                dataKey="value" 
-                name="Monthly Value" 
-                fill="#75C6C3" 
-                radius={[4, 4, 0, 0]} 
+              <Bar
+                dataKey="value"
+                name="Monthly Value"
+                fill="#75C6C3"
+                radius={[4, 4, 0, 0]}
               />
             </BarChart>
           </ResponsiveContainer>

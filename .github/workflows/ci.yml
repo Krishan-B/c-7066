@@ -18,8 +18,8 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Install Supabase CLI
-        run: npm install -g supabase
+      - name: Check Supabase CLI version
+        run: npx supabase --version
 
       - name: Start Supabase
         run: npx supabase start

@@ -1,12 +1,11 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { AlertTriangle, TrendingUp, DollarSign, BarChart3 } from 'lucide-react';
-import { useLeverage } from '@/hooks/useLeverage';
-import { useAuth } from '@/hooks/useAuth';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/hooks/useAuth";
+import { useLeverage } from "@/hooks/useLeverage";
+import { AlertTriangle, BarChart3, DollarSign, TrendingUp } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 interface MarginStatus {
   totalMarginUsed: number;
@@ -20,9 +19,44 @@ interface MarginStatus {
 const MarginTracker = () => {
   const [marginStatus, setMarginStatus] = useState<MarginStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  
-  const { marginCalculations, loadMarginCalculations, checkMarginCall } = useLeverage();
+
+  const { marginCalculations, loadMarginCalculations, checkMarginCall } =
+    useLeverage();
   const { user } = useAuth();
+
+  const calculateMarginStatus = useCallback(() => {
+    const totalUsedMargin = marginCalculations.reduce(
+      (sum, calc) => sum + calc.used_margin,
+      0
+    );
+    const totalFreeMargin = marginCalculations.reduce(
+      (sum, calc) => sum + calc.free_margin,
+      0
+    );
+    const avgMarginLevel =
+      marginCalculations.reduce((sum, calc) => sum + calc.margin_level, 0) /
+      marginCalculations.length;
+
+    let positionsAtRisk = 0;
+    let hasWarning = false;
+    let hasMarginCall = false;
+
+    marginCalculations.forEach((calc) => {
+      const status = checkMarginCall(calc.margin_level);
+      if (status.isMarginCall) positionsAtRisk++;
+      if (status.isWarning) hasWarning = true;
+      if (status.isMarginCall) hasMarginCall = true;
+    });
+
+    setMarginStatus({
+      totalMarginUsed: totalUsedMargin,
+      totalMarginAvailable: totalFreeMargin,
+      marginLevel: avgMarginLevel,
+      positionsAtRisk,
+      warningLevel: hasWarning,
+      marginCallLevel: hasMarginCall,
+    });
+  }, [marginCalculations, checkMarginCall]);
 
   useEffect(() => {
     if (user) {
@@ -35,51 +69,21 @@ const MarginTracker = () => {
       calculateMarginStatus();
     }
     setLoading(false);
-  }, [marginCalculations]);
-
-  const calculateMarginStatus = () => {
-    const totalUsedMargin = marginCalculations.reduce((sum, calc) => sum + calc.used_margin, 0);
-    const totalFreeMargin = marginCalculations.reduce((sum, calc) => sum + calc.free_margin, 0);
-    const avgMarginLevel = marginCalculations.reduce((sum, calc) => sum + calc.margin_level, 0) / marginCalculations.length;
-    
-    let positionsAtRisk = 0;
-    let hasWarning = false;
-    let hasMarginCall = false;
-
-    marginCalculations.forEach(calc => {
-      const status = checkMarginCall(calc.margin_level);
-      if (status.isMarginCall) {
-        hasMarginCall = true;
-        positionsAtRisk++;
-      } else if (status.isWarning) {
-        hasWarning = true;
-        positionsAtRisk++;
-      }
-    });
-
-    setMarginStatus({
-      totalMarginUsed: totalUsedMargin,
-      totalMarginAvailable: totalFreeMargin,
-      marginLevel: avgMarginLevel,
-      positionsAtRisk,
-      warningLevel: hasWarning,
-      marginCallLevel: hasMarginCall
-    });
-  };
+  }, [marginCalculations, calculateMarginStatus]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
   };
 
   const getMarginLevelColor = (level: number) => {
-    if (level <= 1.0) return 'text-red-600';
-    if (level <= 1.5) return 'text-orange-600';
-    return 'text-green-600';
+    if (level <= 1.0) return "text-red-600";
+    if (level <= 1.5) return "text-orange-600";
+    return "text-green-600";
   };
 
   const getMarginLevelBadge = (level: number) => {
@@ -126,8 +130,10 @@ const MarginTracker = () => {
     );
   }
 
-  const marginUtilization = marginStatus.totalMarginUsed / 
-    (marginStatus.totalMarginUsed + marginStatus.totalMarginAvailable) * 100;
+  const marginUtilization =
+    (marginStatus.totalMarginUsed /
+      (marginStatus.totalMarginUsed + marginStatus.totalMarginAvailable)) *
+    100;
 
   return (
     <Card>
@@ -143,8 +149,9 @@ const MarginTracker = () => {
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              <span className="font-medium">Margin Call Alert!</span> 
-              {marginStatus.positionsAtRisk} position(s) require immediate attention.
+              <span className="font-medium">Margin Call Alert!</span>
+              {marginStatus.positionsAtRisk} position(s) require immediate
+              attention.
             </AlertDescription>
           </Alert>
         )}
@@ -154,8 +161,9 @@ const MarginTracker = () => {
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              <span className="font-medium">Margin Warning:</span> 
-              {marginStatus.positionsAtRisk} position(s) approaching margin call level.
+              <span className="font-medium">Margin Warning:</span>
+              {marginStatus.positionsAtRisk} position(s) approaching margin call
+              level.
             </AlertDescription>
           </Alert>
         )}
@@ -171,7 +179,7 @@ const MarginTracker = () => {
               {formatCurrency(marginStatus.totalMarginUsed)}
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
@@ -187,47 +195,64 @@ const MarginTracker = () => {
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium">Margin Utilization</span>
-            <span className="text-sm font-medium">{marginUtilization.toFixed(1)}%</span>
+            <span className="text-sm font-medium">
+              {marginUtilization.toFixed(1)}%
+            </span>
           </div>
-          <Progress 
-            value={marginUtilization} 
-            className="h-2"
-          />
+          <Progress value={marginUtilization} className="h-2" />
         </div>
 
         {/* Margin Level */}
         <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
           <div>
-            <span className="text-sm text-muted-foreground">Average Margin Level</span>
-            <div className={`text-xl font-bold ${getMarginLevelColor(marginStatus.marginLevel)}`}>
+            <span className="text-sm text-muted-foreground">
+              Average Margin Level
+            </span>
+            <div
+              className={`text-xl font-bold ${getMarginLevelColor(
+                marginStatus.marginLevel
+              )}`}
+            >
               {marginStatus.marginLevel.toFixed(2)}%
             </div>
           </div>
-          <div>
-            {getMarginLevelBadge(marginStatus.marginLevel)}
-          </div>
+          <div>{getMarginLevelBadge(marginStatus.marginLevel)}</div>
         </div>
 
         {/* Recent Calculations Summary */}
         <div className="space-y-3">
-          <h4 className="text-sm font-medium">Recent Positions ({marginCalculations.length})</h4>
+          <h4 className="text-sm font-medium">
+            Recent Positions ({marginCalculations.length})
+          </h4>
           <div className="space-y-2">
             {marginCalculations.slice(0, 3).map((calc, index) => {
               const status = checkMarginCall(calc.margin_level);
               return (
-                <div key={calc.id} className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                <div
+                  key={calc.id}
+                  className="flex items-center justify-between p-2 bg-muted/30 rounded"
+                >
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${
-                      status.severity === 'danger' ? 'bg-red-500' :
-                      status.severity === 'warning' ? 'bg-orange-500' : 'bg-green-500'
-                    }`} />
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        status.severity === "danger"
+                          ? "bg-red-500"
+                          : status.severity === "warning"
+                          ? "bg-orange-500"
+                          : "bg-green-500"
+                      }`}
+                    />
                     <span className="text-sm">Position {index + 1}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">
                       {formatCurrency(calc.used_margin)}
                     </span>
-                    <span className={`text-xs ${getMarginLevelColor(calc.margin_level)}`}>
+                    <span
+                      className={`text-xs ${getMarginLevelColor(
+                        calc.margin_level
+                      )}`}
+                    >
                       {calc.margin_level.toFixed(1)}%
                     </span>
                   </div>

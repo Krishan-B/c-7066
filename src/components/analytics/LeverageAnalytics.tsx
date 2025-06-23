@@ -1,13 +1,23 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { TrendingUp, AlertTriangle, Target, BarChart3 } from 'lucide-react';
-import { useLeverage } from '@/hooks/useLeverage';
-import { useAuth } from '@/hooks/useAuth';
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/useAuth";
+import { useLeverage } from "@/hooks/useLeverage";
+import { AlertTriangle, BarChart3, Target } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 interface AssetLeverageData {
   asset_class: string;
@@ -26,13 +36,17 @@ interface MarginEfficiencyData {
   margin_saved: number;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 const LeverageAnalytics = () => {
-  const [assetLeverageData, setAssetLeverageData] = useState<AssetLeverageData[]>([]);
-  const [marginEfficiencyData, setMarginEfficiencyData] = useState<MarginEfficiencyData[]>([]);
+  const [assetLeverageData, setAssetLeverageData] = useState<
+    AssetLeverageData[]
+  >([]);
+  const [marginEfficiencyData, setMarginEfficiencyData] = useState<
+    MarginEfficiencyData[]
+  >([]);
   const [loading, setLoading] = useState(true);
-  
+
   const { marginCalculations, loadMarginCalculations } = useLeverage();
   const { user } = useAuth();
 
@@ -47,12 +61,12 @@ const LeverageAnalytics = () => {
       generateAnalyticsData();
     }
     setLoading(false);
-  }, [marginCalculations]);
+  }, [marginCalculations, generateAnalyticsData]);
 
-  const generateAnalyticsData = () => {
+  const generateAnalyticsData = useCallback(() => {
     // Generate asset-specific leverage analytics
     const assetGroups = marginCalculations.reduce((acc, calc) => {
-      const assetClass = 'crypto'; // This would come from position data
+      const assetClass = "crypto"; // This would come from position data
       if (!acc[assetClass]) {
         acc[assetClass] = {
           asset_class: assetClass,
@@ -60,55 +74,66 @@ const LeverageAnalytics = () => {
           current_utilization: 0,
           margin_used: 0,
           position_count: 0,
-          risk_score: 0
+          risk_score: 0,
         };
       }
-      
+
       acc[assetClass].margin_used += calc.used_margin;
       acc[assetClass].position_count += 1;
       acc[assetClass].current_utilization += calc.leverage_used;
-      
+
       return acc;
     }, {} as Record<string, AssetLeverageData>);
 
     // Calculate averages and risk scores
-    Object.keys(assetGroups).forEach(key => {
+    Object.keys(assetGroups).forEach((key) => {
       const group = assetGroups[key];
-      group.current_utilization = group.current_utilization / group.position_count;
+      group.current_utilization =
+        group.current_utilization / group.position_count;
       group.risk_score = (group.current_utilization / group.max_leverage) * 100;
     });
 
     setAssetLeverageData(Object.values(assetGroups));
 
     // Generate margin efficiency data
-    const efficiencyData = Object.values(assetGroups).map(group => ({
+    const efficiencyData = Object.values(assetGroups).map((group) => ({
       asset_class: group.asset_class,
-      efficiency: Math.max(0, 100 - (group.current_utilization / group.max_leverage) * 100),
-      optimal_leverage: Math.min(group.max_leverage, group.current_utilization * 1.2),
+      efficiency: Math.max(
+        0,
+        100 - (group.current_utilization / group.max_leverage) * 100
+      ),
+      optimal_leverage: Math.min(
+        group.max_leverage,
+        group.current_utilization * 1.2
+      ),
       current_leverage: group.current_utilization,
-      margin_saved: group.margin_used * 0.1 // Simulated savings
+      margin_saved: group.margin_used * 0.1, // Simulated savings
     }));
 
     setMarginEfficiencyData(efficiencyData);
-  };
+  }, [marginCalculations]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
     }).format(amount);
   };
 
   const getRiskColor = (score: number) => {
-    if (score <= 30) return 'text-green-600';
-    if (score <= 60) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score <= 30) return "text-green-600";
+    if (score <= 60) return "text-yellow-600";
+    return "text-red-600";
   };
 
   const getRiskBadge = (score: number) => {
-    if (score <= 30) return <Badge className="bg-green-100 text-green-800">Low Risk</Badge>;
-    if (score <= 60) return <Badge className="bg-yellow-100 text-yellow-800">Medium Risk</Badge>;
+    if (score <= 30)
+      return <Badge className="bg-green-100 text-green-800">Low Risk</Badge>;
+    if (score <= 60)
+      return (
+        <Badge className="bg-yellow-100 text-yellow-800">Medium Risk</Badge>
+      );
     return <Badge className="bg-red-100 text-red-800">High Risk</Badge>;
   };
 
@@ -118,7 +143,7 @@ const LeverageAnalytics = () => {
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3].map(i => (
+            {[1, 2, 3].map((i) => (
               <div key={i} className="h-32 bg-gray-200 rounded"></div>
             ))}
           </div>
@@ -161,7 +186,7 @@ const LeverageAnalytics = () => {
                     <span>Max Leverage:</span>
                     <span className="font-medium">{asset.max_leverage}:1</span>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Utilization:</span>
@@ -169,8 +194,10 @@ const LeverageAnalytics = () => {
                         {asset.current_utilization.toFixed(1)}:1
                       </span>
                     </div>
-                    <Progress 
-                      value={(asset.current_utilization / asset.max_leverage) * 100} 
+                    <Progress
+                      value={
+                        (asset.current_utilization / asset.max_leverage) * 100
+                      }
                       className="h-2"
                     />
                   </div>
@@ -206,14 +233,22 @@ const LeverageAnalytics = () => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="asset_class" />
                   <YAxis />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: number, name: string) => [
-                      `${value.toFixed(1)}:1`, 
-                      name === 'current_utilization' ? 'Current' : 'Maximum'
+                      `${value.toFixed(1)}:1`,
+                      name === "current_utilization" ? "Current" : "Maximum",
                     ]}
                   />
-                  <Bar dataKey="max_leverage" fill="#e5e7eb" name="max_leverage" />
-                  <Bar dataKey="current_utilization" fill="#3b82f6" name="current_utilization" />
+                  <Bar
+                    dataKey="max_leverage"
+                    fill="#e5e7eb"
+                    name="max_leverage"
+                  />
+                  <Bar
+                    dataKey="current_utilization"
+                    fill="#3b82f6"
+                    name="current_utilization"
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -238,7 +273,7 @@ const LeverageAnalytics = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ asset_class, efficiency }) => 
+                      label={({ asset_class, efficiency }) =>
                         `${asset_class}: ${efficiency.toFixed(1)}%`
                       }
                       outerRadius={80}
@@ -246,7 +281,10 @@ const LeverageAnalytics = () => {
                       dataKey="efficiency"
                     >
                       {marginEfficiencyData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -271,7 +309,7 @@ const LeverageAnalytics = () => {
                         {asset.efficiency.toFixed(1)}% Efficient
                       </span>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <div className="text-muted-foreground">Current</div>
@@ -286,7 +324,7 @@ const LeverageAnalytics = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="text-xs text-green-600">
                       Potential savings: {formatCurrency(asset.margin_saved)}
                     </div>
@@ -307,23 +345,29 @@ const LeverageAnalytics = () => {
                   <span className="text-sm font-medium">Low Risk Assets</span>
                 </div>
                 <div className="text-2xl font-bold">
-                  {assetLeverageData.filter(a => a.risk_score <= 30).length}
+                  {assetLeverageData.filter((a) => a.risk_score <= 30).length}
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                  <span className="text-sm font-medium">Medium Risk Assets</span>
+                  <span className="text-sm font-medium">
+                    Medium Risk Assets
+                  </span>
                 </div>
                 <div className="text-2xl font-bold">
-                  {assetLeverageData.filter(a => a.risk_score > 30 && a.risk_score <= 60).length}
+                  {
+                    assetLeverageData.filter(
+                      (a) => a.risk_score > 30 && a.risk_score <= 60
+                    ).length
+                  }
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-2 mb-2">
@@ -331,7 +375,7 @@ const LeverageAnalytics = () => {
                   <span className="text-sm font-medium">High Risk Assets</span>
                 </div>
                 <div className="text-2xl font-bold">
-                  {assetLeverageData.filter(a => a.risk_score > 60).length}
+                  {assetLeverageData.filter((a) => a.risk_score > 60).length}
                 </div>
               </CardContent>
             </Card>
@@ -345,7 +389,7 @@ const LeverageAnalytics = () => {
             <CardContent>
               <div className="space-y-4">
                 {assetLeverageData.map((asset) => (
-                  <div 
+                  <div
                     key={asset.asset_class}
                     className="flex items-center justify-between p-4 border rounded-lg"
                   >
@@ -355,24 +399,36 @@ const LeverageAnalytics = () => {
                       </div>
                       {getRiskBadge(asset.risk_score)}
                     </div>
-                    
+
                     <div className="flex items-center gap-6 text-sm">
                       <div>
                         <div className="text-muted-foreground">Risk Score</div>
-                        <div className={`font-medium ${getRiskColor(asset.risk_score)}`}>
+                        <div
+                          className={`font-medium ${getRiskColor(
+                            asset.risk_score
+                          )}`}
+                        >
                           {asset.risk_score.toFixed(1)}%
                         </div>
                       </div>
-                      
+
                       <div>
-                        <div className="text-muted-foreground">Leverage Usage</div>
+                        <div className="text-muted-foreground">
+                          Leverage Usage
+                        </div>
                         <div className="font-medium">
-                          {((asset.current_utilization / asset.max_leverage) * 100).toFixed(1)}%
+                          {(
+                            (asset.current_utilization / asset.max_leverage) *
+                            100
+                          ).toFixed(1)}
+                          %
                         </div>
                       </div>
-                      
+
                       <div>
-                        <div className="text-muted-foreground">Margin at Risk</div>
+                        <div className="text-muted-foreground">
+                          Margin at Risk
+                        </div>
                         <div className="font-medium">
                           {formatCurrency(asset.margin_used)}
                         </div>

@@ -1,10 +1,15 @@
-
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Bell, AlertTriangle, Newspaper, TrendingUp, Activity } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Activity,
+  AlertTriangle,
+  Bell,
+  Newspaper,
+  TrendingUp,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 interface MarketAlert {
   id: string;
@@ -21,17 +26,17 @@ const AlertsWidget = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchAlerts = async () => {
+  const fetchAlerts = useCallback(async () => {
     try {
       setIsLoading(true);
-      
-      const { data, error } = await supabase.functions.invoke('market-alerts', {
-        method: 'POST',
-        body: {}
+
+      const { data, error } = await supabase.functions.invoke("market-alerts", {
+        method: "POST",
+        body: {},
       });
-      
+
       if (error) throw error;
-      
+
       if (data?.data) {
         setAlerts(data.data);
       }
@@ -40,33 +45,33 @@ const AlertsWidget = () => {
       toast({
         title: "Error",
         description: "Failed to load market alerts.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  };
-  
+  }, [toast]);
+
   useEffect(() => {
     fetchAlerts();
-  }, []);
-  
+  }, [fetchAlerts]);
+
   const getAlertIcon = (type: string) => {
     switch (type) {
-      case 'price_movement':
+      case "price_movement":
         return <Activity className="h-4 w-4" />;
-      case 'technical':
+      case "technical":
         return <TrendingUp className="h-4 w-4" />;
-      case 'news':
+      case "news":
         return <Newspaper className="h-4 w-4" />;
       default:
         return <Bell className="h-4 w-4" />;
     }
   };
-  
+
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   if (isLoading) {
@@ -106,25 +111,35 @@ const AlertsWidget = () => {
               {alerts.map((alert) => (
                 <li key={alert.id} className="p-4 hover:bg-muted/50">
                   <div className="flex items-start gap-3">
-                    <div className={`mt-0.5 rounded-full p-1.5 ${
-                      alert.importance === 'high' ? 'bg-destructive/20 text-destructive' : 
-                      'bg-muted text-muted-foreground'
-                    }`}>
+                    <div
+                      className={`mt-0.5 rounded-full p-1.5 ${
+                        alert.importance === "high"
+                          ? "bg-destructive/20 text-destructive"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
                       {getAlertIcon(alert.type)}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <div className="font-medium flex items-center gap-2">
                           {alert.name} ({alert.symbol})
-                          {alert.importance === 'high' && (
-                            <Badge variant="destructive" className="text-[10px] h-5">Important</Badge>
+                          {alert.importance === "high" && (
+                            <Badge
+                              variant="destructive"
+                              className="text-[10px] h-5"
+                            >
+                              Important
+                            </Badge>
                           )}
                         </div>
                         <span className="text-xs text-muted-foreground">
                           {formatTime(alert.created_at)}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground">{alert.message}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {alert.message}
+                      </p>
                     </div>
                   </div>
                 </li>

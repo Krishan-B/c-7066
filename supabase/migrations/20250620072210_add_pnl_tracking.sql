@@ -1,4 +1,3 @@
-
 -- Add real-time P&L tracking columns to positions table
 ALTER TABLE public.positions 
 ADD COLUMN IF NOT EXISTS daily_pnl NUMERIC DEFAULT 0,
@@ -63,9 +62,9 @@ BEGIN
   
   -- Calculate unrealized P&L
   IF pos.direction = 'buy' THEN
-    pnl_result := (p_new_price - pos.entry_price) * pos.units;
+    pnl_result := (p_new_price - pos.entry_price) * pos.quantity;
   ELSE
-    pnl_result := (pos.entry_price - p_new_price) * pos.units;
+    pnl_result := (pos.entry_price - p_new_price) * pos.quantity;
   END IF;
   
   -- Calculate daily P&L (difference from session start)

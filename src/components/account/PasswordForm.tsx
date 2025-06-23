@@ -1,9 +1,15 @@
-
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
 
 export function PasswordForm() {
   const { toast } = useToast();
@@ -15,7 +21,11 @@ export function PasswordForm() {
     },
   });
 
-  const onSubmit = (values: any) => {
+  const onSubmit = (values: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => {
     toast({
       title: "Password updated",
       description: "Your password has been changed successfully",
@@ -34,7 +44,11 @@ export function PasswordForm() {
             <FormItem>
               <FormLabel>Current Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Enter current password" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Enter current password"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -47,7 +61,11 @@ export function PasswordForm() {
             <FormItem>
               <FormLabel>New Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Enter new password" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Enter new password"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -60,7 +78,11 @@ export function PasswordForm() {
             <FormItem>
               <FormLabel>Confirm New Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Confirm new password" {...field} />
+                <Input
+                  type="password"
+                  placeholder="Confirm new password"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

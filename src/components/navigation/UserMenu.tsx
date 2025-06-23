@@ -1,11 +1,5 @@
-
-import * as React from "react"
-import { useNavigate } from "react-router-dom"
-import { useToast } from "@/hooks/use-toast"
-import { useAuth } from '@/hooks/useAuth'
-import { Button } from "@/components/ui/button"
-import { Link } from "react-router-dom"
-import { Settings, User, LogOut } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,28 +8,35 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { motion } from "framer-motion"
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { motion } from "framer-motion";
+import { LogOut, Settings, User as UserIcon } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 const UserMenu = () => {
-  const { user, signOut } = useAuth()
-  const { toast } = useToast()
-  const navigate = useNavigate()
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {
-      await signOut()
+      await signOut();
       // Removed the navigate call here since signOut function in AuthProvider
       // already redirects to the landing page
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while signing out";
       toast({
         title: "Error signing out",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   if (!user) {
     return (
@@ -44,67 +45,70 @@ const UserMenu = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        <Button variant="ghost" asChild className="hover:bg-primary/10 hover:text-primary transition-colors">
-          <Link to="/auth">
-            Sign In
-          </Link>
+        <Button
+          variant="ghost"
+          asChild
+          className="hover:bg-primary/10 hover:text-primary transition-colors"
+        >
+          <Link to="/auth">Sign In</Link>
         </Button>
       </motion.div>
-    )
+    );
   }
 
+  const userAvatarUrl = user.user_metadata?.avatar_url as string | undefined;
+  const userFullName = user.user_metadata?.full_name as string | undefined;
+  const userEmail = user.email || "";
+  const userInitial = userEmail.charAt(0).toUpperCase();
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full hover:bg-primary/10 transition-colors">
-          <Avatar className="h-8 w-8 ring-2 ring-primary/20">
-            <AvatarImage src="/avatars/01.png" alt={user?.email || "User"} />
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              {user?.email?.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 glass-effect" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">
-              {user?.email}
-            </p>
-            <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
-            </p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          onSelect={() => navigate("/dashboard/account")}
-          className="cursor-pointer hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary"
-        >
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Account</span>
-          <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          onSelect={() => navigate("/dashboard/profile")}
-          className="cursor-pointer hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary"
-        >
-          <User className="mr-2 h-4 w-4" />
-          <span>Profile</span>
-          <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          onSelect={handleSignOut}
-          className="cursor-pointer hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="relative h-8 w-8 rounded-full hover:bg-primary/10 transition-colors"
+          >
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={userAvatarUrl || ""} alt={userEmail} />
+              <AvatarFallback>{userInitial || "U"}</AvatarFallback>
+            </Avatar>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" align="end" forceMount>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">{userEmail}</p>
+              <p className="text-xs leading-none text-muted-foreground">
+                {userFullName || "User"}
+              </p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => navigate("/account")}>
+            <UserIcon className="mr-2 h-4 w-4" />
+            Account
+            <DropdownMenuShortcut>⇧⌘A</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate("/settings")}>
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleSignOut}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Log out
+            <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </motion.div>
+  );
+};
 
 export default UserMenu;

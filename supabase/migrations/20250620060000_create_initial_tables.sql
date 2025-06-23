@@ -1,4 +1,3 @@
-
 -- Create storage bucket for KYC documents
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
@@ -92,3 +91,175 @@ CREATE TRIGGER update_kyc_documents_updated_at
     BEFORE UPDATE ON public.kyc_documents
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+-- Create users table
+CREATE TABLE public.users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255),
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  experience_level TEXT CHECK (experience_level IN ('BEGINNER', 'INTERMEDIATE', 'ADVANCED')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_login TIMESTAMP WITH TIME ZONE,
+  is_verified BOOLEAN DEFAULT FALSE,
+  kyc_status TEXT DEFAULT 'PENDING' CHECK (kyc_status IN ('PENDING', 'APPROVED', 'REJECTED')),
+  preferences JSONB
+);
+
+-- Create accounts table
+CREATE TABLE public.accounts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+  account_type TEXT DEFAULT 'DEMO' CHECK (account_type IN ('DEMO', 'COMPETITION')),
+  balance NUMERIC(15,2) DEFAULT 0.00,
+  equity NUMERIC(15,2),
+  margin_used NUMERIC(15,2) DEFAULT 0.00,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  reset_count INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+-- Create assets table
+CREATE TABLE public.assets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  symbol VARCHAR(20) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  asset_class TEXT NOT NULL CHECK (asset_class IN ('FOREX', 'STOCKS', 'INDICES', 'COMMODITIES', 'CRYPTO')),
+  base_currency VARCHAR(3),
+  quote_currency VARCHAR(3),
+  is_active BOOLEAN DEFAULT TRUE,
+  leverage_max INTEGER,
+  spread_base NUMERIC(8,5),
+  contract_size NUMERIC(15,2) DEFAULT 1.00
+);
+
+-- Create positions table for trading platform
+CREATE TABLE public.positions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  symbol TEXT NOT NULL,
+  asset_class TEXT NOT NULL,
+  direction TEXT NOT NULL CHECK (direction IN ('buy', 'sell')),
+  units NUMERIC NOT NULL,
+  entry_price NUMERIC NOT NULL,
+  leverage NUMERIC DEFAULT 1,
+  open_time TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  close_time TIMESTAMP WITH TIME ZONE,
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed', 'liquidated')),
+  realized_pnl NUMERIC DEFAULT 0,
+  unrealized_pnl NUMERIC DEFAULT 0,
+  stop_loss NUMERIC,
+  take_profit NUMERIC,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS on positions table
+ALTER TABLE public.positions ENABLE ROW LEVEL SECURITY;
+
+-- Create RLS policies for positions
+CREATE POLICY "Users can view their own positions"
+  ON public.positions
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own positions"
+  ON public.positions
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own positions"
+  ON public.positions
+  FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own positions"
+  ON public.positions
+  FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Create trigger to update updated_at timestamp for positions
+CREATE OR REPLACE FUNCTION update_positions_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_positions_updated_at
+    BEFORE UPDATE ON public.positions
+    FOR EACH ROW
+    EXECUTE FUNCTION update_positions_updated_at_column();
+
+-- Create orders table for trading platform
+CREATE TABLE public.orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  symbol TEXT NOT NULL,
+  asset_class TEXT NOT NULL,
+  order_type TEXT NOT NULL CHECK (order_type IN ('market', 'limit', 'stop', 'trailing_stop')),
+  direction TEXT NOT NULL CHECK (direction IN ('buy', 'sell')),
+  quantity NUMERIC NOT NULL,
+  price NUMERIC,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'filled', 'cancelled', 'rejected', 'expired')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS on orders table
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+
+-- Create RLS policies for orders
+CREATE POLICY "Users can view their own orders"
+  ON public.orders
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own orders"
+  ON public.orders
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own orders"
+  ON public.orders
+  FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own orders"
+  ON public.orders
+  FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Create trigger to update updated_at timestamp for orders
+CREATE OR REPLACE FUNCTION update_orders_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_orders_updated_at
+    BEFORE UPDATE ON public.orders
+    FOR EACH ROW
+    EXECUTE FUNCTION update_orders_updated_at_column();
+
+-- Enhance orders table
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS account_id UUID REFERENCES public.accounts(id);
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS asset_id UUID REFERENCES public.assets(id);
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS stop_price NUMERIC;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS filled_quantity NUMERIC DEFAULT 0;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS avg_fill_price NUMERIC;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS side TEXT NOT NULL CHECK (side IN ('buy', 'sell'));
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS quantity NUMERIC NOT NULL;
+
+-- Enhance positions table
+ALTER TABLE public.positions ADD COLUMN IF NOT EXISTS account_id UUID REFERENCES public.accounts(id);
+ALTER TABLE public.positions ADD COLUMN IF NOT EXISTS asset_id UUID REFERENCES public.assets(id);
+
+-- Remove units column if it exists (for upgrades)
+ALTER TABLE public.orders DROP COLUMN IF EXISTS units;

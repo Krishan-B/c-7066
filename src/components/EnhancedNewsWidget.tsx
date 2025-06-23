@@ -1,10 +1,9 @@
-
-import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, ArrowUpRight, ChevronDown } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { ArrowUpRight, ChevronDown, Clock } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 interface NewsItem {
   id: string;
@@ -24,21 +23,24 @@ interface EnhancedNewsWidgetProps {
   className?: string;
 }
 
-const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) => {
+const EnhancedNewsWidget = ({
+  marketType,
+  className,
+}: EnhancedNewsWidgetProps) => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchNews = async () => {
+  const fetchNews = useCallback(async () => {
     try {
       setIsLoading(true);
-      
-      const { data, error } = await supabase.functions.invoke('fetch-market-news', {
-        body: { market_type: marketType }
-      });
-      
+      const { data, error } = await supabase.functions.invoke(
+        "fetch-market-news",
+        {
+          body: { market_type: marketType },
+        }
+      );
       if (error) throw error;
-      
       if (data?.data) {
         setNews(data.data);
       }
@@ -47,22 +49,24 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
       toast({
         title: "Error",
         description: "Failed to load market news.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  };
-  
+  }, [marketType, toast]);
+
   useEffect(() => {
     fetchNews();
-  }, [marketType]);
-  
+  }, [fetchNews]);
+
   const formatTime = (timestamp: string) => {
     const now = new Date();
     const pubDate = new Date(timestamp);
-    const diffMinutes = Math.floor((now.getTime() - pubDate.getTime()) / (1000 * 60));
-    
+    const diffMinutes = Math.floor(
+      (now.getTime() - pubDate.getTime()) / (1000 * 60)
+    );
+
     if (diffMinutes < 60) {
       return `${diffMinutes}m ago`;
     } else if (diffMinutes < 24 * 60) {
@@ -71,16 +75,16 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
       return `${Math.floor(diffMinutes / (60 * 24))}d ago`;
     }
   };
-  
+
   const getSentimentColor = (sentiment?: string) => {
     switch (sentiment) {
-      case 'positive':
-        return 'text-green-500';
-      case 'negative':
-        return 'text-red-500';
-      case 'mixed':
+      case "positive":
+        return "text-green-500";
+      case "negative":
+        return "text-red-500";
+      case "mixed":
       default:
-        return 'text-amber-500';
+        return "text-amber-500";
     }
   };
 
@@ -107,7 +111,7 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
             <ChevronDown className="h-3 w-3" />
           </Button>
         </div>
-        
+
         <div className="max-h-[600px] overflow-y-auto">
           {news.length === 0 ? (
             <div className="py-8 text-center text-muted-foreground">
@@ -123,17 +127,30 @@ const EnhancedNewsWidget = ({ marketType, className }: EnhancedNewsWidgetProps) 
                         {item.market_type}
                       </span>
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" /> {formatTime(item.published_at)}
+                        <Clock className="h-3 w-3" />{" "}
+                        {formatTime(item.published_at)}
                       </span>
                     </div>
-                    <h4 className="font-medium text-sm line-clamp-2">{item.title}</h4>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{item.summary}</p>
+                    <h4 className="font-medium text-sm line-clamp-2">
+                      {item.title}
+                    </h4>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {item.summary}
+                    </p>
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">{item.source}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {item.source}
+                        </span>
                         {item.sentiment && (
-                          <span className={`text-xs ${getSentimentColor(item.sentiment)}`}>
-                            • {item.sentiment.charAt(0).toUpperCase() + item.sentiment.slice(1)}
+                          <span
+                            className={`text-xs ${getSentimentColor(
+                              item.sentiment
+                            )}`}
+                          >
+                            •{" "}
+                            {item.sentiment.charAt(0).toUpperCase() +
+                              item.sentiment.slice(1)}
                           </span>
                         )}
                       </div>

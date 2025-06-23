@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -39,22 +38,22 @@
     --card-foreground: #f9fafb;
     --popover: #1a1f2c;
     --popover-foreground: #f9fafb;
-    --primary: #8989DE;
+    --primary: #8989de;
     --primary-foreground: #f9fafb;
     --secondary: #1e2533;
     --secondary-foreground: #f9fafb;
     --muted: #1e2533;
     --muted-foreground: #9ca3af;
     --accent: rgba(137, 137, 222, 0.2);
-    --accent-foreground: #8989DE;
+    --accent-foreground: #8989de;
     --destructive: #ef4444;
     --destructive-foreground: #f9fafb;
     --border: #1e2533;
     --input: #1e2533;
-    --ring: #8989DE;
-    --success: #7EBF8E;
+    --ring: #8989de;
+    --success: #7ebf8e;
     --success-foreground: #f9fafb;
-    --warning: #D2886F;
+    --warning: #d2886f;
     --warning-foreground: #f9fafb;
   }
 
@@ -72,7 +71,8 @@
 }
 
 @keyframes pulse-subtle {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -97,15 +97,16 @@
 .gradient-bg {
   @apply bg-gradient-to-br;
   background-color: var(--background);
-  background-image: linear-gradient(to bottom right, rgba(99, 102, 241, 0.2), var(--background));
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(99, 102, 241, 0.2),
+    var(--background)
+  );
 }
 
 .glass-effect {
-  @apply backdrop-blur-md border;
-  background-color: var(--secondary);
-  background-opacity: 0.2;
+  @apply backdrop-blur-md border bg-secondary bg-opacity-20 border-opacity-40;
   border-color: var(--secondary);
-  border-opacity: 0.4;
 }
 
 /* Animated underline for navigation links */

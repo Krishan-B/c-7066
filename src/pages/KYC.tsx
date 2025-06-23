@@ -1,40 +1,50 @@
-
-import { useEffect } from 'react';
-import { Shield, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import DocumentUpload from '@/components/kyc/DocumentUpload';
-import DocumentList from '@/components/kyc/DocumentList';
-import { useKYC } from '@/hooks/useKYC';
+import DocumentList from "@/components/kyc/DocumentList";
+import DocumentUpload from "@/components/kyc/DocumentUpload";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useKYC } from "@/hooks/useKYC";
+import { AlertTriangle, CheckCircle, Clock, Shield } from "lucide-react";
+import { useEffect } from "react";
 
 const KYC = () => {
-  const { documents, loading, fetchDocuments, getKYCStatus, isKYCComplete } = useKYC();
-  
+  const { documents, loading, fetchDocuments, getKYCStatus, isKYCComplete } =
+    useKYC();
+
   useEffect(() => {
     fetchDocuments();
-  }, []);
+  }, [fetchDocuments]);
 
   const status = getKYCStatus();
   const isComplete = isKYCComplete();
 
   const getStatusIcon = () => {
     if (isComplete) return <CheckCircle className="h-5 w-5 text-green-600" />;
-    if (status === 'REJECTED') return <AlertTriangle className="h-5 w-5 text-red-600" />;
+    if (status === "REJECTED")
+      return <AlertTriangle className="h-5 w-5 text-red-600" />;
     return <Clock className="h-5 w-5 text-yellow-600" />;
   };
 
   const getStatusMessage = () => {
-    if (isComplete) return 'KYC verification complete! You can now access all trading features.';
-    if (status === 'REJECTED') return 'Some documents have been rejected. Please upload new documents.';
-    if (documents.length === 0) return 'No documents uploaded yet. Please upload your verification documents.';
-    return 'Your documents are under review. We\'ll notify you once verification is complete.';
+    if (isComplete)
+      return "KYC verification complete! You can now access all trading features.";
+    if (status === "REJECTED")
+      return "Some documents have been rejected. Please upload new documents.";
+    if (documents.length === 0)
+      return "No documents uploaded yet. Please upload your verification documents.";
+    return "Your documents are under review. We'll notify you once verification is complete.";
   };
 
   const getStatusColor = () => {
-    if (isComplete) return 'border-green-200 bg-green-50';
-    if (status === 'REJECTED') return 'border-red-200 bg-red-50';
-    return 'border-yellow-200 bg-yellow-50';
+    if (isComplete) return "border-green-200 bg-green-50";
+    if (status === "REJECTED") return "border-red-200 bg-red-50";
+    return "border-yellow-200 bg-yellow-50";
   };
 
   return (
@@ -43,7 +53,9 @@ const KYC = () => {
         <Shield className="h-8 w-8 text-primary" />
         <div>
           <h1 className="text-2xl font-bold">KYC Verification</h1>
-          <p className="text-muted-foreground">Complete your identity verification to start trading</p>
+          <p className="text-muted-foreground">
+            Complete your identity verification to start trading
+          </p>
         </div>
       </div>
 
@@ -59,13 +71,15 @@ const KYC = () => {
           <Tabs defaultValue="upload" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="upload">Upload Documents</TabsTrigger>
-              <TabsTrigger value="documents">My Documents ({documents.length})</TabsTrigger>
+              <TabsTrigger value="documents">
+                My Documents ({documents.length})
+              </TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="upload" className="mt-6">
               <DocumentUpload onUploadComplete={fetchDocuments} />
             </TabsContent>
-            
+
             <TabsContent value="documents" className="mt-6">
               {loading ? (
                 <Card>
@@ -79,7 +93,7 @@ const KYC = () => {
             </TabsContent>
           </Tabs>
         </div>
-        
+
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -99,28 +113,32 @@ const KYC = () => {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 rounded-full bg-red-500 mt-2 flex-shrink-0"></div>
                   <div>
-                    <h4 className="font-medium text-sm">Address Verification *</h4>
+                    <h4 className="font-medium text-sm">
+                      Address Verification *
+                    </h4>
                     <p className="text-xs text-muted-foreground">
                       Utility Bill, Bank Statement, or Tax Bill
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="w-2 h-2 rounded-full bg-gray-400 mt-2 flex-shrink-0"></div>
                   <div>
-                    <h4 className="font-medium text-sm">Additional Documents</h4>
+                    <h4 className="font-medium text-sm">
+                      Additional Documents
+                    </h4>
                     <p className="text-xs text-muted-foreground">
                       Any supporting documents (optional)
                     </p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="pt-3 border-t">
                 <p className="text-xs text-muted-foreground">
                   <strong>File Requirements:</strong>
@@ -138,15 +156,23 @@ const KYC = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center">1</div>
+                <div className="w-6 h-6 rounded-full bg-primary text-white text-xs flex items-center justify-center">
+                  1
+                </div>
                 <span className="text-sm">Upload documents</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center">2</div>
-                <span className="text-sm">Document review (1-3 business days)</span>
+                <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center">
+                  2
+                </div>
+                <span className="text-sm">
+                  Document review (1-3 business days)
+                </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center">3</div>
+                <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center">
+                  3
+                </div>
                 <span className="text-sm">Verification complete</span>
               </div>
             </CardContent>

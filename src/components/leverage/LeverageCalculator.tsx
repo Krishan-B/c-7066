@@ -1,88 +1,108 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
-import { Calculator, AlertTriangle, Info } from 'lucide-react';
-import { useLeverage } from '@/hooks/useLeverage';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
+import { useLeverage } from "@/hooks/useLeverage";
+import { AlertTriangle, Calculator, Info } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 interface LeverageCalculatorProps {
   assetClass: string;
   symbol?: string;
   positionValue: number;
-  onCalculationChange?: (calculation: any) => void;
+  onCalculationChange?: (calculation: CalculationResult) => void;
+}
+
+interface CalculationResult {
+  initial_margin: number;
+  maintenance_margin: number;
+  margin_level: number;
+  max_leverage: number;
+  leverage_used: number;
 }
 
 const LeverageCalculator = ({
   assetClass,
-  symbol = '',
+  symbol = "",
   positionValue,
-  onCalculationChange
+  onCalculationChange,
 }: LeverageCalculatorProps) => {
   const [leverage, setLeverage] = useState([1]);
   const [maxLeverage, setMaxLeverage] = useState(10);
-  const [calculation, setCalculation] = useState<any>(null);
+  const [calculation, setCalculation] = useState<CalculationResult | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
-  
+
   const { calculateMargin, getMaxLeverage, checkMarginCall } = useLeverage();
 
   // Load max leverage for the asset
-  useEffect(() => {
-    const loadMaxLeverage = async () => {
-      const max = await getMaxLeverage(assetClass, symbol);
-      setMaxLeverage(max);
-      
-      // Reset leverage if current value exceeds max
-      if (leverage[0] > max) {
-        setLeverage([max]);
-      }
-    };
+  const loadMaxLeverage = useCallback(async () => {
+    const max = await getMaxLeverage(assetClass, symbol);
+    setMaxLeverage(max);
 
+    // Reset leverage if current value exceeds max
+    if (leverage[0] > max) {
+      setLeverage([max]);
+    }
+  }, [assetClass, symbol, getMaxLeverage, leverage]);
+
+  useEffect(() => {
     if (assetClass) {
       loadMaxLeverage();
     }
-  }, [assetClass, symbol, getMaxLeverage]);
+  }, [assetClass, loadMaxLeverage]);
 
   // Calculate margin requirements when leverage or position value changes
-  useEffect(() => {
-    const performCalculation = async () => {
-      if (!assetClass || positionValue <= 0) return;
+  const performCalculation = useCallback(async () => {
+    if (!assetClass || positionValue <= 0) return;
 
-      setLoading(true);
-      try {
-        const result = await calculateMargin(assetClass, symbol, positionValue, leverage[0]);
-        setCalculation(result);
-        
-        if (onCalculationChange && result) {
-          onCalculationChange(result);
-        }
-      } catch (error) {
-        console.error('Calculation error:', error);
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    try {
+      const result = await calculateMargin(
+        assetClass,
+        symbol,
+        positionValue,
+        leverage[0]
+      );
+      setCalculation(result);
+
+      if (onCalculationChange && result) {
+        onCalculationChange(result);
       }
-    };
+    } catch (error) {
+      console.error("Calculation error:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    assetClass,
+    symbol,
+    positionValue,
+    leverage,
+    calculateMargin,
+    onCalculationChange,
+  ]);
 
+  useEffect(() => {
     performCalculation();
-  }, [assetClass, symbol, positionValue, leverage, calculateMargin, onCalculationChange]);
+  }, [performCalculation]);
 
-  const marginCallStatus = calculation ? 
-    checkMarginCall(calculation.margin_level) : null;
+  const marginCallStatus = calculation
+    ? checkMarginCall(calculation.margin_level)
+    : null;
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(amount);
@@ -101,7 +121,9 @@ const LeverageCalculator = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="text-sm font-medium">Position Value</Label>
-            <div className="text-lg font-semibold">{formatCurrency(positionValue)}</div>
+            <div className="text-lg font-semibold">
+              {formatCurrency(positionValue)}
+            </div>
           </div>
           <div>
             <Label className="text-sm font-medium">Asset Class</Label>
@@ -121,12 +143,14 @@ const LeverageCalculator = ({
                   <Info className="h-4 w-4 text-muted-foreground" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Higher leverage increases both potential profits and losses</p>
+                  <p>
+                    Higher leverage increases both potential profits and losses
+                  </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>1:1</span>
@@ -156,13 +180,17 @@ const LeverageCalculator = ({
             {/* Margin Requirements */}
             <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
               <div>
-                <Label className="text-xs text-muted-foreground">Required Margin</Label>
+                <Label className="text-xs text-muted-foreground">
+                  Required Margin
+                </Label>
                 <div className="text-lg font-semibold text-blue-600">
                   {formatCurrency(calculation.initial_margin)}
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground">Maintenance Margin</Label>
+                <Label className="text-xs text-muted-foreground">
+                  Maintenance Margin
+                </Label>
                 <div className="text-lg font-semibold">
                   {formatCurrency(calculation.maintenance_margin)}
                 </div>
@@ -171,7 +199,13 @@ const LeverageCalculator = ({
 
             {/* Margin Level Warning */}
             {marginCallStatus && (
-              <Alert variant={marginCallStatus.severity === 'danger' ? 'destructive' : 'default'}>
+              <Alert
+                variant={
+                  marginCallStatus.severity === "danger"
+                    ? "destructive"
+                    : "default"
+                }
+              >
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
                   {marginCallStatus.isMarginCall ? (
@@ -180,7 +214,8 @@ const LeverageCalculator = ({
                     </span>
                   ) : marginCallStatus.isWarning ? (
                     <span className="font-medium text-orange-600">
-                      Approaching margin call level. Monitor your position carefully.
+                      Approaching margin call level. Monitor your position
+                      carefully.
                     </span>
                   ) : (
                     <span className="text-green-600">
@@ -195,11 +230,15 @@ const LeverageCalculator = ({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Max Leverage:</span>
-                <span className="font-medium">{calculation.max_leverage}:1</span>
+                <span className="font-medium">
+                  {calculation.max_leverage}:1
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Leverage Used:</span>
-                <span className="font-medium">{calculation.leverage_used}:1</span>
+                <span className="font-medium">
+                  {calculation.leverage_used}:1
+                </span>
               </div>
             </div>
           </div>

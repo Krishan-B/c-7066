@@ -1,9 +1,15 @@
-
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
 
 export function ProfileForm() {
   const { toast } = useToast();
@@ -15,7 +21,11 @@ export function ProfileForm() {
     },
   });
 
-  const onSubmit = (values: any) => {
+  const onSubmit = (values: {
+    fullName: string;
+    email: string;
+    phone: string;
+  }) => {
     toast({
       title: "Profile updated",
       description: "Your profile information has been updated",
