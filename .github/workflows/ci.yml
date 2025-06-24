@@ -21,6 +21,20 @@ jobs:
       - name: Check Supabase CLI version
         run: npx supabase --version
 
+      - name: Pull Supabase images with retries
+        run: |
+          images=(
+            "public.ecr.aws/supabase/vector:0.28.1-alpine"
+            "public.ecr.aws/supabase/kong:2.8.1"
+            "public.ecr.aws/supabase/postgrest:v12.2.3"
+            "public.ecr.aws/supabase/edge-runtime:v1.67.4"
+          )
+          for image in "${images[@]}"; do
+            for i in {1..5}; do
+              docker pull "$image" && break || sleep $((2**i))
+            done
+          done
+
       - name: Start Supabase
         run: npx supabase start
 
