@@ -53,9 +53,8 @@ function getDbColumns(
 }
 
 function parseSeedColumns(seed: string, table: string): string[] {
-  // Final fix: remove all unnecessary escapes for lint compliance
-  // [\w.] is valid, but ( and ) do not need escaping in RegExp constructor string
-  const regex = new RegExp(`insert into [\w.]*${table} *\(([^)]+)\)`, "i");
+  // Remove all unnecessary escapes for lint compliance
+  const regex = new RegExp(`insert into [\\w.]*${table} *(([^)]+))`, "i"); // no unnecessary escapes
   // If lint still complains, use: /insert into [\w.]*${table} *\(([^)]+)\)/i
   const match = seed.match(regex);
   if (!match) return [];

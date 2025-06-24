@@ -185,6 +185,13 @@ The workspace is pre-configured with optimal settings in `.vscode/`:
 4. **Settings Sync**: Use VS Code settings sync for consistency
 5. **Extension Reviews**: Check extension reviews and update frequency
 
+## 4d6 Best Practice: Extension Hygiene
+
+- Only install the extensions listed above for this workspace.
+- Remove or disable any extensions not listed here, especially those known to cause conflicts (see
+  TROUBLESHOOTING.md).
+- Use `npm run extensions:cleanup` to automate extension cleanup.
+
 ## 📝 Package Scripts
 
 The following npm scripts are available for extension management:

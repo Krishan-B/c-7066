@@ -73,6 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Set up auth state listener FIRST - do this before anything else
+    let hasShownWelcome = false;
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, newSession) => {
@@ -94,12 +95,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setTimeout(() => {
           fetchProfile(newSession.user!);
 
-          // Only show welcome toast for non-initial sessions
-          if (initialized) {
+          // Only show welcome toast for non-initial sessions and only once per login
+          if (initialized && !hasShownWelcome) {
             toast({
               title: "Welcome to TradePro",
               description: "You have been signed in successfully",
             });
+            hasShownWelcome = true;
           }
         }, 0);
       } else if (event === "SIGNED_OUT") {
@@ -110,6 +112,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             description: "You have been signed out successfully",
           });
         }
+        hasShownWelcome = false; // Reset on sign out
       } else if (event === "USER_UPDATED" && newSession?.user) {
         // Defer profile updating
         setTimeout(() => {
