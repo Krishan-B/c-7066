@@ -1,0 +1,2 @@
+-- Patch for function search_path issue
+-- Add your migration SQL here
