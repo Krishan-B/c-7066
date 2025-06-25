@@ -1,4 +1,3 @@
-
 -- Create asset_leverage_config table for asset-specific leverage ratios
 CREATE TABLE IF NOT EXISTS public.asset_leverage_config (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -75,7 +74,9 @@ CREATE OR REPLACE FUNCTION public.calculate_position_margin(
   maintenance_margin NUMERIC,
   margin_level NUMERIC,
   leverage_used NUMERIC
-) AS $$
+)
+SET search_path = public
+AS $$
 DECLARE
   config RECORD;
   calculated_leverage NUMERIC;
@@ -119,7 +120,9 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION public.update_position_leverage(
   p_position_id UUID,
   p_leverage NUMERIC DEFAULT NULL
-) RETURNS BOOLEAN AS $$
+) RETURNS BOOLEAN
+SET search_path = public
+AS $$
 DECLARE
   pos RECORD;
   margin_data RECORD;
@@ -186,7 +189,9 @@ CREATE INDEX IF NOT EXISTS idx_margin_calculations_user_id ON public.margin_calc
 
 -- Create trigger to automatically calculate leverage when position is created/updated
 CREATE OR REPLACE FUNCTION public.auto_calculate_position_leverage()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SET search_path = public
+AS $$
 BEGIN
   -- Calculate leverage and margin for the position
   PERFORM public.update_position_leverage(NEW.id, NEW.leverage_ratio);

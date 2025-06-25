@@ -43,7 +43,9 @@ CREATE OR REPLACE FUNCTION public.calculate_realtime_pnl(
   daily_pnl NUMERIC,
   pip_difference NUMERIC,
   pip_value NUMERIC
-) AS $$
+)
+SET search_path = public
+AS $$
 DECLARE
   pos RECORD;
   pnl_result NUMERIC;
@@ -87,7 +89,9 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION public.update_position_realtime(
   p_position_id UUID,
   p_new_price NUMERIC
-) RETURNS BOOLEAN AS $$
+) RETURNS BOOLEAN
+SET search_path = public
+AS $$
 DECLARE
   pnl_data RECORD;
 BEGIN

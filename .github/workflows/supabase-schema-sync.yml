@@ -1,0 +1,28 @@
+name: Supabase Schema Sync
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  supabase-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Supabase CLI
+        run: |
+          curl -L https://github.com/supabase/cli/releases/download/v2.26.9/supabase_linux_amd64.tar.gz -o supabase.tar.gz
+          tar -xzf supabase.tar.gz
+          sudo mv supabase /usr/local/bin/supabase
+          supabase --version
+      - name: Supabase DB Pull (Validate Schema)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          supabase db pull --db-url "$SUPABASE_DB_URL"
