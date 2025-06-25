@@ -1,4 +1,3 @@
-
 // Types for account metrics
 export interface AccountMetrics {
   balance: number;
@@ -54,4 +53,17 @@ export interface AllocationData {
 export interface PerformanceData {
   date: string;
   value: number;
+}
+
+// Account interface to match the backend and frontend WebSocket types
+export interface Account {
+  user_id?: string;
+  balance: number;
+  bonus: number;
+  realizedPnl: number;
+  equity: number;
+  usedMargin: number;
+  availableFunds: number;
+  marginLevel: number;
+  exposure: number;
 }

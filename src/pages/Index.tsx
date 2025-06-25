@@ -8,6 +8,8 @@ import WatchlistTable from "@/components/watchlist/WatchlistTable";
 import { Activity, DollarSign, PieChart, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import RealTimeEventsWidget from "@/components/RealTimeEventsWidget";
+import MarketStatusIndicator from "@/components/MarketStatusIndicator";
 
 // Define a type for asset
 interface AssetType {
@@ -115,7 +117,9 @@ const Index = () => {
         </div>
         <div className="col-span-3 space-y-4">
           <QuickTradePanel asset={selectedAsset} />
+          <MarketStatusIndicator assetClass={selectedAsset.market_type} />
           <NewsWidget />
+          <RealTimeEventsWidget />
         </div>
       </div>
     </div>
