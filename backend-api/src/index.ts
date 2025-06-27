@@ -1,10 +1,11 @@
 import express, { Request, Response } from "express";
-// @ts-expect-error: No type declarations for 'cors' module, safe to ignore for runtime usage
 import cors from "cors";
 import dotenv from "dotenv";
 import ordersRouter from "./routes/orders";
 import positionsRouter from "./routes/positions";
 import accountRouter from "./routes/account";
+import authRouter from "./routes/auth";
+import kycRouter from "./routes/kyc";
 import { createServer } from "http";
 import { initWebSocket } from "./websocket";
 
@@ -23,6 +24,8 @@ app.get("/api/health", (req: Request, res: Response) => {
 app.use("/api/orders", ordersRouter);
 app.use("/api/positions", positionsRouter);
 app.use("/api/account", accountRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/kyc", kycRouter);
 
 const PORT = process.env.PORT || 4000;
 

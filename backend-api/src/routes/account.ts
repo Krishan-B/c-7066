@@ -1,6 +1,8 @@
-import { Router } from "express";
+import { Router, Request } from "express";
+import type { User } from "@supabase/supabase-js";
 import { account, positions, getMarketPrice, Position } from "../store";
 import { broadcast } from "../websocket";
+import { requireAuth } from "./requireAuth";
 
 const router = Router();
 
@@ -28,6 +30,25 @@ router.get("/metrics", (req, res) => {
 
   res.json(account);
 });
+
+// GET /api/accounts/profile - Get authenticated user's profile
+router.get(
+  "/profile",
+  requireAuth,
+  async (req: Request & { user?: User }, res) => {
+    // User info is attached by requireAuth middleware
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    // Return basic profile info (customize as needed)
+    res.json({
+      id: user.id,
+      email: user.email,
+      user_metadata: user.user_metadata || {},
+    });
+  }
+);
 
 function calculatePnl(position: Position): number {
   const currentPrice = getMarketPrice(position.symbol);

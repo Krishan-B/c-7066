@@ -64,7 +64,7 @@ const LoginForm = () => {
       // First attempt to sign out globally in case there's an existing session
       try {
         await supabase.auth.signOut({ scope: "global" });
-      } catch (error) {
+      } catch {
         // Ignore errors during cleanup
       }
 
@@ -113,13 +113,13 @@ const LoginForm = () => {
   return (
     <>
       {formError && (
-        <Alert variant="destructive" className="mb-4">
+        <Alert variant="destructive" className="mb-4" aria-live="assertive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{formError}</AlertDescription>
         </Alert>
       )}
 
-      <form onSubmit={handleSignIn} className="space-y-4">
+      <form onSubmit={handleSignIn} className="space-y-4" aria-busy={loading}>
         <div className="space-y-2">
           <Label htmlFor="signin-email">Email</Label>
           <Input

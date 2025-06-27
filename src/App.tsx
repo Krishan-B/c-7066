@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,7 +12,6 @@ import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Markets from "./pages/Markets";
 import Portfolio from "./pages/Portfolio";
-import Orders from "./pages/Orders";
 import EnhancedOrders from "./pages/EnhancedOrders";
 import Wallet from "./pages/Wallet";
 import News from "./pages/News";
@@ -22,6 +20,9 @@ import ProfilePage from "./pages/ProfilePage";
 import Account from "./pages/Account";
 import KYC from "./pages/KYC";
 import Analytics from "./pages/Analytics";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -36,83 +37,109 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Landing />} />
                   <Route path="/auth" element={<Auth />} />
-                  <Route path="/dashboard" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Index />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/markets" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Markets />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/portfolio" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Portfolio />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/orders" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Portfolio />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/enhanced-orders" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <EnhancedOrders />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/wallet" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Wallet />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/news" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <News />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/analytics" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Analytics />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/profile" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <ProfilePage />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/account" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Account />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/dashboard/kyc" element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <KYC />
-                      </Layout>
-                    </ProtectedRoute>
-                  } />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Index />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/markets"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Markets />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/portfolio"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Portfolio />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/enhanced-orders"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <EnhancedOrders />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/wallet"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Wallet />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/news"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <News />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/analytics"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Analytics />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/profile"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <ProfilePage />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/account"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Account />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/kyc"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <KYC />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
                 </Routes>
               </AuthProvider>
             </BrowserRouter>
