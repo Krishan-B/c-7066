@@ -22,8 +22,23 @@ jobs:
           tar -xzf supabase.tar.gz
           sudo mv supabase /usr/local/bin/supabase
           supabase --version
+      - name: Repair Supabase Migration History
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          supabase migration repair --status reverted 00000000000000 || true
+          supabase migration repair --status reverted 20250620060000 || true
+          supabase migration repair --status reverted 20250620072210 || true
+          supabase migration repair --status reverted 20250620072945 || true
+          supabase migration repair --status reverted 20250620080000 || true
+          supabase migration repair --status reverted 20250625 || true
+          supabase migration repair --status reverted 20250625134815 || true
       - name: Supabase DB Pull (Validate Schema)
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "SUPABASE_DB_URL is not set. Please add it to your repository secrets." >&2
+            exit 1
+          fi
           supabase db pull --db-url "$SUPABASE_DB_URL"
