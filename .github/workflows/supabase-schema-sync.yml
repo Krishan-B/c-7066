@@ -23,9 +23,14 @@ jobs:
           sudo mv supabase /usr/local/bin/supabase
           supabase --version
       - name: Repair Supabase Migration History
+        # Use always() to ensure the step runs, but check for the secret in the script
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "SUPABASE_DB_URL is not set. Skipping migration repair." >&2
+            exit 0
+          fi
           supabase migration repair --status reverted 00000000000000 || true
           supabase migration repair --status reverted 20250620060000 || true
           supabase migration repair --status reverted 20250620072210 || true
