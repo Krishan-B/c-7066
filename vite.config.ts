@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ["react"], // Ensure only one React instance is used
   },
   build: {
     chunkSizeWarningLimit: 1000, // Increase warning limit (optional)

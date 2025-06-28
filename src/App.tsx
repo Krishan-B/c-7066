@@ -23,8 +23,18 @@ import Analytics from "./pages/Analytics";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
+import Orders from "./pages/Orders";
+import { useEffect } from "react";
+import { checkApiHealth } from "@/services/checkApiHealth";
 
 function App() {
+  useEffect(() => {
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (apiUrl) {
+      checkApiHealth(apiUrl);
+    }
+  }, []);
+
   return (
     <ErrorBoundary>
       <ThemeProvider>
@@ -136,6 +146,16 @@ function App() {
                       <ProtectedRoute>
                         <Layout>
                           <KYC />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard/orders"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Orders />
                         </Layout>
                       </ProtectedRoute>
                     }

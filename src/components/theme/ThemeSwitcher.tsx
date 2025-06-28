@@ -31,6 +31,7 @@ export const ThemeSwitcher = () => {
               size="icon"
               className="hidden md:flex"
               onClick={toggleTheme}
+              aria-label="Toggle theme"
             >
               {theme === "dark" ? (
                 <Moon className="h-4 w-4" />

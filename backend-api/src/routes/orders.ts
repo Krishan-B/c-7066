@@ -1,4 +1,6 @@
-import { Router } from "express";
+import { Router, Request } from "express";
+import { requireAuth } from "./requireAuth";
+import type { User } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
 import {
   orders,
@@ -6,9 +8,8 @@ import {
   account,
   getLeverageForAssetClass,
   getMarketPrice,
-  Order,
-  Position,
 } from "../store";
+import type { Order, Position } from "@shared/types";
 import { broadcast } from "../websocket";
 
 const router = Router();
@@ -46,9 +47,10 @@ function isMarketOpen(assetClass: string): boolean {
 }
 
 // POST /api/orders/market - Place market order
-router.post("/market", (req, res) => {
+router.post("/market", requireAuth, (req: Request & { user?: User }, res) => {
+  const user = req.user;
+  if (!user) return res.status(401).json({ error: "Unauthorized" });
   const {
-    user_id,
     symbol,
     asset_class,
     direction,
@@ -57,7 +59,7 @@ router.post("/market", (req, res) => {
     take_profit_price,
   } = req.body;
 
-  if (!user_id || !symbol || !asset_class || !direction || !quantity) {
+  if (!symbol || !asset_class || !direction || !quantity) {
     return res
       .status(400)
       .json({ error: "Missing required fields for market order" });
@@ -82,7 +84,7 @@ router.post("/market", (req, res) => {
 
   const order: Order = {
     id: uuidv4(),
-    user_id,
+    user_id: user.id,
     symbol,
     asset_class,
     order_type: "market",
@@ -100,7 +102,7 @@ router.post("/market", (req, res) => {
   // Create a new position since the market order is filled
   const position: Position = {
     id: uuidv4(),
-    user_id,
+    user_id: user.id,
     symbol,
     direction,
     quantity,
@@ -125,9 +127,10 @@ router.post("/market", (req, res) => {
 });
 
 // POST /api/orders/entry - Place entry order
-router.post("/entry", (req, res) => {
+router.post("/entry", requireAuth, (req: Request & { user?: User }, res) => {
+  const user = req.user;
+  if (!user) return res.status(401).json({ error: "Unauthorized" });
   const {
-    user_id,
     symbol,
     asset_class,
     direction,
@@ -137,14 +140,7 @@ router.post("/entry", (req, res) => {
     take_profit_price,
   } = req.body;
 
-  if (
-    !user_id ||
-    !symbol ||
-    !asset_class ||
-    !direction ||
-    !quantity ||
-    !price
-  ) {
+  if (!symbol || !asset_class || !direction || !quantity || !price) {
     return res
       .status(400)
       .json({ error: "Missing required fields for entry order" });
@@ -158,7 +154,7 @@ router.post("/entry", (req, res) => {
 
   const order: Order = {
     id: uuidv4(),
-    user_id,
+    user_id: user.id,
     symbol,
     asset_class,
     order_type: "entry",
@@ -178,9 +174,13 @@ router.post("/entry", (req, res) => {
 });
 
 // DELETE /api/orders/{id} - Cancel pending order
-router.delete("/:id", (req, res) => {
+router.delete("/:id", requireAuth, (req: Request & { user?: User }, res) => {
+  const user = req.user;
+  if (!user) return res.status(401).json({ error: "Unauthorized" });
   const { id } = req.params;
-  const orderIndex = orders.findIndex((o) => o.id === id);
+  const orderIndex = orders.findIndex(
+    (o) => o.id === id && o.user_id === user.id
+  );
 
   if (orderIndex === -1) {
     return res.status(404).json({ error: "Order not found" });
@@ -199,10 +199,60 @@ router.delete("/:id", (req, res) => {
   res.status(200).json(orders[orderIndex]);
 });
 
+// PUT /api/orders/:id - Modify a pending order
+router.put("/:id", requireAuth, (req: Request & { user?: User }, res) => {
+  const user = req.user;
+  if (!user) return res.status(401).json({ error: "Unauthorized" });
+  const { id } = req.params;
+  const { quantity, price, stop_loss_price, take_profit_price } = req.body;
+  const orderIndex = orders.findIndex(
+    (o) => o.id === id && o.user_id === user.id
+  );
+  if (orderIndex === -1) {
+    return res.status(404).json({ error: "Order not found" });
+  }
+  const order = orders[orderIndex];
+  if (order.status !== "pending") {
+    return res
+      .status(400)
+      .json({ error: "Only pending orders can be modified" });
+  }
+  if (quantity !== undefined) order.quantity = quantity;
+  if (price !== undefined) order.price = price;
+  if (stop_loss_price !== undefined) order.stop_loss_price = stop_loss_price;
+  if (take_profit_price !== undefined)
+    order.take_profit_price = take_profit_price;
+  order.updated_at = new Date().toISOString();
+  broadcast({ type: "ORDER_MODIFIED", payload: order });
+  res.status(200).json(order);
+});
+
 // GET /api/orders/pending - List pending orders
-router.get("/pending", (req, res) => {
-  const pendingOrders = orders.filter((o) => o.status === "pending");
+router.get("/pending", requireAuth, (req: Request & { user?: User }, res) => {
+  const user = req.user;
+  if (!user) return res.status(401).json({ error: "Unauthorized" });
+  const pendingOrders = orders.filter(
+    (o) => o.status === "pending" && o.user_id === user.id
+  );
   res.json(pendingOrders);
+});
+
+// GET /api/orders - List all orders for user
+router.get("/", requireAuth, (req: Request & { user?: User }, res) => {
+  const user = req.user;
+  if (!user) return res.status(401).json({ error: "Unauthorized" });
+  const userOrders = orders.filter((o) => o.user_id === user.id);
+  res.json(userOrders);
+});
+
+// GET /api/orders/:id - Get single order for user
+router.get("/:id", requireAuth, (req: Request & { user?: User }, res) => {
+  const user = req.user;
+  if (!user) return res.status(401).json({ error: "Unauthorized" });
+  const { id } = req.params;
+  const order = orders.find((o) => o.id === id && o.user_id === user.id);
+  if (!order) return res.status(404).json({ error: "Order not found" });
+  res.json(order);
 });
 
 export default router;

@@ -1,4 +1,4 @@
-import type { Order } from "@shared/types";
+// Shared types for orders and positions
 
 export interface Order {
   id: string;
@@ -14,4 +14,19 @@ export interface Order {
   take_profit_price: number | null;
   created_at: string;
   filled_at?: string;
+  updated_at?: string;
+}
+
+export interface Position {
+  id: string;
+  user_id: string;
+  symbol: string;
+  direction: "buy" | "sell";
+  quantity: number;
+  entryPrice: number;
+  marginRequired: number;
+  tp?: number | null;
+  sl?: number | null;
+  createdAt: string;
+  unrealizedPnl: number;
 }

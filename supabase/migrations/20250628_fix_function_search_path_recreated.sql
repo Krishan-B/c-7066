@@ -1,5 +1,5 @@
 -- Migration: Fix function search_path warnings (Supabase Linter)
--- Date: 2025-06-25
+-- Date: 2025-06-28 (recreated due to migration mismatch)
 
 -- Re-create all affected functions with explicit SET search_path = public
 

@@ -1,16 +1,17 @@
+import type { Order as SharedOrder } from "@shared/types";
 
 export interface BaseOrder {
   id: string;
   symbol: string;
   asset: string;
   amount: number;
-  status: 'completed' | 'pending' | 'canceled' | 'active';
+  status: "completed" | "pending" | "canceled" | "active";
   date: string;
 }
 
 export interface OpenTrade extends BaseOrder {
   openRate: number;
-  direction: 'Buy' | 'Sell';
+  direction: "Buy" | "Sell";
   units: number;
   marketRate: number;
   marketValue: number;
@@ -22,7 +23,7 @@ export interface OpenTrade extends BaseOrder {
 
 export interface PendingOrder extends BaseOrder {
   orderRate: number;
-  direction: 'Buy' | 'Sell';
+  direction: "Buy" | "Sell";
   units: number;
   marketRate: number;
   stopLoss: number | null;
@@ -33,7 +34,7 @@ export interface PendingOrder extends BaseOrder {
 export interface ClosedTrade extends BaseOrder {
   openRate: number;
   closeRate: number;
-  direction: 'Buy' | 'Sell';
+  direction: "Buy" | "Sell";
   units: number;
   marketValue: number;
   totalPnl: number;
@@ -45,7 +46,7 @@ export interface ClosedTrade extends BaseOrder {
 
 export interface OrderHistory extends BaseOrder {
   orderRate: number;
-  direction: 'Buy' | 'Sell';
+  direction: "Buy" | "Sell";
   units: number;
   stopLoss: number | null;
   takeProfit: number | null;
@@ -53,4 +54,5 @@ export interface OrderHistory extends BaseOrder {
   closeDate: string;
 }
 
-export type Order = OpenTrade | PendingOrder | ClosedTrade | OrderHistory;
+// Remove local Order interface, use shared type
+export type Order = SharedOrder;

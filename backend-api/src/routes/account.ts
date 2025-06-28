@@ -1,6 +1,7 @@
 import { Router, Request } from "express";
 import type { User } from "@supabase/supabase-js";
-import { account, positions, getMarketPrice, Position } from "../store";
+import { account, positions, getMarketPrice } from "../store";
+import type { Position } from "@shared/types";
 import { broadcast } from "../websocket";
 import { requireAuth } from "./requireAuth";
 
