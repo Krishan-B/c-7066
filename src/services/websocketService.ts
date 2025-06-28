@@ -2,7 +2,25 @@ import type { Account } from "@/types/account";
 import type { Order } from "@/types/order";
 import type { Position } from "@/types/position";
 
-const WEBSOCKET_URL = "ws://localhost:4000";
+// Dynamically determine WebSocket URL for local, Codespaces, and production
+const getWebSocketUrl = () => {
+  // Prefer explicit env variable if set
+  const envUrl = import.meta.env.VITE_WEBSOCKET_URL;
+  if (envUrl) return envUrl;
+  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+  let host = window.location.hostname;
+  // Codespaces: map frontend port (8080) to backend port (4000)
+  if (host.endsWith("app.github.dev")) {
+    host = host.replace(/-\d+\./, "-4000.");
+    return `${protocol}://${host}`;
+  }
+  // Local dev
+  if (host === "localhost" || host === "127.0.0.1") {
+    return `${protocol}://localhost:4000`;
+  }
+  // Fallback: use current host, port 4000
+  return `${protocol}://${host}:4000`;
+};
 
 let socket: WebSocket | null = null;
 
@@ -14,8 +32,8 @@ function connect() {
   if (socket && socket.readyState === WebSocket.OPEN) {
     return;
   }
-
-  socket = new WebSocket(WEBSOCKET_URL);
+  const url = getWebSocketUrl();
+  socket = new WebSocket(url);
 
   socket.onopen = () => {
     console.log("WebSocket connected");
@@ -37,8 +55,11 @@ function connect() {
     // Optional: implement reconnection logic here
   };
 
-  socket.onerror = (error) => {
-    console.error("WebSocket error:", error);
+  socket.onerror = (event) => {
+    console.error("🛑 WebSocket error:", event);
+    if (event instanceof ErrorEvent) {
+      console.error("WebSocket ErrorEvent:", event.message);
+    }
   };
 }
 

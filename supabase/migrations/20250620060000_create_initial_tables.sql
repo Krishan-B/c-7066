@@ -255,7 +255,6 @@ ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS filled_quantity NUMERIC DEFAU
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS avg_fill_price NUMERIC;
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP WITH TIME ZONE;
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS side TEXT NOT NULL CHECK (side IN ('buy', 'sell'));
-ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS quantity NUMERIC NOT NULL;
 
 -- Enhance positions table
 ALTER TABLE public.positions ADD COLUMN IF NOT EXISTS account_id UUID REFERENCES public.accounts(id);

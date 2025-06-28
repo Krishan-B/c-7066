@@ -24,15 +24,28 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
 import Orders from "./pages/Orders";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { checkApiHealth } from "@/services/checkApiHealth";
 
 function App() {
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL;
-    if (apiUrl) {
-      checkApiHealth(apiUrl);
-    }
+    const runHealthCheck = async () => {
+      if (document.visibilityState === "visible") {
+        await checkApiHealth();
+      }
+    };
+    runHealthCheck();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") runHealthCheck();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    intervalRef.current = setInterval(runHealthCheck, 15000); // every 15s
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
 
   return (
@@ -142,6 +155,16 @@ function App() {
                   />
                   <Route
                     path="/dashboard/kyc"
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <KYC />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/kyc"
                     element={
                       <ProtectedRoute>
                         <Layout>
