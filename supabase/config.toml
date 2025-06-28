@@ -1,10 +1,9 @@
-
 project_id = "hntsrkacolpseqnyidis"
 
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "storage", "auth"]
+schemas = ["public", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
@@ -15,4 +14,30 @@ major_version = 15
 [studio]
 enabled = true
 port = 54323
+
+[auth]
+enabled = true
+site_url = "https://c-7066-krishans-projects-a1782459.vercel.app/"
+additional_redirect_urls = ["https://c-7066-krishans-projects-a1782459.vercel.app/", "https://c-7066-krishans-projects-a1782459.vercel.app/**", "https://c-*-7066-krishans-projects-a1782459.vercel.app", "https://c-*-7066-krishans-projects-a1782459.vercel.app/**"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+
+[auth.mfa]
+max_enrolled_factors = 10
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+[auth.mfa.phone]
+enroll_enabled = false
+verify_enabled = false
+
+[auth.email]
+double_confirm_changes = true
+enable_confirmations = false
+secure_password_change = false
+max_frequency = "1m0s"
+otp_length = 6
+otp_expiry = 3600
+[auth.email.template]
 

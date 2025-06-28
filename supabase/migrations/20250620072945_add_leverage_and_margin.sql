@@ -39,17 +39,20 @@ ALTER TABLE public.asset_leverage_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.margin_calculations ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for asset_leverage_config (public read access)
+DROP POLICY IF EXISTS "Anyone can view leverage config" ON public.asset_leverage_config;
 CREATE POLICY "Anyone can view leverage config" 
   ON public.asset_leverage_config 
   FOR SELECT 
   USING (true);
 
 -- Create RLS policies for margin_calculations
+DROP POLICY IF EXISTS "Users can view their own margin calculations" ON public.margin_calculations;
 CREATE POLICY "Users can view their own margin calculations" 
   ON public.margin_calculations 
   FOR SELECT 
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own margin calculations" ON public.margin_calculations;
 CREATE POLICY "Users can insert their own margin calculations" 
   ON public.margin_calculations 
   FOR INSERT 

@@ -1,15 +1,12 @@
 -- Create storage bucket for KYC documents
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES (
-  'kyc-documents', 
-  'kyc-documents', 
-  false, 
-  10485760, -- 10MB limit as per PRD
-  ARRAY['application/pdf', 'image/jpeg', 'image/png']
+SELECT 'kyc-documents', 'kyc-documents', false, 10485760, ARRAY['application/pdf', 'image/jpeg', 'image/png']
+WHERE NOT EXISTS (
+  SELECT 1 FROM storage.buckets WHERE id = 'kyc-documents'
 );
 
 -- Create KYC documents table
-CREATE TABLE public.kyc_documents (
+CREATE TABLE IF NOT EXISTS public.kyc_documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   document_type TEXT NOT NULL CHECK (document_type IN (
@@ -38,22 +35,26 @@ CREATE TABLE public.kyc_documents (
 ALTER TABLE public.kyc_documents ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for kyc_documents
+DROP POLICY IF EXISTS "Users can view their own KYC documents" ON public.kyc_documents;
 CREATE POLICY "Users can view their own KYC documents"
   ON public.kyc_documents
   FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own KYC documents" ON public.kyc_documents;
 CREATE POLICY "Users can insert their own KYC documents"
   ON public.kyc_documents
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own KYC documents" ON public.kyc_documents;
 CREATE POLICY "Users can update their own KYC documents"
   ON public.kyc_documents
   FOR UPDATE
   USING (auth.uid() = user_id);
 
 -- Create storage policies for KYC documents bucket
+DROP POLICY IF EXISTS "Users can upload their own KYC documents" ON storage.objects;
 CREATE POLICY "Users can upload their own KYC documents"
   ON storage.objects
   FOR INSERT
@@ -62,6 +63,7 @@ CREATE POLICY "Users can upload their own KYC documents"
     auth.uid()::text = (storage.foldername(name))[1]
   );
 
+DROP POLICY IF EXISTS "Users can view their own KYC documents" ON storage.objects;
 CREATE POLICY "Users can view their own KYC documents"
   ON storage.objects
   FOR SELECT
@@ -70,6 +72,7 @@ CREATE POLICY "Users can view their own KYC documents"
     auth.uid()::text = (storage.foldername(name))[1]
   );
 
+DROP POLICY IF EXISTS "Admins can view all KYC documents" ON storage.objects;
 CREATE POLICY "Admins can view all KYC documents"
   ON storage.objects
   FOR SELECT
@@ -87,6 +90,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
+DROP TRIGGER IF EXISTS update_kyc_documents_updated_at ON public.kyc_documents;
 CREATE TRIGGER update_kyc_documents_updated_at
     BEFORE UPDATE ON public.kyc_documents
     FOR EACH ROW
@@ -135,7 +139,7 @@ CREATE TABLE public.assets (
 );
 
 -- Create positions table for trading platform
-CREATE TABLE public.positions (
+CREATE TABLE IF NOT EXISTS public.positions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   symbol TEXT NOT NULL,
@@ -160,21 +164,25 @@ CREATE TABLE public.positions (
 ALTER TABLE public.positions ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for positions
+DROP POLICY IF EXISTS "Users can view their own positions" ON public.positions;
 CREATE POLICY "Users can view their own positions"
   ON public.positions
   FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own positions" ON public.positions;
 CREATE POLICY "Users can insert their own positions"
   ON public.positions
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own positions" ON public.positions;
 CREATE POLICY "Users can update their own positions"
   ON public.positions
   FOR UPDATE
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own positions" ON public.positions;
 CREATE POLICY "Users can delete their own positions"
   ON public.positions
   FOR DELETE
@@ -195,7 +203,7 @@ CREATE TRIGGER update_positions_updated_at
     EXECUTE FUNCTION update_positions_updated_at_column();
 
 -- Create orders table for trading platform
-CREATE TABLE public.orders (
+CREATE TABLE IF NOT EXISTS public.orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   symbol TEXT NOT NULL,
@@ -213,21 +221,25 @@ CREATE TABLE public.orders (
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for orders
+DROP POLICY IF EXISTS "Users can view their own orders" ON public.orders;
 CREATE POLICY "Users can view their own orders"
   ON public.orders
   FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own orders" ON public.orders;
 CREATE POLICY "Users can insert their own orders"
   ON public.orders
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own orders" ON public.orders;
 CREATE POLICY "Users can update their own orders"
   ON public.orders
   FOR UPDATE
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own orders" ON public.orders;
 CREATE POLICY "Users can delete their own orders"
   ON public.orders
   FOR DELETE

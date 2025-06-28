@@ -24,11 +24,13 @@ CREATE TABLE IF NOT EXISTS public.position_updates (
 ALTER TABLE public.position_updates ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for position_updates
+DROP POLICY IF EXISTS "Users can view their own position updates" ON public.position_updates;
 CREATE POLICY "Users can view their own position updates" 
   ON public.position_updates 
   FOR SELECT 
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own position updates" ON public.position_updates;
 CREATE POLICY "Users can insert their own position updates" 
   ON public.position_updates 
   FOR INSERT 
@@ -141,5 +143,20 @@ ALTER TABLE public.positions REPLICA IDENTITY FULL;
 ALTER TABLE public.position_updates REPLICA IDENTITY FULL;
 
 -- Add tables to realtime publication
-ALTER PUBLICATION supabase_realtime ADD TABLE public.positions;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.position_updates;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'positions'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.positions;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'position_updates'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.position_updates;
+  END IF;
+END $$;
