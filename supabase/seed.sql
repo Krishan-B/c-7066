@@ -13,14 +13,14 @@ DELETE FROM public.orders;
 -- Insert mock data into the orders table
 insert into public.orders (
   id, user_id, symbol, asset_class, order_type, direction, quantity, price, status, stop_loss_price, take_profit_price, created_at,
-  margin_required, position_value, requested_price, units
+  margin_required, position_value, requested_price
 )
 values
   -- A limit buy order for BTC
-  (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'BTC/USDT', 'CRYPTO', 'limit', 'buy', 0.5, 60000.00, 'pending', 58000.00, 65000.00, now(), 1000.00, 30000.00, 60000.00, 0.5),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'BTC/USDT', 'CRYPTO', 'limit', 'buy', 0.5, 60000.00, 'pending', 58000.00, 65000.00, now(), 1000.00, 30000.00, 60000.00),
   -- A market sell order for ETH
-  (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'ETH/USDT', 'CRYPTO', 'market', 'sell', 10.0, null, 'filled', null, null, now() - interval '1 day', 2000.00, 20000.00, 2000.00, 10.0),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'ETH/USDT', 'CRYPTO', 'market', 'sell', 10.0, null, 'filled', null, null, now() - interval '1 day', 2000.00, 20000.00, 2000.00),
   -- A cancelled stop-limit order
-  (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'SOL/USDT', 'CRYPTO', 'stop_limit', 'buy', 100.0, 150.00, 'cancelled', 145.00, null, now() - interval '2 days', 500.00, 15000.00, 150.00, 100.0);
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'SOL/USDT', 'CRYPTO', 'stop_limit', 'buy', 100.0, 150.00, 'cancelled', 145.00, null, now() - interval '2 days', 500.00, 15000.00, 150.00);
 
 -- You can add more seed data for other tables here

@@ -22,8 +22,23 @@ jobs:
           tar -xzf supabase.tar.gz
           sudo mv supabase /usr/local/bin/supabase
           supabase --version
+      - name: Link Supabase project
+        run: |
+          if [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ]; then
+            echo "SUPABASE_PROJECT_REF is not set. Please add it to your repository secrets." >&2
+            exit 1
+          fi
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+      - name: Set up DB URL
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "SUPABASE_DB_URL is not set. Please add it to your repository secrets." >&2
+            exit 1
+          fi
+          echo "SUPABASE_DB_URL is set"
       - name: Repair Supabase Migration History
-        # Use always() to ensure the step runs, but check for the secret in the script
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
@@ -31,13 +46,7 @@ jobs:
             echo "SUPABASE_DB_URL is not set. Skipping migration repair." >&2
             exit 0
           fi
-          supabase migration repair --status reverted 00000000000000 || true
-          supabase migration repair --status reverted 20250620060000 || true
-          supabase migration repair --status reverted 20250620072210 || true
-          supabase migration repair --status reverted 20250620072945 || true
-          supabase migration repair --status reverted 20250620080000 || true
-          supabase migration repair --status reverted 20250625 || true
-          supabase migration repair --status reverted 20250625134815 || true
+          supabase migration repair --status reverted 20250629015303 || true
       - name: Supabase DB Pull (Validate Schema)
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
