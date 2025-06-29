@@ -7,7 +7,7 @@ import { requireAuth } from "./requireAuth";
 
 const router = Router();
 
-// GET /api/account/metrics - Get financial metrics
+// Public endpoint: returns aggregate/simulated account metrics
 router.get("/metrics", (req, res) => {
   // In a real system, these would be calculated continuously.
   // For this simulation, we'll do a snapshot calculation.
@@ -32,7 +32,7 @@ router.get("/metrics", (req, res) => {
   res.json(account);
 });
 
-// GET /api/accounts/profile - Get authenticated user's profile
+// Protected endpoint: only authenticated users can access their profile
 router.get(
   "/profile",
   requireAuth,

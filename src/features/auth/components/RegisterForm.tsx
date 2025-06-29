@@ -224,7 +224,10 @@ const RegisterForm = () => {
               </SelectTrigger>
               <SelectContent className="max-h-80">
                 {countries.map((c) => (
-                  <SelectItem key={c.code} value={c.dialCode}>
+                  <SelectItem
+                    key={`${c.code}-${c.dialCode}`}
+                    value={c.dialCode}
+                  >
                     {c.dialCode} ({c.code})
                   </SelectItem>
                 ))}

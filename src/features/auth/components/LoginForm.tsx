@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { login, logout } from "@/services/auth";
 import { AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -57,30 +57,15 @@ const LoginForm = () => {
 
     try {
       setLoading(true);
-
       // Clean up any existing auth state
       cleanupAuthState();
-
-      // First attempt to sign out globally in case there's an existing session
       try {
-        await supabase.auth.signOut({ scope: "global" });
-      } catch {
-        // Ignore errors during cleanup
-      }
-
+        await logout();
+      } catch {}
       console.log("Attempting to sign in with:", { email });
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
+      const { data, error } = await login(email, password);
       if (error) throw error;
-
       console.log("Login successful:", data);
-
-      // Instead of displaying a toast here, let AuthProvider handle it
-      // and navigate programmatically instead of forcing a page reload
       navigate("/dashboard", { replace: true });
     } catch (error) {
       // Use type unknown and type guard for error

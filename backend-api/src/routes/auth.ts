@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import { syncUserProfile } from "../utils/syncUserProfile";
 
 dotenv.config();
 
@@ -24,6 +25,16 @@ router.post("/register", async (req, res) => {
   if (error) {
     return res.status(400).json({ error: error.message });
   }
+  // Sync user profile to local DB (only if user exists and email is string)
+  if (data.user && typeof data.user.email === "string") {
+    const { id, email, user_metadata, ...rest } = data.user;
+    await syncUserProfile({
+      id,
+      email,
+      user_metadata: user_metadata || {},
+      ...rest,
+    });
+  }
   return res.status(201).json({ user: data.user });
 });
 
@@ -39,6 +50,16 @@ router.post("/login", async (req, res) => {
   });
   if (error) {
     return res.status(401).json({ error: error.message });
+  }
+  // Sync user profile to local DB (only if user exists and email is string)
+  if (data.user && typeof data.user.email === "string") {
+    const { id, email, user_metadata, ...rest } = data.user;
+    await syncUserProfile({
+      id,
+      email,
+      user_metadata: user_metadata || {},
+      ...rest,
+    });
   }
   return res.status(200).json({ session: data.session, user: data.user });
 });

@@ -7,6 +7,9 @@ import { broadcast } from "../websocket";
 
 const router = Router();
 
+// All routes below are protected by requireAuth middleware
+// Only authenticated users can access or modify their own positions
+
 // GET /api/positions - List all open positions for user
 router.get("/", requireAuth, (req: Request & { user?: User }, res) => {
   const user = req.user;

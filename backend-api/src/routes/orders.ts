@@ -14,6 +14,9 @@ import { broadcast } from "../websocket";
 
 const router = Router();
 
+// All routes below are protected by requireAuth middleware
+// Only authenticated users can access or modify their own orders
+
 function isMarketOpen(assetClass: string): boolean {
   const now = new Date();
   const day = now.getUTCDay(); // 0 = Sunday, 6 = Saturday

@@ -1,7 +1,14 @@
+// Middleware: requireAuth
+// Protects routes by validating Supabase JWT and attaching the user profile to req.user.
+// Also syncs the user profile to the local DB on every authenticated request.
+// Use on any route that requires authentication, e.g.:
+//   router.get('/protected', requireAuth, handler)
+
 import { Request, Response, NextFunction } from "express";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import { syncUserProfile } from "../utils/syncUserProfile";
 
 dotenv.config();
 
@@ -25,5 +32,15 @@ export async function requireAuth(
   }
   // Attach user info to request for downstream handlers
   req.user = data.user;
+  // Sync user profile to local DB (if email is string)
+  if (data.user && typeof data.user.email === "string") {
+    const { id, email, user_metadata, ...rest } = data.user;
+    await syncUserProfile({
+      id,
+      email,
+      user_metadata: user_metadata || {},
+      ...rest,
+    });
+  }
   next();
 }
