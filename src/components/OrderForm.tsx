@@ -1,12 +1,19 @@
 import React, { useState } from "react";
 import { useOrderApi } from "../services/tradingApi";
+import { useKYC } from "@/hooks/useKYC";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const assetClasses = ["STOCKS", "FOREX", "CRYPTO", "INDICES", "COMMODITIES"];
 const directions = ["buy", "sell"];
 
 export default function OrderForm() {
   const { placeMarketOrder, placeEntryOrder } = useOrderApi();
+  const { isKYCComplete } = useKYC();
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     symbol: "",
     asset_class: "STOCKS",
@@ -19,6 +26,8 @@ export default function OrderForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const kycComplete = isKYCComplete();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -33,6 +42,13 @@ export default function OrderForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check KYC status before allowing trading
+    if (!kycComplete) {
+      toast.error("KYC verification required before trading");
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
@@ -82,6 +98,25 @@ export default function OrderForm() {
       className="space-y-4 max-w-md mx-auto p-4 border rounded bg-white dark:bg-gray-900"
     >
       <h2 className="text-lg font-bold mb-2">Place Order</h2>
+
+      {/* KYC Warning */}
+      {!kycComplete && (
+        <Alert className="border-orange-200 bg-orange-50">
+          <AlertTriangle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="flex items-center justify-between text-orange-800">
+            <span>Complete KYC verification to start trading</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/kyc")}
+              className="ml-4"
+            >
+              Verify KYC
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div>
         <label className="block mb-1">Order Type</label>
         <select
@@ -183,9 +218,9 @@ export default function OrderForm() {
       <button
         type="submit"
         className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50"
-        disabled={loading}
+        disabled={loading || !kycComplete}
       >
-        {loading ? "Placing..." : "Place Order"}
+        {loading ? "Placing..." : kycComplete ? "Place Order" : "KYC Required"}
       </button>
     </form>
   );

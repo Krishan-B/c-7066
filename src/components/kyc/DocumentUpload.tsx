@@ -1,51 +1,72 @@
-
-import { useState } from 'react';
-import { Upload, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useKYC } from '@/hooks/useKYC';
-import type { DocumentType, DocumentCategory, DocumentCategoryInfo } from '@/types/kyc';
+import { useState } from "react";
+import { Upload, X, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useKYC } from "@/hooks/useKYC";
+import type {
+  DocumentType,
+  DocumentCategory,
+  DocumentCategoryInfo,
+} from "@/types/kyc";
 
 const DOCUMENT_CATEGORIES: DocumentCategoryInfo[] = [
   {
-    category: 'ID_VERIFICATION',
-    title: 'ID Verification',
-    description: 'Upload government-issued identification documents',
+    category: "ID_VERIFICATION",
+    title: "ID Verification",
+    description: "Upload government-issued identification documents",
     required: true,
     documentTypes: [
-      { value: 'ID_PASSPORT', label: 'Passport', required: false },
-      { value: 'ID_FRONT', label: 'ID Card (Front)', required: false },
-      { value: 'ID_BACK', label: 'ID Card (Back)', required: false },
-      { value: 'DRIVERS_LICENSE', label: 'Driver\'s License', required: false },
-      { value: 'OTHER_ID', label: 'Other ID Document', required: false },
-    ]
+      { value: "ID_PASSPORT", label: "Passport", required: false },
+      { value: "ID_FRONT", label: "ID Card (Front)", required: false },
+      { value: "ID_BACK", label: "ID Card (Back)", required: false },
+      { value: "DRIVERS_LICENSE", label: "Driver's License", required: false },
+      { value: "OTHER_ID", label: "Other ID Document", required: false },
+    ],
   },
   {
-    category: 'ADDRESS_VERIFICATION',
-    title: 'Address Verification',
-    description: 'Upload proof of address documents',
+    category: "ADDRESS_VERIFICATION",
+    title: "Address Verification",
+    description: "Upload proof of address documents",
     required: true,
     documentTypes: [
-      { value: 'UTILITY_BILL', label: 'Utility Bill', required: false },
-      { value: 'BANK_STATEMENT', label: 'Bank Statement', required: false },
-      { value: 'CREDIT_CARD_STATEMENT', label: 'Credit Card Statement', required: false },
-      { value: 'TAX_BILL', label: 'Local Authority Tax Bill', required: false },
-      { value: 'OTHER_ADDRESS', label: 'Other Address Proof', required: false },
-    ]
+      { value: "UTILITY_BILL", label: "Utility Bill", required: false },
+      { value: "BANK_STATEMENT", label: "Bank Statement", required: false },
+      {
+        value: "CREDIT_CARD_STATEMENT",
+        label: "Credit Card Statement",
+        required: false,
+      },
+      { value: "TAX_BILL", label: "Local Authority Tax Bill", required: false },
+      { value: "OTHER_ADDRESS", label: "Other Address Proof", required: false },
+    ],
   },
   {
-    category: 'OTHER_DOCUMENTATION',
-    title: 'Other Documentation',
-    description: 'Upload any additional supporting documents',
+    category: "OTHER_DOCUMENTATION",
+    title: "Other Documentation",
+    description: "Upload any additional supporting documents",
     required: false,
     documentTypes: [
-      { value: 'OTHER_DOC', label: 'Other Document', required: false },
-    ]
-  }
+      { value: "OTHER_DOC", label: "Other Document", required: false },
+    ],
+  },
 ];
 
 interface DocumentUploadProps {
@@ -53,47 +74,82 @@ interface DocumentUploadProps {
 }
 
 const DocumentUpload = ({ onUploadComplete }: DocumentUploadProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<DocumentCategory>('ID_VERIFICATION');
-  const [selectedType, setSelectedType] = useState<DocumentType>('ID_PASSPORT');
+  const [selectedCategory, setSelectedCategory] =
+    useState<DocumentCategory>("ID_VERIFICATION");
+  const [selectedType, setSelectedType] = useState<DocumentType>("ID_PASSPORT");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [comments, setComments] = useState('');
-  
+  const [comments, setComments] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [errors, setErrors] = useState<string[]>([]);
+
   const { uploadDocument, uploading } = useKYC();
+
+  const validateFile = (file: File): string[] => {
+    const errors: string[] = [];
+
+    // Validate file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      errors.push("File size must be less than 10MB");
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      errors.push("Only PDF, JPG, and PNG files are allowed");
+    }
+
+    return errors;
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    setErrors([]);
+
     if (file) {
-      // Validate file size (10MB limit)
-      if (file.size > 10 * 1024 * 1024) {
-        alert('File size must be less than 10MB');
+      const validationErrors = validateFile(file);
+      if (validationErrors.length > 0) {
+        setErrors(validationErrors);
         return;
       }
-      
-      // Validate file type
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
-      if (!allowedTypes.includes(file.type)) {
-        alert('Only PDF, JPG, and PNG files are allowed');
-        return;
-      }
-      
+
       setSelectedFile(file);
+      setUploadProgress(0);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile) return;
-    
+
     try {
-      await uploadDocument(selectedFile, selectedType, selectedCategory, comments);
+      setErrors([]);
+      setUploadProgress(25); // Started
+      await uploadDocument(
+        selectedFile,
+        selectedType,
+        selectedCategory,
+        comments
+      );
+      setUploadProgress(100); // Complete
       setSelectedFile(null);
-      setComments('');
+      setComments("");
+      // Reset progress after a brief delay
+      setTimeout(() => setUploadProgress(0), 1000);
       onUploadComplete?.();
-    } catch (error) {
-      // Error is handled in the hook
+    } catch (err) {
+      console.error("Upload error:", err);
+      setErrors(["Upload failed. Please try again."]);
+      setUploadProgress(0);
     }
   };
 
-  const selectedCategoryInfo = DOCUMENT_CATEGORIES.find(cat => cat.category === selectedCategory);
+  const selectedCategoryInfo = DOCUMENT_CATEGORIES.find(
+    (cat) => cat.category === selectedCategory
+  );
   const availableTypes = selectedCategoryInfo?.documentTypes || [];
 
   return (
@@ -107,12 +163,14 @@ const DocumentUpload = ({ onUploadComplete }: DocumentUploadProps) => {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="category">Document Category</Label>
-          <Select 
-            value={selectedCategory} 
+          <Select
+            value={selectedCategory}
             onValueChange={(value) => {
               setSelectedCategory(value as DocumentCategory);
               // Reset document type when category changes
-              const newCategory = DOCUMENT_CATEGORIES.find(cat => cat.category === value);
+              const newCategory = DOCUMENT_CATEGORIES.find(
+                (cat) => cat.category === value
+              );
               if (newCategory && newCategory.documentTypes.length > 0) {
                 setSelectedType(newCategory.documentTypes[0].value);
               }
@@ -124,7 +182,7 @@ const DocumentUpload = ({ onUploadComplete }: DocumentUploadProps) => {
             <SelectContent>
               {DOCUMENT_CATEGORIES.map((category) => (
                 <SelectItem key={category.category} value={category.category}>
-                  {category.title} {category.required && '*'}
+                  {category.title} {category.required && "*"}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -138,7 +196,10 @@ const DocumentUpload = ({ onUploadComplete }: DocumentUploadProps) => {
 
         <div className="space-y-2">
           <Label htmlFor="type">Document Type</Label>
-          <Select value={selectedType} onValueChange={(value) => setSelectedType(value as DocumentType)}>
+          <Select
+            value={selectedType}
+            onValueChange={(value) => setSelectedType(value as DocumentType)}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -174,7 +235,8 @@ const DocumentUpload = ({ onUploadComplete }: DocumentUploadProps) => {
           </div>
           {selectedFile && (
             <p className="text-sm text-muted-foreground">
-              Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+              Selected: {selectedFile.name} (
+              {(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
             </p>
           )}
           <p className="text-xs text-muted-foreground">
@@ -182,7 +244,9 @@ const DocumentUpload = ({ onUploadComplete }: DocumentUploadProps) => {
           </p>
         </div>
 
-        {(selectedType === 'OTHER_DOC' || selectedType === 'OTHER_ID' || selectedType === 'OTHER_ADDRESS') && (
+        {(selectedType === "OTHER_DOC" ||
+          selectedType === "OTHER_ID" ||
+          selectedType === "OTHER_ADDRESS") && (
           <div className="space-y-2">
             <Label htmlFor="comments">Comments</Label>
             <Textarea
@@ -194,8 +258,33 @@ const DocumentUpload = ({ onUploadComplete }: DocumentUploadProps) => {
           </div>
         )}
 
-        <Button 
-          onClick={handleUpload} 
+        {/* Error display */}
+        {errors.length > 0 && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <ul className="list-disc list-inside space-y-1">
+                {errors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Upload progress */}
+        {uploading && uploadProgress > 0 && uploadProgress < 100 && (
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Uploading...</span>
+              <span>{uploadProgress}%</span>
+            </div>
+            <Progress value={uploadProgress} className="w-full" />
+          </div>
+        )}
+
+        <Button
+          onClick={handleUpload}
           disabled={!selectedFile || uploading}
           className="w-full"
         >
