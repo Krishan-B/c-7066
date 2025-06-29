@@ -12,7 +12,7 @@ DELETE FROM public.orders;
 
 -- Insert mock data into the orders table
 insert into public.orders (
-  id, user_id, symbol, asset_class, order_type, direction, quantity, price, status, stop_loss_price, take_profit_price, created_at,
+  id, user_id, symbol, asset_class, order_type, side, quantity, price, status, stop_loss_price, take_profit_price, created_at,
   margin_required, position_value, requested_price
 )
 values
