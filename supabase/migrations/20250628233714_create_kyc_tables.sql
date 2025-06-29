@@ -23,6 +23,12 @@ CREATE INDEX IF NOT EXISTS idx_kyc_documents_category ON public.kyc_documents(ca
 -- Enable RLS
 ALTER TABLE public.kyc_documents ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Users can view their own KYC documents" ON public.kyc_documents;
+DROP POLICY IF EXISTS "Users can insert their own KYC documents" ON public.kyc_documents;
+DROP POLICY IF EXISTS "Users can update their own KYC documents" ON public.kyc_documents;
+DROP POLICY IF EXISTS "Users can delete their own KYC documents" ON public.kyc_documents;
+
 -- Create RLS policies
 CREATE POLICY "Users can view their own KYC documents" ON public.kyc_documents
     FOR SELECT USING (auth.uid() = user_id);
@@ -36,7 +42,7 @@ CREATE POLICY "Users can update their own KYC documents" ON public.kyc_documents
 CREATE POLICY "Users can delete their own KYC documents" ON public.kyc_documents
     FOR DELETE USING (auth.uid() = user_id);
 
--- Create function to update updated_at timestamp
+-- Create or replace function to update updated_at timestamp (if it doesn't exist, it will be created)
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -45,7 +51,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create trigger to automatically update updated_at
+-- Drop and recreate trigger
+DROP TRIGGER IF EXISTS update_kyc_documents_updated_at ON public.kyc_documents;
 CREATE TRIGGER update_kyc_documents_updated_at
     BEFORE UPDATE ON public.kyc_documents
     FOR EACH ROW
@@ -55,6 +62,11 @@ CREATE TRIGGER update_kyc_documents_updated_at
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('kyc-documents', 'kyc-documents', true)
 ON CONFLICT (id) DO NOTHING;
+
+-- Drop existing storage policies first
+DROP POLICY IF EXISTS "Users can upload their own KYC documents" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view their own KYC documents" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own KYC documents" ON storage.objects;
 
 -- Create storage policies for KYC documents
 CREATE POLICY "Users can upload their own KYC documents" ON storage.objects

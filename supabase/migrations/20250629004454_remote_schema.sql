@@ -1451,20 +1451,6 @@ grant truncate on table "public"."order_history" to "authenticated";
 
 grant update on table "public"."order_history" to "authenticated";
 
-grant delete on table "public"."order_history" to "service_role";
-
-grant insert on table "public"."order_history" to "service_role";
-
-grant references on table "public"."order_history" to "service_role";
-
-grant select on table "public"."order_history" to "service_role";
-
-grant trigger on table "public"."order_history" to "service_role";
-
-grant truncate on table "public"."order_history" to "service_role";
-
-grant update on table "public"."order_history" to "service_role";
-
 grant delete on table "public"."position_history" to "anon";
 
 grant insert on table "public"."position_history" to "anon";
@@ -1492,20 +1478,6 @@ grant trigger on table "public"."position_history" to "authenticated";
 grant truncate on table "public"."position_history" to "authenticated";
 
 grant update on table "public"."position_history" to "authenticated";
-
-grant delete on table "public"."position_history" to "service_role";
-
-grant insert on table "public"."position_history" to "service_role";
-
-grant references on table "public"."position_history" to "service_role";
-
-grant select on table "public"."position_history" to "service_role";
-
-grant trigger on table "public"."position_history" to "service_role";
-
-grant truncate on table "public"."position_history" to "service_role";
-
-grant update on table "public"."position_history" to "service_role";
 
 grant delete on table "public"."position_updates" to "anon";
 
@@ -1535,20 +1507,6 @@ grant truncate on table "public"."position_updates" to "authenticated";
 
 grant update on table "public"."position_updates" to "authenticated";
 
-grant delete on table "public"."position_updates" to "service_role";
-
-grant insert on table "public"."position_updates" to "service_role";
-
-grant references on table "public"."position_updates" to "service_role";
-
-grant select on table "public"."position_updates" to "service_role";
-
-grant trigger on table "public"."position_updates" to "service_role";
-
-grant truncate on table "public"."position_updates" to "service_role";
-
-grant update on table "public"."position_updates" to "service_role";
-
 grant delete on table "public"."price_alerts" to "anon";
 
 grant insert on table "public"."price_alerts" to "anon";
@@ -1576,20 +1534,6 @@ grant trigger on table "public"."price_alerts" to "authenticated";
 grant truncate on table "public"."price_alerts" to "authenticated";
 
 grant update on table "public"."price_alerts" to "authenticated";
-
-grant delete on table "public"."price_alerts" to "service_role";
-
-grant insert on table "public"."price_alerts" to "service_role";
-
-grant references on table "public"."price_alerts" to "service_role";
-
-grant select on table "public"."price_alerts" to "service_role";
-
-grant trigger on table "public"."price_alerts" to "service_role";
-
-grant truncate on table "public"."price_alerts" to "service_role";
-
-grant update on table "public"."price_alerts" to "service_role";
 
 grant delete on table "public"."risk_metrics" to "anon";
 
@@ -1661,20 +1605,6 @@ grant truncate on table "public"."trade_analytics" to "authenticated";
 
 grant update on table "public"."trade_analytics" to "authenticated";
 
-grant delete on table "public"."trade_analytics" to "service_role";
-
-grant insert on table "public"."trade_analytics" to "service_role";
-
-grant references on table "public"."trade_analytics" to "service_role";
-
-grant select on table "public"."trade_analytics" to "service_role";
-
-grant trigger on table "public"."trade_analytics" to "service_role";
-
-grant truncate on table "public"."trade_analytics" to "service_role";
-
-grant update on table "public"."trade_analytics" to "service_role";
-
 grant delete on table "public"."trading_orders" to "anon";
 
 grant insert on table "public"."trading_orders" to "anon";
@@ -1703,20 +1633,6 @@ grant truncate on table "public"."trading_orders" to "authenticated";
 
 grant update on table "public"."trading_orders" to "authenticated";
 
-grant delete on table "public"."trading_orders" to "service_role";
-
-grant insert on table "public"."trading_orders" to "service_role";
-
-grant references on table "public"."trading_orders" to "service_role";
-
-grant select on table "public"."trading_orders" to "service_role";
-
-grant trigger on table "public"."trading_orders" to "service_role";
-
-grant truncate on table "public"."trading_orders" to "service_role";
-
-grant update on table "public"."trading_orders" to "service_role";
-
 grant delete on table "public"."trading_positions" to "anon";
 
 grant insert on table "public"."trading_positions" to "anon";
@@ -1744,20 +1660,6 @@ grant trigger on table "public"."trading_positions" to "authenticated";
 grant truncate on table "public"."trading_positions" to "authenticated";
 
 grant update on table "public"."trading_positions" to "authenticated";
-
-grant delete on table "public"."trading_positions" to "service_role";
-
-grant insert on table "public"."trading_positions" to "service_role";
-
-grant references on table "public"."trading_positions" to "service_role";
-
-grant select on table "public"."trading_positions" to "service_role";
-
-grant trigger on table "public"."trading_positions" to "service_role";
-
-grant truncate on table "public"."trading_positions" to "service_role";
-
-grant update on table "public"."trading_positions" to "service_role";
 
 grant delete on table "public"."user_account" to "anon";
 
@@ -1829,20 +1731,6 @@ grant truncate on table "public"."user_portfolio" to "authenticated";
 
 grant update on table "public"."user_portfolio" to "authenticated";
 
-grant delete on table "public"."user_portfolio" to "service_role";
-
-grant insert on table "public"."user_portfolio" to "service_role";
-
-grant references on table "public"."user_portfolio" to "service_role";
-
-grant select on table "public"."user_portfolio" to "service_role";
-
-grant trigger on table "public"."user_portfolio" to "service_role";
-
-grant truncate on table "public"."user_portfolio" to "service_role";
-
-grant update on table "public"."user_portfolio" to "service_role";
-
 grant delete on table "public"."user_trades" to "anon";
 
 grant insert on table "public"."user_trades" to "anon";
@@ -1870,20 +1758,6 @@ grant trigger on table "public"."user_trades" to "authenticated";
 grant truncate on table "public"."user_trades" to "authenticated";
 
 grant update on table "public"."user_trades" to "authenticated";
-
-grant delete on table "public"."user_trades" to "service_role";
-
-grant insert on table "public"."user_trades" to "service_role";
-
-grant references on table "public"."user_trades" to "service_role";
-
-grant select on table "public"."user_trades" to "service_role";
-
-grant trigger on table "public"."user_trades" to "service_role";
-
-grant truncate on table "public"."user_trades" to "service_role";
-
-grant update on table "public"."user_trades" to "service_role";
 
 grant delete on table "public"."user_watchlist" to "anon";
 
@@ -1913,20 +1787,6 @@ grant truncate on table "public"."user_watchlist" to "authenticated";
 
 grant update on table "public"."user_watchlist" to "authenticated";
 
-grant delete on table "public"."user_watchlist" to "service_role";
-
-grant insert on table "public"."user_watchlist" to "service_role";
-
-grant references on table "public"."user_watchlist" to "service_role";
-
-grant select on table "public"."user_watchlist" to "service_role";
-
-grant trigger on table "public"."user_watchlist" to "service_role";
-
-grant truncate on table "public"."user_watchlist" to "service_role";
-
-grant update on table "public"."user_watchlist" to "service_role";
-
 grant delete on table "public"."users" to "anon";
 
 grant insert on table "public"."users" to "anon";
@@ -1955,20 +1815,6 @@ grant truncate on table "public"."users" to "authenticated";
 
 grant update on table "public"."users" to "authenticated";
 
-grant delete on table "public"."users" to "service_role";
-
-grant insert on table "public"."users" to "service_role";
-
-grant references on table "public"."users" to "service_role";
-
-grant select on table "public"."users" to "service_role";
-
-grant trigger on table "public"."users" to "service_role";
-
-grant truncate on table "public"."users" to "service_role";
-
-grant update on table "public"."users" to "service_role";
-
 create policy "Users can insert their own metrics"
 on "public"."account_metrics"
 as permissive
@@ -1983,6 +1829,7 @@ as permissive
 for update
 to public
 using ((auth.uid() = user_id));
+
 
 
 create policy "Users can view their own metrics"
