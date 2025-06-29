@@ -23,6 +23,8 @@ jobs:
           sudo mv supabase /usr/local/bin/supabase
           supabase --version
       - name: Link Supabase project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           if [ -z "${{ secrets.SUPABASE_PROJECT_REF }}" ]; then
             echo "SUPABASE_PROJECT_REF is not set. Please add it to your repository secrets." >&2
@@ -32,6 +34,7 @@ jobs:
       - name: Set up DB URL
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           if [ -z "$SUPABASE_DB_URL" ]; then
             echo "SUPABASE_DB_URL is not set. Please add it to your repository secrets." >&2
@@ -41,6 +44,7 @@ jobs:
       - name: Repair Supabase Migration History
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           if [ -z "$SUPABASE_DB_URL" ]; then
             echo "SUPABASE_DB_URL is not set. Skipping migration repair." >&2
@@ -50,6 +54,7 @@ jobs:
       - name: Supabase DB Pull (Validate Schema)
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           if [ -z "$SUPABASE_DB_URL" ]; then
             echo "SUPABASE_DB_URL is not set. Please add it to your repository secrets." >&2
