@@ -17,10 +17,10 @@ insert into public.orders (
 )
 values
   -- A limit buy order for BTC
-  (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'BTC/USDT', 'CRYPTO', 'limit', 'buy', 0.5, 60000.00, 'pending', 58000.00, 65000.00, now(), 1000.00, 30000.00, 60000.00, 'long'),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'BTC/USDT', 'CRYPTO', 'limit', 'buy', 0.5, 60000.00, 'pending', 58000.00, 65000.00, now(), 1000.00, 30000.00, 60000.00, 'buy'),
   -- A market sell order for ETH
-  (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'ETH/USDT', 'CRYPTO', 'market', 'sell', 10.0, null, 'filled', null, null, now() - interval '1 day', 2000.00, 20000.00, 2000.00, 'short'),
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'ETH/USDT', 'CRYPTO', 'market', 'sell', 10.0, null, 'filled', null, null, now() - interval '1 day', 2000.00, 20000.00, 2000.00, 'sell'),
   -- A cancelled stop-limit order
-  (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'SOL/USDT', 'CRYPTO', 'stop_limit', 'buy', 100.0, 150.00, 'cancelled', 145.00, null, now() - interval '2 days', 500.00, 15000.00, 150.00, 'long');
+  (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'SOL/USDT', 'CRYPTO', 'stop_limit', 'buy', 100.0, 150.00, 'cancelled', 145.00, null, now() - interval '2 days', 500.00, 15000.00, 150.00, 'buy');
 
 -- You can add more seed data for other tables here
