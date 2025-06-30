@@ -15,25 +15,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [initialized, setInitialized] = useState(false);
   const { toast } = useToast();
 
-  // Fetch profile data from user metadata
+  // Fetch profile data from backend API
   const fetchProfile = useCallback(
     async (currentUser: User) => {
       if (!currentUser) return null;
-
       try {
         setProfileLoading(true);
-        // Get profile data from user metadata
-        const metadata = currentUser.user_metadata || {};
-
-        const userProfile: UserProfile = {
-          id: currentUser.id,
-          firstName: metadata.first_name || "",
-          lastName: metadata.last_name || "",
-          email: currentUser.email || "",
-          country: metadata.country || "",
-          phoneNumber: metadata.phone_number || "",
-        };
-
+        // Get JWT from Supabase session
+        const { data } = await supabase.auth.getSession();
+        const jwt = data.session?.access_token;
+        const resp = await fetch("/api/account/profile", {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        });
+        if (!resp.ok) throw new Error("Failed to fetch profile");
+        const userProfile = await resp.json();
         setProfile(userProfile);
         return userProfile;
       } catch (error) {
@@ -167,7 +164,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [toast, fetchProfile, initialized]);
+  }, [toast, fetchProfile, initialized]); // Fix useEffect dependency
 
   const signOut = async () => {
     try {
@@ -230,6 +227,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // Function to update user profile
+  // Update profile using backend PATCH endpoint
   const updateProfile = async (profileData: Partial<UserProfile>) => {
     if (!user) {
       toast({
@@ -239,24 +237,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       return;
     }
-
     try {
       setProfileLoading(true);
-
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          first_name: profileData.firstName,
-          last_name: profileData.lastName,
-          country: profileData.country,
-          phone_number: profileData.phoneNumber,
+      const { data } = await supabase.auth.getSession();
+      const jwt = data.session?.access_token;
+      const resp = await fetch("/api/account/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwt}`,
         },
+        body: JSON.stringify(profileData),
       });
-
-      if (error) throw error;
-
-      // Update local profile state
-      setProfile((prev) => (prev ? { ...prev, ...profileData } : null));
-
+      if (!resp.ok) throw new Error("Failed to update profile");
+      const updatedProfile = await resp.json();
+      setProfile(updatedProfile);
       toast({
         title: "Profile updated",
         description: "Your profile has been updated successfully",

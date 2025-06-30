@@ -1,4 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+// Remove dotenv and Supabase client creation from this file.
+// Expect supabase client to be passed in via function argument or app.locals.supabase
 
 // Example utility to sync Supabase user profile to your local DB
 // Call this after successful login/register or on first authenticated request
@@ -11,12 +14,13 @@ export interface SupabaseUserProfile {
   [key: string]: unknown;
 }
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Minimal interface for Supabase-like client
+interface SupabaseLike {
+  from: (...args: unknown[]) => unknown;
+}
 
 export async function syncUserProfile(
+  supabase: SupabaseClient,
   supabaseUser: SupabaseUserProfile
 ): Promise<{ success: boolean; error?: string }> {
   if (!supabaseUser) return { success: false, error: "No user provided" };

@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
 import { countries } from "@/lib/countries";
 import { AlertCircle, ArrowRight, Check, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
@@ -43,21 +43,6 @@ const RegisterForm = () => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Utility function to clean up auth state
-  const cleanupAuthState = () => {
-    localStorage.removeItem("supabase.auth.token");
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith("supabase.auth.") || key.includes("sb-")) {
-        localStorage.removeItem(key);
-      }
-    });
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith("supabase.auth.") || key.includes("sb-")) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();

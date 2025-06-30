@@ -4,6 +4,7 @@
     "esbenp.prettier-vscode",
     "supabase.vscode-supabase-extension",
     "eamodio.gitlens",
-    "bradlc.vscode-tailwindcss-intellisense"
+    "bradlc.vscode-tailwindcss-intellisense",
+    "github.copilot-chat"
   ]
 }

@@ -35,7 +35,7 @@ export async function requireAuth(
   // Sync user profile to local DB (if email is string)
   if (data.user && typeof data.user.email === "string") {
     const { id, email, user_metadata, ...rest } = data.user;
-    await syncUserProfile({
+    await syncUserProfile(req.app.locals.supabase, {
       id,
       email,
       user_metadata: user_metadata || {},

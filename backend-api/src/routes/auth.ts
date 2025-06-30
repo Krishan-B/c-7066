@@ -1,41 +1,129 @@
-import { Router } from "express";
-import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
-import { syncUserProfile } from "../utils/syncUserProfile";
-
 dotenv.config();
 
-const SUPABASE_URL = process.env.SUPABASE_URL || "";
-const SUPABASE_KEY = process.env.SUPABASE_KEY || "";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+import { Router } from "express";
+import { createClient } from "@supabase/supabase-js";
+import { syncUserProfile } from "../utils/syncUserProfile";
+import bcrypt from "bcrypt";
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_KEY;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY) {
+  throw new Error("Missing required Supabase environment variables");
+}
+
+console.log("Initializing Supabase clients with:");
+console.log("URL:", SUPABASE_URL);
+console.log("Anon Key (first 10 chars):", SUPABASE_ANON_KEY?.substring(0, 10));
+
+// Client for Auth operations (signUp, signIn)
+const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Client for privileged DB operations
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const router = Router();
 
 // POST /api/auth/register
 router.post("/register", async (req, res) => {
-  const { email, password, ...metadata } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required" });
-  }
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: metadata },
-  });
-  if (error) {
-    return res.status(400).json({ error: error.message });
-  }
-  // Sync user profile to local DB (only if user exists and email is string)
-  if (data.user && typeof data.user.email === "string") {
-    const { id, email, user_metadata, ...rest } = data.user;
-    await syncUserProfile({
-      id,
+  try {
+    const {
       email,
-      user_metadata: user_metadata || {},
-      ...rest,
+      password,
+      first_name,
+      last_name,
+      experience_level,
+      preferences,
+    } = req.body;
+
+    console.log("Registration attempt for:", { email, first_name, last_name });
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    // Register with Supabase Auth
+    console.log("Attempting Supabase Auth signUp...");
+    const { data: authData, error: authError } = await supabaseAuth.auth.signUp(
+      {
+        email,
+        password,
+      }
+    );
+
+    console.log("Supabase Auth Response:", {
+      success: !!authData && !authError,
+      hasUser: !!authData?.user,
+      errorMessage: authError?.message,
+      errorName: authError?.name,
     });
+
+    if (authError) {
+      console.error("Supabase Auth Error:", authError);
+      return res.status(400).json({ error: authError.message });
+    }
+
+    if (!authData.user) {
+      return res.status(400).json({ error: "Failed to create user" });
+    }
+
+    console.log("Auth successful, creating user profile...");
+
+    // Hash password for local users table
+    const password_hash = await bcrypt.hash(password, 10);
+
+    // Create user profile in users table
+    const { error: dbError } = await supabase.from("users").insert([
+      {
+        id: authData.user.id,
+        email,
+        first_name,
+        last_name,
+        experience_level,
+        preferences,
+        password_hash,
+      },
+    ]);
+
+    if (dbError) {
+      console.error("Database Error:", dbError);
+      // Attempt to clean up the auth user if DB insert fails
+      await supabase.auth.admin.deleteUser(authData.user.id);
+      return res.status(500).json({ error: "Failed to create user profile" });
+    }
+
+    // Sync user profile
+    const supabaseUser = {
+      id: authData.user.id,
+      email: authData.user.email || "",
+      user_metadata: {
+        first_name,
+        last_name,
+        experience_level,
+        preferences,
+      },
+    };
+
+    await syncUserProfile(supabase, supabaseUser);
+
+    return res.status(201).json({
+      message: "User registered successfully",
+      user: {
+        id: authData.user.id,
+        email: authData.user.email,
+        first_name,
+        last_name,
+        experience_level,
+      },
+    });
+  } catch (error) {
+    console.error("Registration Error:", error);
+    return res
+      .status(500)
+      .json({ error: "Internal server error during registration" });
   }
-  return res.status(201).json({ user: data.user });
 });
 
 // POST /api/auth/login
@@ -44,24 +132,30 @@ router.post("/login", async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required" });
   }
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  if (error) {
-    return res.status(401).json({ error: error.message });
+  // Fetch user from users table (service role key)
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select(
+      "id, email, password_hash, first_name, last_name, experience_level, preferences, created_at, is_verified, kyc_status"
+    )
+    .eq("email", email)
+    .single();
+  if (userError || !user) {
+    return res.status(401).json({ error: "Invalid email or password" });
   }
-  // Sync user profile to local DB (only if user exists and email is string)
-  if (data.user && typeof data.user.email === "string") {
-    const { id, email, user_metadata, ...rest } = data.user;
-    await syncUserProfile({
-      id,
-      email,
-      user_metadata: user_metadata || {},
-      ...rest,
-    });
+  // Compare password
+  const valid = await bcrypt.compare(password, user.password_hash);
+  if (!valid) {
+    return res.status(401).json({ error: "Invalid email or password" });
   }
-  return res.status(200).json({ session: data.session, user: data.user });
+  // Update last_login
+  await supabase
+    .from("users")
+    .update({ last_login: new Date().toISOString() })
+    .eq("id", user.id);
+  // Remove password_hash from response
+  const { password_hash, ...userProfile } = user;
+  return res.status(200).json({ user: userProfile });
 });
 
 export default router;

@@ -1,19 +1,8 @@
 import { toast } from "sonner";
 
 export async function checkApiHealth() {
-  // Prefer explicit env, fallback to Codespaces or local
-  const envUrl = import.meta.env.VITE_API_HEALTH_URL;
-  let url = envUrl;
-  if (!url) {
-    // Try to auto-detect Codespaces or local dev
-    const { protocol, hostname } = window.location;
-    // If running on Codespaces, use port 4000 pattern
-    if (hostname.endsWith("app.github.dev")) {
-      url = `${protocol}//${hostname.replace(/-\d+\./, "-4000.")}/api/health`;
-    } else {
-      url = "/api/health";
-    }
-  }
+  // Always use the frontend's origin for health check
+  const url = `${window.location.origin}/api/health`;
   console.info("[HealthCheck] Checking API health at:", url);
   try {
     const controller = new AbortController();
@@ -28,7 +17,7 @@ export async function checkApiHealth() {
     toast.error(
       "API is unreachable. Please check your backend and .env configuration."
     );
-    console.error("❌ API health check failed:", err);
+    console.error("❌ API health check failed:", err, "URL used:", url);
     return false;
   }
 }

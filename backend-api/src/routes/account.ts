@@ -1,4 +1,5 @@
 import { Router, Request } from "express";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
 import { account, positions, getMarketPrice } from "../store";
 import type { Position } from "@shared/types";
@@ -36,18 +37,68 @@ router.get("/metrics", (req, res) => {
 router.get(
   "/profile",
   requireAuth,
-  async (req: Request & { user?: User }, res) => {
+  async (req: Request & { user?: { id: string } }, res) => {
     // User info is attached by requireAuth middleware
     const user = req.user;
-    if (!user) {
+    if (!user || !user.id) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    // Return basic profile info (customize as needed)
-    res.json({
-      id: user.id,
-      email: user.email,
-      user_metadata: user.user_metadata || {},
-    });
+    // Fetch user profile from users table
+    const { data: userProfile, error: userError } = await (
+      req.app.locals.supabase as SupabaseClient
+    )
+      .from("users")
+      .select(
+        "id, email, first_name, last_name, experience_level, preferences, created_at, is_verified, kyc_status, last_login"
+      )
+      .eq("id", user.id)
+      .single();
+    if (userError || !userProfile) {
+      return res.status(404).json({ error: "User profile not found" });
+    }
+    res.json(userProfile);
+  }
+);
+
+// PATCH /api/account/profile - update user profile
+router.patch(
+  "/profile",
+  requireAuth,
+  async (req: Request & { user?: { id: string } }, res) => {
+    const user = req.user;
+    if (!user || !user.id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const allowedFields = [
+      "first_name",
+      "last_name",
+      "experience_level",
+      "preferences",
+      "country",
+      "phone_number",
+    ];
+    // Only allow updating allowed fields
+    const updates: Record<string, unknown> = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "No valid fields to update" });
+    }
+    const { error, data } = await (req.app.locals.supabase as SupabaseClient)
+      .from("users")
+      .update(updates)
+      .eq("id", user.id)
+      .select(
+        "id, email, first_name, last_name, experience_level, preferences, created_at, is_verified, kyc_status, last_login, country, phone_number"
+      )
+      .single();
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+    res.json(data);
   }
 );
 

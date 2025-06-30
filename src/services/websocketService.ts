@@ -4,22 +4,22 @@ import type { Position } from "@/types/position";
 
 // Dynamically determine WebSocket URL for local, Codespaces, and production
 const getWebSocketUrl = () => {
-  // Prefer explicit env variable if set
   const envUrl = import.meta.env.VITE_WEBSOCKET_URL;
   if (envUrl) return envUrl;
-  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+  // Always use ws:// for local and Codespaces to avoid handshake issues
+  const protocol = "ws";
   let host = window.location.hostname;
-  // Codespaces: map frontend port (8080) to backend port (4000)
+  // Codespaces: map frontend port (8080) to backend port (3001)
   if (host.endsWith("app.github.dev")) {
-    host = host.replace(/-\d+\./, "-4000.");
+    host = host.replace(/-\d+\./, "-3001.");
     return `${protocol}://${host}`;
   }
   // Local dev
   if (host === "localhost" || host === "127.0.0.1") {
-    return `${protocol}://localhost:4000`;
+    return `${protocol}://localhost:3001`;
   }
-  // Fallback: use current host, port 4000
-  return `${protocol}://${host}:4000`;
+  // Fallback: use current host, port 3001
+  return `${protocol}://${host}:3001`;
 };
 
 let socket: WebSocket | null = null;

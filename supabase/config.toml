@@ -18,7 +18,7 @@ port = 54323
 [auth]
 enabled = true
 site_url = "https://c-7066-krishans-projects-a1782459.vercel.app/"
-additional_redirect_urls = ["https://c-7066-krishans-projects-a1782459.vercel.app/", "https://c-7066-krishans-projects-a1782459.vercel.app/**", "https://c-*-7066-krishans-projects-a1782459.vercel.app", "https://c-*-7066-krishans-projects-a1782459.vercel.app/**"]
+additional_redirect_urls = ["https://c-7066-krishans-projects-a1782459.vercel.app/"]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 refresh_token_reuse_interval = 10
