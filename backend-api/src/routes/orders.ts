@@ -50,149 +50,167 @@ function isMarketOpen(assetClass: string): boolean {
 }
 
 // POST /api/orders/market - Place market order
-router.post("/market", requireAuth, (req: Request & { user?: User }, res) => {
-  const user = req.user;
-  if (!user) return res.status(401).json({ error: "Unauthorized" });
-  const {
-    symbol,
-    asset_class,
-    direction,
-    quantity,
-    stop_loss_price,
-    take_profit_price,
-  } = req.body;
+router.post(
+  "/market",
+  requireAuth,
+  (req: Request & { user?: User }, res): void => {
+    const user = req.user;
+    if (!user) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    const {
+      symbol,
+      asset_class,
+      direction,
+      quantity,
+      stop_loss_price,
+      take_profit_price,
+    } = req.body;
 
-  if (!symbol || !asset_class || !direction || !quantity) {
-    return res
-      .status(400)
-      .json({ error: "Missing required fields for market order" });
+    if (!symbol || !asset_class || !direction || !quantity) {
+      res
+        .status(400)
+        .json({ error: "Missing required fields for market order" });
+      return;
+    }
+
+    if (!isMarketOpen(asset_class)) {
+      res.status(403).json({ error: `Market is closed for ${asset_class}` });
+      return;
+    }
+
+    const marketPrice = getMarketPrice(symbol);
+    const leverage = getLeverageForAssetClass(asset_class);
+    const marginRequired = (marketPrice * quantity) / leverage;
+
+    // Pre-trade validation
+    if (account.availableFunds < marginRequired) {
+      res.status(400).json({ error: "Insufficient funds to place order." });
+      return;
+    }
+
+    const order: Order = {
+      id: uuidv4(),
+      user_id: user.id,
+      symbol,
+      asset_class,
+      order_type: "market",
+      direction,
+      quantity,
+      price: marketPrice,
+      status: "filled",
+      stop_loss_price: stop_loss_price || null,
+      take_profit_price: take_profit_price || null,
+      created_at: new Date().toISOString(),
+      filled_at: new Date().toISOString(),
+    };
+    orders.push(order);
+
+    // Create a new position since the market order is filled
+    const position: Position = {
+      id: uuidv4(),
+      user_id: user.id,
+      symbol,
+      direction,
+      quantity,
+      entryPrice: marketPrice,
+      marginRequired,
+      tp: take_profit_price || null,
+      sl: stop_loss_price || null,
+      createdAt: new Date().toISOString(),
+      unrealizedPnl: 0,
+    };
+    positions.push(position);
+
+    // Update account metrics
+    account.usedMargin += marginRequired;
+    account.availableFunds =
+      account.balance + account.realizedPnl - account.usedMargin;
+
+    broadcast({ type: "ORDER_FILLED", payload: { order, position } });
+    broadcast({ type: "ACCOUNT_METRICS_UPDATE", payload: account });
+
+    res.status(201).json({ order, position });
+    return;
   }
-
-  if (!isMarketOpen(asset_class)) {
-    return res
-      .status(403)
-      .json({ error: `Market is closed for ${asset_class}` });
-  }
-
-  const marketPrice = getMarketPrice(symbol);
-  const leverage = getLeverageForAssetClass(asset_class);
-  const marginRequired = (marketPrice * quantity) / leverage;
-
-  // Pre-trade validation
-  if (account.availableFunds < marginRequired) {
-    return res
-      .status(400)
-      .json({ error: "Insufficient funds to place order." });
-  }
-
-  const order: Order = {
-    id: uuidv4(),
-    user_id: user.id,
-    symbol,
-    asset_class,
-    order_type: "market",
-    direction,
-    quantity,
-    price: marketPrice,
-    status: "filled",
-    stop_loss_price: stop_loss_price || null,
-    take_profit_price: take_profit_price || null,
-    created_at: new Date().toISOString(),
-    filled_at: new Date().toISOString(),
-  };
-  orders.push(order);
-
-  // Create a new position since the market order is filled
-  const position: Position = {
-    id: uuidv4(),
-    user_id: user.id,
-    symbol,
-    direction,
-    quantity,
-    entryPrice: marketPrice,
-    marginRequired,
-    tp: take_profit_price || null,
-    sl: stop_loss_price || null,
-    createdAt: new Date().toISOString(),
-    unrealizedPnl: 0,
-  };
-  positions.push(position);
-
-  // Update account metrics
-  account.usedMargin += marginRequired;
-  account.availableFunds =
-    account.balance + account.realizedPnl - account.usedMargin;
-
-  broadcast({ type: "ORDER_FILLED", payload: { order, position } });
-  broadcast({ type: "ACCOUNT_METRICS_UPDATE", payload: account });
-
-  res.status(201).json({ order, position });
-});
+);
 
 // POST /api/orders/entry - Place entry order
-router.post("/entry", requireAuth, (req: Request & { user?: User }, res) => {
-  const user = req.user;
-  if (!user) return res.status(401).json({ error: "Unauthorized" });
-  const {
-    symbol,
-    asset_class,
-    direction,
-    quantity,
-    price,
-    stop_loss_price,
-    take_profit_price,
-  } = req.body;
+router.post(
+  "/entry",
+  requireAuth,
+  (req: Request & { user?: User }, res): void => {
+    const user = req.user;
+    if (!user) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    const {
+      symbol,
+      asset_class,
+      direction,
+      quantity,
+      price,
+      stop_loss_price,
+      take_profit_price,
+    } = req.body;
 
-  if (!symbol || !asset_class || !direction || !quantity || !price) {
-    return res
-      .status(400)
-      .json({ error: "Missing required fields for entry order" });
+    if (!symbol || !asset_class || !direction || !quantity || !price) {
+      res
+        .status(400)
+        .json({ error: "Missing required fields for entry order" });
+      return;
+    }
+
+    if (!isMarketOpen(asset_class)) {
+      res.status(403).json({ error: `Market is closed for ${asset_class}` });
+      return;
+    }
+
+    const order: Order = {
+      id: uuidv4(),
+      user_id: user.id,
+      symbol,
+      asset_class,
+      order_type: "entry",
+      direction,
+      quantity,
+      price,
+      status: "pending",
+      stop_loss_price: stop_loss_price || null,
+      take_profit_price: take_profit_price || null,
+      created_at: new Date().toISOString(),
+    };
+    orders.push(order);
+
+    broadcast({ type: "ORDER_PENDING", payload: order });
+
+    res.status(201).json(order);
+    return;
   }
-
-  if (!isMarketOpen(asset_class)) {
-    return res
-      .status(403)
-      .json({ error: `Market is closed for ${asset_class}` });
-  }
-
-  const order: Order = {
-    id: uuidv4(),
-    user_id: user.id,
-    symbol,
-    asset_class,
-    order_type: "entry",
-    direction,
-    quantity,
-    price,
-    status: "pending",
-    stop_loss_price: stop_loss_price || null,
-    take_profit_price: take_profit_price || null,
-    created_at: new Date().toISOString(),
-  };
-  orders.push(order);
-
-  broadcast({ type: "ORDER_PENDING", payload: order });
-
-  res.status(201).json(order);
-});
+);
 
 // DELETE /api/orders/{id} - Cancel pending order
-router.delete("/:id", requireAuth, (req: Request & { user?: User }, res) => {
+router.delete(":id", requireAuth, (req: Request & { user?: User }, res) => {
   const user = req.user;
-  if (!user) return res.status(401).json({ error: "Unauthorized" });
+  if (!user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   const { id } = req.params;
   const orderIndex = orders.findIndex(
     (o) => o.id === id && o.user_id === user.id
   );
 
   if (orderIndex === -1) {
-    return res.status(404).json({ error: "Order not found" });
+    res.status(404).json({ error: "Order not found" });
+    return;
   }
 
   if (orders[orderIndex].status !== "pending") {
-    return res
-      .status(400)
-      .json({ error: "Only pending orders can be cancelled" });
+    res.status(400).json({ error: "Only pending orders can be cancelled" });
+    return;
   }
 
   orders[orderIndex].status = "cancelled";
@@ -203,22 +221,25 @@ router.delete("/:id", requireAuth, (req: Request & { user?: User }, res) => {
 });
 
 // PUT /api/orders/:id - Modify a pending order
-router.put("/:id", requireAuth, (req: Request & { user?: User }, res) => {
+router.put(":id", requireAuth, (req: Request & { user?: User }, res) => {
   const user = req.user;
-  if (!user) return res.status(401).json({ error: "Unauthorized" });
+  if (!user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   const { id } = req.params;
   const { quantity, price, stop_loss_price, take_profit_price } = req.body;
   const orderIndex = orders.findIndex(
     (o) => o.id === id && o.user_id === user.id
   );
   if (orderIndex === -1) {
-    return res.status(404).json({ error: "Order not found" });
+    res.status(404).json({ error: "Order not found" });
+    return;
   }
   const order = orders[orderIndex];
   if (order.status !== "pending") {
-    return res
-      .status(400)
-      .json({ error: "Only pending orders can be modified" });
+    res.status(400).json({ error: "Only pending orders can be modified" });
+    return;
   }
   if (quantity !== undefined) order.quantity = quantity;
   if (price !== undefined) order.price = price;
@@ -231,30 +252,46 @@ router.put("/:id", requireAuth, (req: Request & { user?: User }, res) => {
 });
 
 // GET /api/orders/pending - List pending orders
-router.get("/pending", requireAuth, (req: Request & { user?: User }, res) => {
-  const user = req.user;
-  if (!user) return res.status(401).json({ error: "Unauthorized" });
-  const pendingOrders = orders.filter(
-    (o) => o.status === "pending" && o.user_id === user.id
-  );
-  res.json(pendingOrders);
-});
+router.get(
+  "/pending",
+  requireAuth,
+  (req: Request & { user?: User }, res): void => {
+    const user = req.user;
+    if (!user) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    const pendingOrders = orders.filter(
+      (o) => o.status === "pending" && o.user_id === user.id
+    );
+    res.json(pendingOrders);
+  }
+);
 
 // GET /api/orders - List all orders for user
 router.get("/", requireAuth, (req: Request & { user?: User }, res) => {
   const user = req.user;
-  if (!user) return res.status(401).json({ error: "Unauthorized" });
+  if (!user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   const userOrders = orders.filter((o) => o.user_id === user.id);
   res.json(userOrders);
 });
 
 // GET /api/orders/:id - Get single order for user
-router.get("/:id", requireAuth, (req: Request & { user?: User }, res) => {
+router.get(":id", requireAuth, (req: Request & { user?: User }, res) => {
   const user = req.user;
-  if (!user) return res.status(401).json({ error: "Unauthorized" });
+  if (!user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   const { id } = req.params;
   const order = orders.find((o) => o.id === id && o.user_id === user.id);
-  if (!order) return res.status(404).json({ error: "Order not found" });
+  if (!order) {
+    res.status(404).json({ error: "Order not found" });
+    return;
+  }
   res.json(order);
 });
 

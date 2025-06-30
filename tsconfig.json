@@ -7,12 +7,15 @@
       "@/*": ["./src/*"],
       "@shared/*": ["./shared/*"]
     },
-    "noImplicitAny": false,
-    "noUnusedParameters": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "strictNullChecks": true,
     "skipLibCheck": true,
     "allowJs": true,
-    "noUnusedLocals": false,
-    "strictNullChecks": false,
-    "types": ["jest"]
+    "types": ["jest"],
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true
   }
 }

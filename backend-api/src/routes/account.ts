@@ -34,14 +34,19 @@ router.get("/metrics", (req, res) => {
 });
 
 // Protected endpoint: only authenticated users can access their profile
+import type { Response, NextFunction } from "express";
 router.get(
   "/profile",
   requireAuth,
-  async (req: Request & { user?: { id: string } }, res) => {
+  async (
+    req: Request & { user?: { id: string } },
+    res: Response
+  ): Promise<void> => {
     // User info is attached by requireAuth middleware
     const user = req.user;
     if (!user || !user.id) {
-      return res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
     // Fetch user profile from users table
     const { data: userProfile, error: userError } = await (
@@ -54,7 +59,8 @@ router.get(
       .eq("id", user.id)
       .single();
     if (userError || !userProfile) {
-      return res.status(404).json({ error: "User profile not found" });
+      res.status(404).json({ error: "User profile not found" });
+      return;
     }
     res.json(userProfile);
   }
@@ -64,10 +70,14 @@ router.get(
 router.patch(
   "/profile",
   requireAuth,
-  async (req: Request & { user?: { id: string } }, res) => {
+  async (
+    req: Request & { user?: { id: string } },
+    res: Response
+  ): Promise<void> => {
     const user = req.user;
     if (!user || !user.id) {
-      return res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
     const allowedFields = [
       "first_name",
@@ -85,7 +95,8 @@ router.patch(
       }
     }
     if (Object.keys(updates).length === 0) {
-      return res.status(400).json({ error: "No valid fields to update" });
+      res.status(400).json({ error: "No valid fields to update" });
+      return;
     }
     const { error, data } = await (req.app.locals.supabase as SupabaseClient)
       .from("users")
@@ -96,9 +107,11 @@ router.patch(
       )
       .single();
     if (error) {
-      return res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
+      return;
     }
     res.json(data);
+    return;
   }
 );
 

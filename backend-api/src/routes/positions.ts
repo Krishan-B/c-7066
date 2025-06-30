@@ -13,7 +13,10 @@ const router = Router();
 // GET /api/positions - List all open positions for user
 router.get("/", requireAuth, (req: Request & { user?: User }, res) => {
   const user = req.user;
-  if (!user) return res.status(401).json({ error: "Unauthorized" });
+  if (!user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   const userPositions = positions.filter((p) => p.user_id === user.id);
   res.json(userPositions);
 });
@@ -24,14 +27,18 @@ router.post(
   requireAuth,
   (req: Request & { user?: User }, res) => {
     const user = req.user;
-    if (!user) return res.status(401).json({ error: "Unauthorized" });
+    if (!user) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
     const { id } = req.params;
     const positionIndex = positions.findIndex(
       (p: Position) => p.id === id && p.user_id === user.id
     );
 
     if (positionIndex === -1) {
-      return res.status(404).json({ error: "Position not found" });
+      res.status(404).json({ error: "Position not found" });
+      return;
     }
 
     const position = positions[positionIndex];

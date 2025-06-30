@@ -56,13 +56,18 @@ const upload = multer({
 }); // 10MB limit
 
 // GET /api/kyc/status - Get user's KYC status
+import type { Response } from "express";
 router.get(
   "/status",
   requireAuth,
-  async (req: Request & { user?: User }, res) => {
+  async function (
+    req: Request & { user?: User },
+    res: Response
+  ): Promise<void> {
     const user = req.user;
     if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
 
     try {
@@ -101,9 +106,11 @@ router.get(
         documents: documents || [],
         documentsCount: documents?.length || 0,
       });
+      return;
     } catch (error) {
       console.error("Error fetching KYC status:", error);
       res.status(500).json({ error: "Failed to fetch KYC status" });
+      return;
     }
   }
 );
@@ -113,21 +120,27 @@ router.post(
   "/upload",
   requireAuth,
   upload.single("document"),
-  async (req: Request & { user?: User }, res) => {
+  async function (
+    req: Request & { user?: User },
+    res: Response
+  ): Promise<void> {
     const user = req.user;
     const file = req.file;
     const { documentType, category, comments } = req.body;
 
     if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
     if (!file) {
-      return res.status(400).json({ error: "No file uploaded" });
+      res.status(400).json({ error: "No file uploaded" });
+      return;
     }
     if (!documentType || !category) {
-      return res
+      res
         .status(400)
         .json({ error: "Document type and category are required" });
+      return;
     }
 
     try {
@@ -158,31 +171,25 @@ router.post(
         .insert({
           user_id: user.id,
           document_type: documentType,
-          category: category,
+          category,
           file_url: publicUrl,
           file_name: file.originalname,
           status: "PENDING",
           comments: comments || null,
-          uploaded_at: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
         })
         .select()
         .single();
 
       if (dbError) {
-        // If DB insert fails, clean up the uploaded file
-        await supabase.storage.from("kyc-documents").remove([filePath]);
         throw dbError;
       }
 
-      res.status(201).json({
-        message: "KYC document uploaded successfully",
-        document: data,
-      });
+      res.status(201).json({ document: data });
+      return;
     } catch (error) {
       console.error("Error uploading KYC document:", error);
-      res.status(500).json({ error: "Failed to upload document" });
+      res.status(500).json({ error: "Failed to upload KYC document" });
+      return;
     }
   }
 );
@@ -191,10 +198,14 @@ router.post(
 router.get(
   "/documents",
   requireAuth,
-  async (req: Request & { user?: User }, res) => {
+  async function (
+    req: Request & { user?: User },
+    res: Response
+  ): Promise<void> {
     const user = req.user;
     if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
 
     try {
@@ -207,9 +218,11 @@ router.get(
       if (error) throw error;
 
       res.json({ documents: documents || [] });
+      return;
     } catch (error) {
       console.error("Error fetching KYC documents:", error);
       res.status(500).json({ error: "Failed to fetch documents" });
+      return;
     }
   }
 );
@@ -218,12 +231,16 @@ router.get(
 router.delete(
   "/documents/:id",
   requireAuth,
-  async (req: Request & { user?: User }, res) => {
+  async function (
+    req: Request & { user?: User },
+    res: Response
+  ): Promise<void> {
     const user = req.user;
     const { id } = req.params;
 
     if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
 
     try {
@@ -236,7 +253,8 @@ router.delete(
         .single();
 
       if (fetchError || !document) {
-        return res.status(404).json({ error: "Document not found" });
+        res.status(404).json({ error: "Document not found" });
+        return;
       }
 
       // Extract file path from URL
@@ -264,9 +282,11 @@ router.delete(
       if (dbError) throw dbError;
 
       res.json({ message: "Document deleted successfully" });
+      return;
     } catch (error) {
       console.error("Error deleting KYC document:", error);
       res.status(500).json({ error: "Failed to delete document" });
+      return;
     }
   }
 );
@@ -275,13 +295,17 @@ router.delete(
 router.put(
   "/documents/:id",
   requireAuth,
-  async (req: Request & { user?: User }, res) => {
+  async function (
+    req: Request & { user?: User },
+    res: Response
+  ): Promise<void> {
     const user = req.user;
     const { id } = req.params;
     const { comments } = req.body;
 
     if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
 
     try {
@@ -299,16 +323,18 @@ router.put(
       if (error) throw error;
 
       if (!data) {
-        return res.status(404).json({ error: "Document not found" });
+        res.status(404).json({ error: "Document not found" });
+        return;
       }
 
       res.json({
         message: "Document updated successfully",
         document: data,
       });
+      return;
     } catch (error) {
-      console.error("Error updating KYC document:", error);
       res.status(500).json({ error: "Failed to update document" });
+      return;
     }
   }
 );
