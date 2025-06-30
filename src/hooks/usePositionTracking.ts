@@ -1,17 +1,21 @@
-
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { positionTrackingService, type Position, type PositionUpdate } from '@/services/positionTrackingService';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  positionTrackingService,
+  type Position,
+  type PositionUpdate,
+} from "@/services/positionTrackingService";
+import type { RealtimeChannel } from "@supabase/supabase-js";
+import { ErrorHandler } from "@/services/errorHandling";
 
 export const usePositionTracking = () => {
   const [positions, setPositions] = useState<Position[]>([]);
-  const [positionUpdates, setPositionUpdates] = useState<Record<string, PositionUpdate[]>>({});
+  const [positionUpdates, setPositionUpdates] = useState<
+    Record<string, PositionUpdate[]>
+  >({});
   const [loading, setLoading] = useState(false);
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
   const { user } = useAuth();
-  const { toast } = useToast();
   const channelRef = useRef<RealtimeChannel | null>(null);
 
   const fetchPositions = useCallback(async () => {
@@ -19,137 +23,164 @@ export const usePositionTracking = () => {
 
     setLoading(true);
     try {
-      const fetchedPositions = await positionTrackingService.fetchPositions(user.id);
+      const fetchedPositions = await positionTrackingService.fetchPositions(
+        user.id
+      );
       setPositions(fetchedPositions);
     } catch (error) {
-      console.error('Error fetching positions:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load positions',
-        variant: 'destructive',
-      });
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: "data_fetch_error",
+          message: "Failed to load positions",
+          details: error,
+          retryable: true,
+        }),
+        {
+          description: "Unable to load your positions. Please try again.",
+          retryFn: () => fetchPositions(),
+        }
+      );
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [user]);
 
-  const updatePositionPrice = useCallback(async (positionId: string, newPrice: number) => {
-    try {
-      await positionTrackingService.updatePositionPrice(positionId, newPrice);
-    } catch (error) {
-      console.error('Error updating position price:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update position price',
-        variant: 'destructive',
-      });
-    }
-  }, [toast]);
+  const updatePositionPrice = useCallback(
+    async (positionId: string, newPrice: number) => {
+      try {
+        await positionTrackingService.updatePositionPrice(positionId, newPrice);
+      } catch (error) {
+        ErrorHandler.handleError(
+          ErrorHandler.createError({
+            code: "position_update_error",
+            message: "Failed to update position price",
+            details: error,
+            retryable: true,
+          }),
+          {
+            description: "Unable to update position price. Please try again.",
+            retryFn: async () => {
+              await updatePositionPrice(positionId, newPrice);
+            },
+          }
+        );
+      }
+    },
+    []
+  );
 
-  const calculatePnL = useCallback(async (positionId: string, newPrice: number) => {
-    try {
-      return await positionTrackingService.calculateRealtimePnL(positionId, newPrice);
-    } catch (error) {
-      console.error('Error calculating P&L:', error);
-      return null;
-    }
-  }, []);
+  const calculatePnL = useCallback(
+    async (positionId: string, newPrice: number) => {
+      try {
+        return await positionTrackingService.calculateRealtimePnL(
+          positionId,
+          newPrice
+        );
+      } catch (error) {
+        ErrorHandler.handleError(
+          ErrorHandler.createError({
+            code: "pnl_calculation_error",
+            message: "Failed to calculate P&L",
+            details: error,
+          })
+        );
+        return null;
+      }
+    },
+    []
+  );
 
-  const startRealTimeTracking = useCallback(() => {
+  const startRealTimeTracking = useCallback(async () => {
     if (!user || realTimeEnabled) return;
 
-    const channel = positionTrackingService.subscribeToPositionUpdates(
-      user.id,
-      (updatedPosition) => {
-        setPositions(prev => 
-          prev.map(pos => pos.id === updatedPosition.id ? updatedPosition : pos)
-        );
-      },
-      (update) => {
-        setPositionUpdates(prev => ({
-          ...prev,
-          [update.position_id]: [
-            update,
-            ...(prev[update.position_id] || []).slice(0, 49) // Keep last 50 updates
-          ]
-        }));
-      }
-    );
-
-    channelRef.current = channel;
-    setRealTimeEnabled(true);
-
-    toast({
-      title: 'Real-time Tracking Enabled',
-      description: 'Position updates will be tracked in real-time',
-    });
-  }, [user, realTimeEnabled, toast]);
-
-  const stopRealTimeTracking = useCallback(() => {
-    if (channelRef.current) {
-      positionTrackingService.unsubscribeFromPositionUpdates(channelRef.current);
-      channelRef.current = null;
-    }
-    setRealTimeEnabled(false);
-
-    toast({
-      title: 'Real-time Tracking Disabled',
-      description: 'Position tracking has been stopped',
-    });
-  }, [toast]);
-
-  const getPositionUpdates = useCallback(async (positionId: string) => {
     try {
-      const updates = await positionTrackingService.getPositionUpdates(positionId);
-      setPositionUpdates(prev => ({
-        ...prev,
-        [positionId]: updates
-      }));
-      return updates;
+      const channel = positionTrackingService.subscribeToPositionUpdates(
+        user.id,
+        (updatedPosition) => {
+          setPositions((prev) =>
+            prev.map((pos) =>
+              pos.id === updatedPosition.id ? updatedPosition : pos
+            )
+          );
+        },
+        (update) => {
+          setPositionUpdates((prev) => ({
+            ...prev,
+            [update.position_id]: [
+              update,
+              ...(prev[update.position_id] || []).slice(0, 49), // Keep last 50 updates
+            ],
+          }));
+        }
+      );
+
+      channelRef.current = channel;
+      setRealTimeEnabled(true);
+
+      ErrorHandler.handleSuccess("Real-time position tracking is now active", {
+        description: "You'll receive instant updates for your positions",
+      });
     } catch (error) {
-      console.error('Error fetching position updates:', error);
-      return [];
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: "realtime_subscription_error",
+          message: "Failed to start real-time tracking",
+          details: error,
+          retryable: true,
+        }),
+        {
+          description: "Unable to enable real-time tracking. Please try again.",
+          retryFn: async () => {
+            await startRealTimeTracking();
+          },
+        }
+      );
     }
-  }, []);
+  }, [user, realTimeEnabled]);
 
-  // Auto-fetch positions when user changes
-  useEffect(() => {
-    if (user) {
-      fetchPositions();
-    }
-  }, [user, fetchPositions]);
-
-  // Cleanup subscription on unmount
-  useEffect(() => {
-    return () => {
+  const stopRealTimeTracking = useCallback(async () => {
+    try {
       if (channelRef.current) {
-        positionTrackingService.unsubscribeFromPositionUpdates(channelRef.current);
+        positionTrackingService.unsubscribeFromPositionUpdates(
+          channelRef.current
+        );
+        channelRef.current = null;
       }
-    };
+      setRealTimeEnabled(false);
+
+      ErrorHandler.handleSuccess("Real-time tracking stopped", {
+        description: "Position updates will no longer be received in real-time",
+      });
+    } catch (error) {
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: "realtime_unsubscribe_error",
+          message: "Failed to stop real-time tracking",
+          details: error,
+        })
+      );
+    }
   }, []);
 
-  // Calculate totals
-  const totalUnrealizedPnL = positions.reduce((sum, pos) => sum + (pos.unrealized_pnl || 0), 0);
-  const totalDailyPnL = positions.reduce((sum, pos) => sum + (pos.daily_pnl || 0), 0);
-  const totalMarginUsed = positions.reduce((sum, pos) => sum + pos.margin_used, 0);
-  const totalPositionValue = positions.reduce((sum, pos) => sum + pos.position_value, 0);
+  // Start tracking when component mounts and stop when it unmounts
+  useEffect(() => {
+    fetchPositions();
+    startRealTimeTracking();
+
+    return () => {
+      stopRealTimeTracking().catch(console.error);
+    };
+  }, [fetchPositions, startRealTimeTracking, stopRealTimeTracking]);
 
   return {
     positions,
     positionUpdates,
     loading,
     realTimeEnabled,
-    totals: {
-      unrealizedPnL: totalUnrealizedPnL,
-      dailyPnL: totalDailyPnL,
-      marginUsed: totalMarginUsed,
-      positionValue: totalPositionValue
-    },
     fetchPositions,
     updatePositionPrice,
     calculatePnL,
     startRealTimeTracking,
     stopRealTimeTracking,
-    getPositionUpdates
   };
 };

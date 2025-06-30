@@ -1,7 +1,9 @@
 import React from "react";
-import { usePositionApi } from "../services/tradingApi";
-import { toast } from "sonner";
+import { useOrderApi } from "../services/tradingApi";
+import { ErrorHandler } from "@/services/errorHandling";
+import { useCleanup, useInterval } from "@/hooks/useCleanup";
 import Spinner from "./Spinner";
+import { withErrorBoundary } from "./hoc/withErrorBoundary";
 
 interface Position {
   id: string;
@@ -16,8 +18,9 @@ interface Position {
   unrealizedPnl: number;
 }
 
-export default function PositionsList() {
-  const { getPositions, closePosition } = usePositionApi();
+// Define component separately for better Fast Refresh support
+const PositionsListComponent: React.FC = () => {
+  const { getPositions, closePosition } = useOrderApi();
   const [positions, setPositions] = React.useState<Position[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
@@ -26,65 +29,92 @@ export default function PositionsList() {
   const [expandedId, setExpandedId] = React.useState<string | null>(null);
   const [page, setPage] = React.useState(1);
   const pageSize = 20;
+  const { addCleanup } = useCleanup();
+
   const filteredPositions = positions.filter((p) => {
     const symbol = p.symbol?.toLowerCase() || "";
     const direction = p.direction?.toLowerCase() || "";
     const f = filter.toLowerCase();
     return symbol.includes(f) || direction.includes(f);
   });
+
   const pageCount = Math.ceil(filteredPositions.length / pageSize);
   const paginatedPositions = filteredPositions.slice(
     (page - 1) * pageSize,
     page * pageSize
   );
 
-  const refresh = React.useCallback(() => {
+  const refresh = React.useCallback(async () => {
     setLoading(true);
     setError("");
-    getPositions()
-      .then(setPositions)
-      .catch((err) => setError(err.message || "Failed to load positions"))
-      .finally(() => setLoading(false));
+    try {
+      const data = await ErrorHandler.handleAsync(
+        getPositions(),
+        "fetch_positions"
+      );
+      setPositions(data as Position[]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load positions");
+    } finally {
+      setLoading(false);
+    }
   }, [getPositions]);
 
+  // Set up data fetching and cleanup
   React.useEffect(() => {
     let mounted = true;
-    const fetchData = () => {
+    addCleanup(() => {
+      mounted = false;
+    }, "positions_mount_state");
+
+    const fetchData = async () => {
+      if (!mounted) return;
       setLoading(true);
       setError("");
-      getPositions()
-        .then((data) => mounted && setPositions(data))
-        .catch(
-          (err) =>
-            mounted && setError(err.message || "Failed to load positions")
-        )
-        .finally(() => mounted && setLoading(false));
+      try {
+        const data = await ErrorHandler.handleAsync(
+          getPositions(),
+          "fetch_positions"
+        );
+        if (mounted) setPositions(data as Position[]);
+      } catch (err) {
+        if (mounted) {
+          setError(
+            err instanceof Error ? err.message : "Failed to load positions"
+          );
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
+
     fetchData();
-    const interval = setInterval(fetchData, 5000);
-    return () => {
-      mounted = false;
-      clearInterval(interval);
-    };
-  }, [getPositions, refresh]);
+  }, [getPositions, addCleanup]);
+
+  // Set up polling interval
+  useInterval(
+    () => {
+      if (!loading) {
+        refresh();
+      }
+    },
+    5000,
+    "positions_refresh"
+  );
 
   const handleClose = async (id: string) => {
     if (!window.confirm("Are you sure you want to close this position?"))
       return;
+
     setClosingId(id);
     setError("");
+
     try {
-      await closePosition(id);
-      refresh();
-      toast.success("Position closed successfully.");
+      await ErrorHandler.handleAsync(closePosition(id), "close_position");
+      await refresh();
+      ErrorHandler.showSuccess("Position closed successfully");
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message || "Close failed");
-        toast.error(err.message || "Close failed");
-      } else {
-        setError("Close failed");
-        toast.error("Close failed");
-      }
+      setError(err instanceof Error ? err.message : "Close failed");
     } finally {
       setClosingId(null);
     }
@@ -213,4 +243,14 @@ export default function PositionsList() {
       </table>
     </div>
   );
-}
+};
+
+// Create a wrapped version with error boundary
+const PositionsListWrapped = withErrorBoundary(
+  PositionsListComponent,
+  "positions_list"
+);
+
+// Export both named and default for flexibility
+export { PositionsListWrapped as PositionsList };
+export default PositionsListWrapped;

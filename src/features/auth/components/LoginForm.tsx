@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { ErrorHandler } from "@/services/errorHandling";
 import { login, logout } from "@/services/auth";
 import { cleanupAuthState } from "@/integrations/supabase/client";
 import { AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
@@ -11,8 +11,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { validateSignIn } from "../utils/validation";
 import PasswordResetDialog from "./PasswordResetDialog";
+import { withErrorBoundary } from "@/components/hoc/withErrorBoundary";
 
-const LoginForm = () => {
+const LoginFormComponent = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -23,58 +24,46 @@ const LoginForm = () => {
   const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
 
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
+    setFieldErrors({});
 
-    const errors = validateSignIn(email, password);
-    setFieldErrors(errors);
-
-    if (Object.keys(errors).length > 0) {
+    const validationErrors = validateSignIn(email, password);
+    if (validationErrors) {
+      setFieldErrors(validationErrors);
       return;
     }
 
+    setLoading(true);
     try {
-      setLoading(true);
-      // Clean up any existing auth state
-      cleanupAuthState();
-      try {
-        await logout();
-      } catch {
-        // Intentionally ignore logout errors
+      const { error } = await ErrorHandler.handleAsync(
+        login(email, password),
+        "login"
+      );
+      if (!error) {
+        ErrorHandler.showSuccess("Successfully logged in");
+        navigate("/");
       }
-      console.log("Attempting to sign in with:", { email });
-      const { data, error } = await login(email, password);
-      if (error) throw error;
-      console.log("Login successful:", data);
-      navigate("/dashboard", { replace: true });
     } catch (error) {
-      // Use type unknown and type guard for error
-      console.error("Login error:", error);
-      let errorMessage = "Invalid email or password";
-      if (
-        error &&
-        typeof error === "object" &&
-        "message" in error &&
-        typeof (error as { message?: string }).message === "string"
-      ) {
-        const message = (error as { message: string }).message;
-        if (message.includes("rate")) {
-          errorMessage = "Too many login attempts. Please try again later";
-        } else {
-          errorMessage = message;
-        }
-      }
-      setFormError(errorMessage);
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      setFormError(error instanceof Error ? error.message : "Login failed");
+      ErrorHandler.show(error, "login");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await ErrorHandler.handleAsync(
+        Promise.all([logout(), cleanupAuthState()]),
+        "logout"
+      );
+      ErrorHandler.showSuccess("Successfully logged out");
+      navigate("/login");
+    } catch (error) {
+      ErrorHandler.show(error, "logout");
     }
   };
 
@@ -182,4 +171,6 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+const LoginFormWrapped = withErrorBoundary(LoginFormComponent, "login_form");
+export { LoginFormWrapped as LoginForm };
+export default LoginFormWrapped;

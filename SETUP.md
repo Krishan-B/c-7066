@@ -8,7 +8,7 @@
   npm install
   cd src && npm install && cd ..
   cd backend-api && npm install && cd ..
-  cd mcp-server-sequentialthinking && npm install && cd ..
+  # cd mcp-server-sequentialthinking && npm install && cd ..
   ```
 - Set up your Git user/email:
   ```bash
@@ -40,7 +40,7 @@
   ```
 - (Optional) Start MCP server:
   ```bash
-  cd mcp-server-sequentialthinking && npm run start
+  # cd mcp-server-sequentialthinking && npm run start
   ```
 
 ## 4. Code Quality & Pre-commit Hooks

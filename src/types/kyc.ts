@@ -1,23 +1,22 @@
+export type DocumentType =
+  | "ID_PASSPORT"
+  | "ID_FRONT"
+  | "ID_BACK"
+  | "DRIVERS_LICENSE"
+  | "UTILITY_BILL"
+  | "BANK_STATEMENT"
+  | "CREDIT_CARD_STATEMENT"
+  | "TAX_BILL"
+  | "OTHER_ID"
+  | "OTHER_ADDRESS"
+  | "OTHER_DOC";
 
-export type DocumentType = 
-  | 'ID_PASSPORT' 
-  | 'ID_FRONT' 
-  | 'ID_BACK' 
-  | 'DRIVERS_LICENSE'
-  | 'UTILITY_BILL' 
-  | 'BANK_STATEMENT' 
-  | 'CREDIT_CARD_STATEMENT' 
-  | 'TAX_BILL'
-  | 'OTHER_ID' 
-  | 'OTHER_ADDRESS' 
-  | 'OTHER_DOC';
+export type DocumentCategory =
+  | "ID_VERIFICATION"
+  | "ADDRESS_VERIFICATION"
+  | "OTHER_DOCUMENTATION";
 
-export type DocumentCategory = 
-  | 'ID_VERIFICATION' 
-  | 'ADDRESS_VERIFICATION' 
-  | 'OTHER_DOCUMENTATION';
-
-export type KYCStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type KYCStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface KYCDocument {
   id: string;
@@ -47,4 +46,14 @@ export interface DocumentCategoryInfo {
   description: string;
   required: boolean;
   documentTypes: DocumentTypeInfo[];
+}
+
+export interface DocumentUploadProps {
+  onSuccess: () => Promise<void>;
+}
+
+export interface DocumentListProps {
+  documents: KYCDocument[];
+  loading: boolean;
+  onRefresh: () => Promise<void>;
 }

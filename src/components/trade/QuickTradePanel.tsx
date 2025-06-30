@@ -9,16 +9,17 @@ import {
 } from "@/components/trade";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
 import { useCombinedMarketData } from "@/hooks/useCombinedMarketData";
 import { Asset } from "@/hooks/useMarketData";
+import { ErrorHandler } from "@/services/errorHandling";
 import { getLeverageForAssetType } from "@/utils/leverageUtils";
 import { isMarketOpen } from "@/utils/marketHours";
 import { mockAccountMetrics } from "@/utils/metricUtils";
 import { CreditCard } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useInterval } from "../../hooks/useCleanup";
 import { tradeInputSchema } from "../../lib/validationSchemas";
+import { withErrorBoundary } from "../hoc/withErrorBoundary";
 
 interface QuickTradePanelProps {
   asset: {
@@ -46,7 +47,6 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   const [formErrors, setFormErrors] = useState<Record<string, string[]> | null>(
     null
   );
-  const { toast } = useToast();
 
   // Get available funds from account metrics
   const availableFunds = mockAccountMetrics.availableFunds;
@@ -79,12 +79,26 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
     setSellPrice(currentPrice * 0.999); // 0.1% lower
   }, [currentPrice]);
 
-  // useInterval for local price simulation
+  const priceUpdateInterval = useRef<number | null>(null);
+
+  // Use useInterval for local price simulation with proper cleanup
   useInterval(() => {
-    const variation = Math.random() * 0.002 - 0.001; // -0.1% to +0.1%
-    setBuyPrice((prevBuy) => prevBuy * (1 + variation));
-    setSellPrice((prevSell) => prevSell * (1 + variation));
+    if (!isExecuting) {
+      const variation = Math.random() * 0.002 - 0.001; // -0.1% to +0.1%
+      setBuyPrice((prevBuy) => prevBuy * (1 + variation));
+      setSellPrice((prevSell) => prevSell * (1 + variation));
+    }
   }, 1000);
+
+  // Market data error handling
+  useEffect(() => {
+    if (!isLoading && !currentAssetData) {
+      ErrorHandler.showWarning("Market data unavailable", {
+        description:
+          "Unable to fetch latest market data. Using fallback prices.",
+      });
+    }
+  }, [isLoading, currentAssetData]);
 
   // Calculate values based on units
   const parsedUnits = parseFloat(units) || 0;
@@ -148,47 +162,38 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   };
 
   const handleSubmit = async (action: "buy" | "sell") => {
-    if (!validateInputs()) {
-      return;
-    }
-    if (!marketIsOpen && orderType === "market") {
-      toast({
-        title: "Market Closed",
-        description:
-          "The market is currently closed. Please try again during market hours or use an entry order.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsExecuting(true);
-
     try {
+      if (!validateInputs()) {
+        return;
+      }
+      if (!marketIsOpen && orderType === "market") {
+        ErrorHandler.showWarning("Market is currently closed", {
+          description:
+            "Please try again during market hours or use an entry order.",
+        });
+        return;
+      }
+
+      setIsExecuting(true);
+
       // Simulate network delay for trade execution
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Refresh market data to get latest price
-      await refetch();
+      await ErrorHandler.handleAsync(refetch(), "refreshing market data");
 
-      toast({
-        title: `Order Executed: ${action.toUpperCase()} ${asset.name}`,
-        description: `${action.toUpperCase()} order for ${units} units of ${
-          asset.symbol
-        } at $${
-          action === "buy"
-            ? buyPrice.toLocaleString()
-            : sellPrice.toLocaleString()
-        } executed successfully`,
-        variant: action === "buy" ? "default" : "destructive",
-      });
+      ErrorHandler.showSuccess(
+        `${action.toUpperCase()} order executed successfully`,
+        {
+          description: `${action.toUpperCase()} order for ${units} units of ${asset.symbol} at $${
+            action === "buy"
+              ? buyPrice.toLocaleString()
+              : sellPrice.toLocaleString()
+          } has been placed`,
+        }
+      );
     } catch (error) {
-      toast({
-        title: "Execution Failed",
-        description:
-          "There was an error executing your trade. Please try again.",
-        variant: "destructive",
-      });
-      console.error("Trade execution error:", error);
+      ErrorHandler.show(error, "executing trade");
     } finally {
       setIsExecuting(false);
     }
@@ -801,4 +806,9 @@ const QuickTradePanel = ({ asset }: QuickTradePanelProps) => {
   );
 };
 
-export default QuickTradePanel;
+const QuickTradePanelWrapped = withErrorBoundary(
+  QuickTradePanel,
+  "quick_trade_panel"
+);
+export { QuickTradePanelWrapped as QuickTradePanel };
+export default QuickTradePanelWrapped;

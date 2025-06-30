@@ -9,7 +9,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useToast } from "@/hooks/use-toast";
+import { ErrorHandler } from "@/services/errorHandling";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 import { LogOut, Settings, User as UserIcon } from "lucide-react";
@@ -17,23 +17,19 @@ import { Link, useNavigate } from "react-router-dom";
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {
       await signOut();
-      // Removed the navigate call here since signOut function in AuthProvider
-      // already redirects to the landing page
+      // Navigate will be handled by the AuthProvider
     } catch (error) {
       const errorMessage =
         error instanceof Error
           ? error.message
           : "An error occurred while signing out";
-      toast({
-        title: "Error signing out",
-        description: errorMessage,
-        variant: "destructive",
+      ErrorHandler.show(error, "Signing out", async () => {
+        await signOut();
       });
     }
   };

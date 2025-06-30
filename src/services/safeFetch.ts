@@ -1,4 +1,4 @@
-import { toast } from "sonner";
+import { ErrorHandler } from "./errorHandling";
 
 export async function safeFetch(url: string, options?: RequestInit) {
   const start = performance.now();
@@ -9,15 +9,17 @@ export async function safeFetch(url: string, options?: RequestInit) {
       console.error(
         `Fetch failed [${url}] (status: ${response.status}, time: ${duration}ms)`
       );
-      toast.error(`API error: ${response.status} (${duration}ms)`);
-      throw new Error(`Status: ${response.status}`);
+      const error = new Error(`API error (${response.status})`);
+      ErrorHandler.show(error, `fetch:${url}`);
+      throw error;
     }
     console.info(`Fetch success [${url}] (${duration}ms)`);
     return await response.json();
   } catch (err) {
     const duration = (performance.now() - start).toFixed(1);
     console.error(`Fetch failed [${url}] (time: ${duration}ms):`, err);
-    toast.error(`Network/API error: ${(err as Error).message} (${duration}ms)`);
-    throw err;
+    const error = err instanceof Error ? err : new Error("Network/API error");
+    ErrorHandler.show(error, `fetch:${url}`);
+    throw error;
   }
 }

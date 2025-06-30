@@ -1,7 +1,7 @@
 import React from "react";
 import { useOrderApi } from "../services/tradingApi";
 import type { PendingOrder } from "../types/orders";
-import { toast } from "sonner";
+import { ErrorHandler } from "@/services/errorHandling";
 import Spinner from "./Spinner";
 
 export default function PendingOrders() {
@@ -20,6 +20,14 @@ export default function PendingOrders() {
   const [page, setPage] = React.useState(1);
   const pageSize = 20;
 
+  function handleModFormChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target;
+    setModForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+
   const filteredOrders = orders.filter((o) => {
     const symbol = o.symbol?.toLowerCase() || "";
     const direction = o.direction?.toLowerCase() || "";
@@ -34,94 +42,102 @@ export default function PendingOrders() {
     page * pageSize
   );
 
-  const refresh = React.useCallback(() => {
+  const refresh = React.useCallback(async () => {
     setLoading(true);
     setError("");
-    getPendingOrders()
-      .then(setOrders)
-      .catch((err) => setError(err.message || "Failed to load pending orders"))
-      .finally(() => setLoading(false));
+    try {
+      const data = await ErrorHandler.handleAsync(
+        getPendingOrders(),
+        "fetch_pending_orders"
+      );
+      setOrders(data as unknown as PendingOrder[]);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load pending orders"
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [getPendingOrders]);
 
   React.useEffect(() => {
     let mounted = true;
-    const fetchData = () => {
+    const fetchData = async () => {
+      if (!mounted) return;
       setLoading(true);
       setError("");
-      getPendingOrders()
-        .then((data) => mounted && setOrders(data))
-        .catch(
-          (err) =>
-            mounted && setError(err.message || "Failed to load pending orders")
-        )
-        .finally(() => mounted && setLoading(false));
+      try {
+        const data = await ErrorHandler.handleAsync(
+          getPendingOrders(),
+          "fetch_pending_orders"
+        );
+        if (mounted) setOrders(data as unknown as PendingOrder[]);
+      } catch (err) {
+        if (mounted) {
+          setError(
+            err instanceof Error ? err.message : "Failed to load pending orders"
+          );
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
+
     fetchData();
     const interval = setInterval(fetchData, 5000);
     return () => {
       mounted = false;
       clearInterval(interval);
     };
-  }, [getPendingOrders, refresh]);
+  }, [getPendingOrders]);
 
   const handleCancel = async (id: string) => {
     if (!window.confirm("Are you sure you want to cancel this order?")) return;
+
     setActionLoading(id);
     setError("");
     try {
-      await cancelOrder(id);
-      refresh();
-      toast.success("Order cancelled successfully.");
+      await ErrorHandler.handleAsync(cancelOrder(id), "cancel_order");
+      await refresh();
+      ErrorHandler.showSuccess("Order cancelled successfully");
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message || "Cancel failed");
-        toast.error(err.message || "Cancel failed");
-      } else {
-        setError("Cancel failed");
-        toast.error("Cancel failed");
-      }
+      setError(err instanceof Error ? err.message : "Cancel failed");
+      ErrorHandler.show(err, "cancel_order");
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handleModify = (order: PendingOrder) => {
-    setModifyingId(order.id);
-    setModForm({ price: String(order.orderRate), units: String(order.units) });
-  };
+  const handleModify = async (id: string) => {
+    if (!window.confirm("Are you sure you want to modify this order?")) return;
 
-  const handleModFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setModForm((f) => ({ ...f, [name]: value }));
-  };
-
-  const handleModFormSubmit = async (id: string) => {
-    if (!window.confirm("Save changes to this order?")) return;
     setActionLoading(id);
     setError("");
     try {
-      await modifyOrder(id, {
-        price: Number(modForm.price),
-        quantity: Number(modForm.units),
-      });
+      const updates = {
+        price: parseFloat(modForm.price),
+        units: parseFloat(modForm.units),
+      };
+
+      await ErrorHandler.handleAsync(modifyOrder(id, updates), "modify_order");
+      await refresh();
       setModifyingId(null);
-      refresh();
-      toast.success("Order modified successfully.");
+      ErrorHandler.showSuccess("Order modified successfully");
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message || "Modify failed");
-        toast.error(err.message || "Modify failed");
-      } else {
-        setError("Modify failed");
-        toast.error("Modify failed");
-      }
+      setError(err instanceof Error ? err.message : "Modify failed");
+      ErrorHandler.show(err, "modify_order");
     } finally {
       setActionLoading(null);
     }
   };
 
-  if (loading) return <Spinner size={32} />;
-  if (error) return <div className="text-red-600">{error}</div>;
+  const handleModFormSubmit = (id: string) => {
+    handleModify(id);
+  };
+
+  if (loading && !orders.length) return <Spinner size={32} />;
+  if (error && !orders.length)
+    return <div className="text-red-600">{error}</div>;
   if (!orders.length) return <div>No pending orders.</div>;
 
   return (
@@ -250,7 +266,7 @@ export default function PendingOrders() {
                         disabled={actionLoading === o.id}
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleModify(o);
+                          handleModify(o.id);
                         }}
                       >
                         Modify

@@ -1,70 +1,95 @@
-
-import { useState } from 'react';
-import { FileText, Trash2, Eye, Calendar, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useKYC } from '@/hooks/useKYC';
-import type { KYCDocument } from '@/types/kyc';
+import { useState } from "react";
+import { FileText, Trash2, Eye, Calendar, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useKYC } from "@/hooks/useKYC";
+import type { KYCDocument } from "@/types/kyc";
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'APPROVED':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'REJECTED':
-      return 'bg-red-100 text-red-800 border-red-200';
+    case "APPROVED":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "REJECTED":
+      return "bg-red-100 text-red-800 border-red-200";
     default:
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
   }
 };
 
 const getDocumentTypeLabel = (type: string) => {
   const labels: Record<string, string> = {
-    ID_PASSPORT: 'Passport',
-    ID_FRONT: 'ID Card (Front)',
-    ID_BACK: 'ID Card (Back)',
-    DRIVERS_LICENSE: 'Driver\'s License',
-    UTILITY_BILL: 'Utility Bill',
-    BANK_STATEMENT: 'Bank Statement',
-    CREDIT_CARD_STATEMENT: 'Credit Card Statement',
-    TAX_BILL: 'Tax Bill',
-    OTHER_ID: 'Other ID Document',
-    OTHER_ADDRESS: 'Other Address Proof',
-    OTHER_DOC: 'Other Document'
+    ID_PASSPORT: "Passport",
+    ID_FRONT: "ID Card (Front)",
+    ID_BACK: "ID Card (Back)",
+    DRIVERS_LICENSE: "Driver's License",
+    UTILITY_BILL: "Utility Bill",
+    BANK_STATEMENT: "Bank Statement",
+    CREDIT_CARD_STATEMENT: "Credit Card Statement",
+    TAX_BILL: "Tax Bill",
+    OTHER_ID: "Other ID Document",
+    OTHER_ADDRESS: "Other Address Proof",
+    OTHER_DOC: "Other Document",
   };
   return labels[type] || type;
 };
 
 const getCategoryLabel = (category: string) => {
   const labels: Record<string, string> = {
-    ID_VERIFICATION: 'ID Verification',
-    ADDRESS_VERIFICATION: 'Address Verification',
-    OTHER_DOCUMENTATION: 'Other Documentation'
+    ID_VERIFICATION: "ID Verification",
+    ADDRESS_VERIFICATION: "Address Verification",
+    OTHER_DOCUMENTATION: "Other Documentation",
   };
   return labels[category] || category;
 };
 
 interface DocumentListProps {
   documents: KYCDocument[];
+  onRefresh: () => Promise<void>;
 }
 
-const DocumentList = ({ documents }: DocumentListProps) => {
+const DocumentList = ({ documents, onRefresh }: DocumentListProps) => {
   const { deleteDocument } = useKYC();
-  const [selectedDocument, setSelectedDocument] = useState<KYCDocument | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<KYCDocument | null>(
+    null
+  );
 
   const handleDelete = async (documentId: string) => {
     await deleteDocument(documentId);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -92,7 +117,9 @@ const DocumentList = ({ documents }: DocumentListProps) => {
                 <div className="flex items-center gap-3 mb-2">
                   <FileText className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <h4 className="font-medium">{getDocumentTypeLabel(document.document_type)}</h4>
+                    <h4 className="font-medium">
+                      {getDocumentTypeLabel(document.document_type)}
+                    </h4>
                     <p className="text-sm text-muted-foreground">
                       {getCategoryLabel(document.category)}
                     </p>
@@ -101,7 +128,7 @@ const DocumentList = ({ documents }: DocumentListProps) => {
                     {document.status}
                   </Badge>
                 </div>
-                
+
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
@@ -118,10 +145,11 @@ const DocumentList = ({ documents }: DocumentListProps) => {
                   </div>
                 )}
 
-                {document.status === 'REJECTED' && document.reviewed_at && (
+                {document.status === "REJECTED" && document.reviewed_at && (
                   <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
                     <p className="text-sm text-red-800">
-                      <strong>Rejected on:</strong> {formatDate(document.reviewed_at)}
+                      <strong>Rejected on:</strong>{" "}
+                      {formatDate(document.reviewed_at)}
                     </p>
                   </div>
                 )}
@@ -144,11 +172,12 @@ const DocumentList = ({ documents }: DocumentListProps) => {
                         {getDocumentTypeLabel(document.document_type)}
                       </DialogTitle>
                       <DialogDescription>
-                        {getCategoryLabel(document.category)} • {document.status}
+                        {getCategoryLabel(document.category)} •{" "}
+                        {document.status}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="mt-4">
-                      {document.file_name?.toLowerCase().endsWith('.pdf') ? (
+                      {document.file_name?.toLowerCase().endsWith(".pdf") ? (
                         <embed
                           src={document.file_url}
                           type="application/pdf"
@@ -167,7 +196,7 @@ const DocumentList = ({ documents }: DocumentListProps) => {
                   </DialogContent>
                 </Dialog>
 
-                {document.status === 'PENDING' && (
+                {document.status === "PENDING" && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="outline" size="sm">
@@ -178,7 +207,8 @@ const DocumentList = ({ documents }: DocumentListProps) => {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Document</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete this document? This action cannot be undone.
+                          Are you sure you want to delete this document? This
+                          action cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

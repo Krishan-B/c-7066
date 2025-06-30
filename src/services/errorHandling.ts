@@ -5,6 +5,31 @@ export interface AppError {
   message: string;
   userMessage: string;
   details?: unknown;
+  retryable?: boolean;
+}
+
+interface NotificationOptions {
+  duration?: number;
+  description?: string;
+  retryFn?: () => Promise<void>;
+  onAction?: () => void;
+  actionLabel?: string;
+}
+
+interface SuccessOptions {
+  description?: string;
+  duration?: number;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+interface ErrorOptions {
+  code: string;
+  message: string;
+  details?: unknown;
+  retryable?: boolean;
 }
 
 export class ErrorHandler {
@@ -28,6 +53,11 @@ export class ErrorHandler {
     leverage_exceeded: "Maximum leverage limit exceeded for this asset.",
     position_limit_reached:
       "You have reached the maximum number of open positions.",
+    margin_calculation_error: "Unable to calculate margin requirements.",
+    pnl_calculation_error: "Unable to calculate profit and loss.",
+    realtime_subscription_error: "Unable to start real-time updates.",
+    realtime_unsubscribe_error: "Unable to stop real-time updates.",
+    position_update_error: "Failed to update position.",
 
     // Network errors
     network_error: "Network error. Please check your connection and try again.",
@@ -37,11 +67,23 @@ export class ErrorHandler {
     // Data errors
     data_fetch_error: "Unable to load data. Please refresh the page.",
     validation_error: "Please check your input and try again.",
+    market_data_fetch_error:
+      "Unable to fetch market data. Some information may be delayed.",
+    market_data_aggregation_error: "Some market data is currently unavailable.",
 
     // Generic fallback
-    unknown_error:
-      "An unexpected error occurred. Please try again or contact support.",
+    unknown_error: "An unexpected error occurred. Please try again.",
   };
+
+  private static isRetryableError(code: string): boolean {
+    const retryableCodes = [
+      "network_error",
+      "timeout_error",
+      "server_error",
+      "data_fetch_error",
+    ];
+    return retryableCodes.includes(code);
+  }
 
   static handle(error: unknown, context?: string): AppError {
     console.error(`Error in ${context || "application"}:`, error);
@@ -104,39 +146,144 @@ export class ErrorHandler {
       message: hasMessage(error) ? error.message : "Unknown error",
       userMessage: this.errorMap[errorCode] || this.errorMap.unknown_error,
       details,
+      retryable: this.isRetryableError(errorCode),
     };
 
     return appError;
   }
 
-  static show(error: unknown, context?: string): void {
+  static show(
+    error: unknown,
+    context?: string,
+    retryFn?: () => Promise<void>
+  ): void {
     const appError = this.handle(error, context);
 
-    toast.error(appError.userMessage, {
+    const options: NotificationOptions = {
       description:
         process.env.NODE_ENV === "development" ? appError.message : undefined,
       duration: 5000,
+    };
+
+    if (appError.retryable && retryFn) {
+      options.actionLabel = "Retry";
+      options.onAction = async () => {
+        try {
+          await retryFn();
+          this.showSuccess("Operation completed successfully");
+        } catch (retryError) {
+          this.show(retryError, context);
+        }
+      };
+    }
+
+    toast.error(appError.userMessage, options);
+  }
+
+  static showNotification(
+    type: "success" | "info" | "warning",
+    message: string,
+    options?: NotificationOptions
+  ): void {
+    const toastFn = toast[type];
+    toastFn(message, {
+      duration: options?.duration || (type === "success" ? 3000 : 4000),
+      description: options?.description,
+      action:
+        options?.actionLabel && options?.onAction
+          ? {
+              label: options.actionLabel,
+              onClick: options.onAction,
+            }
+          : undefined,
     });
   }
 
-  static showSuccess(message: string, description?: string): void {
-    toast.success(message, {
-      description,
-      duration: 3000,
+  static showSuccess(message: string, options?: NotificationOptions): void {
+    this.showNotification("success", message, options);
+  }
+
+  static showInfo(message: string, options?: NotificationOptions): void {
+    this.showNotification("info", message, options);
+  }
+
+  static showWarning(message: string, options?: NotificationOptions): void {
+    this.showNotification("warning", message, options);
+  }
+
+  static handleAsync<T>(promise: Promise<T>, context: string): Promise<T> {
+    return promise.catch((error) => {
+      this.show(error, context);
+      throw error;
     });
   }
 
-  static showInfo(message: string, description?: string): void {
-    toast.info(message, {
+  static createError({
+    code,
+    message,
+    details,
+    retryable = false,
+  }: ErrorOptions): AppError {
+    return {
+      code,
+      message,
+      userMessage: this.errorMap[code] || message,
+      details,
+      retryable,
+    };
+  }
+
+  static handleError(error: unknown, options: NotificationOptions = {}): void {
+    const appError = this.normalizeError(error);
+    const {
+      duration = 5000,
+      description = appError.userMessage,
+      retryFn,
+      onAction,
+      actionLabel = appError.retryable ? "Retry" : undefined,
+    } = options;
+
+    toast.error(appError.userMessage || "An error occurred", {
       description,
-      duration: 4000,
+      duration,
+      action: actionLabel && {
+        label: actionLabel,
+        onClick: () => {
+          if (retryFn) {
+            retryFn().catch(console.error);
+          }
+          onAction?.();
+        },
+      },
+    });
+
+    // Log error for debugging
+    console.error("Error handled:", {
+      error: appError,
+      stack: (error as Error)?.stack,
     });
   }
 
-  static showWarning(message: string, description?: string): void {
-    toast.warning(message, {
+  static handleSuccess(title: string, options: SuccessOptions = {}): void {
+    const { description, duration = 5000, action } = options;
+
+    toast.success(title, {
       description,
-      duration: 4000,
+      duration,
+      action,
+    });
+  }
+
+  private static normalizeError(error: unknown): AppError {
+    if ((error as AppError).code) {
+      return error as AppError;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    return this.createError({
+      code: "unknown_error",
+      message,
+      details: error,
     });
   }
 }

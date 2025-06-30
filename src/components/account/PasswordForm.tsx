@@ -8,11 +8,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
+import { ErrorHandler } from "@/services/errorHandling";
 
 export function PasswordForm() {
-  const { toast } = useToast();
   const form = useForm({
     defaultValues: {
       currentPassword: "",
@@ -26,12 +25,13 @@ export function PasswordForm() {
     newPassword: string;
     confirmPassword: string;
   }) => {
-    toast({
-      title: "Password updated",
-      description: "Your password has been changed successfully",
-      duration: 3000,
-    });
-    form.reset();
+    try {
+      // Password update logic here
+      ErrorHandler.showSuccess("Your password has been changed successfully");
+      form.reset();
+    } catch (error) {
+      ErrorHandler.show(error, "Updating password");
+    }
   };
 
   return (

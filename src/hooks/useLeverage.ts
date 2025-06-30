@@ -1,4 +1,3 @@
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import type { Database } from "@/integrations/supabase/types";
 import {
@@ -6,6 +5,7 @@ import {
   type LeverageCalculationResult,
 } from "@/services/leverageService";
 import { useCallback, useEffect, useState } from "react";
+import { ErrorHandler } from "@/services/errorHandling";
 
 type LeverageConfig =
   Database["public"]["Tables"]["asset_leverage_config"]["Row"];
@@ -19,7 +19,6 @@ export const useLeverage = () => {
   >([]);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  const { toast } = useToast();
 
   const loadMarginCalculations = useCallback(async () => {
     if (!user) return;
@@ -29,16 +28,22 @@ export const useLeverage = () => {
       const calculations = await leverageService.getMarginCalculations(user.id);
       setMarginCalculations(calculations);
     } catch (error) {
-      console.error("Error loading margin calculations:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load margin calculations",
-        variant: "destructive",
-      });
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: "data_fetch_error",
+          message: "Failed to load margin calculations",
+          details: error,
+          retryable: true,
+        }),
+        {
+          description: "Unable to load margin data. Please try again.",
+          retryFn: () => loadMarginCalculations(),
+        }
+      );
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [user]);
 
   const calculateMargin = useCallback(
     async (
@@ -55,16 +60,29 @@ export const useLeverage = () => {
           leverage
         );
       } catch (error) {
-        console.error("Error calculating margin:", error);
-        toast({
-          title: "Error",
-          description: "Failed to calculate margin requirements",
-          variant: "destructive",
-        });
+        ErrorHandler.handleError(
+          ErrorHandler.createError({
+            code: "margin_calculation_error",
+            message: "Failed to calculate margin requirements",
+            details: error,
+            retryable: true,
+          }),
+          {
+            description: "Unable to calculate margin. Please try again.",
+            retryFn: async () => {
+              await calculateMargin(
+                assetClass,
+                symbol,
+                positionValue,
+                leverage
+              );
+            },
+          }
+        );
         return null;
       }
     },
-    [toast]
+    []
   );
 
   const updatePositionLeverage = useCallback(
@@ -76,35 +94,30 @@ export const useLeverage = () => {
         );
 
         if (success) {
-          toast({
-            title: "Success",
-            description: "Position leverage updated successfully",
-          });
-
           // Refresh margin calculations
           if (user) {
             loadMarginCalculations();
           }
-        } else {
-          toast({
-            title: "Error",
-            description: "Failed to update position leverage",
-            variant: "destructive",
-          });
+          return true;
         }
 
-        return success;
+        throw ErrorHandler.createError({
+          code: "leverage_update_error",
+          message: "Failed to update position leverage",
+          details: { positionId, leverage },
+          retryable: true,
+        });
       } catch (error) {
-        console.error("Error updating position leverage:", error);
-        toast({
-          title: "Error",
-          description: "Failed to update position leverage",
-          variant: "destructive",
+        ErrorHandler.handleError(error, {
+          description: "Unable to update leverage. Please try again.",
+          retryFn: async () => {
+            await updatePositionLeverage(positionId, leverage);
+          },
         });
         return false;
       }
     },
-    [user, toast, loadMarginCalculations]
+    [user, loadMarginCalculations]
   );
 
   const getMaxLeverage = useCallback(
@@ -112,8 +125,14 @@ export const useLeverage = () => {
       try {
         return await leverageService.getMaxLeverage(assetClass, symbol);
       } catch (error) {
-        console.error("Error getting max leverage:", error);
-        return 10; // Default fallback
+        ErrorHandler.handleError(
+          ErrorHandler.createError({
+            code: "max_leverage_fetch_error",
+            message: "Failed to get maximum leverage",
+            details: error,
+          })
+        );
+        return 10; // Default fallback with warning
       }
     },
     []
@@ -127,7 +146,17 @@ export const useLeverage = () => {
       try {
         return await leverageService.getLeverageConfig(assetClass, symbol);
       } catch (error) {
-        console.error("Error getting leverage config:", error);
+        ErrorHandler.handleError(
+          ErrorHandler.createError({
+            code: "leverage_config_error",
+            message: "Failed to get leverage configuration",
+            details: error,
+            retryable: true,
+          }),
+          {
+            description: "Unable to load leverage settings. Using defaults.",
+          }
+        );
         return null;
       }
     },
@@ -136,20 +165,30 @@ export const useLeverage = () => {
 
   const checkMarginCall = useCallback(
     (marginLevel: number, marginCallLevel: number = 1.0) => {
-      return leverageService.calculateMarginCallWarning(
-        marginLevel,
-        marginCallLevel
-      );
+      try {
+        return leverageService.calculateMarginCallWarning(
+          marginLevel,
+          marginCallLevel
+        );
+      } catch (error) {
+        ErrorHandler.handleError(
+          ErrorHandler.createError({
+            code: "margin_call_calculation_error",
+            message: "Failed to calculate margin call warning",
+            details: error,
+          })
+        );
+        // Return a safe default that encourages user attention
+        return { warning: true, critical: false };
+      }
     },
     []
   );
 
-  // Load margin calculations when user changes
+  // Load initial data
   useEffect(() => {
-    if (user) {
-      loadMarginCalculations();
-    }
-  }, [user, loadMarginCalculations]);
+    loadMarginCalculations();
+  }, [loadMarginCalculations]);
 
   return {
     leverageConfigs,
@@ -159,7 +198,7 @@ export const useLeverage = () => {
     updatePositionLeverage,
     getMaxLeverage,
     getLeverageConfig,
-    loadMarginCalculations,
     checkMarginCall,
+    refresh: loadMarginCalculations,
   };
 };

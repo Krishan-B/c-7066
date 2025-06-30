@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { useOrderApi } from "../services/tradingApi";
 import { useKYC } from "@/hooks/useKYC";
-import { toast } from "sonner";
+import { ErrorHandler } from "@/services/errorHandling";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { withErrorBoundary } from "./hoc/withErrorBoundary";
 
 const assetClasses = ["STOCKS", "FOREX", "CRYPTO", "INDICES", "COMMODITIES"];
 const directions = ["buy", "sell"];
 
-export default function OrderForm() {
+const OrderForm = () => {
   const { placeMarketOrder, placeEntryOrder } = useOrderApi();
   const { isKYCComplete } = useKYC();
   const navigate = useNavigate();
@@ -45,48 +46,54 @@ export default function OrderForm() {
 
     // Check KYC status before allowing trading
     if (!kycComplete) {
-      toast.error("KYC verification required before trading");
+      ErrorHandler.showWarning("KYC verification required", {
+        description: "Please complete KYC verification before trading",
+        actionLabel: "Complete KYC",
+        onAction: () => navigate("/kyc"),
+      });
       return;
     }
 
     setLoading(true);
     setError("");
+
     try {
-      const orderPayload = {
-        symbol: form.symbol,
-        asset_class: form.asset_class,
-        direction: form.direction,
-        quantity: Number(form.quantity),
-        stop_loss_price: form.stop_loss_price
-          ? Number(form.stop_loss_price)
-          : undefined,
-        take_profit_price: form.take_profit_price
-          ? Number(form.take_profit_price)
-          : undefined,
-      } as Record<string, string | number | undefined>;
       if (form.order_type === "entry") {
-        orderPayload.price = Number(form.price);
-        await placeEntryOrder(orderPayload);
-        toast.success("Entry order placed!");
+        await ErrorHandler.handleAsync(
+          placeEntryOrder({
+            ...form,
+            direction: form.direction as "buy" | "sell",
+            price: parseFloat(form.price),
+            // Remove stop_loss_price and take_profit_price if not in OrderRequest type
+          }),
+          "place_entry_order"
+        );
+        ErrorHandler.showSuccess("Entry order placed successfully");
       } else {
-        await placeMarketOrder(orderPayload);
-        toast.success("Market order placed!");
+        await ErrorHandler.handleAsync(
+          placeMarketOrder({
+            symbol: form.symbol,
+            direction: form.direction as "buy" | "sell",
+            quantity: Number(form.quantity),
+            price: form.price ? parseFloat(form.price) : undefined,
+          }),
+          "place_market_order"
+        );
+        ErrorHandler.showSuccess("Market order placed successfully");
       }
-      setForm({
-        ...form,
+
+      // Reset form
+      setForm((f) => ({
+        ...f,
         symbol: "",
+        quantity: 1,
         price: "",
         stop_loss_price: "",
         take_profit_price: "",
-      });
+      }));
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message || "Order failed");
-        toast.error(err.message || "Order failed");
-      } else {
-        setError("Order failed");
-        toast.error("Order failed");
-      }
+      setError(err instanceof Error ? err.message : "Order failed");
+      ErrorHandler.show(err, "place_order");
     } finally {
       setLoading(false);
     }
@@ -224,4 +231,8 @@ export default function OrderForm() {
       </button>
     </form>
   );
-}
+};
+
+const OrderFormWrapped = withErrorBoundary(OrderForm, "order_form");
+export { OrderFormWrapped as OrderForm };
+export default OrderFormWrapped;

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Asset } from "@/hooks/useMarketData";
@@ -9,6 +8,7 @@ import MarketTabs from "@/components/markets/MarketTabs";
 import MarketChartSection from "@/components/markets/MarketChartSection";
 import MarketOrderForm from "@/components/markets/MarketOrderForm";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
+import { withErrorBoundary } from "@/components/hoc/withErrorBoundary";
 
 interface MarketContainerProps {
   marketData: Asset[];
@@ -16,7 +16,11 @@ interface MarketContainerProps {
   error: Error | null;
 }
 
-const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps) => {
+const MarketContainerComponent: React.FC<MarketContainerProps> = ({
+  marketData,
+  isLoading,
+  error,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Crypto");
   const [selectedAsset, setSelectedAsset] = useState<Asset>({
@@ -25,28 +29,30 @@ const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps)
     price: 67432.21,
     change_percentage: 2.4,
     market_type: "Crypto",
-    volume: "14.2B"
+    volume: "14.2B",
   });
 
   const chartSectionRef = useRef<HTMLDivElement>(null);
-  
+
   // Check if the selected market is open
-  const marketIsOpen = selectedAsset ? isMarketOpen(selectedAsset.market_type) : false;
+  const marketIsOpen = selectedAsset
+    ? isMarketOpen(selectedAsset.market_type)
+    : false;
 
   return (
     <div className="min-h-screen bg-background">
       <div className="p-4 md:p-6 max-w-7xl mx-auto">
         {/* Market header section */}
-        <MarketHeader 
+        <MarketHeader
           selectedAsset={selectedAsset}
           marketIsOpen={marketIsOpen}
         />
-        
+
         {/* Market search and table section */}
         <div className="mb-8">
           <MarketSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
           <div className="mt-4">
-            <MarketTabs 
+            <MarketTabs
               activeTab={activeTab}
               setActiveTab={setActiveTab}
               marketData={marketData}
@@ -58,11 +64,11 @@ const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps)
             />
           </div>
         </div>
-        
+
         <Separator className="my-8" />
-        
+
         {/* Chart and details section */}
-        <MarketChartSection 
+        <MarketChartSection
           chartSectionRef={chartSectionRef}
           selectedAsset={selectedAsset}
           marketIsOpen={marketIsOpen}
@@ -70,7 +76,7 @@ const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps)
 
         {/* Advanced Order Form Card for trading */}
         <MarketOrderForm selectedAsset={selectedAsset} />
-        
+
         {/* News section */}
         <div className="mt-6">
           <EnhancedNewsWidget marketType={selectedAsset.market_type} />
@@ -80,4 +86,9 @@ const MarketContainer = ({ marketData, isLoading, error }: MarketContainerProps)
   );
 };
 
-export default MarketContainer;
+const MarketContainerWrapped = withErrorBoundary(
+  MarketContainerComponent,
+  "market_container"
+);
+export { MarketContainerWrapped as MarketContainer };
+export default MarketContainerWrapped;
