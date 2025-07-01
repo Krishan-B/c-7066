@@ -1,0 +1,21 @@
+{
+  "files": [],
+  "references": [{ "path": "./app.json" }, { "path": "./node.json" }],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@shared/*": ["./shared/*"]
+    },
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "types": ["jest"],
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true
+  }
+}

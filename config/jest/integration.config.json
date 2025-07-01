@@ -1,0 +1,23 @@
+{
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "testMatch": ["**/tests/integration/**/*.test.ts"],
+  "setupFilesAfterEnv": ["<rootDir>/tests/jest-setup-env.ts", "<rootDir>/tests/setup.ts"],
+  "moduleNameMapper": {
+    "^@/(.*)$": "<rootDir>/src/$1"
+  },
+  "transform": {
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        "tsconfig": "config/typescript/test.json"
+      }
+    ]
+  },
+  "testTimeout": 10000,
+  "verbose": true,
+  "collectCoverage": true,
+  "coverageDirectory": "coverage/integration",
+  "coverageReporters": ["text", "lcov", "html"],
+  "coveragePathIgnorePatterns": ["/node_modules/", "/tests/setup.ts"]
+}

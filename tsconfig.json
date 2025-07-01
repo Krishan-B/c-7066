@@ -1,21 +1,5 @@
 {
+  "extends": "./config/typescript/base.json",
   "files": [],
-  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@shared/*": ["./shared/*"]
-    },
-    "strict": true,
-    "noImplicitAny": true,
-    "noUnusedParameters": true,
-    "noUnusedLocals": true,
-    "strictNullChecks": true,
-    "skipLibCheck": true,
-    "allowJs": true,
-    "types": ["jest"],
-    "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true
-  }
+  "references": [{ "path": "./config/typescript/app.json" }, { "path": "./config/typescript/node.json" }]
 }

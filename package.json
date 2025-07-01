@@ -14,15 +14,15 @@
     "setup:supabase": "npm run supabase:start && npm run supabase:migrate && npm run supabase:gen-types",
     "extensions:install": "bash scripts/install-extensions.sh",
     "extensions:cleanup": "bash scripts/cleanup-extensions.sh",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "eslint --config ./config/eslint/eslint.config.js .",
+    "lint:fix": "eslint --config ./config/eslint/eslint.config.js . --fix",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --project ./config/typescript/base.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
     "test:diagnostics": "vitest run tests/diagnostics",
-    "test:integration": "jest --config jest.integration.config.json",
+    "test:integration": "jest --config ./config/jest/integration.config.json",
     "validate": "npm run typecheck && npm run lint && npm run test && npm run build",
     "clean": "rm -rf node_modules/.cache dist coverage",
     "clean:all": "npm run clean && rm -rf node_modules",
@@ -117,7 +117,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
+      "eslint --config ./config/eslint/eslint.config.js --fix",
       "prettier --write"
     ],
     "*.{json,md,yml,yaml,html,css}": [
