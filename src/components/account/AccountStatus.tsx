@@ -1,5 +1,4 @@
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 
 export function AccountStatus() {
   return (
@@ -12,7 +11,9 @@ export function AccountStatus() {
           <div className="h-3 w-3 rounded-full bg-success" />
           <span className="font-medium">Active</span>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">Your account is in good standing</p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Your account is in good standing
+        </p>
       </CardContent>
     </Card>
   );

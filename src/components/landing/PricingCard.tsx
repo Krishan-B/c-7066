@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui/button";
 import { Check } from "lucide-react";
 
 interface PricingCardProps {
@@ -13,28 +12,33 @@ interface PricingCardProps {
   onClick?: () => void;
 }
 
-const PricingCard = ({ 
-  title, 
-  price, 
-  description, 
-  features, 
-  ctaText, 
+const PricingCard = ({
+  title,
+  price,
+  description,
+  features,
+  ctaText,
   highlighted = false,
-  onClick
+  onClick,
 }: PricingCardProps) => {
   return (
-    <div className={`
+    <div
+      className={`
       border rounded-lg p-6 flex flex-col
-      ${highlighted 
-        ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10' 
-        : 'border-secondary/20'
+      ${
+        highlighted
+          ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
+          : "border-secondary/20"
       }
-    `}>
+    `}
+    >
       <div className="mb-6">
         <h3 className="text-xl font-bold mb-2">{title}</h3>
         <div className="flex items-baseline">
           <span className="text-3xl font-bold">{price}</span>
-          {price !== "Custom" && <span className="text-muted-foreground ml-1">/month</span>}
+          {price !== "Custom" && (
+            <span className="text-muted-foreground ml-1">/month</span>
+          )}
         </div>
         <p className="text-sm text-muted-foreground mt-2">{description}</p>
       </div>
@@ -46,8 +50,8 @@ const PricingCard = ({
           </li>
         ))}
       </ul>
-      <Button 
-        variant={highlighted ? "default" : "outline"} 
+      <Button
+        variant={highlighted ? "default" : "outline"}
         className="w-full"
         onClick={onClick}
       >

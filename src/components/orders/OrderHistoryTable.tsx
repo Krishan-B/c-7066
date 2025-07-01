@@ -1,16 +1,29 @@
-
 import React from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shared/ui/table";
+import { Badge } from "@/shared/ui/badge";
 import { AlertCircle, ShieldCheck } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/ui/tooltip";
 import { OrderHistory } from "@/types/orders";
 
 interface OrderHistoryTableProps {
   ordersHistory: OrderHistory[];
 }
 
-const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({ ordersHistory }) => {
+const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({
+  ordersHistory,
+}) => {
   return (
     <div className="rounded-md border overflow-hidden">
       <Table>
@@ -31,18 +44,24 @@ const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({ ordersHistory }) 
         <TableBody>
           {ordersHistory.map((order) => {
             // For demo purposes, let's determine some status display values
-            const statusDisplay = order.status === 'canceled' ? 'Cancelled' : 'Expired';
-            const reason = order.status === 'canceled' ? 'User Cancelled' : 'Auto Expired';
-            
+            const statusDisplay =
+              order.status === "canceled" ? "Cancelled" : "Expired";
+            const reason =
+              order.status === "canceled" ? "User Cancelled" : "Auto Expired";
+
             // For demo purposes, assume some are limit and some are stop orders
-            const orderType = order.id.endsWith('8') ? 'limit' : 'stop';
-            
+            const orderType = order.id.endsWith("8") ? "limit" : "stop";
+
             return (
               <TableRow key={order.id} className="hover:bg-muted/40">
                 <TableCell className="font-medium">{order.symbol}</TableCell>
                 <TableCell>
-                  <Badge variant={order.direction === 'Buy' ? 'default' : 'destructive'}
-                    className={`${order.direction === 'Buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}>
+                  <Badge
+                    variant={
+                      order.direction === "Buy" ? "default" : "destructive"
+                    }
+                    className={`${order.direction === "Buy" ? "bg-green-600" : "bg-red-500"} text-white`}
+                  >
                     {order.direction}
                   </Badge>
                 </TableCell>
@@ -51,15 +70,24 @@ const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({ ordersHistory }) 
                     {orderType === "limit" ? "Limit" : "Stop"}
                   </span>
                 </TableCell>
-                <TableCell>${order.orderRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
+                <TableCell>
+                  $
+                  {order.orderRate.toLocaleString(undefined, {
+                    minimumFractionDigits: 4,
+                    maximumFractionDigits: 4,
+                  })}
+                </TableCell>
                 <TableCell>{order.units}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="bg-muted text-muted-foreground">
+                  <Badge
+                    variant="outline"
+                    className="bg-muted text-muted-foreground"
+                  >
                     {statusDisplay}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {(order.stopLoss || order.takeProfit) ? (
+                  {order.stopLoss || order.takeProfit ? (
                     <div className="flex gap-1">
                       <TooltipProvider>
                         {order.stopLoss && (
@@ -88,8 +116,12 @@ const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({ ordersHistory }) 
                     <span className="text-muted-foreground">—</span>
                   )}
                 </TableCell>
-                <TableCell className="whitespace-nowrap">{order.orderDate}</TableCell>
-                <TableCell className="whitespace-nowrap">{order.closeDate}</TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {order.orderDate}
+                </TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {order.closeDate}
+                </TableCell>
                 <TableCell>
                   <span className="text-xs text-muted-foreground">
                     {reason}

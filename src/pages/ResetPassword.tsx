@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Button } from "@/shared/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { ErrorHandler } from "@/services/errorHandling";
 

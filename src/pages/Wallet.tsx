@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { Card, CardContent, CardHeader } from "@/shared/ui/card";
 import { Wallet } from "lucide-react";
 import DepositForm from "@/components/wallet/DepositForm";
 import WithdrawForm from "@/components/wallet/WithdrawForm";
 import BalanceInfo from "@/components/wallet/BalanceInfo";
 import TransactionHistory from "@/components/wallet/TransactionHistory";
-import { useAuth } from '@/hooks/useAuth'; // Add this if it's needed but missing
+import { useAuth } from "@/hooks/useAuth"; // Add this if it's needed but missing
 
 const WalletPage = () => {
   const [activeTab, setActiveTab] = useState("deposit");
@@ -25,26 +25,30 @@ const WalletPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="col-span-1 lg:col-span-2 h-fit">
             <CardHeader>
-              <Tabs defaultValue="deposit" onValueChange={setActiveTab} className="w-full">
+              <Tabs
+                defaultValue="deposit"
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="deposit">Deposit</TabsTrigger>
                   <TabsTrigger value="withdraw">Withdraw</TabsTrigger>
                 </TabsList>
-              
+
                 <TabsContent value="deposit" className="mt-4 space-y-4">
                   <DepositForm />
                 </TabsContent>
-                
+
                 <TabsContent value="withdraw" className="mt-4 space-y-4">
                   <WithdrawForm />
                 </TabsContent>
               </Tabs>
             </CardHeader>
           </Card>
-          
+
           <BalanceInfo />
         </div>
-        
+
         <div className="mt-2">
           <TransactionHistory />
         </div>

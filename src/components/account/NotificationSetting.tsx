@@ -1,5 +1,4 @@
-
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@/shared/ui/switch";
 
 interface NotificationSettingProps {
   title: string;
@@ -7,7 +6,11 @@ interface NotificationSettingProps {
   defaultChecked?: boolean;
 }
 
-export function NotificationSetting({ title, description, defaultChecked = false }: NotificationSettingProps) {
+export function NotificationSetting({
+  title,
+  description,
+  defaultChecked = false,
+}: NotificationSettingProps) {
   return (
     <div className="flex items-center justify-between">
       <div>

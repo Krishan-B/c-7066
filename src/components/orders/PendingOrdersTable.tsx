@@ -1,10 +1,21 @@
-
 import React from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shared/ui/table";
+import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
 import { X, AlertCircle, Clock, ShieldCheck } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/ui/tooltip";
 import { PendingOrder } from "@/types/orders";
 
 interface PendingOrdersTableProps {
@@ -12,9 +23,9 @@ interface PendingOrdersTableProps {
   onCancelOrder: (orderId: string) => void;
 }
 
-const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({ 
-  pendingOrders, 
-  onCancelOrder 
+const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
+  pendingOrders,
+  onCancelOrder,
 }) => {
   return (
     <div className="rounded-md border overflow-hidden">
@@ -39,13 +50,17 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
             // In a real app, this would come from the database
             const orderType = "limit";
             const expires = "GTC"; // Good Till Canceled
-            
+
             return (
               <TableRow key={order.id} className="hover:bg-muted/40">
                 <TableCell className="font-medium">{order.symbol}</TableCell>
                 <TableCell>
-                  <Badge variant={order.direction === 'Buy' ? 'default' : 'destructive'}
-                    className={`${order.direction === 'Buy' ? 'bg-green-600' : 'bg-red-500'} text-white`}>
+                  <Badge
+                    variant={
+                      order.direction === "Buy" ? "default" : "destructive"
+                    }
+                    className={`${order.direction === "Buy" ? "bg-green-600" : "bg-red-500"} text-white`}
+                  >
                     {order.direction}
                   </Badge>
                 </TableCell>
@@ -54,11 +69,23 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
                     {orderType === "limit" ? "Limit" : "Market"}
                   </span>
                 </TableCell>
-                <TableCell>${order.orderRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
-                <TableCell>{order.units}</TableCell>
-                <TableCell>${order.marketRate.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4})}</TableCell>
                 <TableCell>
-                  {(order.stopLoss || order.takeProfit) ? (
+                  $
+                  {order.orderRate.toLocaleString(undefined, {
+                    minimumFractionDigits: 4,
+                    maximumFractionDigits: 4,
+                  })}
+                </TableCell>
+                <TableCell>{order.units}</TableCell>
+                <TableCell>
+                  $
+                  {order.marketRate.toLocaleString(undefined, {
+                    minimumFractionDigits: 4,
+                    maximumFractionDigits: 4,
+                  })}
+                </TableCell>
+                <TableCell>
+                  {order.stopLoss || order.takeProfit ? (
                     <div className="flex gap-1">
                       <TooltipProvider>
                         {order.stopLoss && (
@@ -93,11 +120,13 @@ const PendingOrdersTable: React.FC<PendingOrdersTableProps> = ({
                     {expires}
                   </div>
                 </TableCell>
-                <TableCell className="whitespace-nowrap">{order.orderDate}</TableCell>
+                <TableCell className="whitespace-nowrap">
+                  {order.orderDate}
+                </TableCell>
                 <TableCell>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => onCancelOrder(order.id)}
                   >
                     <X className="h-4 w-4 mr-1" /> Cancel

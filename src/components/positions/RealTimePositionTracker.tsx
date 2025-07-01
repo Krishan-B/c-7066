@@ -1,14 +1,26 @@
-
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
+import { Badge } from "@/shared/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shared/ui/table";
+import { Switch } from "@/shared/ui/switch";
+import { Label } from "@/shared/ui/label";
 import { TrendingUp, TrendingDown, Activity, Pause, Play } from "lucide-react";
-import { usePositionTracking } from '@/hooks/usePositionTracking';
-import { formatCurrency, formatNumber } from '@/utils/formatUtils';
+import { usePositionTracking } from "@/hooks/usePositionTracking";
+import { formatCurrency, formatNumber } from "@/utils/formatUtils";
 
 const RealTimePositionTracker = () => {
   const {
@@ -18,7 +30,7 @@ const RealTimePositionTracker = () => {
     totals,
     startRealTimeTracking,
     stopRealTimeTracking,
-    updatePositionPrice
+    updatePositionPrice,
   } = usePositionTracking();
 
   const [simulateUpdates, setSimulateUpdates] = useState(false);
@@ -28,11 +40,12 @@ const RealTimePositionTracker = () => {
     if (!simulateUpdates || positions.length === 0) return;
 
     const interval = setInterval(() => {
-      positions.forEach(position => {
+      positions.forEach((position) => {
         // Simulate small price movements (±0.5% of current price)
-        const priceChange = (Math.random() - 0.5) * 0.01 * position.current_price;
+        const priceChange =
+          (Math.random() - 0.5) * 0.01 * position.current_price;
         const newPrice = Math.max(0.0001, position.current_price + priceChange);
-        
+
         updatePositionPrice(position.id, newPrice);
       });
     }, 2000); // Update every 2 seconds
@@ -49,7 +62,7 @@ const RealTimePositionTracker = () => {
   };
 
   const getDirectionIcon = (direction: string) => {
-    return direction === 'buy' ? (
+    return direction === "buy" ? (
       <TrendingUp className="h-4 w-4 text-green-600" />
     ) : (
       <TrendingDown className="h-4 w-4 text-red-600" />
@@ -57,9 +70,9 @@ const RealTimePositionTracker = () => {
   };
 
   const getPnLColor = (pnl: number) => {
-    if (pnl > 0) return 'text-green-600';
-    if (pnl < 0) return 'text-red-600';
-    return 'text-gray-600';
+    if (pnl > 0) return "text-green-600";
+    if (pnl < 0) return "text-red-600";
+    return "text-gray-600";
   };
 
   return (
@@ -110,22 +123,32 @@ const RealTimePositionTracker = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold">{positions.length}</div>
-              <div className="text-sm text-muted-foreground">Open Positions</div>
+              <div className="text-sm text-muted-foreground">
+                Open Positions
+              </div>
             </div>
             <div className="text-center">
-              <div className={`text-2xl font-bold ${getPnLColor(totals.unrealizedPnL)}`}>
+              <div
+                className={`text-2xl font-bold ${getPnLColor(totals.unrealizedPnL)}`}
+              >
                 {formatCurrency(totals.unrealizedPnL)}
               </div>
-              <div className="text-sm text-muted-foreground">Total Unrealized P&L</div>
+              <div className="text-sm text-muted-foreground">
+                Total Unrealized P&L
+              </div>
             </div>
             <div className="text-center">
-              <div className={`text-2xl font-bold ${getPnLColor(totals.dailyPnL)}`}>
+              <div
+                className={`text-2xl font-bold ${getPnLColor(totals.dailyPnL)}`}
+              >
                 {formatCurrency(totals.dailyPnL)}
               </div>
               <div className="text-sm text-muted-foreground">Daily P&L</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold">{formatCurrency(totals.marginUsed)}</div>
+              <div className="text-2xl font-bold">
+                {formatCurrency(totals.marginUsed)}
+              </div>
               <div className="text-sm text-muted-foreground">Margin Used</div>
             </div>
           </div>
@@ -177,7 +200,9 @@ const RealTimePositionTracker = () => {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {getDirectionIcon(position.direction)}
-                          <span className="capitalize">{position.direction}</span>
+                          <span className="capitalize">
+                            {position.direction}
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
@@ -189,17 +214,27 @@ const RealTimePositionTracker = () => {
                       <TableCell className="text-right font-mono">
                         {formatCurrency(position.current_price)}
                       </TableCell>
-                      <TableCell className={`text-right font-mono ${getPnLColor(position.unrealized_pnl || 0)}`}>
+                      <TableCell
+                        className={`text-right font-mono ${getPnLColor(position.unrealized_pnl || 0)}`}
+                      >
                         {formatCurrency(position.unrealized_pnl || 0)}
                       </TableCell>
-                      <TableCell className={`text-right font-mono ${getPnLColor(position.daily_pnl || 0)}`}>
+                      <TableCell
+                        className={`text-right font-mono ${getPnLColor(position.daily_pnl || 0)}`}
+                      >
                         {formatCurrency(position.daily_pnl || 0)}
                       </TableCell>
                       <TableCell className="text-right">
-                        {position.asset_class === 'forex' ? formatNumber(position.pip_difference || 0, 1) : '-'}
+                        {position.asset_class === "forex"
+                          ? formatNumber(position.pip_difference || 0, 1)
+                          : "-"}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={position.status === 'open' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={
+                            position.status === "open" ? "default" : "secondary"
+                          }
+                        >
                           {position.status}
                         </Badge>
                       </TableCell>

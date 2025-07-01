@@ -1,13 +1,19 @@
 import { User } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { ProfileForm } from "@/components/account/ProfileForm";
 import { PasswordForm } from "@/components/account/PasswordForm";
 import { SecuritySettings } from "@/components/account/SecuritySettings";
 import { NotificationPreferences } from "@/components/account/NotificationPreferences";
 import { AccountStatus } from "@/components/account/AccountStatus";
 import { AccountSecurity } from "@/components/account/AccountSecurity";
-import { useAuth } from '@/hooks/useAuth'; // Add this if it's needed but missing
+import { useAuth } from "@/hooks/useAuth"; // Add this if it's needed but missing
 
 const Account = () => {
   return (
@@ -17,7 +23,9 @@ const Account = () => {
           <User className="h-8 w-8 text-primary" />
           <div>
             <h1 className="text-2xl font-bold">My Account</h1>
-            <p className="text-muted-foreground">Manage your account settings</p>
+            <p className="text-muted-foreground">
+              Manage your account settings
+            </p>
           </div>
         </div>
 
@@ -29,19 +37,21 @@ const Account = () => {
                 <TabsTrigger value="security">Security</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="profile" className="mt-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Profile Information</CardTitle>
-                    <CardDescription>Update your personal details</CardDescription>
+                    <CardDescription>
+                      Update your personal details
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <ProfileForm />
                   </CardContent>
                 </Card>
               </TabsContent>
-              
+
               <TabsContent value="security" className="mt-6 space-y-6">
                 <Card>
                   <CardHeader>
@@ -54,13 +64,13 @@ const Account = () => {
                 </Card>
                 <SecuritySettings />
               </TabsContent>
-              
+
               <TabsContent value="notifications" className="mt-6">
                 <NotificationPreferences />
               </TabsContent>
             </Tabs>
           </div>
-          
+
           <div className="space-y-6">
             <AccountStatus />
             <AccountSecurity />

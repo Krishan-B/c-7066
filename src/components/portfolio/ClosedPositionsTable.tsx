@@ -1,6 +1,12 @@
-
 import React from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shared/ui/table";
 import { ArrowUp, ArrowDown } from "lucide-react";
 
 interface ClosedPosition {
@@ -41,28 +47,39 @@ const ClosedPositionsTable = ({ positions }: ClosedPositionsTableProps) => {
                 {position.name} ({position.symbol})
               </TableCell>
               <TableCell className="text-right">{position.amount}</TableCell>
-              <TableCell className="text-right">${position.entryPrice.toLocaleString()}</TableCell>
-              <TableCell className="text-right">${position.exitPrice.toLocaleString()}</TableCell>
+              <TableCell className="text-right">
+                ${position.entryPrice.toLocaleString()}
+              </TableCell>
+              <TableCell className="text-right">
+                ${position.exitPrice.toLocaleString()}
+              </TableCell>
               <TableCell>
                 <div className="text-xs">
                   <div>{position.openDate}</div>
                   <div>{position.closeDate}</div>
                 </div>
               </TableCell>
-              <TableCell className={`text-right ${position.pnl >= 0 ? 'text-success' : 'text-destructive'}`}>
+              <TableCell
+                className={`text-right ${position.pnl >= 0 ? "text-success" : "text-destructive"}`}
+              >
                 <div className="flex items-center justify-end">
-                  {position.pnl >= 0 
-                    ? <ArrowUp className="mr-1 h-4 w-4" />
-                    : <ArrowDown className="mr-1 h-4 w-4" />
-                  }
-                  ${Math.abs(position.pnl).toLocaleString()} ({Math.abs(position.pnlPercentage).toFixed(2)}%)
+                  {position.pnl >= 0 ? (
+                    <ArrowUp className="mr-1 h-4 w-4" />
+                  ) : (
+                    <ArrowDown className="mr-1 h-4 w-4" />
+                  )}
+                  ${Math.abs(position.pnl).toLocaleString()} (
+                  {Math.abs(position.pnlPercentage).toFixed(2)}%)
                 </div>
               </TableCell>
             </TableRow>
           ))}
           {positions.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+              <TableCell
+                colSpan={6}
+                className="text-center py-4 text-muted-foreground"
+              >
                 No positions match your filter criteria
               </TableCell>
             </TableRow>

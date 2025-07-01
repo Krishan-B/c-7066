@@ -1,7 +1,7 @@
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/shared/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Progress } from "@/shared/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { useLeverage } from "@/hooks/useLeverage";
 import { AlertTriangle, BarChart3, Target } from "lucide-react";
@@ -65,25 +65,28 @@ const LeverageAnalytics = () => {
 
   const generateAnalyticsData = useCallback(() => {
     // Generate asset-specific leverage analytics
-    const assetGroups = marginCalculations.reduce((acc, calc) => {
-      const assetClass = "crypto"; // This would come from position data
-      if (!acc[assetClass]) {
-        acc[assetClass] = {
-          asset_class: assetClass,
-          max_leverage: 10,
-          current_utilization: 0,
-          margin_used: 0,
-          position_count: 0,
-          risk_score: 0,
-        };
-      }
+    const assetGroups = marginCalculations.reduce(
+      (acc, calc) => {
+        const assetClass = "crypto"; // This would come from position data
+        if (!acc[assetClass]) {
+          acc[assetClass] = {
+            asset_class: assetClass,
+            max_leverage: 10,
+            current_utilization: 0,
+            margin_used: 0,
+            position_count: 0,
+            risk_score: 0,
+          };
+        }
 
-      acc[assetClass].margin_used += calc.used_margin;
-      acc[assetClass].position_count += 1;
-      acc[assetClass].current_utilization += calc.leverage_used;
+        acc[assetClass].margin_used += calc.used_margin;
+        acc[assetClass].position_count += 1;
+        acc[assetClass].current_utilization += calc.leverage_used;
 
-      return acc;
-    }, {} as Record<string, AssetLeverageData>);
+        return acc;
+      },
+      {} as Record<string, AssetLeverageData>
+    );
 
     // Calculate averages and risk scores
     Object.keys(assetGroups).forEach((key) => {

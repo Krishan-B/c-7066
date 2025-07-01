@@ -1,13 +1,13 @@
 import { useTheme } from "@/components/theme-context";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@/shared/ui/button";
+import { Label } from "@/shared/ui/label";
+import { Switch } from "@/shared/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/shared/ui/tooltip";
 import { Moon, Sun } from "lucide-react";
 
 export const ThemeSwitcher = () => {

@@ -1,10 +1,14 @@
-import { UserProfile } from "@/features/profile/types";
-import { ErrorHandler } from "@/services/errorHandling";
-import { supabase } from "@/integrations/supabase/client";
+import { UserProfile } from "../../../features/profile/types";
+import { ErrorHandler } from "../../../shared/services/errorHandling";
+import { supabase } from "../../../integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import { AuthContext } from "./AuthContext";
-import type { DBProfile, DBAccount } from "@/integrations/supabase/schema";
+import type {
+  DBProfile,
+  DBAccount,
+} from "../../../integrations/supabase/schema";
+import type { AuthContextType } from "../types";
 
 /**
  * Authentication Provider Component
@@ -79,7 +83,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setProfile(profile);
         return profile;
       } catch (error) {
-        ErrorHandler.show(error, "Loading profile");
+        ErrorHandler.handleError(
+          "Loading profile",
+          error instanceof Error ? error : String(error)
+        );
         return null;
       } finally {
         setProfileLoading(false);
@@ -101,7 +108,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
           // Only show welcome toast for non-initial sessions and only once per login
           if (initialized && !hasShownWelcomeRef.current) {
-            ErrorHandler.showSuccess("Welcome to TradePro", {
+            ErrorHandler.handleSuccess("Welcome to TradePro", {
               description: "You have successfully logged in.",
             });
             hasShownWelcomeRef.current = true;
@@ -140,7 +147,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           authListener.subscription.unsubscribe();
         };
       } catch (error) {
-        ErrorHandler.handleError(error);
+        ErrorHandler.handleError(
+          "Error",
+          error instanceof Error ? error : String(error)
+        );
         return undefined;
       } finally {
         setLoading(false);
@@ -166,7 +176,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       return data.session;
     } catch (error) {
-      ErrorHandler.handleError(error);
+      ErrorHandler.handleError(
+        "Error refreshing session",
+        error instanceof Error ? error : String(error)
+      );
       return null;
     }
   }, []);
@@ -179,7 +192,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
       setProfile(null);
     } catch (error) {
-      ErrorHandler.handleError(error);
+      ErrorHandler.handleError(
+        "Error signing out",
+        error instanceof Error ? error : String(error)
+      );
     }
   }, []);
 
@@ -207,7 +223,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             : ({ id: user.id, ...profileData } as UserProfile)
         );
 
-        ErrorHandler.showSuccess("Profile Updated", {
+        ErrorHandler.handleSuccess("Profile Updated", {
           description: "Your profile has been updated successfully.",
         });
       } catch (error) {
@@ -227,17 +243,76 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [user, fetchProfile]);
 
+  // Method to sign in with email and password
+  const signInWithEmail = useCallback(
+    async (email: string, password: string) => {
+      try {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
+      } catch (error) {
+        ErrorHandler.handleError(
+          "Error signing in",
+          error instanceof Error ? error : String(error)
+        );
+        throw error;
+      }
+    },
+    []
+  );
+
+  // Method to sign up with email and password
+  const signUpWithEmail = useCallback(
+    async (
+      email: string,
+      password: string,
+      profileData?: Partial<UserProfile>
+    ) => {
+      try {
+        const { error: signUpError, data } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (signUpError) throw signUpError;
+
+        if (data.user && profileData) {
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .upsert({
+              id: data.user.id,
+              email,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              ...profileData,
+            });
+          if (profileError) throw profileError;
+        }
+      } catch (error) {
+        ErrorHandler.handleError(
+          "Error signing up",
+          error instanceof Error ? error : String(error)
+        );
+        throw error;
+      }
+    },
+    []
+  );
+
   // Context value to be provided to consumers
-  const contextValue = {
+  const contextValue: AuthContextType = {
     session,
     user,
     profile,
     loading,
     profileLoading,
     signOut,
-    refreshSession,
     updateProfile,
     refreshProfile,
+    refreshSession,
+    signInWithEmail,
+    signUpWithEmail,
   };
 
   return (

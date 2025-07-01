@@ -1,6 +1,12 @@
-
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
 import { CreditCard, Building, PlusCircle } from "lucide-react";
 
 const PaymentMethods = () => {
@@ -15,14 +21,18 @@ const PaymentMethods = () => {
             <CreditCard className="h-4 w-4 mr-2 text-primary" />
             <span>Visa ending in 4242</span>
           </div>
-          <Button variant="ghost" size="sm">Edit</Button>
+          <Button variant="ghost" size="sm">
+            Edit
+          </Button>
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <Building className="h-4 w-4 mr-2 text-primary" />
             <span>Bank Account (ACH)</span>
           </div>
-          <Button variant="ghost" size="sm">Edit</Button>
+          <Button variant="ghost" size="sm">
+            Edit
+          </Button>
         </div>
       </CardContent>
       <CardFooter>

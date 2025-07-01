@@ -1,20 +1,22 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui/button";
 import { ChevronRight, ArrowRight, CheckCircle } from "lucide-react";
 
 const CTASection = () => {
   const navigate = useNavigate();
-  
+
   return (
     <section id="about" className="py-16 md:py-20 container">
       <div className="bg-primary/10 rounded-lg p-8 md:p-12 max-w-4xl mx-auto">
         <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to Start Trading?</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">
+              Ready to Start Trading?
+            </h2>
             <p className="text-base md:text-lg mb-6 max-w-lg">
-              Join thousands of traders using TradePro to access global markets and reach their financial goals.
+              Join thousands of traders using TradePro to access global markets
+              and reach their financial goals.
             </p>
             <div className="space-y-2 mb-6">
               <div className="flex items-center">
@@ -30,8 +32,8 @@ const CTASection = () => {
                 <span>24/7 access to global markets</span>
               </div>
             </div>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="px-8"
               onClick={() => navigate("/auth?tab=signup")}
             >
@@ -58,12 +60,12 @@ const CTASection = () => {
                   <span className="font-medium">Educational Resources</span>
                   <span className="text-success">Free</span>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => {
-                    const element = document.getElementById('pricing');
-                    element?.scrollIntoView({ behavior: 'smooth' });
+                    const element = document.getElementById("pricing");
+                    element?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
                   View All Features

@@ -1,27 +1,26 @@
-
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  ArrowDownToLine, 
-  ArrowUpFromLine, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shared/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/card";
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/shared/ui/badge";
 import { cn } from "@/lib/utils";
 
 // Sample transaction data - in a real app, this would come from your API/database
@@ -29,55 +28,55 @@ const transactions = [
   {
     id: "tx_1",
     type: "deposit",
-    amount: 1250.00,
+    amount: 1250.0,
     status: "completed",
     date: "2025-04-15T14:30:00",
-    paymentMethod: "Visa ending in 4242"
+    paymentMethod: "Visa ending in 4242",
   },
   {
     id: "tx_2",
     type: "withdraw",
-    amount: 450.00,
+    amount: 450.0,
     status: "completed",
     date: "2025-04-12T11:15:00",
-    paymentMethod: "Bank Account (ACH)"
+    paymentMethod: "Bank Account (ACH)",
   },
   {
     id: "tx_3",
     type: "deposit",
-    amount: 2000.00,
+    amount: 2000.0,
     status: "pending",
     date: "2025-04-16T09:45:00",
-    paymentMethod: "Visa ending in 4242"
+    paymentMethod: "Visa ending in 4242",
   },
   {
     id: "tx_4",
     type: "withdraw",
-    amount: 350.00,
+    amount: 350.0,
     status: "failed",
     date: "2025-04-10T16:20:00",
-    paymentMethod: "Bank Account (ACH)"
-  }
+    paymentMethod: "Bank Account (ACH)",
+  },
 ];
 
 const TransactionHistory = () => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
   const getStatusIcon = (status: string) => {
-    switch(status) {
-      case 'completed':
+    switch (status) {
+      case "completed":
         return <CheckCircle2 className="h-4 w-4 text-success" />;
-      case 'pending':
+      case "pending":
         return <Clock className="h-4 w-4 text-warning" />;
-      case 'failed':
+      case "failed":
         return <AlertCircle className="h-4 w-4 text-destructive" />;
       default:
         return null;
@@ -85,22 +84,31 @@ const TransactionHistory = () => {
   };
 
   const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'completed':
+    switch (status) {
+      case "completed":
         return (
-          <Badge variant="outline" className="bg-success/10 text-success border-success/20">
+          <Badge
+            variant="outline"
+            className="bg-success/10 text-success border-success/20"
+          >
             Completed
           </Badge>
         );
-      case 'pending':
+      case "pending":
         return (
-          <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+          <Badge
+            variant="outline"
+            className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+          >
             Pending
           </Badge>
         );
-      case 'failed':
+      case "failed":
         return (
-          <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
+          <Badge
+            variant="outline"
+            className="bg-destructive/10 text-destructive border-destructive/20"
+          >
             Failed
           </Badge>
         );
@@ -113,7 +121,9 @@ const TransactionHistory = () => {
     <Card>
       <CardHeader>
         <CardTitle>Transaction History</CardTitle>
-        <CardDescription>Your recent deposit and withdrawal transactions</CardDescription>
+        <CardDescription>
+          Your recent deposit and withdrawal transactions
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -122,7 +132,9 @@ const TransactionHistory = () => {
               <TableHead>Type</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead className="hidden sm:table-cell">Date</TableHead>
-              <TableHead className="hidden md:table-cell">Payment Method</TableHead>
+              <TableHead className="hidden md:table-cell">
+                Payment Method
+              </TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
@@ -148,11 +160,16 @@ const TransactionHistory = () => {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className={cn(
-                  "font-medium",
-                  transaction.type === "deposit" ? "text-green-600" : "text-blue-600"
-                )}>
-                  {transaction.type === "deposit" ? "+" : "-"}${transaction.amount.toFixed(2)}
+                <TableCell
+                  className={cn(
+                    "font-medium",
+                    transaction.type === "deposit"
+                      ? "text-green-600"
+                      : "text-blue-600"
+                  )}
+                >
+                  {transaction.type === "deposit" ? "+" : "-"}$
+                  {transaction.amount.toFixed(2)}
                 </TableCell>
                 <TableCell className="hidden sm:table-cell text-muted-foreground">
                   {formatDate(transaction.date)}

@@ -1,11 +1,10 @@
-
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { X, Shield, Target, TrendingUp, Edit } from 'lucide-react';
-import { useEnhancedOrders } from '@/hooks/useEnhancedOrders';
-import type { OrderGroup } from '@/types/enhanced-orders';
+import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Separator } from "@/shared/ui/separator";
+import { X, Shield, Target, TrendingUp, Edit } from "lucide-react";
+import { useEnhancedOrders } from "@/hooks/useEnhancedOrders";
+import type { OrderGroup } from "@/types/enhanced-orders";
 
 interface OrderGroupsListProps {
   orderGroups: OrderGroup[];
@@ -16,23 +15,23 @@ const OrderGroupsList = ({ orderGroups }: OrderGroupsListProps) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'filled':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+      case "filled":
+        return "bg-green-100 text-green-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -57,7 +56,8 @@ const OrderGroupsList = ({ orderGroups }: OrderGroupsListProps) => {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">
-                {group.primaryOrder.symbol} - {group.primaryOrder.direction.toUpperCase()}
+                {group.primaryOrder.symbol} -{" "}
+                {group.primaryOrder.direction.toUpperCase()}
               </CardTitle>
               <Badge className={getStatusColor(group.primaryOrder.status)}>
                 {group.primaryOrder.status}
@@ -75,14 +75,16 @@ const OrderGroupsList = ({ orderGroups }: OrderGroupsListProps) => {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="font-medium">Primary Order</span>
-                  <Badge variant="outline">{group.primaryOrder.order_type}</Badge>
+                  <Badge variant="outline">
+                    {group.primaryOrder.order_type}
+                  </Badge>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Value: ${group.primaryOrder.position_value.toFixed(2)} | 
+                  Value: ${group.primaryOrder.position_value.toFixed(2)} |
                   Margin: ${group.primaryOrder.margin_required.toFixed(2)}
                 </div>
               </div>
-              {group.primaryOrder.status === 'pending' && (
+              {group.primaryOrder.status === "pending" && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -94,12 +96,16 @@ const OrderGroupsList = ({ orderGroups }: OrderGroupsListProps) => {
             </div>
 
             {/* Child Orders */}
-            {(group.stopLossOrder || group.takeProfitOrder || group.trailingStopOrder) && (
+            {(group.stopLossOrder ||
+              group.takeProfitOrder ||
+              group.trailingStopOrder) && (
               <>
                 <Separator />
                 <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Risk Management Orders</h4>
-                  
+                  <h4 className="font-medium text-sm">
+                    Risk Management Orders
+                  </h4>
+
                   {group.stopLossOrder && (
                     <div className="flex items-center justify-between p-2 border rounded">
                       <div className="flex items-center gap-2">
@@ -108,11 +114,13 @@ const OrderGroupsList = ({ orderGroups }: OrderGroupsListProps) => {
                         <Badge variant="outline" className="text-xs">
                           @ {group.stopLossOrder.stop_loss_price}
                         </Badge>
-                        <Badge className={getStatusColor(group.stopLossOrder.status)}>
+                        <Badge
+                          className={getStatusColor(group.stopLossOrder.status)}
+                        >
                           {group.stopLossOrder.status}
                         </Badge>
                       </div>
-                      {group.stopLossOrder.status === 'pending' && (
+                      {group.stopLossOrder.status === "pending" && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -132,11 +140,15 @@ const OrderGroupsList = ({ orderGroups }: OrderGroupsListProps) => {
                         <Badge variant="outline" className="text-xs">
                           @ {group.takeProfitOrder.take_profit_price}
                         </Badge>
-                        <Badge className={getStatusColor(group.takeProfitOrder.status)}>
+                        <Badge
+                          className={getStatusColor(
+                            group.takeProfitOrder.status
+                          )}
+                        >
                           {group.takeProfitOrder.status}
                         </Badge>
                       </div>
-                      {group.takeProfitOrder.status === 'pending' && (
+                      {group.takeProfitOrder.status === "pending" && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -156,15 +168,21 @@ const OrderGroupsList = ({ orderGroups }: OrderGroupsListProps) => {
                         <Badge variant="outline" className="text-xs">
                           {group.trailingStopOrder.trailing_stop_distance} pips
                         </Badge>
-                        <Badge className={getStatusColor(group.trailingStopOrder.status)}>
+                        <Badge
+                          className={getStatusColor(
+                            group.trailingStopOrder.status
+                          )}
+                        >
                           {group.trailingStopOrder.status}
                         </Badge>
                       </div>
-                      {group.trailingStopOrder.status === 'pending' && (
+                      {group.trailingStopOrder.status === "pending" && (
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => cancelOrder(group.trailingStopOrder!.id)}
+                          onClick={() =>
+                            cancelOrder(group.trailingStopOrder!.id)
+                          }
                         >
                           <X className="h-3 w-3" />
                         </Button>

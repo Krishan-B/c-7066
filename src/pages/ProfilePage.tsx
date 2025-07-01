@@ -5,11 +5,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/shared/ui/card";
 import { UserProfile } from "@/features/profile/types";
 import ProfileDisplay from "@/features/profile/components/ProfileDisplay";
 import ProfileEditForm from "@/features/profile/components/ProfileEditForm";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui/button";
 import { Pencil, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ErrorHandler } from "@/services/errorHandling";

@@ -1,11 +1,10 @@
-
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertTitle, AlertDescription } from "@/shared/ui/alert";
 
 // Import components and hook
 import PortfolioSummary from "@/components/portfolio/PortfolioSummary";
@@ -18,18 +17,18 @@ import { usePortfolioData } from "@/hooks/usePortfolioData";
 const PortfolioContainer = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  
-  const { 
-    portfolioData, 
-    timeframe, 
-    setTimeframe, 
-    actions, 
+
+  const {
+    portfolioData,
+    timeframe,
+    setTimeframe,
+    actions,
     activeTrades,
     isLoading,
     error,
-    refetch
+    refetch,
   } = usePortfolioData();
-  
+
   const {
     totalValue,
     cashBalance,
@@ -41,7 +40,7 @@ const PortfolioContainer = () => {
     assets,
     closedPositions,
     allocationData,
-    performanceData
+    performanceData,
   } = portfolioData;
 
   if (!user) {
@@ -85,20 +84,23 @@ const PortfolioContainer = () => {
             <Alert variant="destructive" className="mb-4">
               <AlertTitle>Data Retrieval Error</AlertTitle>
               <AlertDescription>
-                {error instanceof Error 
-                  ? error.message 
+                {error instanceof Error
+                  ? error.message
                   : "There was a problem loading your portfolio data. Please try again."}
               </AlertDescription>
             </Alert>
             <p className="text-center mb-6 text-muted-foreground">
-              This could be due to network connectivity issues or a temporary server problem.
+              This could be due to network connectivity issues or a temporary
+              server problem.
             </p>
             <div className="flex gap-4">
               <Button onClick={refetch} className="gap-2">
                 <RefreshCw className="h-4 w-4" />
                 Retry
               </Button>
-              <Button variant="outline" onClick={() => navigate("/")}>Go to Dashboard</Button>
+              <Button variant="outline" onClick={() => navigate("/")}>
+                Go to Dashboard
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -117,7 +119,7 @@ const PortfolioContainer = () => {
         </div>
 
         {/* Portfolio Summary */}
-        <PortfolioSummary 
+        <PortfolioSummary
           balance={cashBalance + lockedFunds}
           equity={cashBalance + lockedFunds + totalValue}
           activeTrades={activeTrades}
@@ -126,7 +128,7 @@ const PortfolioContainer = () => {
         />
 
         {/* Portfolio Metrics Cards */}
-        <PortfolioMetricsCards 
+        <PortfolioMetricsCards
           totalValue={totalValue}
           cashBalance={cashBalance}
           lockedFunds={lockedFunds}
@@ -137,7 +139,7 @@ const PortfolioContainer = () => {
         />
 
         {/* Performance Chart */}
-        <PerformanceChart 
+        <PerformanceChart
           data={performanceData}
           timeframe={timeframe}
           onTimeframeChange={setTimeframe}
@@ -145,14 +147,14 @@ const PortfolioContainer = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3">
-            <PositionsSection 
-              assets={assets} 
-              closedPositions={closedPositions} 
+            <PositionsSection
+              assets={assets}
+              closedPositions={closedPositions}
               onViewDetails={actions.handleViewDetails}
             />
           </div>
-          
-          <PortfolioSideSection 
+
+          <PortfolioSideSection
             totalValue={totalValue}
             dayChange={dayChange}
             dayChangePercentage={dayChangePercentage}

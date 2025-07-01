@@ -1,14 +1,14 @@
 import DocumentList from "@/components/kyc/DocumentList";
 import DocumentUpload from "@/components/kyc/DocumentUpload";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/shared/ui/alert";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/shared/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { useKYC } from "@/hooks/useKYC";
 import { ErrorHandler } from "@/services/errorHandling";
 import { AlertTriangle, CheckCircle, Clock, Shield } from "lucide-react";

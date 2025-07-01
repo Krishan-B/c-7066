@@ -1,8 +1,7 @@
 import { useState, useEffect, ReactNode } from "react";
-import { Navigation } from "@/components/navigation/Navigation";
-import Sidebar from "@/components/navigation/Sidebar";
+import { Navigation, Sidebar } from "../features/navigation";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "../shared/utils";
 
 interface MainLayoutProps {
   children: ReactNode;

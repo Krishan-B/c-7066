@@ -1,7 +1,12 @@
-
 import React from "react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { Search } from "lucide-react";
 
 interface PositionFilterProps {
@@ -15,7 +20,7 @@ const PositionFilter = ({
   filterSymbol,
   filterPnl,
   onSymbolChange,
-  onPnlChange
+  onPnlChange,
 }: PositionFilterProps) => {
   return (
     <div className="flex flex-col md:flex-row gap-4 mb-4">

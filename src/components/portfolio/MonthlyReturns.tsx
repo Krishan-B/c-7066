@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { ChartContainer, ChartTooltipContent } from "@/shared/ui/chart";
 import {
   Bar,
   BarChart,

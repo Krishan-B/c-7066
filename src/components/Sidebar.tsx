@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { ErrorHandler } from "@/services/errorHandling";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui/button";
 
 interface SidebarProps {
   isOpen: boolean;

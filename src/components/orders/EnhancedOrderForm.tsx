@@ -1,15 +1,35 @@
-
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Separator } from '@/components/ui/separator';
-import { Calculator, TrendingUp, TrendingDown, Shield, Target } from 'lucide-react';
-import { useEnhancedOrders } from '@/hooks/useEnhancedOrders';
-import type { EnhancedOrderType, StopLossTakeProfitConfig } from '@/types/enhanced-orders';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
+import { Checkbox } from "@/shared/ui/checkbox";
+import { Separator } from "@/shared/ui/separator";
+import {
+  Calculator,
+  TrendingUp,
+  TrendingDown,
+  Shield,
+  Target,
+} from "lucide-react";
+import { useEnhancedOrders } from "@/hooks/useEnhancedOrders";
+import type {
+  EnhancedOrderType,
+  StopLossTakeProfitConfig,
+} from "@/types/enhanced-orders";
 
 interface EnhancedOrderFormProps {
   defaultSymbol?: string;
@@ -17,18 +37,18 @@ interface EnhancedOrderFormProps {
   onOrderPlaced?: () => void;
 }
 
-const EnhancedOrderForm = ({ 
-  defaultSymbol = 'EURUSD', 
-  defaultPrice = 1.0850,
-  onOrderPlaced 
+const EnhancedOrderForm = ({
+  defaultSymbol = "EURUSD",
+  defaultPrice = 1.085,
+  onOrderPlaced,
 }: EnhancedOrderFormProps) => {
   const [symbol, setSymbol] = useState(defaultSymbol);
-  const [direction, setDirection] = useState<'buy' | 'sell'>('buy');
+  const [direction, setDirection] = useState<"buy" | "sell">("buy");
   const [units, setUnits] = useState<number>(1000);
   const [price, setPrice] = useState<number>(defaultPrice);
-  const [orderType, setOrderType] = useState<EnhancedOrderType>('market');
-  const [assetClass, setAssetClass] = useState('forex');
-  
+  const [orderType, setOrderType] = useState<EnhancedOrderType>("market");
+  const [assetClass, setAssetClass] = useState("forex");
+
   const [slTpConfig, setSlTpConfig] = useState<StopLossTakeProfitConfig>({
     enableStopLoss: false,
     stopLossPrice: 0,
@@ -37,14 +57,14 @@ const EnhancedOrderForm = ({
     takeProfitPrice: 0,
     takeProfitDistance: 50,
     enableTrailingStop: false,
-    trailingStopDistance: 30
+    trailingStopDistance: 30,
   });
 
   const { placeEnhancedOrder, loading } = useEnhancedOrders();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       await placeEnhancedOrder(
         symbol,
@@ -55,7 +75,7 @@ const EnhancedOrderForm = ({
         orderType,
         slTpConfig
       );
-      
+
       onOrderPlaced?.();
     } catch (error) {
       // Error handling is done in the hook
@@ -65,19 +85,15 @@ const EnhancedOrderForm = ({
   const calculateStopLossPrice = () => {
     if (!slTpConfig.stopLossDistance) return;
     const pips = slTpConfig.stopLossDistance / 10000;
-    const newPrice = direction === 'buy' 
-      ? price - pips 
-      : price + pips;
-    setSlTpConfig(prev => ({ ...prev, stopLossPrice: newPrice }));
+    const newPrice = direction === "buy" ? price - pips : price + pips;
+    setSlTpConfig((prev) => ({ ...prev, stopLossPrice: newPrice }));
   };
 
   const calculateTakeProfitPrice = () => {
     if (!slTpConfig.takeProfitDistance) return;
     const pips = slTpConfig.takeProfitDistance / 10000;
-    const newPrice = direction === 'buy' 
-      ? price + pips 
-      : price - pips;
-    setSlTpConfig(prev => ({ ...prev, takeProfitPrice: newPrice }));
+    const newPrice = direction === "buy" ? price + pips : price - pips;
+    setSlTpConfig((prev) => ({ ...prev, takeProfitPrice: newPrice }));
   };
 
   const positionValue = units * price;
@@ -127,7 +143,10 @@ const EnhancedOrderForm = ({
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="direction">Direction</Label>
-              <Select value={direction} onValueChange={(value: 'buy' | 'sell') => setDirection(value)}>
+              <Select
+                value={direction}
+                onValueChange={(value: "buy" | "sell") => setDirection(value)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -171,7 +190,10 @@ const EnhancedOrderForm = ({
 
           <div className="space-y-2">
             <Label htmlFor="orderType">Order Type</Label>
-            <Select value={orderType} onValueChange={(value: EnhancedOrderType) => setOrderType(value)}>
+            <Select
+              value={orderType}
+              onValueChange={(value: EnhancedOrderType) => setOrderType(value)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -199,16 +221,22 @@ const EnhancedOrderForm = ({
                 <Checkbox
                   id="enableStopLoss"
                   checked={slTpConfig.enableStopLoss}
-                  onCheckedChange={(checked) => 
-                    setSlTpConfig(prev => ({ ...prev, enableStopLoss: !!checked }))
+                  onCheckedChange={(checked) =>
+                    setSlTpConfig((prev) => ({
+                      ...prev,
+                      enableStopLoss: !!checked,
+                    }))
                   }
                 />
-                <Label htmlFor="enableStopLoss" className="flex items-center gap-2">
+                <Label
+                  htmlFor="enableStopLoss"
+                  className="flex items-center gap-2"
+                >
                   <Shield className="h-4 w-4 text-red-600" />
                   Enable Stop Loss
                 </Label>
               </div>
-              
+
               {slTpConfig.enableStopLoss && (
                 <div className="grid grid-cols-3 gap-3 ml-6">
                   <div className="space-y-1">
@@ -217,10 +245,12 @@ const EnhancedOrderForm = ({
                       id="stopLossDistance"
                       type="number"
                       value={slTpConfig.stopLossDistance}
-                      onChange={(e) => setSlTpConfig(prev => ({ 
-                        ...prev, 
-                        stopLossDistance: Number(e.target.value) 
-                      }))}
+                      onChange={(e) =>
+                        setSlTpConfig((prev) => ({
+                          ...prev,
+                          stopLossDistance: Number(e.target.value),
+                        }))
+                      }
                     />
                   </div>
                   <div className="space-y-1">
@@ -230,10 +260,12 @@ const EnhancedOrderForm = ({
                       type="number"
                       step="0.00001"
                       value={slTpConfig.stopLossPrice}
-                      onChange={(e) => setSlTpConfig(prev => ({ 
-                        ...prev, 
-                        stopLossPrice: Number(e.target.value) 
-                      }))}
+                      onChange={(e) =>
+                        setSlTpConfig((prev) => ({
+                          ...prev,
+                          stopLossPrice: Number(e.target.value),
+                        }))
+                      }
                     />
                   </div>
                   <div className="flex items-end">
@@ -256,16 +288,22 @@ const EnhancedOrderForm = ({
                 <Checkbox
                   id="enableTakeProfit"
                   checked={slTpConfig.enableTakeProfit}
-                  onCheckedChange={(checked) => 
-                    setSlTpConfig(prev => ({ ...prev, enableTakeProfit: !!checked }))
+                  onCheckedChange={(checked) =>
+                    setSlTpConfig((prev) => ({
+                      ...prev,
+                      enableTakeProfit: !!checked,
+                    }))
                   }
                 />
-                <Label htmlFor="enableTakeProfit" className="flex items-center gap-2">
+                <Label
+                  htmlFor="enableTakeProfit"
+                  className="flex items-center gap-2"
+                >
                   <Target className="h-4 w-4 text-green-600" />
                   Enable Take Profit
                 </Label>
               </div>
-              
+
               {slTpConfig.enableTakeProfit && (
                 <div className="grid grid-cols-3 gap-3 ml-6">
                   <div className="space-y-1">
@@ -274,10 +312,12 @@ const EnhancedOrderForm = ({
                       id="takeProfitDistance"
                       type="number"
                       value={slTpConfig.takeProfitDistance}
-                      onChange={(e) => setSlTpConfig(prev => ({ 
-                        ...prev, 
-                        takeProfitDistance: Number(e.target.value) 
-                      }))}
+                      onChange={(e) =>
+                        setSlTpConfig((prev) => ({
+                          ...prev,
+                          takeProfitDistance: Number(e.target.value),
+                        }))
+                      }
                     />
                   </div>
                   <div className="space-y-1">
@@ -287,10 +327,12 @@ const EnhancedOrderForm = ({
                       type="number"
                       step="0.00001"
                       value={slTpConfig.takeProfitPrice}
-                      onChange={(e) => setSlTpConfig(prev => ({ 
-                        ...prev, 
-                        takeProfitPrice: Number(e.target.value) 
-                      }))}
+                      onChange={(e) =>
+                        setSlTpConfig((prev) => ({
+                          ...prev,
+                          takeProfitPrice: Number(e.target.value),
+                        }))
+                      }
                     />
                   </div>
                   <div className="flex items-end">
@@ -313,28 +355,38 @@ const EnhancedOrderForm = ({
                 <Checkbox
                   id="enableTrailingStop"
                   checked={slTpConfig.enableTrailingStop}
-                  onCheckedChange={(checked) => 
-                    setSlTpConfig(prev => ({ ...prev, enableTrailingStop: !!checked }))
+                  onCheckedChange={(checked) =>
+                    setSlTpConfig((prev) => ({
+                      ...prev,
+                      enableTrailingStop: !!checked,
+                    }))
                   }
                 />
-                <Label htmlFor="enableTrailingStop" className="flex items-center gap-2">
+                <Label
+                  htmlFor="enableTrailingStop"
+                  className="flex items-center gap-2"
+                >
                   <TrendingUp className="h-4 w-4 text-blue-600" />
                   Enable Trailing Stop
                 </Label>
               </div>
-              
+
               {slTpConfig.enableTrailingStop && (
                 <div className="ml-6">
                   <div className="space-y-1">
-                    <Label htmlFor="trailingStopDistance">Distance (pips)</Label>
+                    <Label htmlFor="trailingStopDistance">
+                      Distance (pips)
+                    </Label>
                     <Input
                       id="trailingStopDistance"
                       type="number"
                       value={slTpConfig.trailingStopDistance}
-                      onChange={(e) => setSlTpConfig(prev => ({ 
-                        ...prev, 
-                        trailingStopDistance: Number(e.target.value) 
-                      }))}
+                      onChange={(e) =>
+                        setSlTpConfig((prev) => ({
+                          ...prev,
+                          trailingStopDistance: Number(e.target.value),
+                        }))
+                      }
                       className="w-32"
                     />
                   </div>
@@ -351,22 +403,21 @@ const EnhancedOrderForm = ({
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-muted-foreground">Position Value:</span>
-                <span className="ml-2 font-medium">${positionValue.toFixed(2)}</span>
+                <span className="ml-2 font-medium">
+                  ${positionValue.toFixed(2)}
+                </span>
               </div>
               <div>
                 <span className="text-muted-foreground">Margin Required:</span>
-                <span className="ml-2 font-medium">${marginRequired.toFixed(2)}</span>
+                <span className="ml-2 font-medium">
+                  ${marginRequired.toFixed(2)}
+                </span>
               </div>
             </div>
           </div>
 
-          <Button
-            type="submit"
-            size="lg"
-            disabled={loading}
-            className="w-full"
-          >
-            {loading ? 'Placing Order...' : 'Place Enhanced Order'}
+          <Button type="submit" size="lg" disabled={loading} className="w-full">
+            {loading ? "Placing Order..." : "Place Enhanced Order"}
           </Button>
         </form>
       </CardContent>

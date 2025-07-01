@@ -5,7 +5,7 @@
  * for easier importing throughout the application.
  */
 
-// Context
+// Context & Components
 export { AuthContext, type AuthContextType } from "./context/AuthContext";
 export { AuthProvider } from "./context/AuthProvider";
 

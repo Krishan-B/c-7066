@@ -1,11 +1,23 @@
-
 import { useState } from "react";
 import { UserProfile } from "@/features/profile/types";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/shared/ui/form";
+import { Input } from "@/shared/ui/input";
+import { Button } from "@/shared/ui/button";
 import { useForm } from "react-hook-form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { countries } from "@/lib/countries";
 
 interface ProfileEditFormProps {
@@ -14,17 +26,21 @@ interface ProfileEditFormProps {
   onCancel: () => void;
 }
 
-const ProfileEditForm = ({ profile, onSave, onCancel }: ProfileEditFormProps) => {
+const ProfileEditForm = ({
+  profile,
+  onSave,
+  onCancel,
+}: ProfileEditFormProps) => {
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const form = useForm<UserProfile>({
     defaultValues: {
       firstName: profile.firstName || "",
       lastName: profile.lastName || "",
       email: profile.email || "",
       country: profile.country || "",
-      phoneNumber: profile.phoneNumber || ""
-    }
+      phoneNumber: profile.phoneNumber || "",
+    },
   });
 
   const handleSubmit = async (values: UserProfile) => {
@@ -32,7 +48,7 @@ const ProfileEditForm = ({ profile, onSave, onCancel }: ProfileEditFormProps) =>
     try {
       await onSave({
         ...values,
-        email: profile.email // Don't allow email changes through this form
+        email: profile.email, // Don't allow email changes through this form
       });
     } finally {
       setIsSaving(false);
@@ -92,17 +108,14 @@ const ProfileEditForm = ({ profile, onSave, onCancel }: ProfileEditFormProps) =>
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Country</FormLabel>
-                <Select
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
+                <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select your country" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent className="max-h-80">
-                    {countries.map(c => (
+                    {countries.map((c) => (
                       <SelectItem key={c.code} value={c.code}>
                         {c.name}
                       </SelectItem>
@@ -120,7 +133,11 @@ const ProfileEditForm = ({ profile, onSave, onCancel }: ProfileEditFormProps) =>
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
                 <FormControl>
-                  <Input type="tel" placeholder="Enter your phone number" {...field} />
+                  <Input
+                    type="tel"
+                    placeholder="Enter your phone number"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -129,9 +146,9 @@ const ProfileEditForm = ({ profile, onSave, onCancel }: ProfileEditFormProps) =>
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={onCancel}
             disabled={isSaving}
           >

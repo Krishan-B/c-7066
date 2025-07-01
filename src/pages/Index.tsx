@@ -3,7 +3,7 @@ import NewsWidget from "@/components/NewsWidget";
 import PortfolioCard from "@/components/PortfolioCard";
 import QuickTradePanel from "@/components/trade/QuickTradePanel";
 import KYCBanner from "@/components/kyc/KYCBanner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import WatchlistTable from "@/components/watchlist/WatchlistTable";
 import { Activity, DollarSign, PieChart, TrendingUp } from "lucide-react";
 import { useState } from "react";

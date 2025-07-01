@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { Card } from "@/shared/ui/card";
 import EnhancedNewsWidget from "@/components/EnhancedNewsWidget";
 import AlertsWidget from "@/components/AlertsWidget";
 
@@ -14,7 +13,8 @@ const News = () => {
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-2">News & Market Insights</h1>
           <p className="text-muted-foreground">
-            Stay updated with the latest market news, alerts, and economic events
+            Stay updated with the latest market news, alerts, and economic
+            events
           </p>
         </div>
 
@@ -22,7 +22,9 @@ const News = () => {
           <TabsList className="mb-6">
             <TabsTrigger value="market-news">Market News</TabsTrigger>
             <TabsTrigger value="alerts">Market Alerts</TabsTrigger>
-            <TabsTrigger value="economic-calendar">Economic Calendar</TabsTrigger>
+            <TabsTrigger value="economic-calendar">
+              Economic Calendar
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="market-news" className="space-y-6">

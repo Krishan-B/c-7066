@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 
 interface BalanceBreakdownProps {
   cashBalance: number;
@@ -11,7 +10,7 @@ interface BalanceBreakdownProps {
 const BalanceBreakdown = ({
   cashBalance,
   lockedFunds,
-  totalValue
+  totalValue,
 }: BalanceBreakdownProps) => {
   return (
     <Card>
@@ -34,7 +33,9 @@ const BalanceBreakdown = ({
           </div>
           <div className="pt-2 border-t flex justify-between">
             <span className="font-medium">Total:</span>
-            <span className="font-bold">${(cashBalance + lockedFunds + totalValue).toLocaleString()}</span>
+            <span className="font-bold">
+              ${(cashBalance + lockedFunds + totalValue).toLocaleString()}
+            </span>
           </div>
         </div>
       </CardContent>

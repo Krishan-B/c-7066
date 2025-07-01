@@ -1,27 +1,40 @@
-
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Plus, TrendingUp } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import EnhancedOrderForm from '@/components/orders/EnhancedOrderForm';
-import OrderGroupsList from '@/components/orders/OrderGroupsList';
-import { useEnhancedOrders } from '@/hooks/useEnhancedOrders';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { Button } from "@/shared/ui/button";
+import { Plus, TrendingUp } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/ui/dialog";
+import EnhancedOrderForm from "@/components/orders/EnhancedOrderForm";
+import OrderGroupsList from "@/components/orders/OrderGroupsList";
+import { useEnhancedOrders } from "@/hooks/useEnhancedOrders";
 
 const EnhancedOrders = () => {
   const [showOrderForm, setShowOrderForm] = useState(false);
   const { orderGroups, loading } = useEnhancedOrders();
 
-  const activeOrders = orderGroups.filter(group => 
-    group.primaryOrder.status === 'pending' || 
-    group.stopLossOrder?.status === 'pending' || 
-    group.takeProfitOrder?.status === 'pending' ||
-    group.trailingStopOrder?.status === 'pending'
+  const activeOrders = orderGroups.filter(
+    (group) =>
+      group.primaryOrder.status === "pending" ||
+      group.stopLossOrder?.status === "pending" ||
+      group.takeProfitOrder?.status === "pending" ||
+      group.trailingStopOrder?.status === "pending"
   );
 
-  const completedOrders = orderGroups.filter(group => 
-    !activeOrders.find(active => active.id === group.id)
+  const completedOrders = orderGroups.filter(
+    (group) => !activeOrders.find((active) => active.id === group.id)
   );
 
   return (
@@ -36,7 +49,7 @@ const EnhancedOrders = () => {
             </p>
           </div>
         </div>
-        
+
         <Dialog open={showOrderForm} onOpenChange={setShowOrderForm}>
           <DialogTrigger asChild>
             <Button>
@@ -51,9 +64,7 @@ const EnhancedOrders = () => {
                 Create orders with advanced risk management features
               </DialogDescription>
             </DialogHeader>
-            <EnhancedOrderForm 
-              onOrderPlaced={() => setShowOrderForm(false)}
-            />
+            <EnhancedOrderForm onOrderPlaced={() => setShowOrderForm(false)} />
           </DialogContent>
         </Dialog>
       </div>
@@ -70,10 +81,12 @@ const EnhancedOrders = () => {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Completed Orders</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Completed Orders
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{completedOrders.length}</div>
@@ -82,7 +95,7 @@ const EnhancedOrders = () => {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
@@ -105,7 +118,7 @@ const EnhancedOrders = () => {
             Order History ({completedOrders.length})
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="active" className="mt-6">
           {loading ? (
             <Card>
@@ -117,7 +130,7 @@ const EnhancedOrders = () => {
             <OrderGroupsList orderGroups={activeOrders} />
           )}
         </TabsContent>
-        
+
         <TabsContent value="completed" className="mt-6">
           {loading ? (
             <Card>

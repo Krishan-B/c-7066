@@ -1,7 +1,7 @@
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/shared/ui/alert";
+import { Badge } from "@/shared/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Progress } from "@/shared/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { useLeverage } from "@/hooks/useLeverage";
 import { AlertTriangle, BarChart3, DollarSign, TrendingUp } from "lucide-react";
@@ -238,8 +238,8 @@ const MarginTracker = () => {
                         status.severity === "danger"
                           ? "bg-red-500"
                           : status.severity === "warning"
-                          ? "bg-orange-500"
-                          : "bg-green-500"
+                            ? "bg-orange-500"
+                            : "bg-green-500"
                       }`}
                     />
                     <span className="text-sm">Position {index + 1}</span>

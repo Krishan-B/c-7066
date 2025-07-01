@@ -1,7 +1,6 @@
-
-import React from 'react';
+import React from "react";
 import { ArrowUpIcon, ArrowDownIcon, StarIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui/button";
 
 interface Asset {
   id?: string;
@@ -21,7 +20,7 @@ interface WatchlistTableRowProps {
 
 const WatchlistTableRow = ({ asset, onSelect }: WatchlistTableRowProps) => {
   return (
-    <tr 
+    <tr
       className="border-b border-secondary/40 text-sm hover:bg-secondary/20 cursor-pointer"
       onClick={() => onSelect(asset)}
     >
@@ -34,7 +33,12 @@ const WatchlistTableRow = ({ asset, onSelect }: WatchlistTableRowProps) => {
           </div>
         </div>
       </td>
-      <td className="py-3 px-2 text-right font-medium">${typeof asset.price === 'number' ? asset.price.toLocaleString() : asset.price}</td>
+      <td className="py-3 px-2 text-right font-medium">
+        $
+        {typeof asset.price === "number"
+          ? asset.price.toLocaleString()
+          : asset.price}
+      </td>
       <td className="py-3 px-2 text-right">
         <span
           className={`flex items-center gap-1 justify-end ${
@@ -49,10 +53,16 @@ const WatchlistTableRow = ({ asset, onSelect }: WatchlistTableRowProps) => {
           {Math.abs(asset.change_percentage).toFixed(2)}%
         </span>
       </td>
-      <td className="py-3 px-2 text-right text-muted-foreground">{asset.market_type}</td>
-      <td className="py-3 px-2 text-right text-muted-foreground">{asset.volume}</td>
+      <td className="py-3 px-2 text-right text-muted-foreground">
+        {asset.market_type}
+      </td>
+      <td className="py-3 px-2 text-right text-muted-foreground">
+        {asset.volume}
+      </td>
       <td className="py-3 px-2 text-center">
-        <Button size="sm" variant="outline" className="h-7 px-2">Trade</Button>
+        <Button size="sm" variant="outline" className="h-7 px-2">
+          Trade
+        </Button>
       </td>
     </tr>
   );

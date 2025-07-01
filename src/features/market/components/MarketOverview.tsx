@@ -1,14 +1,15 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../shared/ui/card";
+import { ChartContainer, ChartTooltipContent } from "../../../shared/ui/chart";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
-/**
- * MarketOverview Component
- * Displays a visual overview of market allocation and performance
- */
-export const MarketOverview = () => {
+const MarketOverview = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const data = [
@@ -33,89 +34,90 @@ export const MarketOverview = () => {
 
     return (
       <ChartTooltipContent
-        content={{
-          label: props.payload[0].name,
-          value: `${props.payload[0].value}%`,
-        }}
+        {...props}
+        indicator="dot"
+        formatter={(value, name) => (
+          <div className="flex items-center justify-between gap-2">
+            <span>{name}</span>
+            <span className="font-medium">{value}%</span>
+          </div>
+        )}
       />
     );
   };
 
-  const onPieEnter = (_: unknown, index: number) => {
-    setActiveIndex(index);
-  };
-
-  const onPieLeave = () => {
-    setActiveIndex(null);
-  };
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Market Allocation</CardTitle>
+    <Card className="animate-fade-in">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Portfolio Allocation</CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
-        <div className="flex flex-col items-center justify-center h-[235px]">
-          <div className="absolute flex flex-col items-center justify-center">
-            <div className="text-sm text-muted-foreground">Total Value</div>
-            <div className="text-3xl font-bold">
-              ${totalValue.toLocaleString()}
-            </div>
+      <CardContent>
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <p className="text-2xl font-bold">${totalValue.toLocaleString()}</p>
             <div
               className={`flex items-center text-sm ${
-                isPositive ? "text-success" : "text-destructive"
+                isPositive ? "text-success" : "text-warning"
               }`}
             >
               {isPositive ? (
-                <ArrowUpRight className="mr-1 h-4 w-4" />
+                <ArrowUpRight className="h-3 w-3 mr-1" />
               ) : (
-                <ArrowDownRight className="mr-1 h-4 w-4" />
+                <ArrowDownRight className="h-3 w-3 mr-1" />
               )}
-              <span>${Math.abs(dayChange).toLocaleString()}</span>
-              <span className="ml-1">({dayChangePercentage}%)</span>
+              <span>
+                ${Math.abs(dayChange).toLocaleString()} ({dayChangePercentage}%)
+              </span>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={70}
-                outerRadius={90}
-                paddingAngle={1}
-                dataKey="value"
-                onMouseEnter={onPieEnter}
-                onMouseLeave={onPieLeave}
-              >
-                {data.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.color}
-                    opacity={
-                      activeIndex === null || activeIndex === index ? 1 : 0.5
-                    }
-                  />
-                ))}
-              </Pie>
-              <Tooltip content={renderTooltipContent} />
-            </PieChart>
-          </ResponsiveContainer>
         </div>
-        <div className="grid grid-cols-4 gap-2 py-4 px-1">
-          {data.map((item) => (
+
+        <div className="h-[220px] w-full">
+          <ChartContainer config={{ series: {} }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Tooltip content={renderTooltipContent} />
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={2}
+                  dataKey="value"
+                  onMouseEnter={(_, index) => setActiveIndex(index)}
+                  onMouseLeave={() => setActiveIndex(null)}
+                >
+                  {data.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.color}
+                      stroke={index === activeIndex ? "#fff" : "transparent"}
+                      strokeWidth={2}
+                    />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mt-4">
+          {data.map((item, index) => (
             <div
-              key={item.name}
-              className="flex flex-col items-center justify-center p-2 rounded-lg"
+              key={index}
+              className="flex items-center p-2 rounded-lg hover:bg-secondary/40 transition-colors"
+              onMouseEnter={() => setActiveIndex(index)}
+              onMouseLeave={() => setActiveIndex(null)}
             >
-              <div className="flex items-center">
-                <div
-                  className="w-3 h-3 rounded-full mr-1"
-                  style={{ backgroundColor: item.color }}
-                ></div>
-                <span className="text-xs">{item.name}</span>
+              <div
+                className="w-3 h-3 rounded-full mr-2"
+                style={{ backgroundColor: item.color }}
+              />
+              <div>
+                <p className="text-sm font-medium">{item.name}</p>
+                <p className="text-xs text-muted-foreground">{item.value}%</p>
               </div>
-              <span className="font-medium">{item.value}%</span>
             </div>
           ))}
         </div>

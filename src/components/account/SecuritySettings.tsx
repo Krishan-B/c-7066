@@ -1,6 +1,11 @@
-
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/shared/ui/card";
+import { Switch } from "@/shared/ui/switch";
 
 export function SecuritySettings() {
   return (
@@ -13,7 +18,9 @@ export function SecuritySettings() {
         <div className="flex items-center justify-between">
           <div>
             <p className="font-medium">Two-factor authentication</p>
-            <p className="text-sm text-muted-foreground">Enhance your account security</p>
+            <p className="text-sm text-muted-foreground">
+              Enhance your account security
+            </p>
           </div>
           <Switch />
         </div>

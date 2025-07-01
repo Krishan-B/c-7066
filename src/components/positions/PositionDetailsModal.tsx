@@ -1,13 +1,34 @@
-
-import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import React, { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/ui/dialog";
+import { Badge } from "@/shared/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shared/ui/table";
 import { TrendingUp, TrendingDown, Clock } from "lucide-react";
-import { usePositionTracking } from '@/hooks/usePositionTracking';
-import { formatCurrency, formatNumber } from '@/utils/formatUtils';
-import type { Position, PositionUpdate } from '@/services/positionTrackingService';
+import { usePositionTracking } from "@/hooks/usePositionTracking";
+import { formatCurrency, formatNumber } from "@/utils/formatUtils";
+import type {
+  Position,
+  PositionUpdate,
+} from "@/services/positionTrackingService";
 
 interface PositionDetailsModalProps {
   position: Position | null;
@@ -15,7 +36,11 @@ interface PositionDetailsModalProps {
   onClose: () => void;
 }
 
-const PositionDetailsModal = ({ position, isOpen, onClose }: PositionDetailsModalProps) => {
+const PositionDetailsModal = ({
+  position,
+  isOpen,
+  onClose,
+}: PositionDetailsModalProps) => {
   const { getPositionUpdates, positionUpdates } = usePositionTracking();
   const [updates, setUpdates] = useState<PositionUpdate[]>([]);
 
@@ -39,13 +64,13 @@ const PositionDetailsModal = ({ position, isOpen, onClose }: PositionDetailsModa
   if (!position) return null;
 
   const getPnLColor = (pnl: number) => {
-    if (pnl > 0) return 'text-green-600';
-    if (pnl < 0) return 'text-red-600';
-    return 'text-gray-600';
+    if (pnl > 0) return "text-green-600";
+    if (pnl < 0) return "text-red-600";
+    return "text-gray-600";
   };
 
   const getDirectionIcon = (direction: string) => {
-    return direction === 'buy' ? (
+    return direction === "buy" ? (
       <TrendingUp className="h-4 w-4 text-green-600" />
     ) : (
       <TrendingDown className="h-4 w-4 text-red-600" />
@@ -61,7 +86,8 @@ const PositionDetailsModal = ({ position, isOpen, onClose }: PositionDetailsModa
             {position.symbol} Position Details
           </DialogTitle>
           <DialogDescription>
-            Real-time tracking and update history for position #{position.id.slice(-8)}
+            Real-time tracking and update history for position #
+            {position.id.slice(-8)}
           </DialogDescription>
         </DialogHeader>
 
@@ -89,8 +115,12 @@ const PositionDetailsModal = ({ position, isOpen, onClose }: PositionDetailsModa
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">Entry: {formatCurrency(position.entry_price)}</div>
-                  <div className="text-lg font-semibold">{formatCurrency(position.current_price)}</div>
+                  <div className="text-sm text-muted-foreground">
+                    Entry: {formatCurrency(position.entry_price)}
+                  </div>
+                  <div className="text-lg font-semibold">
+                    {formatCurrency(position.current_price)}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -100,7 +130,9 @@ const PositionDetailsModal = ({ position, isOpen, onClose }: PositionDetailsModa
                 <CardTitle className="text-sm">Unrealized P&L</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className={`text-lg font-semibold ${getPnLColor(position.unrealized_pnl || 0)}`}>
+                <div
+                  className={`text-lg font-semibold ${getPnLColor(position.unrealized_pnl || 0)}`}
+                >
                   {formatCurrency(position.unrealized_pnl || 0)}
                 </div>
                 <div className="text-xs text-muted-foreground">
@@ -132,25 +164,37 @@ const PositionDetailsModal = ({ position, isOpen, onClose }: PositionDetailsModa
           {/* Additional Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="text-center">
-              <div className="text-sm text-muted-foreground">Position Value</div>
-              <div className="text-lg font-semibold">{formatCurrency(position.position_value)}</div>
+              <div className="text-sm text-muted-foreground">
+                Position Value
+              </div>
+              <div className="text-lg font-semibold">
+                {formatCurrency(position.position_value)}
+              </div>
             </div>
             <div className="text-center">
               <div className="text-sm text-muted-foreground">Margin Used</div>
-              <div className="text-lg font-semibold">{formatCurrency(position.margin_used)}</div>
+              <div className="text-lg font-semibold">
+                {formatCurrency(position.margin_used)}
+              </div>
             </div>
             <div className="text-center">
               <div className="text-sm text-muted-foreground">Total Fees</div>
-              <div className="text-lg font-semibold">{formatCurrency(position.total_fees || 0)}</div>
+              <div className="text-lg font-semibold">
+                {formatCurrency(position.total_fees || 0)}
+              </div>
             </div>
             <div className="text-center">
               <div className="text-sm text-muted-foreground">Swap Charges</div>
-              <div className="text-lg font-semibold">{formatCurrency(position.swap_charges || 0)}</div>
+              <div className="text-lg font-semibold">
+                {formatCurrency(position.swap_charges || 0)}
+              </div>
             </div>
-            {position.asset_class === 'forex' && (
+            {position.asset_class === "forex" && (
               <div className="text-center">
                 <div className="text-sm text-muted-foreground">Pips</div>
-                <div className="text-lg font-semibold">{formatNumber(position.pip_difference || 0, 1)}</div>
+                <div className="text-lg font-semibold">
+                  {formatNumber(position.pip_difference || 0, 1)}
+                </div>
               </div>
             )}
           </div>
@@ -179,7 +223,9 @@ const PositionDetailsModal = ({ position, isOpen, onClose }: PositionDetailsModa
                         <TableHead>Time</TableHead>
                         <TableHead className="text-right">Price</TableHead>
                         <TableHead className="text-right">P&L Change</TableHead>
-                        <TableHead className="text-right">Unrealized P&L</TableHead>
+                        <TableHead className="text-right">
+                          Unrealized P&L
+                        </TableHead>
                         <TableHead>Session</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -192,10 +238,14 @@ const PositionDetailsModal = ({ position, isOpen, onClose }: PositionDetailsModa
                           <TableCell className="text-right font-mono">
                             {formatCurrency(update.price_update)}
                           </TableCell>
-                          <TableCell className={`text-right font-mono ${getPnLColor(update.pnl_change)}`}>
+                          <TableCell
+                            className={`text-right font-mono ${getPnLColor(update.pnl_change)}`}
+                          >
                             {formatCurrency(update.pnl_change)}
                           </TableCell>
-                          <TableCell className={`text-right font-mono ${getPnLColor(update.unrealized_pnl)}`}>
+                          <TableCell
+                            className={`text-right font-mono ${getPnLColor(update.unrealized_pnl)}`}
+                          >
                             {formatCurrency(update.unrealized_pnl)}
                           </TableCell>
                           <TableCell>

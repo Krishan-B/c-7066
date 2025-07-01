@@ -1,6 +1,11 @@
-
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
 import { Shield, Bell, Key } from "lucide-react";
 
 export function AccountSecurity() {

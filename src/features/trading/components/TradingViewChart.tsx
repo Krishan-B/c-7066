@@ -4,11 +4,7 @@ interface TradingViewChartProps {
   symbol?: string;
 }
 
-/**
- * TradingViewChart Component
- * Displays an interactive trading chart using TradingView widget
- */
-export const TradingViewChart: React.FC<TradingViewChartProps> = ({
+const TradingViewChart: React.FC<TradingViewChartProps> = ({
   symbol = "BINANCE:BTCUSDT",
 }) => {
   return (

@@ -1,5 +1,5 @@
 import React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import RiskMetrics from "@/components/analytics/RiskMetrics";
 import PerformanceAnalytics from "@/components/analytics/PerformanceAnalytics";
 import ReportingDashboard from "@/components/analytics/ReportingDashboard";

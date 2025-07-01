@@ -1,12 +1,12 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "./shared/ui/toaster";
+import { Toaster as Sonner } from "sonner";
+import { TooltipProvider } from "./shared/ui/tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider, ProtectedRoute } from "@/features/auth";
-import { ThemeProvider } from "./components/ThemeProvider";
-import { TradePanelProvider } from "./components/trade/TradePanelProvider";
+import { AuthProvider, ProtectedRoute } from "./features/auth";
+import { ThemeProvider } from "./features/theme";
+import { TradePanelProvider } from "./features/trading/components/TradePanelProvider";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { MainLayout } from "@/layouts";
+import { MainLayout } from "./layouts";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Markets from "./pages/Markets";
@@ -24,7 +24,7 @@ import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
 import Orders from "./pages/Orders";
 import { useEffect, useRef } from "react";
-import { checkApiHealth } from "@/services/checkApiHealth";
+import { checkApiHealth } from "./shared/services/api/checkApiHealth";
 
 function App() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -106,9 +106,9 @@ function App() {
                     path="/dashboard/wallet"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <Wallet />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -116,9 +116,9 @@ function App() {
                     path="/dashboard/news"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <News />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -126,9 +126,9 @@ function App() {
                     path="/dashboard/analytics"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <Analytics />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -136,9 +136,9 @@ function App() {
                     path="/dashboard/profile"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <ProfilePage />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -146,9 +146,9 @@ function App() {
                     path="/dashboard/account"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <Account />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -156,9 +156,9 @@ function App() {
                     path="/dashboard/kyc"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <KYC />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -166,9 +166,9 @@ function App() {
                     path="/kyc"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <KYC />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -176,9 +176,9 @@ function App() {
                     path="/dashboard/orders"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <Orders />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />

@@ -1,0 +1,1 @@
+export { useKYC } from "./useKYC";

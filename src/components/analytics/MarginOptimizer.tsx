@@ -1,10 +1,10 @@
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/shared/ui/alert";
+import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Label } from "@/shared/ui/label";
+import { Slider } from "@/shared/ui/slider";
+import { Switch } from "@/shared/ui/switch";
 import { useLeverage } from "@/hooks/useLeverage";
 import { AlertTriangle, Settings, Target, TrendingUp } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -387,8 +387,8 @@ const MarginOptimizer = () => {
                       {loading
                         ? "Applying..."
                         : isApplied
-                        ? "Applied"
-                        : "Apply Optimization"}
+                          ? "Applied"
+                          : "Apply Optimization"}
                     </Button>
                   </div>
                 </CardContent>

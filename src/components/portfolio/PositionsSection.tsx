@@ -1,8 +1,7 @@
-
 import React, { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
 import { Plus, Activity } from "lucide-react";
 import PositionsTable from "@/components/portfolio/PositionsTable";
 import ClosedPositionsTable from "@/components/portfolio/ClosedPositionsTable";
@@ -16,24 +15,26 @@ interface PositionsSectionProps {
   onViewDetails: (symbol: string) => void;
 }
 
-const PositionsSection = ({ 
-  assets, 
+const PositionsSection = ({
+  assets,
   closedPositions,
-  onViewDetails 
+  onViewDetails,
 }: PositionsSectionProps) => {
   const [filterSymbol, setFilterSymbol] = useState("");
   const [filterPnl, setFilterPnl] = useState("all");
 
   // Filter closed positions
-  const filteredClosedPositions = closedPositions.filter(position => {
-    const symbolMatch = position.symbol.toLowerCase().includes(filterSymbol.toLowerCase());
-    
+  const filteredClosedPositions = closedPositions.filter((position) => {
+    const symbolMatch = position.symbol
+      .toLowerCase()
+      .includes(filterSymbol.toLowerCase());
+
     if (filterPnl === "profit") {
       return symbolMatch && position.pnl > 0;
     } else if (filterPnl === "loss") {
       return symbolMatch && position.pnl < 0;
     }
-    
+
     return symbolMatch;
   });
 
@@ -44,7 +45,7 @@ const PositionsSection = ({
         <TabsTrigger value="realtime">Real-time Tracking</TabsTrigger>
         <TabsTrigger value="closed">Closed Positions</TabsTrigger>
       </TabsList>
-      
+
       <TabsContent value="open">
         <Card>
           <CardHeader>
@@ -56,10 +57,7 @@ const PositionsSection = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <PositionsTable 
-              assets={assets}
-              onViewDetails={onViewDetails}
-            />
+            <PositionsTable assets={assets} onViewDetails={onViewDetails} />
           </CardContent>
         </Card>
       </TabsContent>
@@ -67,20 +65,20 @@ const PositionsSection = ({
       <TabsContent value="realtime">
         <RealTimePositionTracker />
       </TabsContent>
-      
+
       <TabsContent value="closed">
         <Card>
           <CardHeader>
             <CardTitle>Closed Positions</CardTitle>
           </CardHeader>
           <CardContent>
-            <PositionFilter 
+            <PositionFilter
               filterSymbol={filterSymbol}
               filterPnl={filterPnl}
               onSymbolChange={setFilterSymbol}
               onPnlChange={setFilterPnl}
             />
-            
+
             <ClosedPositionsTable positions={filteredClosedPositions} />
           </CardContent>
         </Card>
