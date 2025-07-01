@@ -2,12 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./components/AuthProvider";
+import { AuthProvider, ProtectedRoute } from "@/features/auth";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { TradePanelProvider } from "./components/trade/TradePanelProvider";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import Layout from "./components/Layout";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { MainLayout } from "@/layouts";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Markets from "./pages/Markets";
@@ -67,9 +66,9 @@ function App() {
                     path="/dashboard"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <Index />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -77,9 +76,9 @@ function App() {
                     path="/dashboard/markets"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <Markets />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -87,9 +86,9 @@ function App() {
                     path="/dashboard/portfolio"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <Portfolio />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
@@ -97,9 +96,9 @@ function App() {
                     path="/dashboard/enhanced-orders"
                     element={
                       <ProtectedRoute>
-                        <Layout>
+                        <MainLayout>
                           <EnhancedOrders />
-                        </Layout>
+                        </MainLayout>
                       </ProtectedRoute>
                     }
                   />
