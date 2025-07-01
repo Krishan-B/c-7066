@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { ErrorHandler } from "@/services/errorHandling";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowUpRight, ChevronDown, Clock } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -29,7 +29,6 @@ const EnhancedNewsWidget = ({
 }: EnhancedNewsWidgetProps) => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
 
   const fetchNews = useCallback(async () => {
     try {
@@ -46,15 +45,17 @@ const EnhancedNewsWidget = ({
       }
     } catch (error) {
       console.error("Error fetching market news:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load market news.",
-        variant: "destructive",
+      ErrorHandler.handleError({
+        code: "news_fetch_error",
+        message:
+          error instanceof Error ? error.message : "Unknown error occurred",
+        details: error,
+        retryable: true,
       });
     } finally {
       setIsLoading(false);
     }
-  }, [marketType, toast]);
+  }, [marketType]);
 
   useEffect(() => {
     fetchNews();

@@ -1,8 +1,14 @@
-
 import { useForm } from "react-hook-form";
-import { useToast } from "@/hooks/use-toast";
+import { ErrorHandler } from "@/services/errorHandling";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ArrowDownToLine } from "lucide-react";
 import { z } from "zod";
@@ -10,24 +16,30 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 // Define validation schema
 const depositSchema = z.object({
-  amount: z.string()
-    .refine(val => !isNaN(parseFloat(val)), { message: "Amount must be a number" })
-    .refine(val => parseFloat(val) > 0, { message: "Amount must be greater than 0" }),
-  cardNumber: z.string()
+  amount: z
+    .string()
+    .refine((val) => !isNaN(parseFloat(val)), {
+      message: "Amount must be a number",
+    })
+    .refine((val) => parseFloat(val) > 0, {
+      message: "Amount must be greater than 0",
+    }),
+  cardNumber: z
+    .string()
     .min(16, { message: "Card number must be at least 16 characters" })
     .max(19, { message: "Card number is too long" }),
-  expiryDate: z.string()
-    .regex(/^(0[1-9]|1[0-2])\/([0-9]{2})$/, { message: "Expiry date must be in MM/YY format" }),
-  cvv: z.string()
+  expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/([0-9]{2})$/, {
+    message: "Expiry date must be in MM/YY format",
+  }),
+  cvv: z
+    .string()
     .min(3, { message: "CVV must be at least 3 characters" })
-    .max(4, { message: "CVV must be at most 4 characters" })
+    .max(4, { message: "CVV must be at most 4 characters" }),
 });
 
 type DepositFormValues = z.infer<typeof depositSchema>;
 
 const DepositForm = () => {
-  const { toast } = useToast();
-  
   const form = useForm<DepositFormValues>({
     resolver: zodResolver(depositSchema),
     defaultValues: {
@@ -39,12 +51,19 @@ const DepositForm = () => {
   });
 
   const onSubmit = (values: DepositFormValues) => {
-    toast({
-      title: "Deposit initiated",
-      description: `$${values.amount} deposit has been initiated`,
-      duration: 3000,
-    });
-    form.reset();
+    try {
+      // In a real app, this would call an API to process the deposit
+      // Mock successful deposit
+      ErrorHandler.handleSuccess("Deposit initiated", {
+        description: `$${values.amount} deposit has been initiated`,
+      });
+      form.reset();
+    } catch (error) {
+      ErrorHandler.handleError(error, {
+        description: "Failed to process deposit",
+        retryFn: () => form.handleSubmit(onSubmit)(),
+      });
+    }
   };
 
   return (

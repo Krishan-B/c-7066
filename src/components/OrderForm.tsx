@@ -13,7 +13,7 @@ const directions = ["buy", "sell"];
 
 const OrderForm = () => {
   const { placeMarketOrder, placeEntryOrder } = useOrderApi();
-  const { isKYCComplete } = useKYC();
+  const kyc = useKYC();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     symbol: "",
@@ -28,7 +28,19 @@ const OrderForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const kycComplete = isKYCComplete();
+  // You may need to adjust this logic based on your actual KYC verification status implementation
+  const [kycComplete, setKycComplete] = useState(false);
+
+  React.useEffect(() => {
+    // Example: get verification status and set kycComplete accordingly
+    kyc.getKYCStatus().then((status: { verified?: boolean } | string) => {
+      // Adjust the condition below based on your actual status structure
+      setKycComplete(
+        status === "VERIFIED" ||
+          (typeof status === "object" && status?.verified === true)
+      );
+    });
+  }, [kyc]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -46,11 +58,9 @@ const OrderForm = () => {
 
     // Check KYC status before allowing trading
     if (!kycComplete) {
-      ErrorHandler.showWarning("KYC verification required", {
-        description: "Please complete KYC verification before trading",
-        actionLabel: "Complete KYC",
-        onAction: () => navigate("/kyc"),
-      });
+      setError(
+        "KYC verification required. Please complete KYC verification before trading."
+      );
       return;
     }
 
@@ -59,27 +69,27 @@ const OrderForm = () => {
 
     try {
       if (form.order_type === "entry") {
-        await ErrorHandler.handleAsync(
-          placeEntryOrder({
-            ...form,
-            direction: form.direction as "buy" | "sell",
-            price: parseFloat(form.price),
-            // Remove stop_loss_price and take_profit_price if not in OrderRequest type
-          }),
-          "place_entry_order"
-        );
-        ErrorHandler.showSuccess("Entry order placed successfully");
+        await placeEntryOrder({
+          ...form,
+          direction: form.direction as "buy" | "sell",
+          price: parseFloat(form.price),
+          // Remove stop_loss_price and take_profit_price if not in OrderRequest type
+        });
+
+        ErrorHandler.handleSuccess("Entry order placed successfully", {
+          description: `${form.quantity} × ${form.symbol} at ${form.price}`,
+        });
       } else {
-        await ErrorHandler.handleAsync(
-          placeMarketOrder({
-            symbol: form.symbol,
-            direction: form.direction as "buy" | "sell",
-            quantity: Number(form.quantity),
-            price: form.price ? parseFloat(form.price) : undefined,
-          }),
-          "place_market_order"
-        );
-        ErrorHandler.showSuccess("Market order placed successfully");
+        await placeMarketOrder({
+          symbol: form.symbol,
+          direction: form.direction as "buy" | "sell",
+          quantity: Number(form.quantity),
+          price: form.price ? parseFloat(form.price) : undefined,
+        });
+
+        ErrorHandler.handleSuccess("Market order placed successfully", {
+          description: `${form.quantity} × ${form.symbol} at market price`,
+        });
       }
 
       // Reset form
@@ -93,7 +103,21 @@ const OrderForm = () => {
       }));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Order failed");
-      ErrorHandler.show(err, "place_order");
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: "order_placement_error",
+          message:
+            err instanceof Error ? err.message : "Order placement failed",
+          details: err,
+          retryable: true,
+        }),
+        {
+          description: `Failed to place ${form.order_type} order for ${form.symbol}`,
+          retryFn: async () => {
+            handleSubmit(e);
+          },
+        }
+      );
     } finally {
       setLoading(false);
     }

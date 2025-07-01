@@ -1,8 +1,14 @@
-
 import { useForm } from "react-hook-form";
-import { useToast } from "@/hooks/use-toast";
+import { ErrorHandler } from "@/services/errorHandling";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { ArrowUpFromLine } from "lucide-react";
 import { z } from "zod";
@@ -10,14 +16,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 // Define validation schema
 const withdrawSchema = z.object({
-  amount: z.string()
-    .refine(val => !isNaN(parseFloat(val)), { message: "Amount must be a number" })
-    .refine(val => parseFloat(val) > 0, { message: "Amount must be greater than 0" }),
-  bankName: z.string()
-    .min(2, { message: "Bank name is required" }),
-  accountNumber: z.string()
+  amount: z
+    .string()
+    .refine((val) => !isNaN(parseFloat(val)), {
+      message: "Amount must be a number",
+    })
+    .refine((val) => parseFloat(val) > 0, {
+      message: "Amount must be greater than 0",
+    }),
+  bankName: z.string().min(2, { message: "Bank name is required" }),
+  accountNumber: z
+    .string()
     .min(6, { message: "Account number must be at least 6 characters" }),
-  routingNumber: z.string()
+  routingNumber: z
+    .string()
     .min(9, { message: "Routing number must be 9 digits" })
     .max(9, { message: "Routing number must be 9 digits" }),
 });
@@ -25,8 +37,6 @@ const withdrawSchema = z.object({
 type WithdrawFormValues = z.infer<typeof withdrawSchema>;
 
 const WithdrawForm = () => {
-  const { toast } = useToast();
-  
   const form = useForm<WithdrawFormValues>({
     resolver: zodResolver(withdrawSchema),
     defaultValues: {
@@ -38,10 +48,8 @@ const WithdrawForm = () => {
   });
 
   const onSubmit = (values: WithdrawFormValues) => {
-    toast({
-      title: "Withdrawal requested",
+    ErrorHandler.handleSuccess("Withdrawal requested", {
       description: `$${values.amount} withdrawal has been requested`,
-      duration: 3000,
     });
     form.reset();
   };

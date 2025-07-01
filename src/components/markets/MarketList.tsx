@@ -1,12 +1,22 @@
-
 import React from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ArrowUp, ArrowDown, Star, Bell, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip } from "@/components/ui/tooltip";
-import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/components/ui/use-toast";
+import { ErrorHandler } from "@/services/errorHandling";
 import { formatCurrency, formatNumber } from "@/utils/formatUtils";
 
 interface Asset {
@@ -32,42 +42,63 @@ interface MarketListProps {
   onSelectAsset: (asset: Asset) => void;
 }
 
-const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: MarketListProps) => {
-  const { toast } = useToast();
-
+const MarketList = ({
+  isLoading,
+  error,
+  filteredMarketData,
+  onSelectAsset,
+}: MarketListProps) => {
   // Helper to calculate simulated day low/high and buy/sell prices
   const getEnhancedAssetData = (asset: Asset) => {
     // Simulate day low/high as ±2% from current price
     const dayLow = asset.price * 0.98;
     const dayHigh = asset.price * 1.02;
-    
+
     // Simulate buy/sell prices (spread)
     const sellPrice = asset.price * 0.997; // 0.3% lower
     const buyPrice = asset.price * 1.003; // 0.3% higher
-    
+
     return {
       ...asset,
       day_low: dayLow,
       day_high: dayHigh,
       sell_price: sellPrice,
-      buy_price: buyPrice
+      buy_price: buyPrice,
     };
   };
 
-  const handleAddToWatchlist = (e: React.MouseEvent, asset: Asset) => {
+  const handleAddToWatchlist = async (e: React.MouseEvent, asset: Asset) => {
     e.stopPropagation(); // Prevent row click
-    toast({
-      title: "Added to watchlist",
-      description: `${asset.name} (${asset.symbol}) has been added to your watchlist.`,
-    });
+    try {
+      // In a real app, this would call an API to add the asset to the watchlist
+      // Simulate API call
+      await Promise.resolve();
+      ErrorHandler.handleSuccess("Added to watchlist", {
+        description: `${asset.name} (${asset.symbol}) has been added to your watchlist.`,
+      });
+    } catch (error) {
+      ErrorHandler.handleError(error, {
+        description: `Failed to add ${asset.name} to your watchlist`,
+        retryFn: async () => handleAddToWatchlist(e, asset),
+      });
+    }
   };
 
-  const handleSetAlert = (e: React.MouseEvent, asset: Asset) => {
+  const handleSetAlert = async (e: React.MouseEvent, asset: Asset) => {
     e.stopPropagation(); // Prevent row click
-    toast({
-      title: "Price alert",
-      description: `Set a price alert for ${asset.name} (${asset.symbol}).`,
-    });
+    try {
+      // In a real app, this would call an API to set up the price alert
+      // Simulate API call
+      await Promise.resolve();
+      ErrorHandler.handleSuccess("Price alert", {
+        description: `Set a price alert for ${asset.name} (${asset.symbol}).`,
+      });
+    } catch (error) {
+      ErrorHandler.handleError(error, {
+        description: `Failed to set price alert for ${asset.name}`,
+        retryFn: async () => handleSetAlert(e, asset),
+      });
+    }
   };
 
   if (isLoading) {
@@ -101,21 +132,35 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
           <Table>
             <TableHeader className="bg-muted/60">
               <TableRow>
-                <TableHead className="font-semibold py-3 px-2 text-left">Symbol</TableHead>
-                <TableHead className="font-semibold py-3 px-2 text-left">Asset Name</TableHead>
-                <TableHead className="font-semibold py-3 px-2 text-right">24h Change</TableHead>
-                <TableHead className="font-semibold py-3 px-2 text-right">Day Range</TableHead>
-                <TableHead className="font-semibold py-3 px-2 text-right">Sell Price</TableHead>
-                <TableHead className="font-semibold py-3 px-2 text-right">Buy Price</TableHead>
-                <TableHead className="text-center py-3 px-2 w-[100px]">Actions</TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-left">
+                  Symbol
+                </TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-left">
+                  Asset Name
+                </TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-right">
+                  24h Change
+                </TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-right">
+                  Day Range
+                </TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-right">
+                  Sell Price
+                </TableHead>
+                <TableHead className="font-semibold py-3 px-2 text-right">
+                  Buy Price
+                </TableHead>
+                <TableHead className="text-center py-3 px-2 w-[100px]">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredMarketData.map((asset) => {
                 const enhancedAsset = getEnhancedAssetData(asset);
                 return (
-                  <TableRow 
-                    key={asset.symbol} 
+                  <TableRow
+                    key={asset.symbol}
                     className="cursor-pointer border-b hover:bg-muted/40"
                     onClick={() => onSelectAsset(enhancedAsset)}
                   >
@@ -128,12 +173,15 @@ const MarketList = ({ isLoading, error, filteredMarketData, onSelectAsset }: Mar
                       </div>
                     </TableCell>
                     <TableCell className="py-3 px-2">{asset.name}</TableCell>
-                    <TableCell className={`py-3 px-2 text-right ${asset.change_percentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <TableCell
+                      className={`py-3 px-2 text-right ${asset.change_percentage >= 0 ? "text-green-500" : "text-red-500"}`}
+                    >
                       <span className="flex items-center justify-end">
-                        {asset.change_percentage >= 0 
-                          ? <ArrowUp className="mr-1 h-4 w-4" />
-                          : <ArrowDown className="mr-1 h-4 w-4" />
-                        }
+                        {asset.change_percentage >= 0 ? (
+                          <ArrowUp className="mr-1 h-4 w-4" />
+                        ) : (
+                          <ArrowDown className="mr-1 h-4 w-4" />
+                        )}
                         {formatNumber(Math.abs(asset.change_percentage), 2)}%
                       </span>
                     </TableCell>

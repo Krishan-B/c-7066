@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { ErrorHandler } from "@/services/errorHandling";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail } from "lucide-react";
 import { useState } from "react";
@@ -26,16 +26,16 @@ const PasswordResetDialog = ({
   const [resetEmail, setResetEmail] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resetEmail) {
-      toast({
-        title: "Error",
-        description: "Please enter your email address",
-        variant: "destructive",
-      });
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: "validation_error",
+          message: "Please enter your email address",
+        })
+      );
       return;
     }
     try {
@@ -45,22 +45,16 @@ const PasswordResetDialog = ({
       });
       if (error) throw error;
       setResetEmailSent(true);
-      toast({
-        title: "Reset link sent",
+      ErrorHandler.handleSuccess("Reset link sent", {
         description: "Check your email for password reset instructions",
       });
     } catch (error) {
-      // Use type guard for error
-      toast({
-        title: "Error",
-        description:
-          error &&
-          typeof error === "object" &&
-          "message" in error &&
-          typeof (error as { message?: string }).message === "string"
-            ? (error as { message: string }).message
-            : "Failed to send reset link",
-        variant: "destructive",
+      ErrorHandler.handleError(error, {
+        description: "Failed to send password reset link",
+        retryFn: async () => {
+          e.preventDefault();
+          await handleResetPassword(e);
+        },
       });
     } finally {
       setLoading(false);

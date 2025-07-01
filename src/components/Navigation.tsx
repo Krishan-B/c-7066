@@ -1,28 +1,24 @@
-
-import * as React from "react"
-import ApplicationLogo from "./navigation/ApplicationLogo"
-import MainNav from "./navigation/MainNav"
-import UserMenu from "./navigation/UserMenu"
-import MobileMenu from "./navigation/MobileMenu"
-import { Bell } from "lucide-react"
-import { Button } from "./ui/button"
-import { useToast } from "@/hooks/use-toast"
-import { ThemeSwitcher } from "./theme/ThemeSwitcher"
+import * as React from "react";
+import ApplicationLogo from "./navigation/ApplicationLogo";
+import MainNav from "./navigation/MainNav";
+import UserMenu from "./navigation/UserMenu";
+import MobileMenu from "./navigation/MobileMenu";
+import { Bell } from "lucide-react";
+import { Button } from "./ui/button";
+import { ErrorHandler } from "@/services/errorHandling";
+import { ThemeSwitcher } from "./theme/ThemeSwitcher";
 
 interface NavigationProps {
   onMenuToggle?: () => void;
 }
 
 export function Navigation({ onMenuToggle }: NavigationProps) {
-  const { toast } = useToast();
-  
   const handleNotificationClick = () => {
-    toast({
-      title: "Notifications",
+    ErrorHandler.handleSuccess("Notifications", {
       description: "No new notifications at this time",
     });
   };
-  
+
   return (
     <div className="border-b sticky top-0 z-50 bg-background shadow-sm transition-colors">
       <div className="container flex h-16 items-center">

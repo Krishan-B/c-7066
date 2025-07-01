@@ -8,7 +8,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useToast } from "@/hooks/use-toast";
+import { ErrorHandler } from "@/services/errorHandling";
 import { useAuth } from "@/hooks/useAuth";
 import { Menu } from "lucide-react";
 import * as React from "react";
@@ -22,25 +22,23 @@ interface MobileMenuProps {
 const MobileMenu = ({ onMenuToggle }: MobileMenuProps) => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
 
   const handleLogout = async () => {
     try {
       await signOut();
-      toast({
-        title: "Signed out successfully",
-      });
+      ErrorHandler.handleSuccess("Signed out successfully");
       navigate("/auth");
       setOpen(false);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
       console.error("Error signing out:", errorMessage);
-      toast({
-        title: "Error signing out",
-        description: "There was a problem signing out",
-        variant: "destructive",
+      ErrorHandler.handleError({
+        code: "authentication_error",
+        message: errorMessage,
+        details: error,
+        retryable: true,
       });
     }
   };

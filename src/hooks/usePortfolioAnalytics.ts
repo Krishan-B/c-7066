@@ -1,7 +1,7 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { ErrorHandler } from "@/services/errorHandling";
 
 export interface PortfolioAnalytics {
   portfolio_value: number;
@@ -41,40 +41,53 @@ export interface PortfolioAnalytics {
   }>;
 }
 
+const fetchPortfolioAnalytics = async (userId: string) => {
+  try {
+    const { data, error } = await supabase.functions.invoke(
+      "portfolio-analytics",
+      {
+        body: { user_id: userId },
+      }
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    return data as PortfolioAnalytics;
+  } catch (error) {
+    ErrorHandler.handleError({
+      code: "data_fetch_error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch portfolio analytics",
+      details: error,
+      retryable: true,
+    });
+    throw error;
+  }
+};
+
 export const usePortfolioAnalytics = () => {
   const { user } = useAuth();
-  
-  const fetchPortfolioAnalytics = async (): Promise<PortfolioAnalytics | null> => {
-    if (!user) return null;
-    
-    const { data, error } = await supabase.functions.invoke('portfolio-analytics', {
-      body: { userId: user.id }
-    });
-    
-    if (error) {
-      console.error("Error fetching portfolio analytics:", error);
-      throw new Error(error.message);
-    }
-    
-    return data?.data || null;
-  };
-  
-  const { 
+
+  const {
     data: analytics,
     isLoading,
     error,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ["portfolio-analytics", user?.id],
-    queryFn: fetchPortfolioAnalytics,
-    enabled: !!user,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    queryFn: () => fetchPortfolioAnalytics(user?.id || ""),
+    enabled: !!user?.id,
+    refetchInterval: 60000, // Refetch every minute
   });
-  
+
   return {
     analytics,
     isLoading,
     error,
-    refetch
+    refetch,
   };
 };

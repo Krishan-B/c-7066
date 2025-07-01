@@ -13,20 +13,35 @@ application.
 The `ErrorHandler` service (`src/services/errorHandling.ts`) provides centralized error handling
 with:
 
-- Consistent error messages
+- Standardized error codes and user-friendly messages
+- Typed error responses
 - Retryable error support
 - Unified notification system
-- Async error handling wrapper
-- Development mode detailed errors
+- Detailed error logging for debugging
 
 ```typescript
-// Example usage:
+// Example basic usage:
 try {
-  await ErrorHandler.handleAsync(apiCall(), "context_name");
-  ErrorHandler.showSuccess("Operation successful");
+  // Your code here
 } catch (error) {
-  ErrorHandler.show(error, "context_name");
+  ErrorHandler.handleError(
+    ErrorHandler.createError({
+      code: "data_fetch_error",
+      message: "Failed to load data",
+      details: error,
+      retryable: true,
+    }),
+    {
+      description: "Unable to load your data. Please try again.",
+      retryFn: async () => {
+        // Retry logic here
+      },
+    }
+  );
 }
+
+// Example success notification:
+ErrorHandler.handleSuccess("Operation completed", { description: "Your changes have been saved" });
 ```
 
 ### 2. Error Boundaries
@@ -47,94 +62,113 @@ export default withErrorBoundary(MyComponent, "component_name");
 
 1. **Always Use ErrorHandler**
    - Replace direct toast calls with ErrorHandler methods
-   - Use appropriate context names for error tracking
-   - Include retry capability where applicable
+   - Use appropriate error codes for consistent messaging
+   - Always include error details for debugging
+   - Use retry functionality for recoverable errors
 
-2. **Error Boundary Usage**
-   - Wrap key feature components
-   - Provide meaningful boundary names
-   - Use resetOnPropsChange when appropriate
+2. **Standardized Error Codes**
+   - Use consistent error codes across the application
+   - Map error codes to user-friendly messages in ErrorHandler
+   - Group related errors (auth, trading, data, etc.)
 
-3. **Async Operations**
-   - Use handleAsync wrapper for promises
-   - Include proper error context
-   - Implement retry logic for recoverable errors
+3. **Appropriate Error Handling by Type**
+   - Authentication errors: Redirect to login when appropriate
+   - Network errors: Provide retry options
+   - Validation errors: Show specific feedback
+   - Business logic errors: Display clear action steps
 
-4. **User Feedback**
-   - Show clear error messages
-   - Provide recovery actions when possible
-   - Include detailed info in development
+## Error Codes
 
-## Error Types
+The system uses standardized error codes grouped by domain:
 
-1. **Recoverable Errors**
-   - Network timeouts
-   - Rate limiting
-   - Temporary API failures
+### Authentication Errors
 
-2. **Critical Errors**
-   - Authentication failures
-   - Permission issues
-   - Data corruption
+- `invalid_credentials`: Wrong username/password
+- `email_not_confirmed`: Email verification needed
+- `email_already_used`: Email address is already registered
+- `too_many_requests`: Rate limiting
+- `user_not_found`: User doesn't exist
+- `weak_password`: Password requirements not met
+- `authentication_error`: General auth error
+- `password_update_error`: Password change failed
+- `session_check_error`: Session validation failed
 
-## Implementation Examples
+### Profile Errors
 
-### API Calls
+- `profile_update_error`: Profile update failed
+
+### Trading Errors
+
+- `insufficient_funds`: Not enough balance
+- `market_closed`: Market unavailable
+- `invalid_order_size`: Order size issues
+- `leverage_exceeded`: Beyond allowed leverage
+- `position_limit_reached`: Too many open positions
+- `margin_calculation_error`: Margin calculation failed
+- `pnl_calculation_error`: P&L calculation error
+- `order_placement_error`: Order creation failed
+- `order_cancellation_error`: Order cancellation failed
+- `order_modification_error`: Order update failed
+
+### KYC Errors
+
+- `kyc_document_upload_error`: Document upload failed
+- `kyc_document_fetch_error`: Can't retrieve documents
+- `kyc_document_delete_error`: Document deletion failed
+- `kyc_verification_error`: Verification process error
+
+### Data & Network Errors
+
+- `network_error`: Connection issues
+- `server_error`: Backend problems
+- `timeout_error`: Request timeout
+- `data_fetch_error`: Data retrieval failed
+- `validation_error`: Invalid input
+- `market_data_fetch_error`: Market data unavailable
+- `data_refresh_error`: Data update failed
+
+## Implementation Guidelines
+
+1. **For New Components**
+   - Import ErrorHandler instead of toast
+   - Use createError for typed errors
+   - Handle success states with handleSuccess
+
+2. **For Refactoring Existing Code**
+   - Replace direct toast calls with ErrorHandler methods
+   - Add appropriate error codes
+   - Implement retry functionality where appropriate
+
+3. **For Hooks**
+   - Use proper error handling in async operations
+   - Return normalized errors for component handling
+   - Add retry capabilities for data operations
+
+## Example Pattern for Hooks
 
 ```typescript
-const fetchData = async () => {
-  try {
-    const data = await ErrorHandler.handleAsync(apiCall(), "fetch_data");
-    ErrorHandler.showSuccess("Data fetched successfully");
-    return data;
-  } catch (error) {
-    ErrorHandler.show(error, "fetch_data");
-    throw error;
-  }
+const useDataHook = () => {
+  const fetchData = async () => {
+    try {
+      // Data fetching logic
+      return data;
+    } catch (error) {
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: "data_fetch_error",
+          message: "Failed to fetch required data",
+          details: error,
+          retryable: true,
+        }),
+        {
+          description: "Unable to load necessary data. Please try again.",
+          retryFn: async () => await fetchData(),
+        }
+      );
+      return fallbackData;
+    }
+  };
+
+  return { fetchData };
 };
 ```
-
-### Form Submissions
-
-```typescript
-const handleSubmit = async (data) => {
-  try {
-    await ErrorHandler.handleAsync(submitData(data), "form_submit");
-    ErrorHandler.showSuccess("Form submitted successfully");
-  } catch (error) {
-    ErrorHandler.show(error, "form_submit");
-  }
-};
-```
-
-### Component Error Boundaries
-
-```typescript
-// High-level feature components
-export default withErrorBoundary(FeatureComponent, "feature_name");
-
-// Critical UI components
-export default withErrorBoundary(CriticalComponent, "critical_ui");
-```
-
-## Testing
-
-1. **Unit Tests**
-   - Test error handling paths
-   - Verify error messages
-   - Check retry functionality
-
-2. **Integration Tests**
-   - Verify error boundary fallbacks
-   - Test recovery flows
-   - Check error reporting
-
-## Migration Guide
-
-When updating existing components:
-
-1. Replace direct toast calls with ErrorHandler
-2. Add error boundaries to key components
-3. Implement retry capability where appropriate
-4. Update error messages to be user-friendly
-5. Add proper error contexts for tracking

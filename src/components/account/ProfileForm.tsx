@@ -8,11 +8,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { ErrorHandler } from "@/services/errorHandling";
 import { useForm } from "react-hook-form";
 
 export function ProfileForm() {
-  const { toast } = useToast();
   const form = useForm({
     defaultValues: {
       fullName: "",
@@ -26,11 +25,23 @@ export function ProfileForm() {
     email: string;
     phone: string;
   }) => {
-    toast({
-      title: "Profile updated",
-      description: "Your profile information has been updated",
-      duration: 3000,
-    });
+    try {
+      // In a real app, this would call an API to update the profile
+      // Mock successful profile update
+      ErrorHandler.handleSuccess("Profile updated", {
+        description: "Your profile information has been updated",
+      });
+    } catch (error) {
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: "profile_update_error",
+          message: "Failed to update profile information",
+        }),
+        {
+          retryFn: () => form.handleSubmit(onSubmit)(),
+        }
+      );
+    }
   };
 
   return (

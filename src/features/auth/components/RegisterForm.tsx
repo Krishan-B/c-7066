@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { ErrorHandler } from "@/services/errorHandling";
 import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
 import { countries } from "@/lib/countries";
 import { AlertCircle, ArrowRight, Check, Eye, EyeOff } from "lucide-react";
@@ -42,7 +42,6 @@ const RegisterForm = () => {
   } = usePasswordStrength(password);
 
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,8 +99,7 @@ const RegisterForm = () => {
 
       console.log("Signup successful:", data);
 
-      toast({
-        title: "Account created successfully",
+      ErrorHandler.handleSuccess("Account created successfully", {
         description: "Please check your email for verification and then log in",
       });
 
@@ -111,6 +109,8 @@ const RegisterForm = () => {
       // Use type guard for error
       console.error("Signup error:", error);
       let errorMessage = "An error occurred during sign up";
+      let errorCode = "unknown_error";
+
       if (
         error &&
         typeof error === "object" &&
@@ -120,16 +120,24 @@ const RegisterForm = () => {
         const message = (error as { message: string }).message;
         if (message.includes("email")) {
           errorMessage = "This email is already in use";
+          errorCode = "email_already_used";
         } else {
           errorMessage = message;
         }
       }
       setFormError(errorMessage);
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
+
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: errorCode,
+          message: errorMessage,
+        }),
+        {
+          retryFn: async () => {
+            handleSignUp(e);
+          },
+        }
+      );
     } finally {
       setLoading(false);
     }
@@ -290,8 +298,8 @@ const RegisterForm = () => {
                     passwordStrength <= 25
                       ? "text-destructive"
                       : passwordStrength <= 75
-                      ? "text-warning"
-                      : "text-success"
+                        ? "text-warning"
+                        : "text-success"
                   }
                 >
                   {getPasswordStrengthLabel()}

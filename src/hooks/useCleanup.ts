@@ -21,7 +21,9 @@ export const useCleanup = () => {
       try {
         fn();
       } catch (error) {
-        ErrorHandler.show(error, `cleanup:${description}`);
+        ErrorHandler.handleError(error, {
+          description: `cleanup:${description}`,
+        });
       }
     });
     cleanupFunctions.current = [];
@@ -52,7 +54,9 @@ export const useInterval = (
       try {
         savedCallback.current?.();
       } catch (error) {
-        ErrorHandler.show(error, `interval:${description || "unnamed"}`);
+        ErrorHandler.handleError(error, {
+          description: `interval:${description || "unnamed"}`,
+        });
       }
     };
 

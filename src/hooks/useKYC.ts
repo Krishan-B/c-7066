@@ -1,15 +1,14 @@
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { DocumentCategory, DocumentType, KYCDocument } from "@/types/kyc";
 import { useCallback, useEffect, useState } from "react";
+import { ErrorHandler } from "@/services/errorHandling";
 
 export const useKYC = () => {
   const [documents, setDocuments] = useState<KYCDocument[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const { user } = useAuth();
-  const { toast } = useToast();
 
   const fetchDocuments = useCallback(async () => {
     if (!user) return;
@@ -22,19 +21,25 @@ export const useKYC = () => {
         .eq("user_id", user.id)
         .order("uploaded_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        throw ErrorHandler.createError({
+          code: "kyc_document_fetch_error",
+          message: error.message,
+          details: error,
+          retryable: true,
+        });
+      }
+
       setDocuments((data || []) as KYCDocument[]);
     } catch (error) {
-      console.error("Error fetching KYC documents:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load KYC documents",
-        variant: "destructive",
+      ErrorHandler.handleError(error, {
+        description: "Unable to load your KYC documents. Please try again.",
+        retryFn: async () => await fetchDocuments(),
       });
     } finally {
       setLoading(false);
     }
-  }, [user, toast]);
+  }, [user]);
 
   const uploadDocument = async (
     file: File,
@@ -42,7 +47,13 @@ export const useKYC = () => {
     category: DocumentCategory,
     comments?: string
   ) => {
-    if (!user) throw new Error("User not authenticated");
+    if (!user) {
+      throw ErrorHandler.createError({
+        code: "authentication_error",
+        message: "User not authenticated",
+        details: { requiresAuth: true },
+      });
+    }
 
     setUploading(true);
     try {
@@ -54,7 +65,14 @@ export const useKYC = () => {
         .from("kyc-documents")
         .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        throw ErrorHandler.createError({
+          code: "kyc_document_upload_error",
+          message: `Storage upload error: ${uploadError.message}`,
+          details: uploadError,
+          retryable: true,
+        });
+      }
 
       // Get public URL
       const {
@@ -71,20 +89,27 @@ export const useKYC = () => {
         comments: comments || null,
       });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        throw ErrorHandler.createError({
+          code: "kyc_document_upload_error",
+          message: `Database record error: ${dbError.message}`,
+          details: dbError,
+          retryable: false,
+        });
+      }
 
-      toast({
-        title: "Success",
-        description: "Document uploaded successfully",
+      ErrorHandler.handleSuccess("Document uploaded successfully", {
+        description: `Your ${documentType} has been submitted for verification`,
       });
 
       await fetchDocuments();
     } catch (error) {
-      console.error("Error uploading document:", error);
-      toast({
-        title: "Upload Failed",
-        description: "Failed to upload document. Please try again.",
-        variant: "destructive",
+      ErrorHandler.handleError(error, {
+        description:
+          "Failed to upload document. Please check the file and try again.",
+        retryFn: async () => {
+          await uploadDocument(file, documentType, category, comments);
+        },
       });
       throw error;
     } finally {
@@ -94,66 +119,99 @@ export const useKYC = () => {
 
   const deleteDocument = async (documentId: string) => {
     try {
+      // First, get the document to retrieve the file path
+      const { data: document, error: fetchError } = await supabase
+        .from("kyc_documents")
+        .select("file_url")
+        .eq("id", documentId)
+        .single();
+
+      if (fetchError) {
+        throw ErrorHandler.createError({
+          code: "kyc_document_fetch_error",
+          message: fetchError.message,
+          details: fetchError,
+        });
+      }
+
+      // Delete from database
       const { error } = await supabase
         .from("kyc_documents")
         .delete()
-        .eq("id", documentId)
-        .eq("user_id", user?.id);
+        .eq("id", documentId);
 
-      if (error) throw error;
+      if (error) {
+        throw ErrorHandler.createError({
+          code: "kyc_document_delete_error",
+          message: error.message,
+          details: error,
+        });
+      }
 
-      toast({
-        title: "Success",
-        description: "Document deleted successfully",
+      // Extract file path from URL
+      if (document?.file_url) {
+        const filePath = new URL(document.file_url).pathname
+          .split("/")
+          .slice(-1)[0];
+        if (filePath) {
+          // Delete from storage
+          await supabase.storage.from("kyc-documents").remove([filePath]);
+        }
+      }
+
+      ErrorHandler.handleSuccess("Document deleted", {
+        description: "The document has been removed from your profile",
       });
 
       await fetchDocuments();
     } catch (error) {
-      console.error("Error deleting document:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete document",
-        variant: "destructive",
+      ErrorHandler.handleError(error, {
+        description: "Failed to delete document. Please try again.",
+        retryFn: async () => {
+          await deleteDocument(documentId);
+        },
       });
     }
   };
 
-  const getKYCStatus = () => {
-    if (documents.length === 0) return "PENDING";
+  const getKYCStatus = useCallback(async () => {
+    if (!user) return null;
 
-    const hasRejected = documents.some((doc) => doc.status === "REJECTED");
-    if (hasRejected) return "REJECTED";
+    try {
+      const { data, error } = await supabase
+        .from("user_kyc_status")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
 
-    const allApproved = documents.every((doc) => doc.status === "APPROVED");
-    if (allApproved && documents.length > 0) return "APPROVED";
+      if (error) {
+        throw ErrorHandler.createError({
+          code: "kyc_verification_error",
+          message: error.message,
+          details: error,
+        });
+      }
 
-    return "PENDING";
-  };
-
-  const isKYCComplete = () => {
-    const requiredCategories = ["ID_VERIFICATION", "ADDRESS_VERIFICATION"];
-    const completedCategories = requiredCategories.filter((category) =>
-      documents.some(
-        (doc) => doc.category === category && doc.status === "APPROVED"
-      )
-    );
-    return completedCategories.length === requiredCategories.length;
-  };
+      return data;
+    } catch (error) {
+      ErrorHandler.handleError(error, {
+        description: "Unable to retrieve your KYC verification status.",
+      });
+      return null;
+    }
+  }, [user]);
 
   useEffect(() => {
-    if (user) {
-      fetchDocuments();
-    }
-  }, [user, fetchDocuments]);
+    fetchDocuments();
+  }, [fetchDocuments]);
 
   return {
     documents,
     loading,
     uploading,
+    fetchDocuments,
     uploadDocument,
     deleteDocument,
-    fetchDocuments,
     getKYCStatus,
-    isKYCComplete,
   };
 };

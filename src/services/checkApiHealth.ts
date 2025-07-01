@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { ErrorHandler } from "./errorHandling";
 
 export async function checkApiHealth() {
   // Always use the frontend's origin for health check
@@ -14,8 +15,19 @@ export async function checkApiHealth() {
     console.info("✅ API is healthy:", data);
     return data;
   } catch (err) {
-    toast.error(
-      "API is unreachable. Please check your backend and .env configuration."
+    ErrorHandler.handleError(
+      ErrorHandler.createError({
+        code: "api_health_check_failed",
+        message: "API is unreachable",
+        details: { error: err, url },
+        retryable: true,
+      }),
+      {
+        description: "Please check your backend and .env configuration.",
+        retryFn: async () => {
+          await checkApiHealth();
+        },
+      }
     );
     console.error("❌ API health check failed:", err, "URL used:", url);
     return false;

@@ -28,20 +28,24 @@ const OrderTabs: React.FC<OrderTabsProps> = ({ activeTab, onTabChange }) => {
   const handleCloseTrade = async (tradeId: string) => {
     try {
       // In a real app, this would call an API to close the trade
-      // await ErrorHandler.handleAsync(closeTrade(tradeId), "close_trade");
-      ErrorHandler.showSuccess(`Trade ${tradeId} closed successfully`);
+      // Mock successful API call
+      ErrorHandler.handleSuccess(`Trade ${tradeId} closed successfully`);
     } catch (error) {
-      ErrorHandler.show(error, "close_trade");
+      ErrorHandler.handleError(error, {
+        description: `Failed to close trade ${tradeId}`,
+      });
     }
   };
 
   const handleCancelOrder = async (orderId: string) => {
     try {
       // In a real app, this would call an API to cancel the pending order
-      // await ErrorHandler.handleAsync(cancelOrder(orderId), "cancel_order");
-      ErrorHandler.showSuccess(`Order ${orderId} cancelled successfully`);
+      // Mock successful API call
+      ErrorHandler.handleSuccess(`Order ${orderId} cancelled successfully`);
     } catch (error) {
-      ErrorHandler.show(error, "cancel_order");
+      ErrorHandler.handleError(error, {
+        description: `Failed to cancel order ${orderId}`,
+      });
     }
   };
 
@@ -57,15 +61,18 @@ const OrderTabs: React.FC<OrderTabsProps> = ({ activeTab, onTabChange }) => {
       const orderTypeDisplay =
         values.orderType === "market" ? "Market" : "Entry";
 
-      // await ErrorHandler.handleAsync(submitOrder(values, action), "submit_order");
-      ErrorHandler.showSuccess(
+      // Mock successful API call
+      ErrorHandler.handleSuccess(
         `${orderTypeDisplay} ${action.toUpperCase()} order for ${selectedSymbol} created successfully`,
         {
           description: `Order type: ${orderTypeDisplay}, Stop Loss: ${values.stopLoss ? "Yes" : "No"}, Take Profit: ${values.takeProfit ? "Yes" : "No"}`,
         }
       );
     } catch (error) {
-      ErrorHandler.show(error, "submit_order");
+      ErrorHandler.handleError(error, {
+        description: "Failed to submit order",
+        retryFn: async () => handleOrderSubmit(values, action),
+      });
     }
   };
 

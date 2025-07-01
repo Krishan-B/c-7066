@@ -1,6 +1,7 @@
 import type { Account } from "@/types/account";
 import type { Order } from "@/types/order";
 import type { Position } from "@/types/position";
+import { ErrorHandler } from "@/services/errorHandling";
 
 // Dynamically determine WebSocket URL for local, Codespaces, and production
 const getWebSocketUrl = () => {
@@ -23,44 +24,83 @@ const getWebSocketUrl = () => {
 };
 
 let socket: WebSocket | null = null;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAY = 1000; // 1 second
 
 type WebSocketPayload = Account | Order | Position | Record<string, unknown>;
 
 const listeners = new Map<string, ((data: WebSocketPayload) => void)[]>();
 
 function connect() {
-  if (socket && socket.readyState === WebSocket.OPEN) {
-    return;
-  }
-  const url = getWebSocketUrl();
-  socket = new WebSocket(url);
+  try {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      return;
+    }
+    const url = getWebSocketUrl();
+    socket = new WebSocket(url);
 
-  socket.onopen = () => {
-    console.log("WebSocket connected");
-  };
+    socket.onopen = () => {
+      console.log("WebSocket connected");
+      reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+    };
 
-  socket.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-      if (data.type && listeners.has(data.type)) {
-        listeners.get(data.type)?.forEach((callback) => callback(data.payload));
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type && listeners.has(data.type)) {
+          listeners
+            .get(data.type)
+            ?.forEach((callback) => callback(data.payload));
+        }
+      } catch (error) {
+        ErrorHandler.handleError({
+          code: "realtime_subscription_error",
+          message: "Failed to parse WebSocket message",
+          details: error,
+          retryable: false,
+        });
       }
-    } catch (error) {
-      console.error("Error parsing WebSocket message:", error);
-    }
-  };
+    };
 
-  socket.onclose = () => {
-    console.log("WebSocket disconnected");
-    // Optional: implement reconnection logic here
-  };
+    socket.onerror = (error) => {
+      ErrorHandler.handleError({
+        code: "realtime_subscription_error",
+        message: "WebSocket connection error",
+        details: error,
+        retryable: true,
+      });
+    };
 
-  socket.onerror = (event) => {
-    console.error("🛑 WebSocket error:", event);
-    if (event instanceof ErrorEvent) {
-      console.error("WebSocket ErrorEvent:", event.message);
-    }
-  };
+    socket.onclose = () => {
+      if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+        reconnectAttempts++;
+        setTimeout(() => {
+          ErrorHandler.handleError({
+            code: "realtime_subscription_error",
+            message: `WebSocket disconnected. Attempting to reconnect (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`,
+            details: { reconnectAttempt: reconnectAttempts },
+            retryable: true,
+          });
+          connect();
+        }, RECONNECT_DELAY * reconnectAttempts);
+      } else {
+        ErrorHandler.handleError({
+          code: "realtime_subscription_error",
+          message: "WebSocket connection failed after maximum retry attempts",
+          details: { maxAttempts: MAX_RECONNECT_ATTEMPTS },
+          retryable: false,
+        });
+      }
+    };
+  } catch (error) {
+    ErrorHandler.handleError({
+      code: "realtime_subscription_error",
+      message: "Failed to establish WebSocket connection",
+      details: error,
+      retryable: true,
+    });
+  }
 }
 
 function on(eventType: string, callback: (data: WebSocketPayload) => void) {

@@ -1,19 +1,34 @@
-
 import { ArrowUpIcon, ArrowDownIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { ErrorHandler } from "@/services/errorHandling";
 
 const fetchCryptoData = async () => {
-  const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false');
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
+  try {
+    const response = await fetch(
+      "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false"
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  } catch (error) {
+    ErrorHandler.handleError({
+      code: "market_data_fetch_error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch cryptocurrency data",
+      details: error,
+      retryable: true,
+    });
+    throw error;
   }
-  return response.json();
 };
 
 const CryptoList = () => {
   const { data: cryptos, isLoading } = useQuery({
-    queryKey: ['cryptos'],
+    queryKey: ["cryptos"],
     queryFn: fetchCryptoData,
     refetchInterval: 30000, // Refetch every 30 seconds
   });
@@ -68,22 +83,37 @@ const CryptoList = () => {
           </thead>
           <tbody>
             {cryptos?.map((crypto, index) => (
-              <tr key={crypto.id} className="border-t border-secondary/40 hover:bg-secondary/20">
-                <td className="py-3 pl-1 text-xs text-muted-foreground">{index + 1}</td>
+              <tr
+                key={crypto.id}
+                className="border-t border-secondary/40 hover:bg-secondary/20"
+              >
+                <td className="py-3 pl-1 text-xs text-muted-foreground">
+                  {index + 1}
+                </td>
                 <td className="py-3">
                   <div className="flex items-center gap-2">
-                    <img src={crypto.image} alt={crypto.name} className="w-6 h-6 rounded-full" />
+                    <img
+                      src={crypto.image}
+                      alt={crypto.name}
+                      className="w-6 h-6 rounded-full"
+                    />
                     <div>
                       <p className="font-medium">{crypto.name}</p>
-                      <p className="text-xs text-muted-foreground">{crypto.symbol.toUpperCase()}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {crypto.symbol.toUpperCase()}
+                      </p>
                     </div>
                   </div>
                 </td>
-                <td className="py-3 text-right">${crypto.current_price.toLocaleString()}</td>
+                <td className="py-3 text-right">
+                  ${crypto.current_price.toLocaleString()}
+                </td>
                 <td className="py-3 text-right">
                   <span
                     className={`flex items-center gap-1 justify-end ${
-                      crypto.price_change_percentage_24h >= 0 ? "text-success" : "text-warning"
+                      crypto.price_change_percentage_24h >= 0
+                        ? "text-success"
+                        : "text-warning"
                     }`}
                   >
                     {crypto.price_change_percentage_24h >= 0 ? (
@@ -94,10 +124,20 @@ const CryptoList = () => {
                     {Math.abs(crypto.price_change_percentage_24h).toFixed(2)}%
                   </span>
                 </td>
-                <td className="py-3 text-right text-muted-foreground">${(crypto.market_cap / 1e9).toFixed(1)}B</td>
-                <td className="py-3 text-right text-muted-foreground">${(crypto.total_volume / 1e9).toFixed(1)}B</td>
+                <td className="py-3 text-right text-muted-foreground">
+                  ${(crypto.market_cap / 1e9).toFixed(1)}B
+                </td>
+                <td className="py-3 text-right text-muted-foreground">
+                  ${(crypto.total_volume / 1e9).toFixed(1)}B
+                </td>
                 <td className="py-3 text-center">
-                  <Button size="sm" variant="outline" className="h-7 px-2 text-xs">Trade</Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-2 text-xs"
+                  >
+                    Trade
+                  </Button>
                 </td>
               </tr>
             ))}

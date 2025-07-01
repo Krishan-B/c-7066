@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { ErrorHandler } from "@/services/errorHandling";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Activity,
@@ -24,7 +24,6 @@ interface MarketAlert {
 const AlertsWidget = () => {
   const [alerts, setAlerts] = useState<MarketAlert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
 
   const fetchAlerts = useCallback(async () => {
     try {
@@ -42,15 +41,19 @@ const AlertsWidget = () => {
       }
     } catch (error) {
       console.error("Error fetching market alerts:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load market alerts.",
-        variant: "destructive",
-      });
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: "data_fetch_error",
+          message: "Failed to load market alerts.",
+        }),
+        {
+          retryFn: fetchAlerts,
+        }
+      );
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     fetchAlerts();

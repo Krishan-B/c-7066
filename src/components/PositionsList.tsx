@@ -48,12 +48,12 @@ const PositionsListComponent: React.FC = () => {
     setLoading(true);
     setError("");
     try {
-      const data = await ErrorHandler.handleAsync(
-        getPositions(),
-        "fetch_positions"
-      );
+      const data = await getPositions();
       setPositions(data as Position[]);
     } catch (err) {
+      ErrorHandler.handleError(err, {
+        description: "Failed to load positions",
+      });
       setError(err instanceof Error ? err.message : "Failed to load positions");
     } finally {
       setLoading(false);
@@ -72,13 +72,13 @@ const PositionsListComponent: React.FC = () => {
       setLoading(true);
       setError("");
       try {
-        const data = await ErrorHandler.handleAsync(
-          getPositions(),
-          "fetch_positions"
-        );
+        const data = await getPositions();
         if (mounted) setPositions(data as Position[]);
       } catch (err) {
         if (mounted) {
+          ErrorHandler.handleError(err, {
+            description: "Failed to load positions",
+          });
           setError(
             err instanceof Error ? err.message : "Failed to load positions"
           );
@@ -110,10 +110,14 @@ const PositionsListComponent: React.FC = () => {
     setError("");
 
     try {
-      await ErrorHandler.handleAsync(closePosition(id), "close_position");
+      await closePosition(id);
       await refresh();
-      ErrorHandler.showSuccess("Position closed successfully");
+      ErrorHandler.handleSuccess("Position closed successfully");
     } catch (err) {
+      ErrorHandler.handleError(err, {
+        description: "Failed to close position",
+        retryFn: async () => handleClose(id),
+      });
       setError(err instanceof Error ? err.message : "Close failed");
     } finally {
       setClosingId(null);

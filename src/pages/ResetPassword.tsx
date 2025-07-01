@@ -5,14 +5,13 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { ErrorHandler } from "@/services/errorHandling";
 
 const ResetPassword = () => {
   const [open, setOpen] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { session } = useAuth();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
@@ -32,38 +31,54 @@ const ResetPassword = () => {
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!newPassword || newPassword.length < 8) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 8 characters.",
-        variant: "destructive",
-      });
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: "weak_password",
+          message: "Password must be at least 8 characters",
+        })
+      );
       return;
     }
+
     if (newPassword !== confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match.",
-        variant: "destructive",
-      });
+      ErrorHandler.handleError(
+        ErrorHandler.createError({
+          code: "validation_error",
+          message: "Passwords do not match",
+        }),
+        {
+          description: "Please ensure both password fields match",
+        }
+      );
       return;
     }
+
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    setLoading(false);
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
       });
-    } else {
+
+      if (error) {
+        throw ErrorHandler.createError({
+          code: "password_update_error",
+          message: error.message,
+          details: error,
+        });
+      }
+
       setSuccess(true);
-      toast({
-        title: "Password updated",
-        description: "You can now log in with your new password.",
+      ErrorHandler.handleSuccess("Password updated successfully", {
+        description: "You can now log in with your new password",
       });
+
       setTimeout(() => navigate("/login"), 2000);
+    } catch (error) {
+      ErrorHandler.handleError(error);
+    } finally {
+      setLoading(false);
     }
   };
 
